@@ -1,5 +1,5 @@
 {
-    "name": "xrow/xrowextract-ls",
+    "name": "se7enxweb/xrowextract",
     "description": "This extenstion delivers tools for extracting/exporting content object data to csv",
     "type": "ezpublish-legacy-extension",
     "license": "GPL-2.0",
