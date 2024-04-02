@@ -265,7 +265,7 @@ if ( $http->hasPostVariable( 'Remove' ) || $http->hasPostVariable( 'AddAttribute
 }
 else
 {
-    if ( array_key_exists( 'Attributes', $sessionConfig ) and array_key_exists( $Class_id, $sessionConfig['Attributes'] ) )
+    if ( is_array( $sessionConfig ) and array_key_exists( 'Attributes', $sessionConfig ) and array_key_exists( $Class_id, $sessionConfig['Attributes'] ) )
     {
         $Attributes = $sessionConfig['Attributes'][$Class_id];
     }
