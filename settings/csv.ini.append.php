@@ -121,7 +121,7 @@ HandlerClass=XroweZObjectRelationListHandler
 
 [hmregexpline]
 HandlerFile=extension/xrowextract/classes/parsers/xrowhmregexplinehandler.php
-HandlerClass=xrowhmregexplineHandler
+HandlerClass=XrowhmregexplineHandler
 
 [ezprice]
 HandlerFile=extension/xrowextract/classes/parsers/xrowezpricehandler.php
