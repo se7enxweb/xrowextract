@@ -1,6 +1,6 @@
 <?php
 
-class BaseHandler
+class XrowBaseHandler
 {
     //place holder
     function exportAttribute( &$attribute )

@@ -1,6 +1,9 @@
 <?php
-class eZBooleanHandler extends BaseHandler
+class XroweZBooleanHandler extends XrowBaseHandler
 {
+    public $encloseChar = "'";
+    public $separationChar = ',';
+
     public function exportAttribute( &$attribute )
     {
         if ( $attribute->content() )

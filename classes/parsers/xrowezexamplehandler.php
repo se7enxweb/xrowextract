@@ -1,6 +1,5 @@
 <?php
-
-class eZTextHandler extends BaseHandler
+class XroweZExampleHandler extends XrowBaseHandler
 {
     public function exportAttribute( &$attribute )
     {

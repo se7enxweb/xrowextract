@@ -1,6 +1,6 @@
 <?php
 
-class eZURLHandler extends BaseHandler
+class XroweZURLHandler extends XrowBaseHandler
 {
 	public function exportAttribute( &$attribute )
 	{

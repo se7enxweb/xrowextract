@@ -34,97 +34,97 @@ StripURLText=true
 # just enter the full path to the handler
 
 [ezstring]
-HandlerFile=extension/xrowextract/classes/parsers/ezstringhandler.php
-HandlerClass=eZStringHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezstringhandler.php
+HandlerClass=XroweZStringHandler
 
 [ezenhancedselection]
-HandlerFile=extension/xrowextract/classes/parsers/ezstringhandler.php
-HandlerClass=eZStringHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezstringhandler.php
+HandlerClass=XroweZStringHandler
 
 [ezinteger]
-HandlerFile=extension/xrowextract/classes/parsers/ezintegerhandler.php
-HandlerClass=eZIntegerHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezintegerhandler.php
+HandlerClass=XroweZIntegerHandler
 
 [ezxmltext]
-HandlerFile=extension/xrowextract/classes/parsers/ezxmltexthandler.php
-HandlerClass=eZXMLTextHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezxmltexthandler.php
+HandlerClass=XroweZXMLTextHandler
 
 [ezidentifier]
-HandlerFile=extension/xrowextract/classes/parsers/ezidentifierhandler.php
-HandlerClass=eZIdentifierHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezidentifierhandler.php
+HandlerClass=XroweZIdentifierHandler
 
 [ezfloat]
-HandlerFile=extension/xrowextract/classes/parsers/ezfloathandler.php
-HandlerClass=eZFloatHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezfloathandler.php
+HandlerClass=XroweZFloatHandler
 
 [ezemail]
-HandlerFile=extension/xrowextract/classes/parsers/ezemailhandler.php
-HandlerClass=eZEmailHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezemailhandler.php
+HandlerClass=XroweZEmailHandler
 
 [ezurl]
-HandlerFile=extension/xrowextract/classes/parsers/ezurlhandler.php
-HandlerClass=eZURLHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezurlhandler.php
+HandlerClass=XroweZURLHandler
 
 [eztext]
-HandlerFile=extension/xrowextract/classes/parsers/eztexthandler.php
-HandlerClass=eZTextHandler
+HandlerFile=extension/xrowextract/classes/parsers/xroweztexthandler.php
+HandlerClass=XroweZTextHandler
 
 [ezenhancedobjectrelation]
-HandlerFile=extension/xrowextract/classes/parsers/ezenhancedobjectrelationhandler.php
-HandlerClass=ezenhancedobjectrelationHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezenhancedobjectrelationhandler.php
+HandlerClass=XroweZenhancedobjectrelationHandler
 #false will simply output the IDs of the related objects
 OutputRelatedObjectNames=true
 
 [ezselection]
-HandlerFile=extension/xrowextract/classes/parsers/ezselectionhandler.php
-HandlerClass=eZSelectionHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezselectionhandler.php
+HandlerClass=XroweZSelectionHandler
 
 [ezenum]
-HandlerFile=extension/xrowextract/classes/parsers/ezenumhandler.php
-HandlerClass=eZEnumHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezenumhandler.php
+HandlerClass=XroweZEnumHandler
 
 [ezuser]
-HandlerFile=extension/xrowextract/classes/parsers/ezuserhandler.php
-HandlerClass=eZUserHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezuserhandler.php
+HandlerClass=XroweZUserHandler
 
 [ezdate]
-HandlerFile=extension/xrowextract/classes/parsers/ezdatehandler.php
-HandlerClass=eZDateHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezdatehandler.php
+HandlerClass=XroweZDateHandler
 
 [ezboolean]
-HandlerFile=extension/xrowextract/classes/parsers/ezbooleanhandler.php
-HandlerClass=eZBooleanHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezbooleanhandler.php
+HandlerClass=XroweZBooleanHandler
 
 [ezcountry]
-HandlerFile=extension/xrowextract/classes/parsers/ezselectionhandler.php
-HandlerClass=eZSelectionHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezselectionhandler.php
+HandlerClass=XroweZSelectionHandler
 
 [ezimage]
-HandlerFile=extension/xrowextract/classes/parsers/ezimagehandler.php
-HandlerClass=ezImageExportHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezimagehandler.php
+HandlerClass=XroweZImageExportHandler
 
 [ezmedia]
-HandlerFile=extension/xrowextract/classes/parsers/ezmediahandler.php
-HandlerClass=ezMediaExportHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezmediahandler.php
+HandlerClass=XroweZMediaExportHandler
 
 [ezbinaryfile]
-HandlerFile=extension/xrowextract/classes/parsers/ezbinaryfilehandler.php
-HandlerClass=ezBinaryfileExportHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezbinaryfilehandler.php
+HandlerClass=XroweZBinaryfileExportHandler
 
 [ezmatrix]
-HandlerFile=extension/xrowextract/classes/parsers/ezmatrixhandler.php
-HandlerClass=ezMatrixExportHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezmatrixhandler.php
+HandlerClass=XroweZMatrixExportHandler
 
 [ezobjectrelationlist]
-HandlerFile=extension/xrowextract/classes/parsers/ezobjectrelationlisthandler.php
-HandlerClass=eZObjectRelationListHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezobjectrelationlisthandler.php
+HandlerClass=XroweZObjectRelationListHandler
 
 [hmregexpline]
-HandlerFile=extension/xrowextract/classes/parsers/hmregexplinehandler.php
-HandlerClass=hmregexplineHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowhmregexplinehandler.php
+HandlerClass=xrowhmregexplineHandler
 
 [ezprice]
-HandlerFile=extension/xrowextract/classes/parsers/ezpricehandler.php
-HandlerClass=eZPriceHandler
+HandlerFile=extension/xrowextract/classes/parsers/xrowezpricehandler.php
+HandlerClass=XroweZPriceHandler
 
 */ ?>

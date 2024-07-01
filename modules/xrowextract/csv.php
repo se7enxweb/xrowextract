@@ -355,11 +355,11 @@ if ( $http->hasPostVariable( 'Download' ) )
         else
             $row .= $Separator;
         
-        $row .= $item['exportname'];
+        $row .= preg_replace("/_/i", "-", $item['exportname'] );
     }
     
     $data = $row . $LineSeparatorArray[$LineSeparator]['value'];
-    
+
     if ( $hasPreFilledData )
     {
         $list = $http->sessionVariable( 'EXTRACTCSV_OBJECTID_ARRAY' );
@@ -369,11 +369,11 @@ if ( $http->hasPostVariable( 'Download' ) )
         // Retrieve parent_node_id sort_array
         $node = eZContentObjectTreeNode::fetch( $Subtree );
         $file = $node->attribute('name').'_export.csv';
-        
-        ( is_object( $item ) ) ? $sortBy = $node->sortArray() : null;
+//var_dump($node); echo "<hr><hr>";
+        ( is_object( $node ) ) ? $sortBy = $node->sortArray() : $sortBy = array('published');
         $sortBy = $sortBy[0];
         $groupBy = null;
-        
+
         $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $Limit, $depth, false, $Class_id, false, false, 'include', array( 
             $Class_id 
         ), $groupBy, $Mainnodeonly, true, array(), true, false, true );
@@ -382,14 +382,19 @@ if ( $http->hasPostVariable( 'Download' ) )
     }
     
     $parser = new ParserInterface( $Separator, $Escape );
-    
+/*
+var_dump($list2);
+
+var_dump($Class_id); echo "<hr /><hr />";
+var_dump($Subtree); echo "<hr /><hr />";
+var_dump($list);die();
+*/
+
     foreach ( $list as $item )
     {
-        
         $row = '';
         if ( is_object( $item ) )
             $obj = $item->attribute( 'object' );
-        
         else
             $obj = eZContentObject::fetch( $item );
         if ( ! is_object( $obj ) )
@@ -402,7 +407,7 @@ if ( $http->hasPostVariable( 'Download' ) )
         foreach ( $Attributes as $dataelement )
         {
             $found = false;
-            
+//var_dump( $parser->exportAttribute( $datamap[$dataelement['id']] ) );
             if ( is_object( $datamap[$dataelement['id']] ) )
             {
                 $row .= $parser->exportAttribute( $datamap[$dataelement['id']] );
@@ -424,7 +429,7 @@ if ( $http->hasPostVariable( 'Download' ) )
                     {
                         $tmp = applyOutputFilter( $tmp, $ExtraAttributes[$dataelement['id']]['filter'] );
                     }
-                    
+
                     if ( $first )
                         $first = false;
                     else
@@ -433,7 +438,7 @@ if ( $http->hasPostVariable( 'Download' ) )
                         $row .= $parser->escape( $tmp->attribute( $matches[2] ) );
                     else
                         $row .= $parser->escape( $tmp );
-                    
+
                     unset( $tmp );
                 }
                 else
@@ -442,10 +447,13 @@ if ( $http->hasPostVariable( 'Download' ) )
                 }
         }
         $data .= $row . $LineSeparatorArray[$LineSeparator]['value'];
-    
     }
-    
-    //    @unlink( $file );
+/*
+echo "<hr><hr>";
+echo $data;
+die();
+*/
+//    @unlink( $file );
     //    eZFile::create( $file, false, $data );
     
 

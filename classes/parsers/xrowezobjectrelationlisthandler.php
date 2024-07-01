@@ -1,6 +1,6 @@
 <?php
 
-class eZObjectRelationListHandler extends BaseHandler
+class XroweZObjectRelationListHandler extends XrowBaseHandler
 {
 	public function exportAttribute( &$attribute )
 	{
@@ -12,16 +12,18 @@ class eZObjectRelationListHandler extends BaseHandler
         $rl = new eZObjectRelationListType();
         $doc = $rl->parseXML( $xmlText );
         $content = $rl->createObjectContentStructure( $doc );
-			
-		foreach ($content["relation_list"] as $id)
+        $names = array();
+
+        foreach ($content["relation_list"] as $id)
         {
-        	$object=eZContentObject::fetch($id["contentobject_id"]);
+            $object=eZContentObject::fetch($id["contentobject_id"]);
             if (is_object($object))
             {
-            	$names[]=$object->name();
+                $names[]=$object->name();
             }
         }
-        return $this->escape(  utf8_decode(join(", ", $names) ));
-	}
+        $joinString = join(", ", $names);
+        return $this->escape( mb_convert_encoding( $joinString, "UTF-8", mb_detect_encoding( $joinString ) ) );
+        }
 }
 ?>

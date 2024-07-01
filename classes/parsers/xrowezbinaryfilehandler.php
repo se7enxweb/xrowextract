@@ -1,5 +1,5 @@
 <?php
-class ezBinaryfileExportHandler extends BaseHandler
+class XroweZBinaryfileExportHandler extends XrowBaseHandler
 {
        function exportAttribute( &$attribute )
        {

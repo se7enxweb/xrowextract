@@ -1,6 +1,6 @@
 <?php
 
-class ezenhancedobjectrelationHandler extends BaseHandler
+class XroweZenhancedobjectrelationHandler extends XrowBaseHandler
 {
     public function exportAttribute(&$attribute)
     {

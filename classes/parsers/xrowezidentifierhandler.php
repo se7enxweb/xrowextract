@@ -1,6 +1,6 @@
 <?php
 
-class eZIdentifierHandler extends BaseHandler
+class XroweZIdentifierHandler extends XrowBaseHandler
 {
     function exportAttribute( &$attribute )
     {

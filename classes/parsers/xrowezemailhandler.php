@@ -1,6 +1,6 @@
 <?php
 
-class eZEmailHandler extends BaseHandler
+class XroweZEmailHandler extends XrowBaseHandler
 {
 	public function exportAttribute( &$attribute )
 	{

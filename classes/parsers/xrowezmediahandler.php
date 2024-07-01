@@ -1,5 +1,5 @@
 <?php
-class ezMediaExportHandler extends BaseHandler
+class XroweZMediaExportHandler extends XrowBaseHandler
 {
        function exportAttribute( &$attribute )
        {

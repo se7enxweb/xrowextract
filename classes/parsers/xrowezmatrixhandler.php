@@ -1,6 +1,6 @@
 <?php
 
-class ezMatrixExportHandler extends BaseHandler
+class XroweZMatrixExportHandler extends XrowBaseHandler
 {
     function exportAttribute(&$attribute)
     {

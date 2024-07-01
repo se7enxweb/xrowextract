@@ -1,5 +1,5 @@
 <?php
-class eZSelectionHandler extends BaseHandler
+class XroweZSelectionHandler extends XrowBaseHandler
 {
     function exportAttribute( &$attribute )
     {

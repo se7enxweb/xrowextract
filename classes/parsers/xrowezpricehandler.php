@@ -1,6 +1,6 @@
 <?php
 
-class eZPriceHandler extends BaseHandler
+class XroweZPriceHandler extends XrowBaseHandler
 {
     public function exportAttribute( &$attribute )
     {

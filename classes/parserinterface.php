@@ -13,7 +13,7 @@ class ParserInterface
     public $separationChar = ",";
     public $escape = true;
 
-    public function ParserInterface( $separationChar = null, $escape = null )
+    public function __construct( $separationChar = null, $escape = null )
     {
         if ( $escape === true or $escape === false )
            $this->escape = $escape;
@@ -25,11 +25,17 @@ class ParserInterface
         {
             if ( file_exists( $ini->variable( $typename, 'HandlerFile' ) ) )
             {
-                 #include_once("extension/extract/classes/parsers/".$ini->variable( $typename, 'HandlerFile' ) );
+                 //#include_once("extension/extract/classes/parsers/".$ini->variable( $typename, 'HandlerFile' ) );
                  $classname = $ini->variable( $typename, 'HandlerClass' );
                  $handler = new $classname();
-                 $handler->separationChar = $this->separationChar;
-                 $handler->escape = $this->escape;
+                 if( isset( $handler->separationChar ) )
+                 {
+                     $handler->separationChar = $this->separationChar;
+                 }
+                 if( isset( $handler->escape ) )
+                 {
+                     $handler->escape = $this->escape;
+                 }
                  $this->handlerMap[$typename] = array( "handler" => $handler,
                                                        "exportable" => true );
             }
@@ -48,8 +54,12 @@ class ParserInterface
     */
     public function exportAttribute( &$attribute )
     {
-        $handler = $this->handlerMap[$attribute->DataTypeString]['handler'];
-        if( is_object( $handler ) )
+        if( isset( $this->handlerMap[$attribute->DataTypeString]['handler'] ) )
+        {
+            $handler = $this->handlerMap[$attribute->DataTypeString]['handler'];
+        }
+
+        if( isset($handler) && is_object( $handler ) )
         {
             return $handler->exportAttribute( $attribute ).$this->separationChar;
         }

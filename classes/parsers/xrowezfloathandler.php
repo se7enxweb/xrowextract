@@ -1,6 +1,6 @@
 <?php
 
-class eZFloatHandler extends BaseHandler
+class XroweZFloatHandler extends XrowBaseHandler
 {
     public function exportAttribute( &$attribute )
     {

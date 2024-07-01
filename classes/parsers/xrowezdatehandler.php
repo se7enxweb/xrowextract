@@ -1,5 +1,5 @@
 <?php
-class eZDateHandler extends BaseHandler
+class XroweZDateHandler extends XrowBaseHandler
 {
     public function exportAttribute( &$attribute )
     {

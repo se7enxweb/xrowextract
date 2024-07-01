@@ -1,3 +1,9 @@
+Version 2.4
+
+-  Added some php8 improvments based on current project usage and refinements
+
+Version 2.3
+
 -  Added some community suggestions
 
 Version 2.2
