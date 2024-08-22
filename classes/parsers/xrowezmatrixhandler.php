@@ -6,6 +6,7 @@ class XroweZMatrixExportHandler extends XrowBaseHandler
     {
         $content = $attribute->content();
         $rows = $content->attribute( 'rows' );
+        $matrixArray = array();
         foreach( $rows['sequential'] as $row )
         {
 
