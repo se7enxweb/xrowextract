@@ -42,30 +42,30 @@ function applyOutputFilter( $tmp, $filtername )
         default:
             break;
     }
-    
+
     return $tmp;
 }
 
 // Array of extra node attributes
-$ExtraAttributes = array( 
-    'ezuser.login' => array( 
-        'id' => 'ezuser.login' , 
-        'exportname' => 'login' , 
-        'name' => 'Login' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezuser.email' => array( 
-        'id' => 'ezuser.email' , 
-        'exportname' => 'email' , 
-        'name' => 'E-Mail' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezuser.password_hash' => array( 
-        'id' => 'ezuser.password_hash' , 
-        'exportname' => 'password' , 
-        'name' => 'Password' , 
-        'function' => 'fetch' 
-    ) , 
+$ExtraAttributes = array(
+    'ezuser.login' => array(
+        'id' => 'ezuser.login' ,
+        'exportname' => 'login' ,
+        'name' => 'Login' ,
+        'function' => 'fetch'
+    ) ,
+    'ezuser.email' => array(
+        'id' => 'ezuser.email' ,
+        'exportname' => 'email' ,
+        'name' => 'E-Mail' ,
+        'function' => 'fetch'
+    ) ,
+    'ezuser.password_hash' => array(
+        'id' => 'ezuser.password_hash' ,
+        'exportname' => 'password' ,
+        'name' => 'Password' ,
+        'function' => 'fetch'
+    ) ,
     'ezuser.is_enabled' => array(
         'id' => 'ezuser.is_enabled' ,
         'exportname' => 'user_status' ,
@@ -73,60 +73,60 @@ $ExtraAttributes = array(
         'filter' => 'state' ,
         'function' => 'fetch'
     ) ,
-    'ezcontentobject.published' => array( 
-        'id' => 'ezcontentobject.published' , 
-        'exportname' => 'published' , 
-        'name' => 'Content Object Published Time' , 
-        'filter' => 'date' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.modified' => array( 
-        'id' => 'ezcontentobject.modified' , 
-        'exportname' => 'modified' , 
-        'name' => 'Content Object Modified Time' , 
-        'filter' => 'date' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.url_alias' => array( 
-        'id' => 'ezcontentobject.url_alias' , 
-        'exportname' => 'url_alias' , 
-        'name' => 'URL Alias' , 
-        'filter' => 'url_alias' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.full_url_alias' => array( 
-        'id' => 'ezcontentobject.full_url_alias' , 
-        'exportname' => 'full_url_alias' , 
-        'name' => 'Absolute URL Alias' , 
-        'filter' => 'full_url_alias' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.main_parent_node_id' => array( 
-        'id' => 'ezcontentobject.main_parent_node_id' , 
-        'exportname' => 'parent_name' , 
-        'name' => 'Content Object Main Parent Name' , 
-        'filter' => 'parent_name' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.main_node_id' => array( 
-        'id' => 'ezcontentobject.main_node_id' , 
-        'exportname' => 'main_node_id' , 
-        'name' => 'Main Node ID' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.main_parent_node_id' => array( 
-        'id' => 'ezcontentobject.main_parent_node_id' , 
-        'exportname' => 'main_parent_node_id' , 
-        'name' => 'Main Parent Node ID' , 
-        'function' => 'fetch' 
-    ) , 
-    'ezcontentobject.parent_nodes' => array( 
-        'id' => 'ezcontentobject.parent_nodes' , 
-        'exportname' => 'parent_nodes' , 
-        'name' => 'Content Object Parent Names' , 
-        'filter' => 'parent_nodes' , 
-        'function' => 'fetch' 
-    ) 
+    'ezcontentobject.published' => array(
+        'id' => 'ezcontentobject.published' ,
+        'exportname' => 'published' ,
+        'name' => 'Content Object Published Time' ,
+        'filter' => 'date' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.modified' => array(
+        'id' => 'ezcontentobject.modified' ,
+        'exportname' => 'modified' ,
+        'name' => 'Content Object Modified Time' ,
+        'filter' => 'date' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.url_alias' => array(
+        'id' => 'ezcontentobject.url_alias' ,
+        'exportname' => 'url_alias' ,
+        'name' => 'URL Alias' ,
+        'filter' => 'url_alias' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.full_url_alias' => array(
+        'id' => 'ezcontentobject.full_url_alias' ,
+        'exportname' => 'full_url_alias' ,
+        'name' => 'Absolute URL Alias' ,
+        'filter' => 'full_url_alias' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.main_parent_node_id' => array(
+        'id' => 'ezcontentobject.main_parent_node_id' ,
+        'exportname' => 'parent_name' ,
+        'name' => 'Content Object Main Parent Name' ,
+        'filter' => 'parent_name' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.main_node_id' => array(
+        'id' => 'ezcontentobject.main_node_id' ,
+        'exportname' => 'main_node_id' ,
+        'name' => 'Main Node ID' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.main_parent_node_id' => array(
+        'id' => 'ezcontentobject.main_parent_node_id' ,
+        'exportname' => 'main_parent_node_id' ,
+        'name' => 'Main Parent Node ID' ,
+        'function' => 'fetch'
+    ) ,
+    'ezcontentobject.parent_nodes' => array(
+        'id' => 'ezcontentobject.parent_nodes' ,
+        'exportname' => 'parent_nodes' ,
+        'name' => 'Content Object Parent Names' ,
+        'filter' => 'parent_nodes' ,
+        'function' => 'fetch'
+    )
 );
 
 // Start module definition
@@ -150,7 +150,7 @@ else
 if ( $hasPreFilledData and $http->hasPostVariable( 'RemoveData' ) )
 {
     unset( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] );
-    
+
     return $module->redirectTo( 'xrowextract/csv' );
 
 }
@@ -160,22 +160,22 @@ $Separator = $http->hasPostVariable( 'Separator' ) ? $http->postVariable( 'Separ
 
 $LineSeparator = $http->hasPostVariable( 'LineSeparator' ) ? $http->postVariable( 'LineSeparator' ) : $sys->osType();
 
-$LineSeparatorArray = array( 
-    'win32' => array( 
-        'id' => 'win32' , 
-        'value' => "\r\n" , 
-        'name' => 'Windows' 
-    ) , 
-    'unix' => array( 
-        'id' => 'unix' , 
-        'value' => "\n" , 
-        'name' => 'Unix' 
-    ) , 
-    'mac' => array( 
-        'id' => 'mac' , 
-        'value' => "\r" , 
-        'name' => 'Mac' 
-    ) 
+$LineSeparatorArray = array(
+    'win32' => array(
+        'id' => 'win32' ,
+        'value' => "\r\n" ,
+        'name' => 'Windows'
+    ) ,
+    'unix' => array(
+        'id' => 'unix' ,
+        'value' => "\n" ,
+        'name' => 'Unix'
+    ) ,
+    'mac' => array(
+        'id' => 'mac' ,
+        'value' => "\r" ,
+        'name' => 'Mac'
+    )
 );
 
 $tpl->setVariable( 'Separator', $Separator );
@@ -269,7 +269,7 @@ else
     {
         $Attributes = $sessionConfig['Attributes'][$Class_id];
     }
-    else 
+    else
         if ( $ini_bis->variable( 'ExportSettings', 'PreselectAttributes' ) == 'false' )
         {
             $Attributes = array();
@@ -277,13 +277,13 @@ else
         else
         {
             $contentAttributeList = eZContentClassAttribute::fetchListByClassID( $Class_id, eZContentClass::VERSION_STATUS_DEFINED, true );
-            
+
             foreach ( $contentAttributeList as $classattribute )
             {
-                $Attributes[] = array( 
-                    'id' => $classattribute->attribute( 'identifier' ) , 
-                    'name' => $classattribute->attribute( 'name' ) , 
-                    'exportname' => $classattribute->attribute( 'identifier' ) 
+                $Attributes[] = array(
+                    'id' => $classattribute->attribute( 'identifier' ) ,
+                    'name' => $classattribute->attribute( 'name' ) ,
+                    'exportname' => $classattribute->attribute( 'identifier' )
                 );
             }
         }
@@ -293,14 +293,14 @@ else
 if ( $http->hasPostVariable( 'AddAttribute' ) )
 {
     $addID = $http->postVariable( 'AddAttributeID' );
-    
+
     if ( is_numeric( $addID ) )
     {
         $attribute = eZContentClassAttribute::fetch( $addID );
-        $element = array( 
-            'id' => $attribute->attribute( 'identifier' ) , 
-            'name' => $attribute->attribute( 'name' ) , 
-            'exportname' => $attribute->attribute( 'identifier' ) 
+        $element = array(
+            'id' => $attribute->attribute( 'identifier' ) ,
+            'name' => $attribute->attribute( 'name' ) ,
+            'exportname' => $attribute->attribute( 'identifier' )
         );
         $Attributes[] = $element;
     }
@@ -314,9 +314,9 @@ if ( $http->hasPostVariable( 'AddAttribute' ) )
 if ( $http->hasPostVariable( 'Remove' ) && $http->hasPostVariable( 'RemoveIDArray' ) )
 {
     $AttributesClean = array();
-    
+
     $Removes = $http->postVariable( 'RemoveIDArray' );
-    
+
     for ( $i = 0; $i < count( $Attributes ); $i ++ )
     {
         if ( ! in_array( $i, $Removes ) )
@@ -339,25 +339,28 @@ $tpl->setVariable( 'Escape', $Escape );
 
 $fCollection = new eZContentFunctionCollection();
 $list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array( 
-    $Class_id 
+    $Class_id
 ), false, false, false, false, false, true, false, false );
+// echo 'Count: '; var_dump($list); echo '<br />';
+
 $tpl->setVariable( 'max_count', $list['result'] + 1 );
+
 // Handle download action
 if ( $http->hasPostVariable( 'Download' ) )
 {
     $row = "";
     $first = true;
-    
+
     foreach ( $Attributes as $item )
     {
         if ( $first )
             $first = false;
         else
             $row .= $Separator;
-        
+
         $row .= preg_replace("/_/i", "-", $item['exportname'] );
     }
-    
+
     $data = $row . $LineSeparatorArray[$LineSeparator]['value'];
 
     if ( $hasPreFilledData )
@@ -369,24 +372,32 @@ if ( $http->hasPostVariable( 'Download' ) )
         // Retrieve parent_node_id sort_array
         $node = eZContentObjectTreeNode::fetch( $Subtree );
         $file = $node->attribute('name').'_export.csv';
-//var_dump($node); echo "<hr><hr>";
-        ( is_object( $node ) ) ? $sortBy = $node->sortArray() : $sortBy = array('published');
+        // var_dump($file); echo "<hr><hr>";
+
+        ( is_object( $node ) ) ? $sortBy = $node->sortArray() : $sortBy = array('published', false);
+
         $sortBy = $sortBy[0];
-        $groupBy = null;
+        $groupBy = false;
+
+        if ( $Limit == 0 )
+            $Limit = false;
 
         $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $Limit, $depth, false, $Class_id, false, false, 'include', array( 
-            $Class_id 
+            $Class_id
         ), $groupBy, $Mainnodeonly, true, array(), true, false, true );
-        
+
         $list = $list2['result'];
     }
-    
-    $parser = new ParserInterface( $Separator, $Escape );
-/*
-var_dump($list2);
 
+    $parser = new ParserInterface( $Separator, $Escape );
+
+/*
+var_dump($list2); echo "<hr /><hr />";
+
+var_dump($sortBy); echo "<hr /><hr />";
 var_dump($Class_id); echo "<hr /><hr />";
 var_dump($Subtree); echo "<hr /><hr />";
+
 var_dump($list);die();
 */
 
@@ -403,7 +414,7 @@ var_dump($list);die();
         $datamap = $obj->attribute( 'data_map' );
         
         $first = true;
-        
+
         foreach ( $Attributes as $dataelement )
         {
             $found = false;
@@ -412,17 +423,17 @@ var_dump($list);die();
             {
                 $row .= $parser->exportAttribute( $datamap[$dataelement['id']] );
             }
-            else 
+            else
                 if ( preg_match( '#(.*)\.(.*)#', $dataelement['id'], $matches ) )
                 {
                     $id = $obj->attribute( 'id' );
                     $tmp = new $matches[1]();
-                    
+
                     $tmp = $tmp->$ExtraAttributes[$dataelement['id']]['function']( $id );
-                    
+
                     if ( array_key_exists( 'filter', $ExtraAttributes[$dataelement['id']] ) and $tmp->hasAttribute( $matches[2] ) )
                     {
-                        
+
                         $tmp = applyOutputFilter( $tmp->attribute( $matches[2] ), $ExtraAttributes[$dataelement['id']]['filter'] );
                     }
                     elseif ( array_key_exists( 'filter', $ExtraAttributes[$dataelement['id']] ) and ! $tmp->hasAttribute( $matches[2] ) )
@@ -448,14 +459,15 @@ var_dump($list);die();
         }
         $data .= $row . $LineSeparatorArray[$LineSeparator]['value'];
     }
+
 /*
 echo "<hr><hr>";
 echo $data;
 die();
 */
+
 //    @unlink( $file );
     //    eZFile::create( $file, false, $data );
-    
 
     if ( $data )
     {
@@ -469,9 +481,9 @@ die();
         header( 'Content-Type: application/excel; charset=' . $httpCharset );
         header( 'Content-Length: ' . strlen( $data ) );
         header( 'Content-Disposition: attachment; filename="' . $file . '"' );
-        
+
         while ( @ob_end_clean() );
-        
+
         echo $data;
         eZExecution::cleanExit();
     }
@@ -486,31 +498,31 @@ die();
 
 if ( $http->hasPostVariable( 'BrowseSubtree' ) )
 {
-    $return = eZContentBrowse::browse( array( 
-        'action_name' => 'ExtractionSubtree' , 
-        'description_template' => 'design:xrowextract/browse_node.tpl' , 
-        'from_page' => '/xrowextract/csv' , 
-        'persistent_data' => array( 
-            'Subtree' => $Subtree , 
-            'Class_id' => $Class_id , 
-            'Attributes' => $Attributes , 
-            'LineSeparator' => $LineSeparator , 
-            'Separator' => $Separator 
-        ) 
+    $return = eZContentBrowse::browse( array(
+        'action_name' => 'ExtractionSubtree' ,
+        'description_template' => 'design:xrowextract/browse_node.tpl' ,
+        'from_page' => '/xrowextract/csv' ,
+        'persistent_data' => array(
+            'Subtree' => $Subtree ,
+            'Class_id' => $Class_id ,
+            'Attributes' => $Attributes ,
+            'LineSeparator' => $LineSeparator ,
+            'Separator' => $Separator
+        )
     ), $module );
 }
 
 $Result = array();
 $Result['content'] = $tpl->fetch( "design:xrowextract/csv.tpl" );
-$Result['path'] = array( 
-    array( 
-        'url' => false , 
-        'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) 
-    ) , 
-    array( 
-        'url' => false , 
-        'text' => ezpI18n::tr( 'design/standard/xrowextract', 'CSV' ) 
-    ) 
+$Result['path'] = array(
+    array(
+        'url' => false ,
+        'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' )
+    ) ,
+    array(
+        'url' => false ,
+        'text' => ezpI18n::tr( 'design/standard/xrowextract', 'CSV' )
+    )
 );
 
 $Result['left_menu'] = 'design:xrowextract/menu.tpl';
