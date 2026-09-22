@@ -1,5 +1,7 @@
 <?php
 
+
+if ( !function_exists( 'applyOutputFilter' ) ) {
 function applyOutputFilter( $tmp, $filtername )
 {
     switch ( $filtername )
@@ -45,6 +47,8 @@ function applyOutputFilter( $tmp, $filtername )
 
     return $tmp;
 }
+}
+
 
 // Array of extra node attributes
 $ExtraAttributes = array(
@@ -341,7 +345,7 @@ $fCollection = new eZContentFunctionCollection();
 $list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array( 
     $Class_id
 ), false, false, false, false, false, true, false, false );
-// echo 'Count: '; var_dump($list); echo '<br />';
+// echo 'Count: '; var_dump($list); echo '<br>';
 
 $tpl->setVariable( 'max_count', $list['result'] + 1 );
 
