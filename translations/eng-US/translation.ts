@@ -1,17 +1,19 @@
-<!DOCTYPE TS><TS>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.0">
 <context>
     <name>design/standard/extract</name>
     <message>
         <source>Choose node to export</source>
-        <translation>Node für Export wählen</translation>
+        <translation>Choose node to export</translation>
     </message>
     <message>
         <source>Extract settings</source>
-        <translation>Einstellungen entnehmen</translation>
+        <translation>Extract settings</translation>
     </message>
     <message>
         <source>Data selection</source>
-        <translation>Daten Auswahl</translation>
+        <translation>Data selection</translation>
     </message>
     <message>
         <source>Node</source>
@@ -19,19 +21,35 @@
     </message>
     <message>
         <source>Change</source>
-        <translation>Ändern</translation>
+        <translation>Change</translation>
+    </message>
+    <message>
+        <source>Tree (full subtree)</source>
+        <translation>Tree (full subtree)</translation>
+    </message>
+    <message>
+        <source>List (only children)</source>
+        <translation>List (only children)</translation>
     </message>
     <message>
         <source>Depth</source>
-        <translation>Tiefe</translation>
+        <translation>Depth</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Yes</translation>
     </message>
     <message>
         <source>Mainnode only</source>
-        <translation>Nur Hauptknoten</translation>
+        <translation>Mainnode only</translation>
     </message>
     <message>
-        <source>Limit</source>
-        <translation>Limit</translation>
+        <source>Limit ( max %max_count )</source>
+        <translation>Limit ( max %max_count )</translation>
     </message>
     <message>
         <source>Offset</source>
@@ -39,39 +57,51 @@
     </message>
     <message>
         <source>Remove current pre filled selection</source>
-        <translation>Aktuelle vorausgefüllte Auswahl entfernen</translation>
+        <translation>Remove current pre filled selection</translation>
     </message>
     <message>
         <source>Export format options</source>
-        <translation>Format Optionen exportieren</translation>
+        <translation>Export format options</translation>
     </message>
     <message>
         <source>Column separator</source>
-        <translation>Spalten Trennzeichen</translation>
+        <translation>Column separator</translation>
+    </message>
+    <message>
+        <source>Info: Excel likes a semicolon as separator.</source>
+        <translation>Info: Excel likes a semicolon as separator.</translation>
     </message>
     <message>
         <source>Row separator</source>
-        <translation>Zeilen Trennzeichen</translation>
+        <translation>Row separator</translation>
     </message>
     <message>
         <source>Escape</source>
         <translation>Escape</translation>
     </message>
     <message>
+        <source>&quot;No&quot; is not %rfc conform, &lt;br&gt; removal of CR and LF from field value</source>
+        <translation>&quot;No&quot; is not %rfc conform, &lt;br&gt; removal of CR and LF from field value</translation>
+    </message>
+    <message>
         <source>Selected class</source>
-        <translation>Ausgewählte Klasse</translation>
+        <translation>Selected class</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation>Aktualisieren</translation>
+        <translation>Update</translation>
+    </message>
+    <message>
+        <source>Special Attributes</source>
+        <translation>Special Attributes</translation>
     </message>
     <message>
         <source>Add attribute</source>
-        <translation>Attribute hinzufügen</translation>
+        <translation>Add attribute</translation>
     </message>
     <message>
         <source>Selected attribute(s)</source>
-        <translation>Ausgewählte(s) Attribut(e)</translation>
+        <translation>Selected attribute(s)</translation>
     </message>
     <message>
         <source>Position</source>
@@ -87,7 +117,7 @@
     </message>
     <message>
         <source>Remove selected attribute(s)</source>
-        <translation>Ausgewählte Attribute entfernen</translation>
+        <translation>Remove selected attribute(s)</translation>
     </message>
     <message>
         <source>Download</source>
@@ -95,77 +125,41 @@
     </message>
     <message>
         <source>Extract</source>
-        <translation>Entnehmen</translation>
+        <translation>Extract</translation>
     </message>
     <message>
         <source>Select a node to export</source>
-        <translation>Knoten für Export auswählen</translation>
+        <translation>Select a node to export</translation>
     </message>
     <message>
         <source>Setup format options</source>
-        <translation>Format Optionen Setup</translation>
+        <translation>Setup format options</translation>
     </message>
     <message>
         <source>Select concerned class</source>
-        <translation>Zuständige Klasse auswählen</translation>
+        <translation>Select concerned class</translation>
     </message>
     <message>
         <source>Add/Remove attributes</source>
-        <translation>Attribute hinzufügen / entfernen</translation>
+        <translation>Add/Remove attributes</translation>
     </message>
     <message>
         <source>Click the download button</source>
-        <translation>Den Download Button anklicken</translation>
-    </message>
-    <message>
-        <source>CSV</source>
-        <translation>CSV</translation>
-    </message>
-    <message>
-        <source>Info: Excel likes a semicolon as separator.</source>
-        <translation>Info: Excel bevorzugt ein Semikolon als Trennzeichen.</translation>
-    </message>
-    <message>
-        <source>Tree (full subtree)</source>
-        <translation>Baum (ganzer Teilbaum)</translation>
-    </message>
-    <message>
-        <source>List (only children)</source>
-        <translation>Liste (nur Unterelemente)</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation>Nein</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation>Ja</translation>
-    </message>
-    <message>
-        <source>Limit ( max %max_count )</source>
-        <translation>Limit ( max. %max_count )</translation>
-    </message>
-    <message>
-        <source>&quot;No&quot; is not %rfc conform, &lt;br&gt; removal of CR and LF from field value</source>
-        <translation>„Nein“ ist nicht %rfc-konform, &lt;br&gt; entfernt CR und LF aus dem Feldwert</translation>
-    </message>
-    <message>
-        <source>Special Attributes</source>
-        <translation>Spezielle Attribute</translation>
+        <translation>Click the download button</translation>
     </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
     <message>
         <source>Please choose the node(s) you wish to export.</source>
-        <translation>Bitte wählen Sie den/die Knoten, die Sie exportieren möchten.</translation>
+        <translation>Please choose the node(s) you wish to export.</translation>
     </message>
 </context>
 <context>
     <name>design/standard/xrowextract</name>
     <message>
         <source>Extract</source>
-        <translation>Entnehmen</translation>
+        <translation>Extract</translation>
     </message>
     <message>
         <source>CSV</source>
