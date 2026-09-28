@@ -90,7 +90,7 @@
                         <option value="{$:item.id}" {section show=$:item.id|eq( $Escape )} selected{/section}>{$:item.name}</option>
                         {/section}
                     </select>
-                    <p>"No" is not <a href="http://tools.ietf.org/html/rfc4180">RFC</a> conform, <br /> removal of CR and LF from field value</p>
+                    <p>"No" is not <a href="http://tools.ietf.org/html/rfc4180">RFC</a> conform, <br> removal of CR and LF from field value</p>
                 </div>
             </div>
         </fieldset>
