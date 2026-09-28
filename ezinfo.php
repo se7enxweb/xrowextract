@@ -1,22 +1,23 @@
 <?php
 /**
- * File containing the extractInfo class.
+ * File containing the xrowextractInfo class.
  *
  * @package extract
  * @version //autogentag//
  * @copyright Copyright (C) 2008 xrow. All rights reserved.
- * @license http://www.gnu.org/licenses/gpl.txt GPL License
+ * @license http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License v2.0 (or any later version)
  */
-class extractInfo
+class xrowextractInfo
 {
-    function info()
+    static function info()
     {
         return array(
-            'Name' => "eZ Publish xrowextract extension",
-            'Version' => "1.0",
+            'Name' => "Exponential xrowextract extension",
+            'Version' => "2.5.1",
             'Copyright' => "Copyright (C) 2013 xrow GmbH",
             'Author' => "xrow GmbH",
-            'License' => "GPL License" );
+            'License' => "GNU General Public License v2.0 (or any later version)",
+            'Info_url' => "https://github.com/se7enxweb/xrowextract" );
     }
 }
 ?>
