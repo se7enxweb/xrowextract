@@ -4,6 +4,34 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>created</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>already there</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>left as they were</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>added again as copies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not installed (class missing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects in the package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Install 1 change (in the background)</source>
         <translation type="unfinished"></translation>
     </message>

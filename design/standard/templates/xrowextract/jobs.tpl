@@ -91,7 +91,15 @@
                     </ol>
 
                     <div class="xe-job-meta" data-label-failed="{'Failed'|i18n('design/standard/extract')|wash}" data-label-took="{'took %time'|i18n('design/standard/extract')|wash}" data-label-wait="{'after %time in the queue'|i18n('design/standard/extract')|wash}">
-                        {if and( $job.type|eq( 'package' ), is_set( $job.installed_objects ) )}
+                        {if and( $job.type|eq( 'package' ), is_set( $job.install_summary ) )}
+                        {def $is = $job.install_summary}
+                        <span data-role="rows"><strong>{$is.created}</strong> {'created'|i18n('design/standard/extract')},
+                            <strong>{$is.existing}</strong> {'already there'|i18n('design/standard/extract')}
+                            ({if $is.object_mode|eq( 'skip' )}{'left as they were'|i18n('design/standard/extract')}{elseif $is.object_mode|eq( 'new' )}{'added again as copies'|i18n('design/standard/extract')}{else}{'updated'|i18n('design/standard/extract')}{/if}){if $is.class_missing|gt( 0 )},
+                            <strong>{$is.class_missing}</strong> {'not installed (class missing)'|i18n('design/standard/extract')}{/if}
+                            · {$job.installed_classes} {'classes'|i18n('design/standard/extract')}, {$job.installed_objects} {'objects in the package'|i18n('design/standard/extract')}</span>
+                        {undef $is}
+                        {elseif and( $job.type|eq( 'package' ), is_set( $job.installed_objects ) )}
                         <span data-role="rows"><strong>{$job.installed_classes}</strong> {'classes'|i18n('design/standard/extract')}, <strong>{$job.installed_objects}</strong> {'objects installed'|i18n('design/standard/extract')}</span>
                         <span data-role="size">{if $job.size_kb|ne( null )}{'report'|i18n('design/standard/extract')} {$job.size_kb} KB{/if}</span>
                         {else}

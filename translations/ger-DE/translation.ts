@@ -2,6 +2,34 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>created</source>
+        <translation>angelegt</translation>
+    </message>
+    <message>
+        <source>already there</source>
+        <translation>schon vorhanden</translation>
+    </message>
+    <message>
+        <source>left as they were</source>
+        <translation>unverändert belassen</translation>
+    </message>
+    <message>
+        <source>added again as copies</source>
+        <translation>als Kopien erneut angelegt</translation>
+    </message>
+    <message>
+        <source>updated</source>
+        <translation>aktualisiert</translation>
+    </message>
+    <message>
+        <source>not installed (class missing)</source>
+        <translation>nicht installiert (Klasse fehlt)</translation>
+    </message>
+    <message>
+        <source>objects in the package</source>
+        <translation>Objekte im Paket</translation>
+    </message>
+    <message>
         <source>Install 1 change (in the background)</source>
         <translation>1 Änderung installieren (im Hintergrund)</translation>
     </message>

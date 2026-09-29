@@ -178,6 +178,26 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         $rows[$last]['installed_classes'] = count( $rows[$last]['created_classes'] );
         $rows[$last]['installed_objects'] = count( $rows[$last]['created_objects'] );
         $installedTotal = $rows[$last]['installed_classes'] + $rows[$last]['installed_objects'];
+        // With the dry run's counts: how many were new and how many already existed, and what the job did with
+        // those (its --object-mode/--class-mode) - a re-import with "skip" created nothing and left the rest alone
+        $pc = $rows[$last]['counts'];
+        if ( is_array( $pc ) && isset( $pc['objects_create'] ) )
+        {
+            $mode = function ( $name, $default ) use ( $job )
+            {
+                foreach ( (array)$job['args'] as $arg )
+                    if ( strpos( $arg, '--' . $name . '=' ) === 0 )
+                        return substr( $arg, strlen( $name ) + 3 );
+                return $default;
+            };
+            $rows[$last]['install_summary'] = array(
+                'created' => (int)$pc['classes_create'] + (int)$pc['objects_create'],
+                'existing' => (int)$pc['classes_update'] + (int)$pc['objects_update'] + (int)$pc['objects_unchanged'],
+                'class_missing' => (int)$pc['objects_class_missing'],
+                'object_mode' => $mode( 'object-mode', 'update' ),
+                'class_mode' => $mode( 'class-mode', 'skip' ),
+            );
+        }
         if ( $job['state'] === 'done' && $installedTotal )
         {
             $rows[$last]['progress'] = array( 'done' => $installedTotal, 'total' => $installedTotal, 'phase' => 'done' );
