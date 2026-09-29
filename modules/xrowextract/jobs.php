@@ -103,6 +103,8 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'progress' => $progress,
         'progress_percent' => $percent,
         'active' => $job['state'] === 'queued' || $job['state'] === 'running',
+        'counts' => isset( $job['counts'] ) ? $job['counts'] : null,
+        'has_errors_file' => !empty( $job['has_errors_file'] ),
     );
 }
 

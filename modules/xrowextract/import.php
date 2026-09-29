@@ -11,38 +11,106 @@
 $module = $Params["Module"];
 $http = eZHTTPTool::instance();
 $tpl = eZTemplate::factory();
+$login = eZUser::currentUser()->attribute( 'login' );
 
 XrowExtractImport::cleanupOldUploads();
+XrowExtractUpload::cleanupStale();
 
 $SESSION_KEY = 'XROWEXTRACT_IMPORT_FILE';
+
+/** Forgets the session's current file, deleting it the way its source needs to. */
+$forgetFile = function () use ( &$SESSION_KEY )
+{
+    if ( !isset( $_SESSION[$SESSION_KEY] ) )
+        return;
+    $current = $_SESSION[$SESSION_KEY];
+    if ( isset( $current['source'] ) && $current['source'] === 'chunked' && !empty( $current['upload_id'] ) )
+        XrowExtractUpload::delete( $current['upload_id'] );
+    elseif ( isset( $current['path'] ) && is_file( $current['path'] ) )
+        @unlink( $current['path'] );
+    unset( $_SESSION[$SESSION_KEY] );
+};
+
+// Resume a job (from the Jobs page): the same file and settings, a new job, --resume-from added
+if ( $http->hasPostVariable( 'ResumeJobID' ) )
+{
+    $resumeID = (string)$http->postVariable( 'ResumeJobID' );
+    $resumeRow = max( 1, (int)$http->postVariable( 'ResumeFromRow' ) );
+    $sourceJob = XrowExtractJob::isValidID( $resumeID ) ? XrowExtractJob::load( $resumeID ) : null;
+    if ( $sourceJob && XrowExtractJob::canSee( $sourceJob, $login, XrowExtractJob::allowAllJobs() ) && $sourceJob['type'] === 'import' && XrowExtractJob::available() )
+    {
+        $newArgs = array();
+        foreach ( (array)$sourceJob['args'] as $arg )
+        {
+            if ( strpos( $arg, '--resume-from=' ) === 0 )
+                continue; // replaced below
+            $newArgs[] = $arg;
+        }
+        $newArgs[] = '--resume-from=' . $resumeRow;
+        $newJobID = XrowExtractJob::create( array(
+            'type' => 'import', 'owner' => $login,
+            'what' => $sourceJob['what'] . " (resumed from row $resumeRow)",
+            'format' => 'json', 'output_file' => 'report.json', 'args' => $newArgs,
+        ) );
+        XrowExtractJob::start( $newJobID );
+        $http->setSessionVariable( 'eZExtractJobStarted', $newJobID );
+    }
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
 
 // Start over: forget the uploaded file
 if ( $http->hasPostVariable( 'NewImport' ) )
 {
-    if ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
-        @unlink( $_SESSION[$SESSION_KEY]['path'] );
-    unset( $_SESSION[$SESSION_KEY] );
+    $forgetFile();
     return $module->redirectTo( 'xrowextract/import' );
 }
 
-// A new upload
+// A new upload: the plain (no JavaScript) whole-file fallback, or a finished chunked upload adopted by
+// its UploadID (XrowExtractUpload::path() only returns a path the current user's own upload, complete)
 $uploadError = '';
-if ( $http->hasPostVariable( 'Upload' ) && isset( $_FILES['ImportFile'] ) && $_FILES['ImportFile']['error'] === UPLOAD_ERR_OK )
+if ( $http->hasPostVariable( 'Upload' ) && $http->hasPostVariable( 'UploadID' ) && (string)$http->postVariable( 'UploadID' ) !== '' )
 {
-    $originalName = $_FILES['ImportFile']['name'];
-    $stored = XrowExtractImport::storeUpload( $_FILES['ImportFile']['tmp_name'], $originalName );
+    $uploadID = (string)$http->postVariable( 'UploadID' );
+    $stored = XrowExtractUpload::path( $uploadID );
     if ( $stored === false )
     {
-        $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be stored.' );
+        $uploadError = ezpI18n::tr( 'design/standard/extract', 'The upload could not be found; it may have expired. Choose the file again.' );
     }
     else
     {
-        if ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
-            @unlink( $_SESSION[$SESSION_KEY]['path'] );
-        $format = XrowExtractImport::detectFormat( (string)file_get_contents( $stored ) );
-        $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( (string)file_get_contents( $stored ) ) : ',';
-        $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator );
+        $originalName = $http->hasPostVariable( 'UploadName' ) ? (string)$http->postVariable( 'UploadName' ) : XrowExtractUpload::originalName( $uploadID );
+        $forgetFile();
+        $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
+        $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
+        $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
+                                         'source' => 'chunked', 'upload_id' => $uploadID, 'size' => filesize( $stored ) );
         return $module->redirectTo( 'xrowextract/import' );
+    }
+}
+elseif ( $http->hasPostVariable( 'Upload' ) && isset( $_FILES['ImportFile'] ) && $_FILES['ImportFile']['error'] === UPLOAD_ERR_OK )
+{
+    $originalName = $_FILES['ImportFile']['name'];
+    list( $hasRoom, $roomMessage ) = XrowExtractUpload::hasRoomFor( (int)$_FILES['ImportFile']['size'] );
+    if ( !$hasRoom )
+    {
+        $uploadError = $roomMessage;
+    }
+    else
+    {
+        $stored = XrowExtractImport::storeUpload( $_FILES['ImportFile']['tmp_name'], $originalName );
+        if ( $stored === false )
+        {
+            $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be stored.' );
+        }
+        else
+        {
+            $forgetFile();
+            $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
+            $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
+            $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
+                                             'source' => 'plain', 'size' => filesize( $stored ) );
+            return $module->redirectTo( 'xrowextract/import' );
+        }
     }
 }
 elseif ( $http->hasPostVariable( 'Upload' ) )
@@ -53,11 +121,15 @@ elseif ( $http->hasPostVariable( 'Upload' ) )
 $hasFile = isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] );
 $tpl->setVariable( 'HasFile', $hasFile );
 $tpl->setVariable( 'UploadError', $uploadError );
+$diskFree = XrowExtractUpload::freeDiskSpace();
+$tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? XrowExtractUpload::humanSize( $diskFree ) : false );
+$tpl->setVariable( 'UploadedSize', $hasFile && isset( $_SESSION[$SESSION_KEY]['size'] ) ? XrowExtractUpload::humanSize( (int)$_SESSION[$SESSION_KEY]['size'] ) : false );
+$uploadJsFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-upload.js';
+$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ), 0, 12 ) : '0' );
 
 if ( $http->hasPostVariable( 'RemoveFile' ) && $hasFile )
 {
-    @unlink( $_SESSION[$SESSION_KEY]['path'] );
-    unset( $_SESSION[$SESSION_KEY] );
+    $forgetFile();
     return $module->redirectTo( 'xrowextract/import' );
 }
 
@@ -69,7 +141,47 @@ if ( $hasFile )
     $separators = array( 'comma' => ',', 'semicolon' => ';', 'tab' => "\t", 'pipe' => '|' );
     $separatorKey = $http->hasPostVariable( 'ImportSeparator' ) ? (string)$http->postVariable( 'ImportSeparator' ) : array_search( $_SESSION[$SESSION_KEY]['separator'], $separators, true );
     $separator = isset( $separators[$separatorKey] ) ? $separators[$separatorKey] : ',';
-    $parsed = XrowExtractImport::parseFile( $_SESSION[$SESSION_KEY]['path'], $format, $separator );
+    // A full streaming pass just to show the mapping/preview screen is cheap in memory but not in time
+    // for a huge file (tens of seconds for hundreds of MB, on a single request thread) - too slow to
+    // repeat on every postback while the user is only choosing a class or editing a mapping, so it is
+    // cached in the session, keyed to this exact file (path + size + mtime never collide across a
+    // RemoveFile/NewImport/re-upload) and to the format/separator that changes what streaming finds.
+    //
+    // Above the byte threshold, the exact row count is never computed inline at all: a byte size this
+    // large already means the file will be queued as a background job regardless of its row count (see
+    // NeedsQueue below), so only the header is read (fileHeader() is bounded - one CSV line, or an XML
+    // pass that stops once </columns> is seen - never a full pass) and the mapping table works from
+    // that alone; the job itself reports the exact total once it has actually streamed the file.
+    $fileSizeForParse = filesize( $_SESSION[$SESSION_KEY]['path'] );
+    $queueThresholdBytesForParse = (int)eZINI::instance( 'csv.ini' )->variable( 'Uploads', 'QueueThresholdMB' );
+    $queueThresholdBytesForParse = ( $queueThresholdBytesForParse > 0 ? $queueThresholdBytesForParse : 20 ) * 1024 * 1024;
+    if ( $format !== 'json' && $fileSizeForParse > $queueThresholdBytesForParse )
+    {
+        try
+        {
+            $info = XrowExtractImport::fileHeader( $_SESSION[$SESSION_KEY]['path'], $format, $separator );
+            $parsed = array( 'header' => $info['header'], 'rows' => array(), 'total_rows' => null,
+                            'columnIDs' => $info['columnIDs'], 'class' => $info['class'], 'format' => $format, 'separator' => $separator );
+        }
+        catch ( Exception $e )
+        {
+            $parsed = array( 'header' => array(), 'rows' => array(), 'total_rows' => null, 'format' => $format, 'separator' => $separator, 'error' => $e->getMessage() );
+        }
+    }
+    else
+    {
+        $parseCacheKey = md5( $_SESSION[$SESSION_KEY]['path'] . '|' . filemtime( $_SESSION[$SESSION_KEY]['path'] ) . '|' . $fileSizeForParse . '|' . $format . '|' . $separator );
+        if ( isset( $_SESSION[$SESSION_KEY]['parseCacheKey'] ) && $_SESSION[$SESSION_KEY]['parseCacheKey'] === $parseCacheKey && isset( $_SESSION[$SESSION_KEY]['parseCache'] ) )
+        {
+            $parsed = $_SESSION[$SESSION_KEY]['parseCache'];
+        }
+        else
+        {
+            $parsed = XrowExtractImport::parseFile( $_SESSION[$SESSION_KEY]['path'], $format, $separator );
+            $_SESSION[$SESSION_KEY]['parseCacheKey'] = $parseCacheKey;
+            $_SESSION[$SESSION_KEY]['parseCache'] = $parsed;
+        }
+    }
     $tpl->setVariable( 'ImportFormat', $format );
     $tpl->setVariable( 'ImportSeparatorKey', $separatorKey ?: 'comma' );
     $tpl->setVariable( 'UploadedName', $_SESSION[$SESSION_KEY]['name'] );
@@ -78,7 +190,10 @@ if ( $hasFile )
 }
 $tpl->setVariable( 'ParseError', isset( $parsed['error'] ) ? $parsed['error'] : false );
 $tpl->setVariable( 'FileHeader', $parsed['header'] );
-$tpl->setVariable( 'FileRowCount', count( $parsed['rows'] ) );
+// A file large enough by bytes alone to be queued regardless never has its exact row count computed
+// inline (see the note above the parseFile()/fileHeader() choice) - "total_rows" stays null for it.
+$tpl->setVariable( 'FileRowCount', isset( $parsed['total_rows'] ) ? $parsed['total_rows'] : count( $parsed['rows'] ) );
+$tpl->setVariable( 'FileRowCountKnown', array_key_exists( 'total_rows', $parsed ) ? $parsed['total_rows'] !== null : true );
 $xmlColumnIDs = isset( $parsed['columnIDs'] ) ? $parsed['columnIDs'] : null;
 
 // Class: a chosen fallback (a "class" column in the file still wins per row at run time)
@@ -316,23 +431,72 @@ if ( $http->hasPostVariable( 'ImportParentNodeSelected' ) )
     $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
 }
 
-// Preview (dry run) and Apply run the same engine; Apply only after a preview was shown for these settings
+// Above the threshold, both the dry run and the apply run as a background job instead (the web
+// request only queues it and returns); below it, they run right here exactly as before - "rows" only
+// ever held a bounded preview since parseFile() started streaming, so both paths now read the file
+// again through streamRows() for the real work, never the preview array.
+$QueueThresholdRows = (int)eZINI::instance( 'csv.ini' )->variable( 'Uploads', 'QueueThresholdRows' );
+if ( $QueueThresholdRows <= 0 )
+    $QueueThresholdRows = 2000;
+$QueueThresholdBytes = (int)eZINI::instance( 'csv.ini' )->variable( 'Uploads', 'QueueThresholdMB' );
+$QueueThresholdBytes = ( $QueueThresholdBytes > 0 ? $QueueThresholdBytes : 20 ) * 1024 * 1024;
+$fileSizeForThreshold = $hasFile ? filesize( $_SESSION[$SESSION_KEY]['path'] ) : 0;
+$NeedsQueue = $hasFile && ( $parsed['total_rows'] === null || $parsed['total_rows'] > $QueueThresholdRows || $fileSizeForThreshold > $QueueThresholdBytes );
+$tpl->setVariable( 'NeedsQueue', $NeedsQueue );
+$tpl->setVariable( 'QueueThresholdRows', $QueueThresholdRows );
+
 $Preview = false;
 $Applied = false;
-if ( $hasFile && $parsed['rows'] && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
+$QueuedJobID = null;
+
+if ( $hasFile && $NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) && XrowExtractJob::available() )
+{
+    $apply = $http->hasPostVariable( 'Apply' );
+    $args = array( '--file=' . $_SESSION[$SESSION_KEY]['path'] );
+    if ( $apply )
+        $args[] = '--apply';
+    if ( $ClassID )
+        $args[] = '--class=' . $ClassID;
+    if ( $ParentNodeID )
+        $args[] = '--parent=' . $ParentNodeID;
+    $args[] = '--match=' . $MatchMode;
+    if ( $Language )
+        $args[] = '--language=' . $Language;
+    $mapOverrides = array();
+    foreach ( $Mapping as $m )
+    {
+        if ( $m['target'] !== 'ignore' )
+            $mapOverrides[] = $m['column'] . '=' . $m['target'];
+    }
+    if ( $mapOverrides )
+        $args[] = '--map=' . implode( ',', $mapOverrides );
+    $QueuedJobID = XrowExtractJob::create( array(
+        'type' => 'import', 'owner' => $login,
+        'what' => ( $apply ? 'Import' : 'Preview' ) . ': ' . $_SESSION[$SESSION_KEY]['name'],
+        'format' => 'json', 'output_file' => 'report.json', 'args' => $args,
+    ) );
+    XrowExtractJob::start( $QueuedJobID );
+    $http->setSessionVariable( 'eZExtractJobStarted', $QueuedJobID );
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+elseif ( $hasFile && !$NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
 {
     $mappingForRun = array();
     foreach ( $Mapping as $m )
         $mappingForRun[] = array( 'column' => $m['column'], 'target' => $m['target'] );
     $apply = $http->hasPostVariable( 'Apply' );
+    $streamPath = $_SESSION[$SESSION_KEY]['path'];
+    $streamFormat = $parsed['format'];
+    $streamSeparator = $parsed['separator'];
     $result = XrowExtractImport::run( array(
-        'rows'         => $parsed['rows'],
+        'rows'         => XrowExtractImport::streamRows( $streamPath, $streamFormat, $streamSeparator ),
         'mapping'      => $mappingForRun,
         'classID'      => $ClassID,
         'match'        => $MatchMode,
         'language'     => $Language,
         'parentNodeID' => $ParentNodeID,
         'apply'        => $apply,
+        'totalRows'    => $parsed['total_rows'],
     ) );
     $tpl->setVariable( 'Result', $result );
     $tpl->setVariable( 'Preview', !$apply );
@@ -341,8 +505,7 @@ if ( $hasFile && $parsed['rows'] && ( $http->hasPostVariable( 'Preview' ) || $ht
     if ( $apply )
     {
         // Done: the file has served its purpose
-        @unlink( $_SESSION[$SESSION_KEY]['path'] );
-        unset( $_SESSION[$SESSION_KEY] );
+        $forgetFile();
     }
 }
 
