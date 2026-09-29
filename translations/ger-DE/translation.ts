@@ -2,6 +2,30 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages</source>
+        <translation>Sprachen</translation>
+    </message>
+    <message>
+        <source>%count of %all languages; each object is one row per chosen language it is translated into.</source>
+        <translation>%count von %all Sprachen; jedes Objekt ist eine Zeile je gewählter Sprache, in die es übersetzt ist.</translation>
+    </message>
+    <message>
+        <source>site default</source>
+        <translation>Standard der Seite</translation>
+    </message>
+    <message>
+        <source>No language chosen: the file would be empty.</source>
+        <translation>Keine Sprache gewählt: die Datei wäre leer.</translation>
+    </message>
+    <message>
+        <source>A language column is added in front, so the rows of each translation can be told apart.</source>
+        <translation>Vorne wird eine Sprachspalte eingefügt, damit sich die Zeilen jeder Übersetzung unterscheiden lassen.</translation>
+    </message>
+    <message>
+        <source>language code</source>
+        <translation>Sprachcode</translation>
+    </message>
+    <message>
         <source>The direct children of the node</source>
         <translation>Die direkten Unterelemente des Knotens</translation>
     </message>

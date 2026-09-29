@@ -111,6 +111,34 @@
                 </div>
                 {/if}
             </div>
+            {if $LanguageChoices|count|gt( 0 )}
+            <div class="xe-field xe-languages">
+                <div class="xe-columns-head">
+                    <span class="xe-label" id="xe-lang-label">{'Languages'|i18n('design/standard/extract')}</span>
+                    <span class="xe-columns-hint">{'%count of %all languages; each object is one row per chosen language it is translated into.'|i18n('design/standard/extract',, hash( '%count', $SelectedLanguageCount, '%all', $LanguageChoices|count ))}</span>
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="SelectAllLanguages" value="{'Select all'|i18n('design/standard/extract')}" />
+                    <input class="button" type="submit" name="SelectNoLanguages" value="{'Select none'|i18n('design/standard/extract')}" />
+                </div>
+                <input type="hidden" name="LanguageSelection" value="1" />
+                <ul class="xe-language-list" aria-labelledby="xe-lang-label">
+                    {foreach $LanguageChoices as $language}
+                    <li>
+                        <label class="xe-class-item">
+                            <input type="checkbox" name="Languages[]" value="{$language.locale|wash}" class="xe-autosubmit"{if $language.selected} checked{/if} />
+                            <span class="xe-colinfo">
+                                <strong>{$language.name|wash}</strong>
+                                <small><code>{$language.locale|wash}</code>{if $language.default} · <span class="xe-badge">{'site default'|i18n('design/standard/extract')}</span>{/if}</small>
+                            </span>
+                            <span class="xe-node-count"><strong>{$language.count}</strong> {'rows'|i18n('design/standard/extract')}</span>
+                        </label>
+                    </li>
+                    {/foreach}
+                </ul>
+                {if $SelectedLanguageCount|eq( 0 )}<p class="xe-note xe-note-bad">{'No language chosen: the file would be empty.'|i18n('design/standard/extract')}</p>
+                {elseif $SelectedLanguageCount|gt( 1 )}<p class="xe-help">{'A language column is added in front, so the rows of each translation can be told apart.'|i18n('design/standard/extract')}</p>{/if}
+            </div>
+            {/if}
         </section>
 
         {* 2. How the file is written *}

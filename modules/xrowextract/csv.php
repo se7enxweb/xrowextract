@@ -232,6 +232,21 @@ if ( $Scope === 'all' )
 }
 $tpl->setVariable( 'Scope', $Scope );
 
+// Languages: every content language by default; the form posts the ticked ones (LanguageSelection marks it)
+$ContentLanguages = XrowExtractColumns::contentLanguages();
+$allLocales = array_keys( $ContentLanguages );
+if ( $http->hasPostVariable( 'SelectAllLanguages' ) )
+    $SelectedLanguages = $allLocales;
+elseif ( $http->hasPostVariable( 'SelectNoLanguages' ) )
+    $SelectedLanguages = array();
+elseif ( $http->hasPostVariable( 'LanguageSelection' ) )
+    $SelectedLanguages = array_values( array_intersect( $allLocales, (array)( $http->hasPostVariable( 'Languages' ) ? $http->postVariable( 'Languages' ) : array() ) ) );
+elseif ( isset( $sessionConfig['Languages'] ) && is_array( $sessionConfig['Languages'] ) )
+    $SelectedLanguages = array_values( array_intersect( $allLocales, $sessionConfig['Languages'] ) );
+else
+    $SelectedLanguages = $allLocales;
+$sessionConfig['Languages'] = $SelectedLanguages;
+
 // The posted column list is kept by every action on the same class (the form holds the columns of
 // AttributesClassID); a class change, or a first visit, starts from the saved or preselected list
 $columnActions = array( 'Remove', 'RemoveAttribute', 'RemoveAllAttributes', 'ResetAttributes', 'MoveAttributeUp', 'MoveAttributeDown',
@@ -414,8 +429,25 @@ $list = $fCollection->fetchObjectTreeCount( $FetchSubtree, false, false, 'includ
 
 $tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
 
+// Translations per language in this selection; a row is one object in one chosen language
+$LanguageChoices = array();
+$LanguageCounts = array();
+foreach ( $ContentLanguages as $locale => $language )
+{
+    $languageCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, true, $locale, 'include', array( $Class_id ),
+                                                         false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+    $LanguageCounts[$locale] = isset( $languageCount['result'] ) ? (int)$languageCount['result'] : 0;
+    $LanguageChoices[] = array_merge( $language, array( 'count' => $LanguageCounts[$locale],
+                                                        'selected' => in_array( $locale, $SelectedLanguages, true ) ) );
+}
+$tpl->setVariable( 'LanguageChoices', $LanguageChoices );
+$tpl->setVariable( 'SelectedLanguageCount', count( $SelectedLanguages ) );
+$translationRows = 0;
+foreach ( $SelectedLanguages as $locale )
+    $translationRows += $LanguageCounts[$locale];
+
 // How many rows the file will hold with this limit and offset
-$exportRows = $hasPreFilledData ? count( $preFilledIDs ) : max( 0, ( isset( $list['result'] ) ? (int)$list['result'] : 0 ) - $Offset );
+$exportRows = $hasPreFilledData ? count( $preFilledIDs ) : max( 0, $translationRows - $Offset );
 if ( $Limit && !$hasPreFilledData )
     $exportRows = min( $exportRows, $Limit );
 $tpl->setVariable( 'export_rows', $exportRows );
@@ -472,21 +504,45 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
     $parser = new ParserInterface( $Separator, $Escape );
     $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];
 
-    $cells = array();
+    // More than one language: a language column in front tells the rows apart
+    $ExportColumns = $Attributes;
+    $hasLanguageColumn = false;
     foreach ( $Attributes as $item )
-    {
-        $cells[] = $parser->escape( str_replace( '_', '-', $item['exportname'] ) );
-    }
-    $data = implode( $Separator, $cells ) . $newLine;
+        $hasLanguageColumn = $hasLanguageColumn || $item['id'] === 'ezcontentobject.language';
+    if ( count( $SelectedLanguages ) > 1 && !$hasLanguageColumn )
+        array_unshift( $ExportColumns, $ExtraAttributes['ezcontentobject.language'] );
+    $data = implode( $Separator, XrowExtractColumns::headerCells( $ExportColumns, $parser ) ) . $newLine;
     $file = 'export.csv';
     $exportTotal = 0;
 
+    $maxRows = $isPreview ? ( $Limit ? min( $Limit, $PreviewRows ) : $PreviewRows ) : ( $Limit ? $Limit : PHP_INT_MAX );
+    $written = 0;
+    $writeRow = function ( eZContentObject $obj, $locale ) use ( &$data, &$written, $ExportColumns, $parser, $ExtraAttributes, $allowPasswordHash, $Separator, $newLine )
+    {
+        XrowExtractColumns::$language = $locale;
+        $data .= implode( $Separator, XrowExtractColumns::rowCells( $ExportColumns, $obj, $parser, $ExtraAttributes, $allowPasswordHash ) ) . $newLine;
+        $written++;
+    };
+
     if ( $hasPreFilledData )
     {
-        $list = $preFilledIDs;
-        $exportTotal = count( $list );
-        if ( $isPreview )
-            $list = array_slice( $list, 0, $PreviewRows );
+        // Objects handed over by another view: each in every chosen language it has
+        $exportTotal = 0;
+        foreach ( $preFilledIDs as $objectID )
+        {
+            $obj = eZContentObject::fetch( $objectID );
+            if ( !$obj instanceof eZContentObject || !$obj->canRead() )
+                continue;
+            foreach ( $SelectedLanguages as $locale )
+            {
+                if ( !in_array( $locale, $obj->availableLanguages(), true ) )
+                    continue;
+                $exportTotal++;
+                if ( $written < $maxRows )
+                    $writeRow( $obj, $locale );
+            }
+            eZContentObject::clearCache( array( $objectID ) );
+        }
     }
     else
     {
@@ -509,54 +565,46 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             $sortBy = $node->sortArray();
             $sortBy = $sortBy[0];
         }
+        $exportTotal = $Limit ? min( $Limit, max( 0, $translationRows - $Offset ) ) : max( 0, $translationRows - $Offset );
 
-        $fetchLimit = $Limit ? $Limit : false;
-        $exportTotal = max( 0, ( isset( $list['result'] ) ? (int)$list['result'] : 0 ) - $Offset );
-        if ( $Limit )
-            $exportTotal = min( $exportTotal, $Limit );
-        if ( $isPreview )
-            $fetchLimit = $Limit ? min( $Limit, $PreviewRows ) : $PreviewRows;
-
-        // Limitation false: the user's content/read policies apply
-        $list2 = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, false, false, $Offset, $fetchLimit, $depth, $depthOperator, $Class_id, false, false, 'include', array(
-            $Class_id
-        ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
-
-        $list = isset( $list2['result'] ) && is_array( $list2['result'] ) ? $list2['result'] : array();
-    }
-
-    foreach ( $list as $item )
-    {
-        $obj = is_object( $item ) ? $item->attribute( 'object' ) : eZContentObject::fetch( (int)$item );
-        if ( ! ( $obj instanceof eZContentObject ) || ! $obj->canRead() )
-            continue;
-
-        $datamap = $obj->attribute( 'data_map' );
-
-        $cells = array();
-        foreach ( $Attributes as $dataelement )
+        // The chosen languages one after the other; skip and take count over all of them.
+        // Limitation false: the user's content/read policies apply.
+        $skip = $Offset;
+        foreach ( $SelectedLanguages as $locale )
         {
-            if ( isset( $ExtraAttributes[$dataelement['id']] ) )
+            if ( $written >= $maxRows )
+                break;
+            if ( $skip >= $LanguageCounts[$locale] )
             {
-                $cells[] = $parser->escape( XrowExtractColumns::extraValue( $dataelement['id'], $obj, $allowPasswordHash ) );
+                $skip -= $LanguageCounts[$locale];
+                continue;
             }
-            elseif ( isset( $datamap[$dataelement['id']] ) && is_object( $datamap[$dataelement['id']] ) )
+            for ( $batchOffset = $skip; $written < $maxRows; $batchOffset += 100 )
             {
-                $cells[] = $parser->exportValue( $datamap[$dataelement['id']] );
+                $take = min( 100, $maxRows - $written );
+                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, false, false, 'include', array(
+                    $Class_id
+                ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
+                $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
+                foreach ( $batch as $treeNode )
+                {
+                    $obj = $treeNode->attribute( 'object' );
+                    if ( $obj instanceof eZContentObject && $obj->canRead() )
+                        $writeRow( $obj, $locale );
+                }
+                // A large export: keep the object cache from growing with every row
+                eZContentObject::clearCache();
+                if ( count( $batch ) < $take )
+                    break;
             }
-            else
-            {
-                $cells[] = $parser->escape( '' );
-            }
+            $skip = 0;
         }
-        $data .= implode( $Separator, $cells ) . $newLine;
-
-        // A large export: keep the object cache from growing with every row
-        eZContentObject::clearCache( array( $obj->attribute( 'id' ) ) );
     }
+    XrowExtractColumns::$language = null;
 
     if ( $isPreview )
     {
+        $tpl->setVariable( 'PreviewColumns', $ExportColumns );
         $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, $file, microtime( true ) - $started ) );
         if ( $http->hasPostVariable( 'PreviewOnly' ) )
         {
@@ -565,6 +613,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             header( 'Content-Type: text/html; charset=' . eZTextCodec::httpCharset() );
             header( 'X-Content-Type-Options: nosniff' );
             $tpl->setVariable( 'Attributes', $Attributes );
+            $tpl->setVariable( 'PreviewColumns', $ExportColumns );
             $html = $tpl->fetch( 'design:xrowextract/csv_preview.tpl' );
             while ( @ob_end_clean() );
             echo $html;

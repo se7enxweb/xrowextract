@@ -4,6 +4,30 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages</source>
+        <translation>Languages</translation>
+    </message>
+    <message>
+        <source>%count of %all languages; each object is one row per chosen language it is translated into.</source>
+        <translation>%count of %all languages; each object is one row per chosen language it is translated into.</translation>
+    </message>
+    <message>
+        <source>site default</source>
+        <translation>site default</translation>
+    </message>
+    <message>
+        <source>No language chosen: the file would be empty.</source>
+        <translation>No language chosen: the file would be empty.</translation>
+    </message>
+    <message>
+        <source>A language column is added in front, so the rows of each translation can be told apart.</source>
+        <translation>A language column is added in front, so the rows of each translation can be told apart.</translation>
+    </message>
+    <message>
+        <source>language code</source>
+        <translation>language code</translation>
+    </message>
+    <message>
         <source>The direct children of the node</source>
         <translation>The direct children of the node</translation>
     </message>

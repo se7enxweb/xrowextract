@@ -64,7 +64,7 @@
                     {foreach $preview.header as $index => $column}
                     <th scope="col" data-col="{$index}">
                         <span class="xe-colname">{$column.name|wash}</span>
-                        {if is_set( $Attributes[$index] )}<span class="xe-colsource">{$Attributes[$index].name|wash}</span>{if is_set( $AttributeMeta[$Attributes[$index].id] )}<span class="xe-coltype" title="{$AttributeMeta[$Attributes[$index].id].datatype|wash}">{$AttributeMeta[$Attributes[$index].id].datatype_name|wash} → {$AttributeMeta[$Attributes[$index].id].cell|wash}</span>{/if}{/if}
+                        {if is_set( $PreviewColumns[$index] )}<span class="xe-colsource">{$PreviewColumns[$index].name|wash}</span>{if is_set( $AttributeMeta[$PreviewColumns[$index].id] )}<span class="xe-coltype" title="{$AttributeMeta[$PreviewColumns[$index].id].datatype|wash}">{$AttributeMeta[$PreviewColumns[$index].id].datatype_name|wash} → {$AttributeMeta[$PreviewColumns[$index].id].cell|wash}</span>{/if}{/if}
                         <span class="xe-fill" title="{'%percent % of the rows shown have a value'|i18n( 'design/standard/extract',, hash( '%percent', $column.fill ) )|wash}"><span style="width: {$column.fill}%"></span></span>
                     </th>
                     {/foreach}

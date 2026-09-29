@@ -7,6 +7,9 @@
  */
 class XrowExtractColumns
 {
+    /** The language rows are written in (a locale such as eng-US), or null for the object's own language order. */
+    public static $language = null;
+
     /** The special columns. Only these exist; each value is computed in extraValue(). */
     public static function extraAttributes( $allowPasswordHash = null )
     {
@@ -16,6 +19,7 @@ class XrowExtractColumns
             'ezcontentobject.id'                  => array( 'exportname' => 'object_id',           'name' => 'Object ID' ),
             'ezcontentobject.remote_id'           => array( 'exportname' => 'remote_id',           'name' => 'Remote ID' ),
             'ezcontentobject.name'                => array( 'exportname' => 'object_name',         'name' => 'Object Name' ),
+            'ezcontentobject.language'            => array( 'exportname' => 'language',            'name' => 'Language' ),
             'ezcontentobject.class_identifier'    => array( 'exportname' => 'class',               'name' => 'Class Identifier' ),
             'ezcontentobject.section'             => array( 'exportname' => 'section',             'name' => 'Section' ),
             'ezcontentobject.owner'               => array( 'exportname' => 'owner',               'name' => 'Owner Name' ),
@@ -120,7 +124,7 @@ class XrowExtractColumns
             );
         }
         $extraCells = array(
-            'ezcontentobject.id' => 'number', 'ezcontentobject.remote_id' => 'identifier', 'ezcontentobject.name' => 'text',
+            'ezcontentobject.id' => 'number', 'ezcontentobject.remote_id' => 'identifier', 'ezcontentobject.name' => 'text', 'ezcontentobject.language' => 'language code',
             'ezcontentobject.class_identifier' => 'identifier', 'ezcontentobject.section' => 'section name', 'ezcontentobject.owner' => 'owner name',
             'ezuser.login' => 'login', 'ezuser.email' => 'e-mail address', 'ezuser.password_hash' => 'password hash', 'ezuser.password_hash_type' => 'md5_password, bcrypt ...', 'ezuser.is_enabled' => 'enabled or disabled',
             'ezcontentobject.published' => 'YYYY-MM-DD', 'ezcontentobject.modified' => 'YYYY-MM-DD',
@@ -172,7 +176,7 @@ class XrowExtractColumns
     /** One object as CSV cells, in the order of $columns. */
     public static function rowCells( array $columns, eZContentObject $obj, ParserInterface $parser, array $extras, $allowPasswordHash )
     {
-        $datamap = $obj->attribute( 'data_map' );
+        $datamap = self::$language ? $obj->fetchDataMap( false, self::$language ) : $obj->attribute( 'data_map' );
         $cells = array();
         foreach ( $columns as $column )
         {
@@ -198,6 +202,25 @@ class XrowExtractColumns
     {
         $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ), '._' );
         return ( $name === '' ? $fallback : substr( $name, 0, 80 ) ) . $suffix;
+    }
+
+    /**
+     * The content languages: locale => (locale, name, default), the public site's default language
+     * (ContentObjectLocale of DefaultAccess) first, then by name.
+     */
+    public static function contentLanguages()
+    {
+        $default = self::publicSiteINI()->variable( 'RegionalSettings', 'ContentObjectLocale' );
+        $languages = array();
+        foreach ( eZContentLanguage::fetchList() as $language )
+        {
+            $locale = $language->attribute( 'locale' );
+            $languages[$locale] = array( 'locale' => $locale, 'name' => $language->attribute( 'name' ), 'default' => $locale === $default );
+        }
+        uasort( $languages, function ( $a, $b ) {
+            return $a['default'] !== $b['default'] ? ( $a['default'] ? -1 : 1 ) : strcasecmp( $a['name'], $b['name'] );
+        } );
+        return $languages;
     }
 
     /** The public site's site.ini (DefaultAccess), not the admin one the view runs in. */
@@ -253,7 +276,8 @@ class XrowExtractColumns
         {
             case 'ezcontentobject.id':               return $obj->attribute( 'id' );
             case 'ezcontentobject.remote_id':        return $obj->attribute( 'remote_id' );
-            case 'ezcontentobject.name':             return $obj->attribute( 'name' );
+            case 'ezcontentobject.name':             return self::$language ? $obj->name( false, self::$language ) : $obj->attribute( 'name' );
+            case 'ezcontentobject.language':         return self::$language ? self::$language : $obj->attribute( 'initial_language_code' );
             case 'ezcontentobject.class_identifier': return $obj->attribute( 'class_identifier' );
             case 'ezcontentobject.section':
                 $section = eZSection::fetch( $obj->attribute( 'section_id' ) );

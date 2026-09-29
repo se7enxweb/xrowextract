@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][names:][separator:][line-endings:][unquoted]' .
-    '[output:][preview;][list-classes][list-columns][user:]',
+    '[languages:][output:][preview;][list-classes][list-columns][user:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export)',
@@ -43,6 +43,7 @@ $options = $script->getOptions(
         'separator'    => 'One character, or comma, semicolon, tab, pipe (default comma)',
         'line-endings' => 'win32/crlf, unix/lf (default), mac/cr',
         'unquoted'     => 'Do not quote cells (line breaks are removed; a separator in a value shifts the columns)',
+        'languages'    => 'all (default) or a comma list of locales (eng-US,ger-DE): one row per object per language',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
         'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
         'list-classes' => 'List the classes with how many objects each has in the selection',
@@ -94,9 +95,20 @@ else
 $offset = max( 0, (int)$options['offset'] );
 $limit = max( 0, (int)$options['limit'] );
 
-$countIn = function ( $classID ) use ( $fetchNode, $depth, $depthOperator, $mainOnly )
+// Languages: all, or the given locales, in the order of the content languages (site default first)
+$contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
+if ( !$options['languages'] || $options['languages'] === 'all' )
+    $languages = $contentLanguages;
+else
 {
-    $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, false, false, 'include', array( (int)$classID ),
+    $languages = array_values( array_filter( array_map( 'trim', explode( ',', $options['languages'] ) ) ) );
+    foreach ( $languages as $locale )
+        if ( !in_array( $locale, $contentLanguages, true ) )
+            $fail( "Unknown language $locale (--languages). Languages: " . implode( ', ', $contentLanguages ) . '.' );
+}
+$countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly )
+{
+    $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, $locale !== false, $locale, 'include', array( (int)$classID ),
                                                                  false, $depth, $depthOperator, true, false, $mainOnly, false, false );
     return isset( $result['result'] ) ? (int)$result['result'] : 0;
 };
@@ -108,7 +120,12 @@ if ( $options['list-classes'] )
     {
         $count = $countIn( $class->attribute( 'id' ) );
         if ( $count > 0 )
-            $cli->output( sprintf( '  %5d  %-32s %-40s %d objects', $class->attribute( 'id' ), $class->attribute( 'identifier' ), $class->attribute( 'name' ), $count ) );
+        {
+            $perLanguage = array();
+            foreach ( $languages as $locale )
+                $perLanguage[] = $locale . ' ' . $countIn( $class->attribute( 'id' ), $locale );
+            $cli->output( sprintf( '  %5d  %-32s %-40s %d objects  (%s)', $class->attribute( 'id' ), $class->attribute( 'identifier' ), $class->attribute( 'name' ), $count, implode( ', ', $perLanguage ) ) );
+        }
     }
     $script->shutdown( 0 );
 }
@@ -172,6 +189,8 @@ if ( $options['names'] )
 }
 if ( !$columns )
     $fail( 'No columns.' );
+if ( count( $languages ) > 1 && !in_array( 'ezcontentobject.language', array_map( function ( $c ) { return $c['id']; }, $columns ), true ) )
+    array_unshift( $columns, $extras['ezcontentobject.language'] );
 
 // Format
 $separators = array( 'comma' => ',', 'semicolon' => ';', 'tab' => "\t", '\t' => "\t", 'pipe' => '|' );
@@ -194,7 +213,10 @@ if ( $scope === 'node' )
     $sort = $node->sortArray();
     $sortBy = $sort[0];
 }
-$total = $countIn( $classID );
+$languageCounts = array();
+foreach ( $languages as $locale )
+    $languageCounts[$locale] = $countIn( $classID, $locale );
+$total = array_sum( $languageCounts );
 $wantRows = max( 0, $total - $offset );
 if ( $limit )
     $wantRows = min( $wantRows, $limit );
@@ -218,30 +240,42 @@ $buffer = $previewRows ? $header . "\n" : null;
 if ( $fh )
     fwrite( $fh, $header . $newLine );
 $written = 0;
-for ( $batchOffset = $offset; $written < $wantRows; $batchOffset += 100 )
+$skip = $offset;
+foreach ( $languages as $locale )
 {
-    $take = min( 100, $wantRows - $written );
-    $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, false, false, $batchOffset, $take, $depth, $depthOperator,
-                                                            $classID, false, false, 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
-    $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
-    if ( !$batch )
+    if ( $written >= $wantRows )
         break;
-    foreach ( $batch as $treeNode )
+    if ( $skip >= $languageCounts[$locale] )
     {
-        $obj = $treeNode->attribute( 'object' );
-        if ( !$obj instanceof eZContentObject || !$obj->canRead() )
-            continue;
-        $line = implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $allowHash ) );
-        if ( $fh )
-            fwrite( $fh, $line . $newLine );
-        else
-            $buffer .= $line . "\n";
-        $written++;
+        $skip -= $languageCounts[$locale];
+        continue;
     }
-    eZContentObject::clearCache();
-    if ( count( $batch ) < $take )
-        break;
+    XrowExtractColumns::$language = $locale;
+    for ( $batchOffset = $skip; $written < $wantRows; $batchOffset += 100 )
+    {
+        $take = min( 100, $wantRows - $written );
+        $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator,
+                                                                $classID, false, false, 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+        $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
+        foreach ( $batch as $treeNode )
+        {
+            $obj = $treeNode->attribute( 'object' );
+            if ( !$obj instanceof eZContentObject || !$obj->canRead() )
+                continue;
+            $line = implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $allowHash ) );
+            if ( $fh )
+                fwrite( $fh, $line . $newLine );
+            else
+                $buffer .= $line . "\n";
+            $written++;
+        }
+        eZContentObject::clearCache();
+        if ( count( $batch ) < $take )
+            break;
+    }
+    $skip = 0;
 }
+XrowExtractColumns::$language = null;
 
 if ( $previewRows )
 {
@@ -273,6 +307,6 @@ if ( $file !== '-' )
     fclose( $fh );
     $cli->output( sprintf( 'Wrote %s: %d rows, %d columns, %.1f KB, %.1f s (%s, class %s, read access of %s)', $file, $written, count( $columns ),
                            filesize( $file ) / 1024, microtime( true ) - $started,
-                           $scope === 'all' ? 'whole site' : "below node $nodeID", $class->attribute( 'identifier' ), $login ) );
+                           ( $scope === 'all' ? 'whole site' : "below node $nodeID" ) . ', ' . implode( '+', $languages ), $class->attribute( 'identifier' ), $login ) );
 }
 $script->shutdown( 0 );

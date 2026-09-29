@@ -4,6 +4,30 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%count of %all languages; each object is one row per chosen language it is translated into.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>site default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No language chosen: the file would be empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A language column is added in front, so the rows of each translation can be told apart.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>language code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>The direct children of the node</source>
         <translation type="unfinished"></translation>
     </message>

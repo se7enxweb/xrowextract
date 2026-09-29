@@ -468,3 +468,8 @@
 .xe-side ul.xe-typelist code { color: #666; font-size: .85em; }
 .xe-side ul.xe-typelist small { display: block; color: #777; }
 .xe-side ul.xe-typelist li.xe-typelist-missing { opacity: .6; }
+
+/* Languages in the data selection card */
+.xe-languages { margin-top: 1em; }
+.xe-language-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(17em, 1fr)); gap: .4em; margin: .3em 0 0; padding: 0; list-style: none; }
+.xe-language-list li { margin: 0; }
