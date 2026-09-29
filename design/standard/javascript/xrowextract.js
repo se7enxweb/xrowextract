@@ -225,3 +225,121 @@
         document.body.removeChild(area);
     }
 }());
+
+/*
+ * The settings cards: separator presets, a live sample of a row in the
+ * chosen format, and a class change that loads that class's columns.
+ */
+(function () {
+    'use strict';
+
+    var form = document.forms.eZExtract;
+    if (!form) {
+        return;
+    }
+    var input = form.elements.Separator;
+    var presets = form.querySelector('.xe-presets');
+    var sample = form.querySelector('.xe-sample-line');
+    var tabNotation = presets ? presets.getAttribute('data-tab') : '\\t';
+
+    // The separator the server will use: one character, \t is a tab, never a quote or line break
+    function separator() {
+        var value = input ? input.value : ',';
+        if (value === tabNotation) {
+            return '\t';
+        }
+        return (value.length === 1 && '"\r\n'.indexOf(value) === -1) ? value : ',';
+    }
+
+    function checkedValue(name, fallback) {
+        var field = form.querySelector('input[name="' + name + '"]:checked');
+        return field ? field.value : fallback;
+    }
+
+    function markPreset() {
+        if (!presets) {
+            return;
+        }
+        var current = separator();
+        presets.querySelectorAll('.xe-preset').forEach(function (button) {
+            var sep = button.getAttribute('data-sep') === 'tab' ? '\t' : button.getAttribute('data-sep');
+            button.classList.toggle('xe-active', sep === current);
+            button.setAttribute('aria-pressed', sep === current ? 'true' : 'false');
+        });
+    }
+
+    function renderSample() {
+        if (!sample) {
+            return;
+        }
+        var sep = separator();
+        var quoted = checkedValue('Escape', '1') === '1';
+        var eol = { win32: '␍␊', unix: '␊', mac: '␍' }[checkedValue('LineSeparator', 'unix')] || '␊';
+        var columns = (sample.getAttribute('data-columns') || '').split('\n').filter(Boolean);
+        if (!columns.length) {
+            columns = ['title', 'name'];
+        }
+        var header = columns.map(function (c) { return c.replace(/_/g, '-'); });
+        var values = [sample.getAttribute('data-value'), '42', ''].slice(0, columns.length);
+        while (values.length < columns.length) {
+            values.push('');
+        }
+        var cell = function (value) {
+            return quoted ? '"' + value.replace(/"/g, '""') + '"' : value.replace(/[\r\n]+/g, '');
+        };
+        sample.textContent = '';
+        [header, values].forEach(function (row) {
+            row.forEach(function (value, index) {
+                if (index) {
+                    var mark = document.createElement('span');
+                    mark.className = 'xe-sep';
+                    mark.textContent = sep === '\t' ? '⇥' : sep;
+                    sample.appendChild(mark);
+                }
+                sample.appendChild(document.createTextNode(cell(value)));
+            });
+            var end = document.createElement('span');
+            end.className = 'xe-eol';
+            end.textContent = eol + '\n';
+            sample.appendChild(end);
+        });
+    }
+
+    if (presets) {
+        presets.addEventListener('click', function (event) {
+            var button = event.target.closest('.xe-preset');
+            if (!button) {
+                return;
+            }
+            input.value = button.getAttribute('data-sep') === 'tab' ? tabNotation : button.getAttribute('data-sep');
+            markPreset();
+            renderSample();
+        });
+    }
+    form.addEventListener('input', function (event) {
+        if (event.target === input) {
+            markPreset();
+            renderSample();
+        }
+    });
+    form.addEventListener('change', function (event) {
+        var target = event.target;
+        if (target.name === 'Escape' || target.name === 'LineSeparator') {
+            renderSample();
+        }
+        if (target.classList.contains('xe-autosubmit')) {
+            // A new class has other columns: load them right away (the button stays for use without JavaScript)
+            var update = form.querySelector('input[name=Update]');
+            if (update) {
+                update.classList.add('xe-pending');
+                if (form.requestSubmit) {
+                    form.requestSubmit(update);
+                } else {
+                    update.click();
+                }
+            }
+        }
+    });
+    markPreset();
+    renderSample();
+}());

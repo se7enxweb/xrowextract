@@ -350,7 +350,8 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
 $Subtree = (int)$Subtree;
 
 // If we don't remove, add or download then or we load all attributes or we start empty
-if ( $http->hasPostVariable( 'Remove' ) || $http->hasPostVariable( 'AddAttribute' ) || $http->hasPostVariable( 'Download' ) )
+if ( $http->hasPostVariable( 'Remove' ) || $http->hasPostVariable( 'AddAttribute' ) || $http->hasPostVariable( 'AddAllAttributes' )
+     || $http->hasPostVariable( 'Download' ) || $http->hasPostVariable( 'Preview' ) )
 {
     $Attributes = $http->hasPostVariable( 'Attributes' ) ? $http->postVariable( 'Attributes' ) : array();
 }
@@ -401,6 +402,28 @@ if ( $http->hasPostVariable( 'AddAttribute' ) )
     elseif ( isset( $ExtraAttributes[$addID] ) )
     {
         $Attributes[] = $ExtraAttributes[$addID];
+    }
+}
+
+// Add every class attribute that is not a column yet, in class order
+if ( $http->hasPostVariable( 'AddAllAttributes' ) )
+{
+    $present = array();
+    foreach ( (array)$Attributes as $item )
+    {
+        if ( is_array( $item ) && isset( $item['id'] ) )
+            $present[$item['id']] = true;
+    }
+    foreach ( eZContentClassAttribute::fetchListByClassID( $Class_id, eZContentClass::VERSION_STATUS_DEFINED, true ) as $classattribute )
+    {
+        if ( !isset( $present[$classattribute->attribute( 'identifier' )] ) )
+        {
+            $Attributes[] = array(
+                'id' => $classattribute->attribute( 'identifier' ) ,
+                'name' => $classattribute->attribute( 'name' ) ,
+                'exportname' => $classattribute->attribute( 'identifier' )
+            );
+        }
     }
 }
 
@@ -457,6 +480,15 @@ $list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', a
 ), false, $depth, $depthOperator, true, false, (bool)$Mainnodeonly, false, false );
 
 $tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
+
+// How many rows the file will hold with this limit and offset
+$exportRows = $hasPreFilledData ? count( $preFilledIDs ) : max( 0, ( isset( $list['result'] ) ? (int)$list['result'] : 0 ) - $Offset );
+if ( $Limit && !$hasPreFilledData )
+    $exportRows = min( $exportRows, $Limit );
+$tpl->setVariable( 'export_rows', $exportRows );
+$tpl->setVariable( 'prefilled_count', count( $preFilledIDs ) );
+$tpl->setVariable( 'TabNotation', '\t' );
+$tpl->setVariable( 'ExportableDatatypes', (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) );
 
 // Download and preview build the file the same way; the preview reads it back as a spreadsheet would
 $isPreview = !$http->hasPostVariable( 'Download' ) && $http->hasPostVariable( 'Preview' );
