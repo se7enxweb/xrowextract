@@ -544,3 +544,14 @@
 .xe-badge-skip      { background: #f3f5f8; color: var(--xe-muted); }
 .xe-badge-error     { background: var(--xe-bad-bg); color: var(--xe-bad); }
 li.xe-badge { margin: 0; }
+
+/* Import: "Try a sample" and the file format reference */
+.xe-sample-try { padding: .6em .8em; border-radius: 6px; background: #f3f5f8; }
+.xe-sample-buttons { flex-wrap: wrap; }
+.xe-example {
+    margin: .6em 0; padding: .8em 1em; border-radius: 6px; background: var(--xe-head);
+    font-size: .82em; line-height: 1.5; overflow-x: auto; white-space: pre; max-height: 22em; overflow-y: auto;
+}
+#xe-card-reference details { margin: .8em 0; padding: .6em 0; border-top: 1px solid var(--xe-line); }
+#xe-card-reference summary { cursor: pointer; font-weight: bold; }
+#xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }

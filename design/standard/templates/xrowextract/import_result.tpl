@@ -12,6 +12,9 @@
         </ul>
     </header>
 
+    {if $IsSample}
+    <p class="xe-note">{if $Applied}{'This was a sample built from the site’s own content: real content was just written (see below).'|i18n('design/standard/extract')}{else}{'This is a sample built from the site’s own content, to try the importer. Applying it writes real content.'|i18n('design/standard/extract')}{/if}</p>
+    {/if}
     {if $Result.ezoe|eq( false )}
     <p class="xe-note">{'The ezoe extension is not active on this installation; rich text columns were imported as plain paragraphs, without inline formatting or links.'|i18n('design/standard/extract')}</p>
     {/if}
@@ -34,7 +37,7 @@
                                                                         $row.action|eq( 'error' ), 'error'|i18n('design/standard/extract'),
                                                                         'skip'|i18n('design/standard/extract') )}</span>
                     {if $row.action|eq( 'error' )}<p class="xe-help">{$row.reason|wash}</p>{/if}</td>
-                <td>{if $row.object_id}<code>{$row.object_id}</code>{else}—{/if}</td>
+                <td>{if $row.object_id}{if $row.node_id}<a href={concat( 'content/view/full/', $row.node_id )|ezurl} target="_blank" rel="noopener"><code>{$row.object_id}</code></a>{else}<code>{$row.object_id}</code>{/if}{else}—{/if}</td>
                 <td>
                     {if $row.changes|count}
                     <table class="xe-table" style="width: 100%">
@@ -62,7 +65,12 @@
     {else}
     <div class="xe-toolbar">
         <span class="xe-spacer"></span>
+        {if $IsSample}
+        <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes (writes real content)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}"
+               onclick="return confirm('{'This sample really writes to the site: %count objects will be created or updated. Continue?'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))|wash}');" />
+        {else}
         <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}" />
+        {/if}
     </div>
     {/if}
 </section>
