@@ -25,7 +25,7 @@
         <li>{'You see your own jobs; users with the policy xrowextract/all_jobs see the jobs of every user.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Finished jobs and their files are removed after the days set in csv.ini [Jobs] RetentionDays.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Files are kept privately on the server and are only sent to their owner.'|i18n( 'design/standard/extract' )}</li>
-        <li>{'Command line: ext:xrowextract:job --list, --run=<id>, --clean.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Command line: ext:xrowextract:job --list, --run=<id>, --clean.'|i18n( 'design/standard/extract' )|wash}</li>
     </ul>
 </details>
 </div>

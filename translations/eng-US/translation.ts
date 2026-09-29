@@ -4,6 +4,490 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Other classes</source>
+        <translation>Other classes</translation>
+    </message>
+    <message>
+        <source>Class for the sample</source>
+        <translation>Class for the sample</translation>
+    </message>
+    <message>
+        <source>no objects yet</source>
+        <translation>no objects yet</translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</source>
+        <translation>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</translation>
+    </message>
+    <message>
+        <source>%count rows</source>
+        <translation>%count rows</translation>
+    </message>
+    <message>
+        <source>No row could be given a class: choose one above, or map a &quot;class&quot; column.</source>
+        <translation>No row could be given a class: choose one above, or map a &quot;class&quot; column.</translation>
+    </message>
+    <message>
+        <source>New objects go below</source>
+        <translation>New objects go below</translation>
+    </message>
+    <message>
+        <source>unless a row has its own parent column</source>
+        <translation>unless a row has its own parent column</translation>
+    </message>
+    <message>
+        <source>Existing objects matched by</source>
+        <translation>Existing objects matched by</translation>
+    </message>
+    <message>
+        <source>nothing (always create)</source>
+        <translation>nothing (always create)</translation>
+    </message>
+    <message>
+        <source>Object %id</source>
+        <translation>Object %id</translation>
+    </message>
+    <message>
+        <source>new</source>
+        <translation>new</translation>
+    </message>
+    <message>
+        <source>object(s)</source>
+        <translation>object(s)</translation>
+    </message>
+    <message>
+        <source>Package</source>
+        <translation>Package</translation>
+    </message>
+    <message>
+        <source>A content package (.ezpkg): inspect, install, or build a sample one</source>
+        <translation>A content package (.ezpkg): inspect, install, or build a sample one</translation>
+    </message>
+    <message>
+        <source>Pick a package</source>
+        <translation>Pick a package</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</source>
+        <translation>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg file</source>
+        <translation>Upload an .ezpkg file</translation>
+    </message>
+    <message>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</source>
+        <translation>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</translation>
+    </message>
+    <message>
+        <source>Or choose one already in the repository</source>
+        <translation>Or choose one already in the repository</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>Open</translation>
+    </message>
+    <message>
+        <source>Current package: %name</source>
+        <translation>Current package: %name</translation>
+    </message>
+    <message>
+        <source>full package view</source>
+        <translation>full package view</translation>
+    </message>
+    <message>
+        <source>download .ezpkg</source>
+        <translation>download .ezpkg</translation>
+    </message>
+    <message>
+        <source>full install wizard</source>
+        <translation>full install wizard</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>Forget</translation>
+    </message>
+    <message>
+        <source>Inspection — nothing written</source>
+        <translation>Inspection — nothing written</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <source>Summary</source>
+        <translation>Summary</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Description</translation>
+    </message>
+    <message>
+        <source>Licence</source>
+        <translation>Licence</translation>
+    </message>
+    <message>
+        <source>Installed already</source>
+        <translation>Installed already</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>yes</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <source>Dependencies</source>
+        <translation>Dependencies</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Changelog</source>
+        <translation>Changelog</translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation>State</translation>
+    </message>
+    <message>
+        <source>Remote id</source>
+        <translation>Remote id</translation>
+    </message>
+    <message>
+        <source>Existing object</source>
+        <translation>Existing object</translation>
+    </message>
+    <message>
+        <source>Installed</source>
+        <translation>Installed</translation>
+    </message>
+    <message>
+        <source>Install did not finish cleanly</source>
+        <translation>Install did not finish cleanly</translation>
+    </message>
+    <message>
+        <source>Content objects</source>
+        <translation>Content objects</translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation>Install</translation>
+    </message>
+    <message>
+        <source>Install this package</source>
+        <translation>Install this package</translation>
+    </message>
+    <message>
+        <source>Install-time matching and options</source>
+        <translation>Install-time matching and options</translation>
+    </message>
+    <message>
+        <source>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</source>
+        <translation>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</translation>
+    </message>
+    <message>
+        <source>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</source>
+        <translation>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</translation>
+    </message>
+    <message>
+        <source>Site access</source>
+        <translation>Site access</translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</source>
+        <translation>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</translation>
+    </message>
+    <message>
+        <source>Existing objects (matched by remote id)</source>
+        <translation>Existing objects (matched by remote id)</translation>
+    </message>
+    <message>
+        <source>Update in place</source>
+        <translation>Update in place</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new remote id)</source>
+        <translation>Keep both (new copy, new remote id)</translation>
+    </message>
+    <message>
+        <source>Existing classes (matched by remote id, then identifier)</source>
+        <translation>Existing classes (matched by remote id, then identifier)</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Replace</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new identifier)</source>
+        <translation>Keep both (new copy, new identifier)</translation>
+    </message>
+    <message>
+        <source>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</source>
+        <translation>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</translation>
+    </message>
+    <message>
+        <source>Package template</source>
+        <translation>Package template</translation>
+    </message>
+    <message>
+        <source>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</source>
+        <translation>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</translation>
+    </message>
+    <message>
+        <source>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</source>
+        <translation>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</translation>
+    </message>
+    <message>
+        <source>Variant</source>
+        <translation>Variant</translation>
+    </message>
+    <message>
+        <source>Class only</source>
+        <translation>Class only</translation>
+    </message>
+    <message>
+        <source>Content only</source>
+        <translation>Content only</translation>
+    </message>
+    <message>
+        <source>Class + content</source>
+        <translation>Class + content</translation>
+    </message>
+    <message>
+        <source>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</source>
+        <translation>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</translation>
+    </message>
+    <message>
+        <source>Build the sample package</source>
+        <translation>Build the sample package</translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</source>
+        <translation>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</translation>
+    </message>
+    <message>
+        <source>Package template reference</source>
+        <translation>Package template reference</translation>
+    </message>
+    <message>
+        <source>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</source>
+        <translation>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</translation>
+    </message>
+    <message>
+        <source>Archive layout</source>
+        <translation>Archive layout</translation>
+    </message>
+    <message>
+        <source>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</source>
+        <translation>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</translation>
+    </message>
+    <message>
+        <source>package.xml: the elements that matter here</source>
+        <translation>package.xml: the elements that matter here</translation>
+    </message>
+    <message>
+        <source>Element</source>
+        <translation>Element</translation>
+    </message>
+    <message>
+        <source>Meaning</source>
+        <translation>Meaning</translation>
+    </message>
+    <message>
+        <source>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</source>
+        <translation>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</translation>
+    </message>
+    <message>
+        <source>Shown on the inspect screen and package/view.</source>
+        <translation>Shown on the inspect screen and package/view.</translation>
+    </message>
+    <message>
+        <source>Version and release number; not compared against an installed copy automatically.</source>
+        <translation>Version and release number; not compared against an installed copy automatically.</translation>
+    </message>
+    <message>
+        <source>Free text, shown on the inspect screen and package/view.</source>
+        <translation>Free text, shown on the inspect screen and package/view.</translation>
+    </message>
+    <message>
+        <source>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</source>
+        <translation>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</translation>
+    </message>
+    <message>
+        <source>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</source>
+        <translation>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</source>
+        <translation>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</translation>
+    </message>
+    <message>
+        <source>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</source>
+        <translation>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</translation>
+    </message>
+    <message>
+        <source>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</source>
+        <translation>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</translation>
+    </message>
+    <message>
+        <source>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</source>
+        <translation>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</translation>
+    </message>
+    <message>
+        <source>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</source>
+        <translation>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</translation>
+    </message>
+    <message>
+        <source>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</source>
+        <translation>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</translation>
+    </message>
+    <message>
+        <source>Annotated example, from a generated sample package</source>
+        <translation>Annotated example, from a generated sample package</translation>
+    </message>
+    <message>
+        <source>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</source>
+        <translation>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</translation>
+    </message>
+    <message>
+        <source>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</source>
+        <translation>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</translation>
+    </message>
+    <message>
+        <source>What each datatype gets</source>
+        <translation>What each datatype gets</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>a short readable sample sentence or address, numbered per object.</source>
+        <translation>a short readable sample sentence or address, numbered per object.</translation>
+    </message>
+    <message>
+        <source>Numbers</source>
+        <translation>Numbers</translation>
+    </message>
+    <message>
+        <source>a different valid number/flag per object.</source>
+        <translation>a different valid number/flag per object.</translation>
+    </message>
+    <message>
+        <source>today plus a few days/hours per object.</source>
+        <translation>today plus a few days/hours per object.</translation>
+    </message>
+    <message>
+        <source>Choice</source>
+        <translation>Choice</translation>
+    </message>
+    <message>
+        <source>a real option of the class, chosen by id.</source>
+        <translation>a real option of the class, chosen by id.</translation>
+    </message>
+    <message>
+        <source>Keywords/tags</source>
+        <translation>Keywords/tags</translation>
+    </message>
+    <message>
+        <source>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</source>
+        <translation>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</translation>
+    </message>
+    <message>
+        <source>Rich text</source>
+        <translation>Rich text</translation>
+    </message>
+    <message>
+        <source>a short real paragraph.</source>
+        <translation>a short real paragraph.</translation>
+    </message>
+    <message>
+        <source>a real bundled sample image/document, stored in the package.</source>
+        <translation>a real bundled sample image/document, stored in the package.</translation>
+    </message>
+    <message>
+        <source>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</source>
+        <translation>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</translation>
+    </message>
+    <message>
+        <source>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</source>
+        <translation>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</translation>
+    </message>
+    <message>
+        <source>class missing</source>
+        <translation>class missing</translation>
+    </message>
+    <message>
+        <source>classes: create</source>
+        <translation>classes: create</translation>
+    </message>
+    <message>
+        <source>classes: update</source>
+        <translation>classes: update</translation>
+    </message>
+    <message>
+        <source>objects: class missing</source>
+        <translation>objects: class missing</translation>
+    </message>
+    <message>
+        <source>objects: create</source>
+        <translation>objects: create</translation>
+    </message>
+    <message>
+        <source>objects: unchanged</source>
+        <translation>objects: unchanged</translation>
+    </message>
+    <message>
+        <source>objects: update</source>
+        <translation>objects: update</translation>
+    </message>
+    <message>
+        <source>installed</source>
+        <translation>installed</translation>
+    </message>
+    <message>
+        <source>open</source>
+        <translation>open</translation>
+    </message>
+    <message>
+        <source>A package named %packagename already exists in the repository.</source>
+        <translation>A package named %packagename already exists in the repository.</translation>
+    </message>
+    <message>
+        <source>The package name %packagename is invalid.</source>
+        <translation>The package name %packagename is invalid.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is not a valid Exponential package (.ezpkg).</source>
+        <translation>The uploaded file is not a valid Exponential package (.ezpkg).</translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be read.</source>
+        <translation>The uploaded file could not be read.</translation>
+    </message>
+    <message>
+        <source>Content + class package (.ezpkg)</source>
+        <translation>Content + class package (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</source>
+        <translation>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation>Total jobs</translation>
     </message>
@@ -2316,6 +2800,298 @@
         <translation>Choose a file first.</translation>
     </message>
     <message>
+        <source>Depth below the node</source>
+        <translation>Depth below the node</translation>
+    </message>
+    <message>
+        <source>Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).</source>
+        <translation>Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).</translation>
+    </message>
+    <message>
+        <source>Named fetch</source>
+        <translation>Named fetch</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini named fetch</source>
+        <translation>A fetchalias.ini named fetch</translation>
+    </message>
+    <message>
+        <source>Choose one to apply...</source>
+        <translation>Choose one to apply...</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>Apply</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</translation>
+    </message>
+    <message>
+        <source>Applied: %list.</source>
+        <translation>Applied: %list.</translation>
+    </message>
+    <message>
+        <source>Not understood: %list.</source>
+        <translation>Not understood: %list.</translation>
+    </message>
+    <message>
+        <source>Remembered choice: %name.</source>
+        <translation>Remembered choice: %name.</translation>
+    </message>
+    <message>
+        <source>Additional conditions</source>
+        <translation>Additional conditions</translation>
+    </message>
+    <message>
+        <source>Join</source>
+        <translation>Join</translation>
+    </message>
+    <message>
+        <source>All conditions (and)</source>
+        <translation>All conditions (and)</translation>
+    </message>
+    <message>
+        <source>Any condition (or)</source>
+        <translation>Any condition (or)</translation>
+    </message>
+    <message>
+        <source>Add condition</source>
+        <translation>Add condition</translation>
+    </message>
+    <message>
+        <source>No additional conditions. "Add condition" adds a row.</source>
+        <translation>No additional conditions. "Add condition" adds a row.</translation>
+    </message>
+    <message>
+        <source>Field</source>
+        <translation>Field</translation>
+    </message>
+    <message>
+        <source>Choose a field...</source>
+        <translation>Choose a field...</translation>
+    </message>
+    <message>
+        <source>Object fields</source>
+        <translation>Object fields</translation>
+    </message>
+    <message>
+        <source>Value (or a comma list for in / not in)</source>
+        <translation>Value (or a comma list for in / not in)</translation>
+    </message>
+    <message>
+        <source>value, or a,b,c for in/not in</source>
+        <translation>value, or a,b,c for in/not in</translation>
+    </message>
+    <message>
+        <source>Second value, for between / not between</source>
+        <translation>Second value, for between / not between</translation>
+    </message>
+    <message>
+        <source>second value (between)</source>
+        <translation>second value (between)</translation>
+    </message>
+    <message>
+        <source>Remove this condition</source>
+        <translation>Remove this condition</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list.</source>
+        <translation>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list.</translation>
+    </message>
+    <message>
+        <source>"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.</source>
+        <translation>"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.</translation>
+    </message>
+    <message>
+        <source>Extended attribute filter</source>
+        <translation>Extended attribute filter</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>None</translation>
+    </message>
+    <message>
+        <source>Its parameters, as JSON</source>
+        <translation>Its parameters, as JSON</translation>
+    </message>
+    <message>
+        <source>A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.</source>
+        <translation>A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.</translation>
+    </message>
+    <message>
+        <source>Then sort by</source>
+        <translation>Then sort by</translation>
+    </message>
+    <message>
+        <source>Breaks ties in the sort above. Only applies once the sort above is not tree order.</source>
+        <translation>Breaks ties in the sort above. Only applies once the sort above is not tree order.</translation>
+    </message>
+    <message>
+        <source>greater than or equal to</source>
+        <translation>greater than or equal to</translation>
+    </message>
+    <message>
+        <source>less than or equal to</source>
+        <translation>less than or equal to</translation>
+    </message>
+    <message>
+        <source>in list</source>
+        <translation>in list</translation>
+    </message>
+    <message>
+        <source>not in list</source>
+        <translation>not in list</translation>
+    </message>
+    <message>
+        <source>between (both ends included)</source>
+        <translation>between (both ends included)</translation>
+    </message>
+    <message>
+        <source>not between</source>
+        <translation>not between</translation>
+    </message>
+    <message>
+        <source>matches pattern (* wildcard)</source>
+        <translation>matches pattern (* wildcard)</translation>
+    </message>
+    <message>
+        <source>does not match pattern (* wildcard)</source>
+        <translation>does not match pattern (* wildcard)</translation>
+    </message>
+    <message>
+        <source>Section (id)</source>
+        <translation>Section (id)</translation>
+    </message>
+    <message>
+        <source>Owner (user id)</source>
+        <translation>Owner (user id)</translation>
+    </message>
+    <message>
+        <source>Tree depth</source>
+        <translation>Tree depth</translation>
+    </message>
+    <message>
+        <source>Class identifier</source>
+        <translation>Class identifier</translation>
+    </message>
+    <message>
+        <source>Node id</source>
+        <translation>Node id</translation>
+    </message>
+    <message>
+        <source>Object state (id)</source>
+        <translation>Object state (id)</translation>
+    </message>
+    <message>
+        <source>Any depth</source>
+        <translation>Any depth</translation>
+    </message>
+    <message>
+        <source>Exactly</source>
+        <translation>Exactly</translation>
+    </message>
+    <message>
+        <source>At most</source>
+        <translation>At most</translation>
+    </message>
+    <message>
+        <source>At least</source>
+        <translation>At least</translation>
+    </message>
+    <message>
+        <source>Parameters, key=value,key=value</source>
+        <translation>Parameters, key=value,key=value</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</translation>
+    </message>
+    <message>
+        <source>This one also takes: %list.</source>
+        <translation>This one also takes: %list.</translation>
+    </message>
+    <message>
+        <source>Invert this condition</source>
+        <translation>Invert this condition</translation>
+    </message>
+    <message>
+        <source>not</source>
+        <translation>not</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).</source>
+        <translation>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).</translation>
+    </message>
+    <message>
+        <source>Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.</source>
+        <translation>Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.</translation>
+    </message>
+    <message>
+        <source>Fetch parameters</source>
+        <translation>Fetch parameters</translation>
+    </message>
+    <message>
+        <source>What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.</source>
+        <translation>What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.</translation>
+    </message>
+    <message>
+        <source>An object property</source>
+        <translation>An object property</translation>
+    </message>
+    <message>
+        <source>owner is admin (a login also works), section is 2, name contains report, published is since 7d.</source>
+        <translation>owner is admin (a login also works), section is 2, name contains report, published is since 7d.</translation>
+    </message>
+    <message>
+        <source>A node / tree property</source>
+        <translation>A node / tree property</translation>
+    </message>
+    <message>
+        <source>depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.</source>
+        <translation>depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.</translation>
+    </message>
+    <message>
+        <source>A class attribute</source>
+        <translation>A class attribute</translation>
+    </message>
+    <message>
+        <source>Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).</source>
+        <translation>Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).</translation>
+    </message>
+    <message>
+        <source>Inverts a row: owner is not admin, state not in 4,7.</source>
+        <translation>Inverts a row: owner is not admin, state not in 4,7.</translation>
+    </message>
+    <message>
+        <source>A named fetch</source>
+        <translation>A named fetch</translation>
+    </message>
+    <message>
+        <source>Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.</source>
+        <translation>Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.</translation>
+    </message>
+    <message>
+        <source>Open it at the bottom of the Filters card to copy the same fetch() call into a template.</source>
+        <translation>Open it at the bottom of the Filters card to copy the same fetch() call into a template.</translation>
+    </message>
+    <message>
+        <source>Modified, including sub items</source>
+        <translation>Modified, including sub items</translation>
+    </message>
+    <message>
+        <source>Owner (user id or login)</source>
+        <translation>Owner (user id or login)</translation>
+    </message>
+    <message>
+        <source>Tree depth (absolute)</source>
+        <translation>Tree depth (absolute)</translation>
+    </message>
+    <message>
+        <source>Class name</source>
+        <translation>Class name</translation>
+    </message>
+    <message>
         <source>An XML, CSV or JSON file written by the export views, any column set.</source>
         <translation>An XML, CSV or JSON file written by the export views, any column set.</translation>
     </message>
@@ -2620,10 +3396,6 @@
         <translation>Cancel</translation>
     </message>
     <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</translation>
-    </message>
-    <message>
         <source>Download report</source>
         <translation>Download report</translation>
     </message>
@@ -2638,10 +3410,6 @@
     <message>
         <source>Resume as a new job</source>
         <translation>Resume as a new job</translation>
-    </message>
-    <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</translation>
     </message>
     <message>
         <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
@@ -2668,12 +3436,124 @@
         <translation>Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.</translation>
     </message>
     <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</translation>
-    </message>
-    <message>
         <source>many rows (counted once queued)</source>
         <translation>many rows (counted once queued)</translation>
+    </message>
+    <message>
+        <source>Presets</source>
+        <translation>Presets</translation>
+    </message>
+    <message>
+        <source>Save everything below as a named preset, load one back, or run it directly.</source>
+        <translation>Save everything below as a named preset, load one back, or run it directly.</translation>
+    </message>
+    <message>
+        <source>loaded</source>
+        <translation>loaded</translation>
+    </message>
+    <message>
+        <source>Placeholders with no value: %list.</source>
+        <translation>Placeholders with no value: %list.</translation>
+    </message>
+    <message>
+        <source>Load a preset</source>
+        <translation>Load a preset</translation>
+    </message>
+    <message>
+        <source>Choose one...</source>
+        <translation>Choose one...</translation>
+    </message>
+    <message>
+        <source>Your presets and shared with you</source>
+        <translation>Your presets and shared with you</translation>
+    </message>
+    <message>
+        <source>shared</source>
+        <translation>shared</translation>
+    </message>
+    <message>
+        <source>Site presets</source>
+        <translation>Site presets</translation>
+    </message>
+    <message>
+        <source>Placeholder values, key=value,key=value</source>
+        <translation>Placeholder values, key=value,key=value</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Load</translation>
+    </message>
+    <message>
+        <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
+        <translation>Resolve this preset and start it as a job right away, without loading it into the form first</translation>
+    </message>
+    <message>
+        <source>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</source>
+        <translation>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</translation>
+    </message>
+    <message>
+        <source>extends %ref</source>
+        <translation>extends %ref</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicate</translation>
+    </message>
+    <message>
+        <source>Delete this preset?</source>
+        <translation>Delete this preset?</translation>
+    </message>
+    <message>
+        <source>Duplicate as your own</source>
+        <translation>Duplicate as your own</translation>
+    </message>
+    <message>
+        <source>INI</source>
+        <translation>INI</translation>
+    </message>
+    <message>
+        <source>Defined in xrowextract.ini; edit it there</source>
+        <translation>Defined in xrowextract.ini; edit it there</translation>
+    </message>
+    <message>
+        <source>site</source>
+        <translation>site</translation>
+    </message>
+    <message>
+        <source>Save the current settings as a preset</source>
+        <translation>Save the current settings as a preset</translation>
+    </message>
+    <message>
+        <source>Preset name</source>
+        <translation>Preset name</translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation>Description (optional)</translation>
+    </message>
+    <message>
+        <source>Shared with everyone</source>
+        <translation>Shared with everyone</translation>
+    </message>
+    <message>
+        <source>Save as preset</source>
+        <translation>Save as preset</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
+        <translation>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</translation>
+    </message>
+    <message>
+        <source>Started from a saved preset</source>
+        <translation>Started from a saved preset</translation>
+    </message>
+    <message>
+        <source>Name the preset first.</source>
+        <translation>Name the preset first.</translation>
+    </message>
+    <message>
+        <source>Preset "%name" saved.</source>
+        <translation>Preset "%name" saved.</translation>
     </message>
 </context>
 <context>

@@ -41,6 +41,16 @@ $ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
                                    'post_actions' => array( 'Action' ),
                                    'params' => array() );
 
+// Content packages (.ezpkg): upload or pick one from the repository, inspect it
+// (a dry run: nothing written), install it, or build a sample "content + class"
+// template package for a chosen class. Same policy function as import: this is
+// the same feature area, structured content going in, one way or another.
+$ViewList['package'] = array( 'script' => 'package.php',
+                              'functions' => array( 'import' ),
+                              'default_navigation_part' => 'ezextractnavigationpart',
+                              'post_actions' => array( 'UploadPackage', 'ForgetPackage', 'BrowseParent', 'Install', 'BuildTemplate' ),
+                              'params' => array( 'PackageName' ) );
+
 $FunctionList = array();
 $FunctionList['csv'] = array();
 // Export the password hash and hash type of user accounts (special columns, site archive option)

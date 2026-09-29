@@ -47,7 +47,7 @@
                         <span class="xe-job-type" title="{if $job.type|eq( 'archive' )}{'Site archive'|i18n('design/standard/extract')|wash}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')|wash}{else}{'One class'|i18n('design/standard/extract')|wash}{/if}">{if $job.type|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
                         <span class="xe-colinfo">
                             <strong>{$job.what|wash}</strong>
-                            <small><code>{$job.format|wash}</code></small>
+                            <small><code>{$job.format|wash}</code>{if $job.preset|ne( '' )} · <span class="xe-badge" title="{'Started from a saved preset'|i18n('design/standard/extract')|wash}">{$job.preset_name|wash}</span>{/if}</small>
                         </span>
                         {def $owner = $job.owner_user}
                         {if $owner.node_id}

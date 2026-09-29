@@ -100,6 +100,8 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'size_kb' => $job['size'] !== null ? (int)ceil( $job['size'] / 1024 ) : null,
         'error' => $job['error'],
         'output_file' => $job['output_file'],
+        'preset' => isset( $job['preset'] ) ? (string)$job['preset'] : '',
+        'preset_name' => isset( $job['preset'] ) && $job['preset'] !== '' ? XrowExtractPreset::presetName( $job['preset'] ) : '',
         'progress' => $progress,
         'progress_percent' => $percent,
         'active' => $job['state'] === 'queued' || $job['state'] === 'running',

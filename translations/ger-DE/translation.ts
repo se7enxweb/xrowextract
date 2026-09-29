@@ -2,6 +2,490 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Other classes</source>
+        <translation>Weitere Klassen</translation>
+    </message>
+    <message>
+        <source>Class for the sample</source>
+        <translation>Klasse für das Beispiel</translation>
+    </message>
+    <message>
+        <source>no objects yet</source>
+        <translation>noch keine Objekte</translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</source>
+        <translation>Noch nichts zu importieren? Eine beliebige Klasse wählen, und ein Klick erzeugt eine kleine Datei aus den eigenen Inhalten der Website für diese Klasse - eine geänderte Zeile, eine unveränderte Zeile, ein neues Objekt und (wenn die Klasse ein Datumsattribut hat) eine Zeile mit absichtlichem Fehler - und lädt sie unten, bereit für die Vorschau. Eine Klasse ohne Objekte erhält nur das neue Objekt. Das Anwenden schreibt echte Inhalte.</translation>
+    </message>
+    <message>
+        <source>%count rows</source>
+        <translation>%count Zeilen</translation>
+    </message>
+    <message>
+        <source>No row could be given a class: choose one above, or map a &quot;class&quot; column.</source>
+        <translation>Keiner Zeile konnte eine Klasse zugeordnet werden: oben eine wählen oder eine Spalte &quot;class&quot; zuordnen.</translation>
+    </message>
+    <message>
+        <source>New objects go below</source>
+        <translation>Neue Objekte kommen unter</translation>
+    </message>
+    <message>
+        <source>unless a row has its own parent column</source>
+        <translation>sofern eine Zeile keine eigene Elternspalte hat</translation>
+    </message>
+    <message>
+        <source>Existing objects matched by</source>
+        <translation>Vorhandene Objekte erkannt über</translation>
+    </message>
+    <message>
+        <source>nothing (always create)</source>
+        <translation>nichts (immer neu anlegen)</translation>
+    </message>
+    <message>
+        <source>Object %id</source>
+        <translation>Objekt %id</translation>
+    </message>
+    <message>
+        <source>new</source>
+        <translation>neu</translation>
+    </message>
+    <message>
+        <source>object(s)</source>
+        <translation>Objekt(e)</translation>
+    </message>
+    <message>
+        <source>Package</source>
+        <translation>Paket</translation>
+    </message>
+    <message>
+        <source>A content package (.ezpkg): inspect, install, or build a sample one</source>
+        <translation>Ein Inhaltspaket (.ezpkg): prüfen, installieren oder ein Beispiel erzeugen</translation>
+    </message>
+    <message>
+        <source>Pick a package</source>
+        <translation>Paket wählen</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</source>
+        <translation>Eine .ezpkg-Datei hochladen oder ein bereits im Repository vorhandenes Paket wählen, das eine Inhaltsklasse oder ein Inhaltsobjekt enthält.</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg file</source>
+        <translation>Eine .ezpkg-Datei hochladen</translation>
+    </message>
+    <message>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</source>
+        <translation>Es wird unter seinem eigenen Namen zum lokalen Paket-Repository hinzugefügt und unten zur Prüfung geöffnet - installiert wird noch nichts.</translation>
+    </message>
+    <message>
+        <source>Or choose one already in the repository</source>
+        <translation>Oder ein bereits vorhandenes Paket wählen</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>Öffnen</translation>
+    </message>
+    <message>
+        <source>Current package: %name</source>
+        <translation>Aktuelles Paket: %name</translation>
+    </message>
+    <message>
+        <source>full package view</source>
+        <translation>vollständige Paketansicht</translation>
+    </message>
+    <message>
+        <source>download .ezpkg</source>
+        <translation>.ezpkg herunterladen</translation>
+    </message>
+    <message>
+        <source>full install wizard</source>
+        <translation>vollständiger Installationsassistent</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>Vergessen</translation>
+    </message>
+    <message>
+        <source>Inspection — nothing written</source>
+        <translation>Prüfung — nichts geschrieben</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <source>Summary</source>
+        <translation>Zusammenfassung</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Beschreibung</translation>
+    </message>
+    <message>
+        <source>Licence</source>
+        <translation>Lizenz</translation>
+    </message>
+    <message>
+        <source>Installed already</source>
+        <translation>Bereits installiert</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>ja</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>nein</translation>
+    </message>
+    <message>
+        <source>Dependencies</source>
+        <translation>Abhängigkeiten</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Typ</translation>
+    </message>
+    <message>
+        <source>Changelog</source>
+        <translation>Änderungsprotokoll</translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Remote id</source>
+        <translation>Remote-ID</translation>
+    </message>
+    <message>
+        <source>Existing object</source>
+        <translation>Vorhandenes Objekt</translation>
+    </message>
+    <message>
+        <source>Installed</source>
+        <translation>Installiert</translation>
+    </message>
+    <message>
+        <source>Install did not finish cleanly</source>
+        <translation>Installation wurde nicht sauber abgeschlossen</translation>
+    </message>
+    <message>
+        <source>Content objects</source>
+        <translation>Inhaltsobjekte</translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation>Installieren</translation>
+    </message>
+    <message>
+        <source>Install this package</source>
+        <translation>Dieses Paket installieren</translation>
+    </message>
+    <message>
+        <source>Install-time matching and options</source>
+        <translation>Zuordnung und Optionen bei der Installation</translation>
+    </message>
+    <message>
+        <source>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</source>
+        <translation>Läuft über eZPackage::install(), dieselbe Komfortmethode, auf der die Kernel-Ansicht package/install aufbaut.</translation>
+    </message>
+    <message>
+        <source>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</source>
+        <translation>Jedes Objekt oberster Ebene, das das Paket enthält, wird hier abgelegt (browse.ini [ImportParentNode], dieselbe Gruppe wie bei xrowextract/import).</translation>
+    </message>
+    <message>
+        <source>Site access</source>
+        <translation>Zugriffsbereich</translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</source>
+        <translation>Worauf ein vom Paket mitgeführtes Design/Template/Override abgebildet würde; von diesem Werkzeug erzeugte Inhaltspakete enthalten keines.</translation>
+    </message>
+    <message>
+        <source>Existing objects (matched by remote id)</source>
+        <translation>Vorhandene Objekte (Zuordnung über Remote-ID)</translation>
+    </message>
+    <message>
+        <source>Update in place</source>
+        <translation>An Ort und Stelle aktualisieren</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new remote id)</source>
+        <translation>Beide behalten (neue Kopie, neue Remote-ID)</translation>
+    </message>
+    <message>
+        <source>Existing classes (matched by remote id, then identifier)</source>
+        <translation>Vorhandene Klassen (Zuordnung über Remote-ID, dann Kennung)</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Ersetzen</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new identifier)</source>
+        <translation>Beide behalten (neue Kopie, neue Kennung)</translation>
+    </message>
+    <message>
+        <source>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</source>
+        <translation>Das Ersetzen einer Klasse entfernt zunächst sie und jedes ihrer Objekte; die Bestätigung dafür befindet sich im vollständigen Installationsassistenten, nicht hier.</translation>
+    </message>
+    <message>
+        <source>Package template</source>
+        <translation>Paketvorlage</translation>
+    </message>
+    <message>
+        <source>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</source>
+        <translation>Erzeugt über die Kernel-Paket-Handler ein echtes, installierbares Beispielpaket für eine gewählte Klasse.</translation>
+    </message>
+    <message>
+        <source>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</source>
+        <translation>Dieselbe Klassenliste wie beim CSV/JSON-Import; solange keine gewählt wurde, ist die Klasse mit dem meisten Inhalt vorausgewählt.</translation>
+    </message>
+    <message>
+        <source>Variant</source>
+        <translation>Variante</translation>
+    </message>
+    <message>
+        <source>Class only</source>
+        <translation>Nur Klasse</translation>
+    </message>
+    <message>
+        <source>Content only</source>
+        <translation>Nur Inhalt</translation>
+    </message>
+    <message>
+        <source>Class + content</source>
+        <translation>Klasse + Inhalt</translation>
+    </message>
+    <message>
+        <source>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</source>
+        <translation>Nur Inhalt: die installierende Website muss diese Klasse bereits besitzen. Klasse + Inhalt: alles Nötige steckt im einen Paket.</translation>
+    </message>
+    <message>
+        <source>Build the sample package</source>
+        <translation>Beispielpaket erzeugen</translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</source>
+        <translation>2-3 echte Inhaltsobjekte werden angelegt, in das Paket exportiert und danach wieder entfernt; von diesem Schritt bleibt nichts im Inhaltsbaum. Das Ergebnis öffnet sich unten zur Prüfung.</translation>
+    </message>
+    <message>
+        <source>Package template reference</source>
+        <translation>Referenz zur Paketvorlage</translation>
+    </message>
+    <message>
+        <source>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</source>
+        <translation>Wie ein Inhaltspaket auf der Festplatte aussieht, jedes Element, das package.xml enthält, und wie die Zuordnung bei der Installation funktioniert.</translation>
+    </message>
+    <message>
+        <source>Archive layout</source>
+        <translation>Aufbau des Archivs</translation>
+    </message>
+    <message>
+        <source>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</source>
+        <translation>Eine Vorlage &quot;Nur Klasse&quot; hat nur ezcontentclass/. Eine Vorlage &quot;Nur Inhalt&quot; hat nur ezcontentobject/ und simplefiles/. &quot;Klasse + Inhalt&quot; hat alles davon.</translation>
+    </message>
+    <message>
+        <source>package.xml: the elements that matter here</source>
+        <translation>package.xml: die hier wichtigen Elemente</translation>
+    </message>
+    <message>
+        <source>Element</source>
+        <translation>Element</translation>
+    </message>
+    <message>
+        <source>Meaning</source>
+        <translation>Bedeutung</translation>
+    </message>
+    <message>
+        <source>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</source>
+        <translation>Die ID, unter der dieses Paket im Repository bekannt ist (package/list, die Auswahl auf dieser Seite, ext:xrowextract:package). Eindeutig je Repository, dem Besucher nicht gezeigt.</translation>
+    </message>
+    <message>
+        <source>Shown on the inspect screen and package/view.</source>
+        <translation>Wird auf dem Prüfbildschirm und unter package/view angezeigt.</translation>
+    </message>
+    <message>
+        <source>Version and release number; not compared against an installed copy automatically.</source>
+        <translation>Versions- und Release-Nummer; wird nicht automatisch mit einer installierten Kopie verglichen.</translation>
+    </message>
+    <message>
+        <source>Free text, shown on the inspect screen and package/view.</source>
+        <translation>Freitext, wird auf dem Prüfbildschirm und unter package/view angezeigt.</translation>
+    </message>
+    <message>
+        <source>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation>Ein oder mehrere &amp;lt;change&amp;gt;-Einträge: Person, Zeitstempel und der/die Änderungstext(e). Rein informativ.</translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</source>
+        <translation>provides/requires/obsoletes/conflicts. Ein &quot;requires&quot; vom Typ ezpackage wird von eZPackage::install() automatisch zuerst installiert; andere Typen sind hier rein informativ.</translation>
+    </message>
+    <message>
+        <source>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</source>
+        <translation>Die geordnete Liste der Installationselemente: Typ (ezcontentclass, ezcontentobject, ...), die Datei, aus der der Inhalt gelesen wird, und ob es auch ein &amp;lt;uninstall&amp;gt;-Gegenstück gibt.</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</source>
+        <translation>Klassen werden über die Remote-ID zugeordnet, ersatzweise über die Kennung; eine gefundene Klasse wird je nach obiger Klassen-Option übersprungen, ersetzt oder zusammen mit einer neuen Kopie behalten.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation>Objekte werden nur über die Remote-ID zugeordnet; ein gefundenes Objekt wird übersprungen, an Ort und Stelle aktualisiert (sein vorhandener Inhalt bleibt dort erhalten, wo das Paket ihn nicht berührt) oder zusammen mit einer neuen Kopie mit frisch erzeugter Remote-ID behalten.</translation>
+    </message>
+    <message>
+        <source>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</source>
+        <translation>Sprachen: jede &amp;lt;object-translation&amp;gt;, die das Objekt enthält, wird installiert; eine auf der installierenden Website nicht aktivierte Sprache wird automatisch hinzugefügt, sofern gültig, sonst wird diese Übersetzung übersprungen.</translation>
+    </message>
+    <message>
+        <source>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</source>
+        <translation>Beziehungen (ezobjectrelation/ezobjectrelationlist): im Paket als Remote-ID des verknüpften Objekts gespeichert, damit sie auch bei unterschiedlichen Objekt-IDs zwischen Websites richtig aufgelöst werden. Eine Beziehung zu einem Objekt, das das Paket selbst nicht enthält und das auf der installierenden Website noch nicht existiert, bleibt stillschweigend leer.</translation>
+    </message>
+    <message>
+        <source>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</source>
+        <translation>Dateien (ezimage/ezbinaryfile/ezmedia): die eigentliche Datei wird in das zu diesem Paket gehörende Verzeichnis simplefiles/ kopiert und bei der Installation wieder herauskopiert; bei der Installation wird nichts von der exportierenden Website nachgeladen.</translation>
+    </message>
+    <message>
+        <source>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</source>
+        <translation>Platzierung: jedes Objekt oberster Ebene im Paket (eines ohne Elternobjekt innerhalb desselben Pakets) wird unter dem bei der Installation gewählten Elternknoten angelegt; ein Objekt, dessen Elternobjekt ein anderes Objekt im selben Paket ist, behält diese relative Platzierung.</translation>
+    </message>
+    <message>
+        <source>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</source>
+        <translation>Zugriffsbereich: nur relevant, wenn das Paket auch Template-Overrides enthält (ein von diesem Werkzeug erzeugtes Paket tut das nie); er bildet den Namen des Zugriffsbereichs der exportierenden Website auf einen der installierenden Website ab.</translation>
+    </message>
+    <message>
+        <source>Annotated example, from a generated sample package</source>
+        <translation>Kommentiertes Beispiel aus einem erzeugten Beispielpaket</translation>
+    </message>
+    <message>
+        <source>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</source>
+        <translation>Eine gekürzte, echte ezcontentobject/*.xml, wie sie die Variante Klasse + Inhalt schreibt (ein ezstring- und ein ezobjectrelationlist-Attribut gezeigt; jeder andere importierbare Datentyp folgt derselben Form).</translation>
+    </message>
+    <message>
+        <source>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</source>
+        <translation>Die vom Vorlagen-Generator vergebenen Remote-IDs folgen dem Muster xrowextract-pkgtpl-&amp;lt;Klassenkennung&amp;gt;-&amp;lt;Zeitstempel&amp;gt;-&amp;lt;Objektnummer&amp;gt;, sodass ein zweites Beispiel derselben Klasse nie mit dem ersten auf der Remote-ID kollidiert.</translation>
+    </message>
+    <message>
+        <source>What each datatype gets</source>
+        <translation>Was jeder Datentyp erhält</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>a short readable sample sentence or address, numbered per object.</source>
+        <translation>ein kurzer, lesbarer Beispielsatz oder eine Adresse, je Objekt durchnummeriert.</translation>
+    </message>
+    <message>
+        <source>Numbers</source>
+        <translation>Zahlen</translation>
+    </message>
+    <message>
+        <source>a different valid number/flag per object.</source>
+        <translation>eine je Objekt unterschiedliche, gültige Zahl/Markierung.</translation>
+    </message>
+    <message>
+        <source>today plus a few days/hours per object.</source>
+        <translation>heute plus ein paar Tage/Stunden je Objekt.</translation>
+    </message>
+    <message>
+        <source>Choice</source>
+        <translation>Auswahl</translation>
+    </message>
+    <message>
+        <source>a real option of the class, chosen by id.</source>
+        <translation>eine echte Option der Klasse, über die ID gewählt.</translation>
+    </message>
+    <message>
+        <source>Keywords/tags</source>
+        <translation>Schlagworte/Tags</translation>
+    </message>
+    <message>
+        <source>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</source>
+        <translation>ein paar Beispiel-Schlagworte/Tags (eztags legt sie an, falls sie noch nicht existieren).</translation>
+    </message>
+    <message>
+        <source>Rich text</source>
+        <translation>Rich Text</translation>
+    </message>
+    <message>
+        <source>a short real paragraph.</source>
+        <translation>ein kurzer, echter Absatz.</translation>
+    </message>
+    <message>
+        <source>a real bundled sample image/document, stored in the package.</source>
+        <translation>ein echtes, mitgeliefertes Beispielbild/-dokument, im Paket gespeichert.</translation>
+    </message>
+    <message>
+        <source>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</source>
+        <translation>das zweite und dritte Beispielobjekt beziehen sich über die Remote-ID auf das erste, sofern die Klasse Beziehungen zur eigenen Art erlaubt.</translation>
+    </message>
+    <message>
+        <source>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</source>
+        <translation>Jeder andere Datentyp der Klasse behält seinen Klassen-Standardwert; das erzeugte Paket installiert trotzdem, dieses Attribut hat nur keinen Beispielwert.</translation>
+    </message>
+    <message>
+        <source>class missing</source>
+        <translation>Klasse fehlt</translation>
+    </message>
+    <message>
+        <source>classes: create</source>
+        <translation>Klassen: anlegen</translation>
+    </message>
+    <message>
+        <source>classes: update</source>
+        <translation>Klassen: aktualisieren</translation>
+    </message>
+    <message>
+        <source>objects: class missing</source>
+        <translation>Objekte: Klasse fehlt</translation>
+    </message>
+    <message>
+        <source>objects: create</source>
+        <translation>Objekte: anlegen</translation>
+    </message>
+    <message>
+        <source>objects: unchanged</source>
+        <translation>Objekte: unverändert</translation>
+    </message>
+    <message>
+        <source>objects: update</source>
+        <translation>Objekte: aktualisieren</translation>
+    </message>
+    <message>
+        <source>installed</source>
+        <translation>installiert</translation>
+    </message>
+    <message>
+        <source>open</source>
+        <translation>öffnen</translation>
+    </message>
+    <message>
+        <source>A package named %packagename already exists in the repository.</source>
+        <translation>Im Repository gibt es bereits ein Paket namens %packagename.</translation>
+    </message>
+    <message>
+        <source>The package name %packagename is invalid.</source>
+        <translation>Der Paketname %packagename ist ungültig.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is not a valid Exponential package (.ezpkg).</source>
+        <translation>Die hochgeladene Datei ist kein gültiges Exponential-Paket (.ezpkg).</translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be read.</source>
+        <translation>Die hochgeladene Datei konnte nicht gelesen werden.</translation>
+    </message>
+    <message>
+        <source>Content + class package (.ezpkg)</source>
+        <translation>Inhalts- + Klassenpaket (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</source>
+        <translation>Ein reichhaltigerer Ausgangspunkt als eine CSV/JSON-Vorlage: ein echtes, installierbares Paket mit der Klassendefinition und 2-3 Beispiel-Inhaltsobjekten dazu, erzeugt auf der Seite Paket.</translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation>Aufträge gesamt</translation>
     </message>
@@ -2318,6 +2802,298 @@
         <translation>Zuerst eine Datei wählen.</translation>
     </message>
     <message>
+        <source>Depth below the node</source>
+        <translation>Tiefe unterhalb des Knotens</translation>
+    </message>
+    <message>
+        <source>Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).</source>
+        <translation>Beliebige Tiefe nimmt den gesamten Teilbaum. Genau / höchstens / mindestens zählt Ebenen unterhalb des Knotens (der Knoten selbst hat Tiefe 0).</translation>
+    </message>
+    <message>
+        <source>Named fetch</source>
+        <translation>Benannter Abruf</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini named fetch</source>
+        <translation>Ein benannter Abruf aus fetchalias.ini</translation>
+    </message>
+    <message>
+        <source>Choose one to apply...</source>
+        <translation>Zum Anwenden auswählen …</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>Anwenden</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>Ein Abruf aus fetchalias.ini (Module=content, tree, list, tree_count oder list_count) dieses Siteaccess oder des Standard-Siteaccess. Beim Anwenden werden Knoten, Klasse, Sortierung, Tiefe, Limit/Offset, Hauptorte und — soweit lesbar — eine Bedingung übernommen.</translation>
+    </message>
+    <message>
+        <source>Applied: %list.</source>
+        <translation>Angewendet: %list.</translation>
+    </message>
+    <message>
+        <source>Not understood: %list.</source>
+        <translation>Nicht verstanden: %list.</translation>
+    </message>
+    <message>
+        <source>Remembered choice: %name.</source>
+        <translation>Gemerkte Auswahl: %name.</translation>
+    </message>
+    <message>
+        <source>Additional conditions</source>
+        <translation>Weitere Bedingungen</translation>
+    </message>
+    <message>
+        <source>Join</source>
+        <translation>Verknüpfung</translation>
+    </message>
+    <message>
+        <source>All conditions (and)</source>
+        <translation>Alle Bedingungen (und)</translation>
+    </message>
+    <message>
+        <source>Any condition (or)</source>
+        <translation>Eine Bedingung (oder)</translation>
+    </message>
+    <message>
+        <source>Add condition</source>
+        <translation>Bedingung hinzufügen</translation>
+    </message>
+    <message>
+        <source>No additional conditions. "Add condition" adds a row.</source>
+        <translation>Keine weiteren Bedingungen. „Bedingung hinzufügen“ fügt eine Zeile hinzu.</translation>
+    </message>
+    <message>
+        <source>Field</source>
+        <translation>Feld</translation>
+    </message>
+    <message>
+        <source>Choose a field...</source>
+        <translation>Feld auswählen …</translation>
+    </message>
+    <message>
+        <source>Object fields</source>
+        <translation>Objektfelder</translation>
+    </message>
+    <message>
+        <source>Value (or a comma list for in / not in)</source>
+        <translation>Wert (oder eine Kommaliste für „in Liste“ / „nicht in Liste“)</translation>
+    </message>
+    <message>
+        <source>value, or a,b,c for in/not in</source>
+        <translation>Wert, oder a,b,c für in/nicht in</translation>
+    </message>
+    <message>
+        <source>Second value, for between / not between</source>
+        <translation>Zweiter Wert, für zwischen / nicht zwischen</translation>
+    </message>
+    <message>
+        <source>second value (between)</source>
+        <translation>zweiter Wert (zwischen)</translation>
+    </message>
+    <message>
+        <source>Remove this condition</source>
+        <translation>Diese Bedingung entfernen</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list.</source>
+        <translation>Der Wert wird wie eingegeben verwendet; eine Kommaliste für „in Liste“ / „nicht in Liste“, beide Wertfelder für „zwischen“ / „nicht zwischen“. Status akzeptiert nur ist / ist nicht / in Liste / nicht in Liste.</translation>
+    </message>
+    <message>
+        <source>"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.</source>
+        <translation>„Eine Bedingung (oder)“ ist gewählt: Der Abruf hat nur eine Verknüpfung für den gesamten Filter, daher werden Datum, Bereich, Status, Sichtbarkeit und Name oben ebenfalls mit „oder“ verknüpft, nicht nur die Bedingungen untereinander.</translation>
+    </message>
+    <message>
+        <source>Extended attribute filter</source>
+        <translation>Erweiterter Attributfilter</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Keiner</translation>
+    </message>
+    <message>
+        <source>Its parameters, as JSON</source>
+        <translation>Seine Parameter, als JSON</translation>
+    </message>
+    <message>
+        <source>A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.</source>
+        <translation>Ein in extendedattributefilter.ini registrierter Filter (z. B. ein eztags-Filter), verkettet mit dem Sprachfilter. Seine Parameter als JSON-Objekt; ungültiges JSON wird verworfen, statt den Export scheitern zu lassen.</translation>
+    </message>
+    <message>
+        <source>Then sort by</source>
+        <translation>Dann sortieren nach</translation>
+    </message>
+    <message>
+        <source>Breaks ties in the sort above. Only applies once the sort above is not tree order.</source>
+        <translation>Löst Gleichstände der obigen Sortierung auf. Gilt erst, wenn die obige Sortierung nicht die Baumreihenfolge ist.</translation>
+    </message>
+    <message>
+        <source>greater than or equal to</source>
+        <translation>größer oder gleich</translation>
+    </message>
+    <message>
+        <source>less than or equal to</source>
+        <translation>kleiner oder gleich</translation>
+    </message>
+    <message>
+        <source>in list</source>
+        <translation>in Liste</translation>
+    </message>
+    <message>
+        <source>not in list</source>
+        <translation>nicht in Liste</translation>
+    </message>
+    <message>
+        <source>between (both ends included)</source>
+        <translation>zwischen (beide Enden eingeschlossen)</translation>
+    </message>
+    <message>
+        <source>not between</source>
+        <translation>nicht zwischen</translation>
+    </message>
+    <message>
+        <source>matches pattern (* wildcard)</source>
+        <translation>entspricht Muster (* Platzhalter)</translation>
+    </message>
+    <message>
+        <source>does not match pattern (* wildcard)</source>
+        <translation>entspricht nicht Muster (* Platzhalter)</translation>
+    </message>
+    <message>
+        <source>Section (id)</source>
+        <translation>Bereich (ID)</translation>
+    </message>
+    <message>
+        <source>Owner (user id)</source>
+        <translation>Eigentümer (Benutzer-ID)</translation>
+    </message>
+    <message>
+        <source>Tree depth</source>
+        <translation>Baumtiefe</translation>
+    </message>
+    <message>
+        <source>Class identifier</source>
+        <translation>Klassenkennung</translation>
+    </message>
+    <message>
+        <source>Node id</source>
+        <translation>Knoten-ID</translation>
+    </message>
+    <message>
+        <source>Object state (id)</source>
+        <translation>Objektstatus (ID)</translation>
+    </message>
+    <message>
+        <source>Any depth</source>
+        <translation>Beliebige Tiefe</translation>
+    </message>
+    <message>
+        <source>Exactly</source>
+        <translation>Genau</translation>
+    </message>
+    <message>
+        <source>At most</source>
+        <translation>Höchstens</translation>
+    </message>
+    <message>
+        <source>At least</source>
+        <translation>Mindestens</translation>
+    </message>
+    <message>
+        <source>Parameters, key=value,key=value</source>
+        <translation>Parameter, Schlüssel=Wert,Schlüssel=Wert</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>Ein Abruf aus fetchalias.ini (Module=content, tree, list, tree_count oder list_count) dieses Siteaccess, jeder aktiven Extension oder des Standard-Siteaccess. Beim Anwenden werden Knoten, Klasse, Sortierung, Tiefe, Limit/Offset, Hauptorte und — soweit lesbar — eine Bedingung übernommen.</translation>
+    </message>
+    <message>
+        <source>This one also takes: %list.</source>
+        <translation>Dieser nimmt außerdem: %list.</translation>
+    </message>
+    <message>
+        <source>Invert this condition</source>
+        <translation>Diese Bedingung umkehren</translation>
+    </message>
+    <message>
+        <source>not</source>
+        <translation>nicht</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).</source>
+        <translation>Der Wert wird wie eingegeben verwendet; eine Kommaliste für „in Liste“ / „nicht in Liste“, beide Wertfelder für „zwischen“ / „nicht zwischen“. Status akzeptiert nur ist / ist nicht / in Liste / nicht in Liste. „nicht“ kehrt die Bedingung um (aus ist wird ist nicht, aus in Liste wird nicht in Liste, und so weiter).</translation>
+    </message>
+    <message>
+        <source>Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.</source>
+        <translation>Beispiele: Name enthält Bericht; Eigentümer ist admin (ein Login geht auch); Tiefe ist 3; Veröffentlicht ist seit 7d; Priorität ist zwischen 1..5.</translation>
+    </message>
+    <message>
+        <source>Fetch parameters</source>
+        <translation>Abrufparameter</translation>
+    </message>
+    <message>
+        <source>What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.</source>
+        <translation>Wozu die obigen Filter aufgelöst werden: derselbe Aufruf, den ein Template mit fetch() machen würde. Kopieren, oder die Teile für einen eigenen fetch_alias ablesen.</translation>
+    </message>
+    <message>
+        <source>An object property</source>
+        <translation>Eine Objekteigenschaft</translation>
+    </message>
+    <message>
+        <source>owner is admin (a login also works), section is 2, name contains report, published is since 7d.</source>
+        <translation>Eigentümer ist admin (ein Login geht auch), Bereich ist 2, Name enthält Bericht, Veröffentlicht ist seit 7d.</translation>
+    </message>
+    <message>
+        <source>A node / tree property</source>
+        <translation>Eine Knoten-/Baumeigenschaft</translation>
+    </message>
+    <message>
+        <source>depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.</source>
+        <translation>Tiefe ist 3 (absolut), Priorität ist zwischen 1..5, Klassenkennung ist ng_article, Knoten-ID in 91,92,95.</translation>
+    </message>
+    <message>
+        <source>A class attribute</source>
+        <translation>Ein Klassenattribut</translation>
+    </message>
+    <message>
+        <source>Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).</source>
+        <translation>Aus derselben Liste wählen; die Operatoren passen zum Datentyp (Checkbox: ist/ist nicht 1 oder 0; Zahl: auch zwischen).</translation>
+    </message>
+    <message>
+        <source>Inverts a row: owner is not admin, state not in 4,7.</source>
+        <translation>Kehrt eine Zeile um: Eigentümer ist nicht admin, Status nicht in 4,7.</translation>
+    </message>
+    <message>
+        <source>A named fetch</source>
+        <translation>Ein benannter Abruf</translation>
+    </message>
+    <message>
+        <source>Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.</source>
+        <translation>Unter „Benannter Abruf“ auswählen und Anwenden: Knoten, Klasse, Sortierung, Tiefe und eine Bedingung werden ins Formular geladen. Ausfüllbare (Parameter[]) nehmen Werte in „Parameter“, Schlüssel=Wert,Schlüssel=Wert.</translation>
+    </message>
+    <message>
+        <source>Open it at the bottom of the Filters card to copy the same fetch() call into a template.</source>
+        <translation>Am Ende der Filter-Karte öffnen, um denselben fetch()-Aufruf in ein Template zu kopieren.</translation>
+    </message>
+    <message>
+        <source>Modified, including sub items</source>
+        <translation>Geändert, einschließlich Unterobjekte</translation>
+    </message>
+    <message>
+        <source>Owner (user id or login)</source>
+        <translation>Eigentümer (Benutzer-ID oder Login)</translation>
+    </message>
+    <message>
+        <source>Tree depth (absolute)</source>
+        <translation>Baumtiefe (absolut)</translation>
+    </message>
+    <message>
+        <source>Class name</source>
+        <translation>Klassenname</translation>
+    </message>
+    <message>
         <source>An XML, CSV or JSON file written by the export views, any column set.</source>
         <translation>Eine XML-, CSV- oder JSON-Datei, wie sie die Export-Ansichten schreiben, jede Spaltenauswahl.</translation>
     </message>
@@ -2622,10 +3398,6 @@
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
-    </message>
-    <message>
         <source>Download report</source>
         <translation>Bericht herunterladen</translation>
     </message>
@@ -2640,10 +3412,6 @@
     <message>
         <source>Resume as a new job</source>
         <translation>Als neuen Auftrag fortsetzen</translation>
-    </message>
-    <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
     </message>
     <message>
         <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
@@ -2670,12 +3438,124 @@
         <translation>Oberhalb einer Zeilen- oder Größenschwelle laufen sowohl der Probelauf als auch der Import als Hintergrundauftrag (Reiter Aufträge), statt die Seite offen zu halten; ein teilweise fehlgeschlagener Auftrag kann ab der Zeile fortgesetzt werden, bei der er stehen blieb.</translation>
     </message>
     <message>
-        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
-        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
-    </message>
-    <message>
         <source>many rows (counted once queued)</source>
         <translation>viele Zeilen (gezählt, sobald in die Warteschlange gestellt)</translation>
+    </message>
+    <message>
+        <source>Presets</source>
+        <translation>Vorlagen</translation>
+    </message>
+    <message>
+        <source>Save everything below as a named preset, load one back, or run it directly.</source>
+        <translation>Alles unten als benannte Vorlage speichern, eine wieder laden oder direkt ausführen.</translation>
+    </message>
+    <message>
+        <source>loaded</source>
+        <translation>geladen</translation>
+    </message>
+    <message>
+        <source>Placeholders with no value: %list.</source>
+        <translation>Platzhalter ohne Wert: %list.</translation>
+    </message>
+    <message>
+        <source>Load a preset</source>
+        <translation>Eine Vorlage laden</translation>
+    </message>
+    <message>
+        <source>Choose one...</source>
+        <translation>Auswählen …</translation>
+    </message>
+    <message>
+        <source>Your presets and shared with you</source>
+        <translation>Ihre Vorlagen und mit Ihnen geteilte</translation>
+    </message>
+    <message>
+        <source>shared</source>
+        <translation>geteilt</translation>
+    </message>
+    <message>
+        <source>Site presets</source>
+        <translation>Website-Vorlagen</translation>
+    </message>
+    <message>
+        <source>Placeholder values, key=value,key=value</source>
+        <translation>Platzhalterwerte, Schlüssel=Wert,Schlüssel=Wert</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Laden</translation>
+    </message>
+    <message>
+        <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
+        <translation>Diese Vorlage auflösen und sofort als Auftrag starten, ohne sie zuerst ins Formular zu laden</translation>
+    </message>
+    <message>
+        <source>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</source>
+        <translation>Eine Vorlage kann Platzhalter deklarieren, zum Beispiel einen Knoten oder ein Datum; hier als Schlüssel=Wert,Schlüssel=Wert ausfüllen, sonst gelten ihre eigenen Standardwerte.</translation>
+    </message>
+    <message>
+        <source>extends %ref</source>
+        <translation>erweitert %ref</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplizieren</translation>
+    </message>
+    <message>
+        <source>Delete this preset?</source>
+        <translation>Diese Vorlage löschen?</translation>
+    </message>
+    <message>
+        <source>Duplicate as your own</source>
+        <translation>Als eigene Vorlage duplizieren</translation>
+    </message>
+    <message>
+        <source>INI</source>
+        <translation>INI</translation>
+    </message>
+    <message>
+        <source>Defined in xrowextract.ini; edit it there</source>
+        <translation>In xrowextract.ini definiert; dort bearbeiten</translation>
+    </message>
+    <message>
+        <source>site</source>
+        <translation>Website</translation>
+    </message>
+    <message>
+        <source>Save the current settings as a preset</source>
+        <translation>Aktuelle Einstellungen als Vorlage speichern</translation>
+    </message>
+    <message>
+        <source>Preset name</source>
+        <translation>Name der Vorlage</translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation>Beschreibung (optional)</translation>
+    </message>
+    <message>
+        <source>Shared with everyone</source>
+        <translation>Für alle freigegeben</translation>
+    </message>
+    <message>
+        <source>Save as preset</source>
+        <translation>Als Vorlage speichern</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
+        <translation>Erfasst Bereich, Knoten, Klasse, Spalten, Sprachen, alle Filter, die Sortierung und die Ausgabeeinstellungen oben. Speichern bei bereits geladener Vorlage aktualisiert diese (nur deren Eigentümer oder ein Benutzer mit all_jobs); ein neuer Name legt immer eine neue an.</translation>
+    </message>
+    <message>
+        <source>Started from a saved preset</source>
+        <translation>Aus einer gespeicherten Vorlage gestartet</translation>
+    </message>
+    <message>
+        <source>Name the preset first.</source>
+        <translation>Zuerst die Vorlage benennen.</translation>
+    </message>
+    <message>
+        <source>Preset "%name" saved.</source>
+        <translation>Vorlage „%name“ gespeichert.</translation>
     </message>
 </context>
 <context>

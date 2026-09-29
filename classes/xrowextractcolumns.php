@@ -96,9 +96,23 @@ class XrowExtractColumns
         return ezpI18n::tr( 'design/standard/extract', isset( $cells[$datatype] ) ? $cells[$datatype] : 'value' );
     }
 
+    /** Whether a datatype is registered on this installation (its extension active), without trying to load it. */
+    public static function datatypeInstalled( $datatype )
+    {
+        static $allowed = null;
+        if ( $allowed === null )
+            $allowed = array_flip( eZDataType::allowedTypes() );
+        return isset( $allowed[$datatype] );
+    }
+
     /** The translated name of a datatype, or its identifier when it is not installed. */
     public static function datatypeName( $datatype )
     {
+        // Only a registered datatype is created: eZDataType::create() of one whose extension is not active
+        // logs "Datatype not found" as an error on every page that lists it (the importer names datatypes of
+        // optional extensions such as enhancedselection)
+        if ( !self::datatypeInstalled( $datatype ) )
+            return $datatype;
         $type = eZDataType::create( $datatype );
         return ( $type && isset( $type->Name ) && $type->Name !== '' ) ? $type->Name : $datatype;
     }
