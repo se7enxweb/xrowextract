@@ -2,6 +2,82 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Try a sample (.ezpkg)</source>
+        <translation>Beispiel ausprobieren (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A content package sample is built read-only from up to 3 of the class’s own existing objects (class only for a class with no content yet) and altered on the copy only, so its dry run shows every outcome: unchanged, updated, newly created, and a class the site does not have. Not kept in the package repository unless you choose to.</source>
+        <translation>Ein Inhaltspaket-Beispiel wird schreibgeschützt aus bis zu 3 vorhandenen Objekten der Klasse erstellt (nur die Klasse bei einer Klasse ohne Inhalt) und nur an der Kopie verändert, sodass der Probelauf jedes Ergebnis zeigt: unverändert, aktualisiert, neu angelegt, und eine Klasse, die die Website nicht hat. Wird nicht im Paket-Repository behalten, außer Sie entscheiden sich dafür.</translation>
+    </message>
+    <message>
+        <source>Keep in the repository</source>
+        <translation>Im Repository behalten</translation>
+    </message>
+    <message>
+        <source>Content package: what to include</source>
+        <translation>Inhaltspaket: was enthalten sein soll</translation>
+    </message>
+    <message>
+        <source>Class or object XML on their own</source>
+        <translation>Klassen- oder Objekt-XML für sich allein</translation>
+    </message>
+    <message>
+        <source>A single content-class definition XML, or a single content-object XML with up to 3 of the class’s own existing objects - both accepted directly by this page, no archive needed.</source>
+        <translation>Eine einzelne Inhaltsklassen-Definitions-XML, oder eine einzelne Inhaltsobjekt-XML mit bis zu 3 vorhandenen Objekten der Klasse - beide werden von dieser Seite direkt angenommen, kein Archiv nötig.</translation>
+    </message>
+    <message>
+        <source>Download class definition XML</source>
+        <translation>Klassendefinitions-XML herunterladen</translation>
+    </message>
+    <message>
+        <source>Download object XML</source>
+        <translation>Objekt-XML herunterladen</translation>
+    </message>
+    <message>
+        <source>This class has no content on this site yet: a &quot;class + content&quot; or &quot;content only&quot; package download would use temporary hidden scratch content instead (removed again immediately after), not real existing objects.</source>
+        <translation>Diese Klasse hat auf dieser Website noch keinen Inhalt: ein Download &quot;Klasse + Inhalt&quot; oder &quot;Nur Inhalt&quot; würde stattdessen vorübergehenden, versteckten Test-Inhalt verwenden (danach sofort wieder entfernt), keine echten vorhandenen Objekte.</translation>
+    </message>
+    <message>
+        <source>The class definition XML could not be built.</source>
+        <translation>Die Klassendefinitions-XML konnte nicht erstellt werden.</translation>
+    </message>
+    <message>
+        <source>No content object XML could be built (the class may have no content on this site yet).</source>
+        <translation>Es konnte keine Objekt-XML erstellt werden (die Klasse hat auf dieser Website eventuell noch keinen Inhalt).</translation>
+    </message>
+    <message>
+        <source>The sample package could not be built: %reason</source>
+        <translation>Das Beispielpaket konnte nicht erstellt werden: %reason</translation>
+    </message>
+    <message>
+        <source>The template package could not be built: %reason</source>
+        <translation>Das Vorlagenpaket konnte nicht erstellt werden: %reason</translation>
+    </message>
+    <message>
+        <source>There is no class to sample from (the site has no classes with content, or none you may read).</source>
+        <translation>Es gibt keine Klasse für ein Beispiel (die Website hat keine Klassen mit Inhalt, oder keine, die Sie lesen dürfen).</translation>
+    </message>
+    <message>
+        <source>Class: %name</source>
+        <translation>Klasse: %name</translation>
+    </message>
+    <message>
+        <source>Class %class does not exist on this site.</source>
+        <translation>Die Klasse %class existiert auf dieser Website nicht.</translation>
+    </message>
+    <message>
+        <source>new attribute</source>
+        <translation>neues Attribut</translation>
+    </message>
+    <message>
+        <source>removed</source>
+        <translation>entfernt</translation>
+    </message>
+    <message>
+        <source>classes/objects</source>
+        <translation>Klassen/Objekte</translation>
+    </message>
+    <message>
         <source>Import content file</source>
         <translation>Inhaltsdatei importieren</translation>
     </message>

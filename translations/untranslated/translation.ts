@@ -4,6 +4,82 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Try a sample (.ezpkg)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A content package sample is built read-only from up to 3 of the class’s own existing objects (class only for a class with no content yet) and altered on the copy only, so its dry run shows every outcome: unchanged, updated, newly created, and a class the site does not have. Not kept in the package repository unless you choose to.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keep in the repository</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content package: what to include</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class or object XML on their own</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A single content-class definition XML, or a single content-object XML with up to 3 of the class’s own existing objects - both accepted directly by this page, no archive needed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download class definition XML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download object XML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This class has no content on this site yet: a &quot;class + content&quot; or &quot;content only&quot; package download would use temporary hidden scratch content instead (removed again immediately after), not real existing objects.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The class definition XML could not be built.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No content object XML could be built (the class may have no content on this site yet).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The sample package could not be built: %reason</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The template package could not be built: %reason</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is no class to sample from (the site has no classes with content, or none you may read).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class: %name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class %class does not exist on this site.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>new attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>classes/objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Import content file</source>
         <translation type="unfinished"></translation>
     </message>
