@@ -51,8 +51,19 @@ if ( $logSize > $logOffset )
         fseek( $fp, $logOffset );
         $logText = (string)fread( $fp, min( 65536, $logSize - $logOffset ) );
         fclose( $fp );
+        // Only whole lines (up to the last line break), so a line is never cleaned in two halves; the
+        // rest comes with the next poll
+        $lastBreak = max( (int)strrpos( $logText, "\n" ), (int)strrpos( $logText, "\r" ) );
+        if ( $lastBreak > 0 && $job['state'] === 'running' )
+            $logText = substr( $logText, 0, $lastBreak + 1 );
     }
 }
+$logRead = strlen( $logText );
+
+// The job's own progress bar (the kernel's installers print one: "40% (1736/4339) ... end @ 16:16") is the
+// most exact source while it runs; the database count and the progress file come after it
+if ( $job['state'] === 'running' && ( $fromLog = XrowExtractJob::logProgress( $logPath ) ) )
+    $progress = $fromLog;
 
 echo json_encode( array(
     'id' => $job['id'],
@@ -65,6 +76,6 @@ echo json_encode( array(
     'has_file' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $id ) . '/' . $job['output_file'] ),
     'progress' => $progress,
     'install' => $installProgress,
-    'log' => array( 'text' => $logText, 'offset' => $logOffset + strlen( $logText ), 'size' => $logSize ),
+    'log' => array( 'text' => XrowExtractJob::cleanLog( $logText ), 'offset' => $logOffset + $logRead, 'size' => $logSize ),
 ), JSON_INVALID_UTF8_SUBSTITUTE );
 eZExecution::cleanExit();

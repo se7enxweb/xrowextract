@@ -12,6 +12,18 @@ $tpl = eZTemplate::factory();
 $login = eZUser::currentUser()->attribute( 'login' );
 $allJobs = XrowExtractJob::allowAllJobs();
 
+if ( $http->hasPostVariable( 'CancelJobID' ) )
+{
+    $id = (string)$http->postVariable( 'CancelJobID' );
+    $job = XrowExtractJob::isValidID( $id ) ? XrowExtractJob::load( $id ) : null;
+    if ( $job && ( $job['owner'] === $login || $allJobs ) )
+    {
+        list( $cancelled, $message ) = XrowExtractJob::cancel( $id, $login );
+        $http->setSessionVariable( 'eZExtractJobNotice', ezpI18n::tr( 'design/standard/extract', $message ) );
+    }
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+
 if ( $http->hasPostVariable( 'DeleteJobID' ) )
 {
     $id = (string)$http->postVariable( 'DeleteJobID' );
@@ -94,7 +106,10 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
     $logPath = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::LOG_FILE;
     $logSize = is_file( $logPath ) ? (int)@filesize( $logPath ) : 0;
     $logFrom = max( 0, $logSize - 65536 );
-    $logText = $logSize ? (string)@file_get_contents( $logPath, false, null, $logFrom ) : '';
+    $logText = $logSize ? XrowExtractJob::cleanLog( (string)@file_get_contents( $logPath, false, null, $logFrom ) ) : '';
+    // The job's own progress bar in its log is the most exact progress while it runs
+    if ( $job['state'] === 'running' && ( $fromLog = XrowExtractJob::logProgress( $logPath ) ) )
+        $progress = $fromLog;
     $percent = 0;
     if ( is_array( $progress ) && !empty( $progress['total'] ) )
         $percent = max( 0, min( 100, (int)round( 100 * $progress['done'] / $progress['total'] ) ) );
@@ -144,6 +159,11 @@ $tpl->setVariable( 'jobs', $rows );
 $tpl->setVariable( 'job_counts', $counts );
 $tpl->setVariable( 'all_jobs', $allJobs );
 $tpl->setVariable( 'started_job_id', $startedJobID );
+$jobNotice = $http->hasSessionVariable( 'eZExtractJobNotice' ) ? $http->sessionVariable( 'eZExtractJobNotice' ) : false;
+if ( $jobNotice )
+    $http->removeSessionVariable( 'eZExtractJobNotice' );
+$tpl->setVariable( 'job_notice', $jobNotice );
+
 $tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( $login, $allJobs ) );
 $tpl->setVariable( 'retention_days', XrowExtractJob::retentionDays() );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';

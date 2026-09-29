@@ -167,6 +167,54 @@ class XrowExtractJob
         return $count;
     }
 
+    /**
+     * Cancels a queued or running job: stops the job's runner (bin/php/job.php) and every process below it
+     * (the export/import/install script, and anything that started, e.g. tar), and records it as failed with
+     * "Cancelled by <login>". Whatever the job already wrote stays (an install's objects are not rolled back).
+     * A process started by another system user (a job started from :8080 runs as root, from :443 as the
+     * web user) may not be stoppable from here; that is reported, and the job is still marked cancelled so
+     * its runner does not overwrite the state when it ends.
+     * @return array( ok, message )
+     */
+    public static function cancel( $id, $login )
+    {
+        $job = self::load( $id );
+        if ( !$job || !in_array( $job['state'], array( 'queued', 'running' ), true ) )
+            return array( false, 'The job is not queued or running.' );
+        $pid = isset( $job['pid'] ) ? (int)$job['pid'] : 0;
+        $notStopped = array();
+        if ( $pid > 1 )
+        {
+            // The whole tree first, while the runner still holds it together, then stop it from the top down
+            $tree = array( $pid );
+            for ( $i = 0; $i < count( $tree ) && $i < 64; $i++ )
+            {
+                $children = array();
+                @exec( 'pgrep -P ' . (int)$tree[$i], $children );
+                foreach ( $children as $child )
+                    if ( ctype_digit( trim( $child ) ) )
+                        $tree[] = (int)trim( $child );
+            }
+            foreach ( $tree as $process )
+            {
+                $stopped = function_exists( 'posix_kill' ) ? @posix_kill( $process, 15 ) : false;
+                if ( !$stopped )
+                {
+                    $output = array();
+                    @exec( 'kill -TERM ' . (int)$process . ' 2>&1', $output, $code );
+                    $stopped = $code === 0;
+                }
+                if ( !$stopped && file_exists( '/proc/' . (int)$process ) )
+                    $notStopped[] = $process;
+            }
+        }
+        self::update( $id, array(
+            'state' => 'failed', 'ended' => time(), 'cancelled' => true,
+            'error' => 'Cancelled by ' . $login . ( $notStopped ? ' (process ' . implode( ', ', $notStopped ) . ' could not be stopped from this server user; it may finish on its own)' : '' ),
+        ) );
+        return array( !$notStopped, $notStopped ? 'The job was marked cancelled, but its process could not be stopped from here.' : 'The job was cancelled.' );
+    }
+
     /** Removes a job's folder (its files, then itself). */
     public static function delete( $id )
     {
@@ -286,6 +334,69 @@ class XrowExtractJob
         $raw = @file_get_contents( $path );
         $data = $raw !== false && $raw !== '' ? json_decode( $raw, true ) : null;
         return is_array( $data ) ? $data : null;
+    }
+
+    /**
+     * A job log as a person reads it: terminal colour codes removed (eZCLI writes them, the kernel's
+     * progress bars included), carriage-return redraws flattened, and the progress bar's own lines
+     * ("Installing content objects | 12.6% (548/4339) | elapsed ... | end @ 16:15") left out - they are
+     * shown as the job's progress bar instead (logProgress()), and would otherwise bury the steps,
+     * warnings and errors under thousands of near-identical lines.
+     */
+    public static function cleanLog( $text )
+    {
+        $text = preg_replace( '/\x1b\[[0-9;?]*[A-Za-z]/', '', (string)$text );
+        $text = preg_replace( '/(?<![\x1b])\[[0-9;]{1,12}m/', '', $text ); // codes whose ESC byte got lost
+        $text = str_replace( "\r\n", "\n", $text );
+        $lines = array();
+        foreach ( preg_split( '/[\n\r]/', $text ) as $line )
+        {
+            if ( self::parseProgressLine( $line ) )
+                continue;
+            if ( trim( $line ) === '' && $lines && trim( end( $lines ) ) === '' )
+                continue;
+            $lines[] = rtrim( $line );
+        }
+        return implode( "\n", $lines );
+    }
+
+    /** One eZCLI progress bar line, as array( phase, percent, done, total, elapsed, end_at ), or null. */
+    public static function parseProgressLine( $line )
+    {
+        $line = preg_replace( '/\x1b?\[[0-9;?]*m/', '', (string)$line );
+        if ( !preg_match( '/^\s*(?:(.*?)\s*\|\s*)?([\d.]+)%\s*\((\d+)\/(\d+)\)(?:.*?elapsed\s*([\d:]+))?(?:.*?end\s*@\s*([\d:]+))?/', $line, $m ) )
+            return null;
+        return array( 'phase' => trim( (string)$m[1] ), 'percent' => (float)$m[2], 'done' => (int)$m[3], 'total' => (int)$m[4],
+                      'elapsed' => isset( $m[5] ) ? $m[5] : '', 'end_at' => isset( $m[6] ) ? $m[6] : '' );
+    }
+
+    /**
+     * The latest progress a job's own output reported (the kernel's installers draw eZCLI progress bars:
+     * "Installing content objects | 40% (1736/4339) | elapsed 00:10:13 | end @ 16:16"), read from the end of
+     * its log: the exact count, a percentage, the time spent and the expected end. Null when there is none.
+     */
+    public static function logProgress( $logPath )
+    {
+        if ( !is_file( $logPath ) )
+            return null;
+        $size = (int)@filesize( $logPath );
+        $tail = (string)@file_get_contents( $logPath, false, null, max( 0, $size - 16384 ) );
+        $found = null;
+        foreach ( preg_split( '/[\n\r]/', $tail ) as $line )
+        {
+            $parsed = self::parseProgressLine( $line );
+            if ( $parsed )
+                $found = $parsed;
+        }
+        if ( !$found )
+            return null;
+        $phase = $found['phase'] !== '' ? $found['phase'] : 'working';
+        $details = array( $phase, rtrim( rtrim( number_format( $found['percent'], 1 ), '0' ), '.' ) . '%' );
+        if ( $found['elapsed'] !== '' )
+            $details[] = 'elapsed ' . $found['elapsed'];
+        if ( $found['end_at'] !== '' )
+            $details[] = 'expected end ' . $found['end_at'];
+        return array( 'done' => $found['done'], 'total' => $found['total'], 'phase' => implode( ' · ', $details ) );
     }
 
     /** bin/php/csv.php, archive.php or package.php, the scripts a job runs. */
