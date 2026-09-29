@@ -181,6 +181,77 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
     }
 }
 
+// Velocity ends a request after 30s, too short for a large archive: "Run in the background" builds
+// the same command line as bin/php/archive.php from this view's already-validated state (never from
+// raw request strings) and starts it detached, so the export keeps going after the page returns.
+$tpl->setVariable( 'BackgroundAvailable', XrowExtractJob::available() );
+$tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( eZUser::currentUser()->attribute( 'login' ), XrowExtractJob::allowAllJobs() ) );
+
+if ( $http->hasPostVariable( 'RunInBackground' ) )
+{
+    if ( !$roots || !$selectedClassIDs )
+    {
+        $error = ezpI18n::tr( 'design/standard/extract', 'Choose at least one node and one class.' );
+    }
+    elseif ( !XrowExtractJob::available() )
+    {
+        $error = ezpI18n::tr( 'design/standard/extract', 'Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).' );
+    }
+    elseif ( !$state['languages'] )
+    {
+        $error = ezpI18n::tr( 'design/standard/extract', 'Choose at least one language first.' );
+    }
+    else
+    {
+        // The current siteaccess, so a URL alias in the export (below a multi-site root, several
+        // siteaccesses can see the same node under a different path) comes out exactly as this
+        // Download would have written it
+        $currentAccess = eZSiteAccess::current();
+        $jobArgs = array();
+        if ( $currentAccess && !empty( $currentAccess['name'] ) )
+            $jobArgs[] = '--siteaccess=' . $currentAccess['name'];
+        $jobArgs[] = '--nodes=' . implode( ',', $state['nodes'] );
+        $jobArgs[] = '--classes=' . implode( ',', $selectedClassIDs );
+        $jobArgs[] = '--format=' . $state['format'];
+        $jobArgs[] = '--separator=' . $state['separator'];
+        $jobArgs[] = '--line-endings=' . $state['line'];
+        if ( !$state['escape'] )
+            $jobArgs[] = '--unquoted';
+        if ( $state['password_hashes'] && $allowHashes )
+            $jobArgs[] = '--password-hashes';
+        $jobArgs[] = '--languages=' . implode( ',', $state['languages'] );
+        $jobArgs[] = '--columns=' . $state['columns'];
+        if ( $state['plain_text'] )
+            $jobArgs[] = '--plain-text';
+
+        $rootNames = array();
+        foreach ( $roots as $root )
+            $rootNames[] = $root->attribute( 'name' );
+        $what = implode( ', ', array_slice( $rootNames, 0, 4 ) ) . ( count( $rootNames ) > 4 ? ' …' : '' )
+              . ' — ' . count( $selectedClassIDs ) . ' ' . ezpI18n::tr( 'design/standard/extract', 'classes' );
+
+        $jobID = XrowExtractJob::create( array(
+            'type' => 'archive',
+            'owner' => eZUser::currentUser()->attribute( 'login' ),
+            'what' => $what,
+            'format' => $state['format'],
+            // The archive's exact name carries a timestamp decided inside build(); bin/php/job.php
+            // fills this in once the run is done
+            'output_file' => null,
+            'args' => $jobArgs,
+        ) );
+        if ( !XrowExtractJob::start( $jobID ) )
+        {
+            XrowExtractJob::update( $jobID, array(
+                'state' => 'failed', 'ended' => time(),
+                'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+            ) );
+        }
+        $http->setSessionVariable( 'eZExtractJobStarted', $jobID );
+        return $module->redirectTo( 'xrowextract/jobs' );
+    }
+}
+
 // Nodes to pick from: the roots of the installation and the first levels of the content and media trees
 $suggestions = array();
 $selectedIDs = array_flip( $state['nodes'] );
