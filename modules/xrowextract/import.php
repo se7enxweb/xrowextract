@@ -108,7 +108,11 @@ $tpl->setVariable( 'Language', $Language );
 if ( $http->hasPostVariable( 'ParentNodeID' ) )
     $ParentNodeID = (int)$http->postVariable( 'ParentNodeID' );
 else
-    $ParentNodeID = (int)eZINI::instance()->variable( 'UserSettings', 'DefaultUserPlacement' );
+{
+    // New objects go below the public site's root by default (content, not the user placement)
+    $publicContentINI = eZSiteAccess::getIni( eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
+    $ParentNodeID = (int)$publicContentINI->variable( 'NodeSettings', 'RootNode' );
+}
 $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
 $parentNode = $ParentNodeID ? eZContentObjectTreeNode::fetch( $ParentNodeID ) : null;
 $tpl->setVariable( 'ParentNode', ( $parentNode instanceof eZContentObjectTreeNode && $parentNode->canRead() )
@@ -169,6 +173,26 @@ foreach ( $specialColumnIDs as $id )
 $tpl->setVariable( 'SpecialChoices', $SpecialChoices );
 
 // Browse for a parent node (same pattern as the csv view's BrowseSubtree)
+if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID <= 0 )
+    $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'Choose a class first' ) );
+// A template: an empty file with the columns of the Migration set for the chosen class (fill it, import it)
+if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $templateClass = eZContentClass::fetch( $ClassID ) ) )
+{
+    $templateColumns = XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $ClassID ), $ClassID,
+                                                             XrowExtractColumns::extraAttributes( false ) );
+    $templateFormat = $http->hasPostVariable( 'TemplateFormat' ) && $http->postVariable( 'TemplateFormat' ) === 'json' ? 'json' : 'csv';
+    $templateWriter = new XrowExtractWriter( $templateFormat, $templateColumns, ',', true, "\r\n", array( 'class' => $templateClass->attribute( 'identifier' ) ) );
+    $templateData = $templateWriter->begin() . $templateWriter->end();
+    header( 'Cache-Control: private, no-store, max-age=0' );
+    header( 'X-Content-Type-Options: nosniff' );
+    header( 'Content-Type: ' . $templateWriter->contentType( 'utf-8' ) );
+    header( 'Content-Length: ' . strlen( $templateData ) );
+    header( 'Content-Disposition: attachment; filename="' . XrowExtractColumns::fileName( $templateClass->attribute( 'identifier' ), '_import_template.' . $templateWriter->extension() ) . '"' );
+    while ( @ob_end_clean() );
+    echo $templateData;
+    eZExecution::cleanExit();
+}
+
 if ( $http->hasPostVariable( 'BrowseParent' ) )
 {
     $return = eZContentBrowse::browse( array(
@@ -222,6 +246,11 @@ $Result['path'] = array(
     array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
     array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Import' ) ),
 );
-$Result['left_menu'] = 'design:xrowextract/menu.tpl';
+$importableNames = array();
+foreach ( XrowExtractImport::baseImportableDatatypes() as $datatype )
+    $importableNames[] = array( 'id' => $datatype, 'name' => XrowExtractColumns::datatypeName( $datatype ) );
+usort( $importableNames, function ( $a, $b ) { return strcasecmp( $a['name'], $b['name'] ); } );
+$tpl->setVariable( 'ImportableDatatypes', $importableNames );
+$Result['left_menu'] = 'design:xrowextract/menu_import.tpl';
 
 ?>

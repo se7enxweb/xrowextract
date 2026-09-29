@@ -60,8 +60,7 @@
             {/if}
         </section>
 
-        {if $HasFile}
-        {* 2. Class, matching, language, placement *}
+        {* 2. Class, matching, language, placement: chosen before or after the upload *}
         <section class="xe-card" aria-labelledby="xe-card-target">
             <header class="xe-card-head">
                 <span class="xe-step">2</span>
@@ -124,8 +123,20 @@
                     <p class="xe-help">{'Used when a row has no parent-remote-id or main-parent-node-id column.'|i18n('design/standard/extract')}</p>
                 </div>
             </div>
+            <div class="xe-field">
+                <span class="xe-label">{'Start from a template'|i18n('design/standard/extract')}</span>
+                <div class="xe-inline">
+                    <select name="TemplateFormat" aria-label="{'File type'|i18n('design/standard/extract')|wash}">
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                    </select>
+                    <input class="button" type="submit" name="DownloadTemplate" value="{'Download a template for this class'|i18n('design/standard/extract')}" />
+                </div>
+                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.'|i18n('design/standard/extract')}</p>
+            </div>
         </section>
 
+        {if $HasFile}
         {* 3. Column mapping *}
         <section class="xe-card" aria-labelledby="xe-card-mapping">
             <header class="xe-card-head">

@@ -4,6 +4,178 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Start from a template</source>
+        <translation>Start from a template</translation>
+    </message>
+    <message>
+        <source>Download a template for this class</source>
+        <translation>Download a template for this class</translation>
+    </message>
+    <message>
+        <source>Choose a class first</source>
+        <translation>Choose a class first</translation>
+    </message>
+    <message>
+        <source>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.</source>
+        <translation>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.</translation>
+    </message>
+    <message>
+        <source>Reads a CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</source>
+        <translation>Reads a CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</translation>
+    </message>
+    <message>
+        <source>Choose the class, matching, language and parent</source>
+        <translation>Choose the class, matching, language and parent</translation>
+    </message>
+    <message>
+        <source>Before or after the upload; a class, language or parent column in the file wins for its rows.</source>
+        <translation>Before or after the upload; a class, language or parent column in the file wins for its rows.</translation>
+    </message>
+    <message>
+        <source>Upload the file</source>
+        <translation>Upload the file</translation>
+    </message>
+    <message>
+        <source>An export of this tool (the Migration column set carries everything needed), or a filled template.</source>
+        <translation>An export of this tool (the Migration column set carries everything needed), or a filled template.</translation>
+    </message>
+    <message>
+        <source>Check the column mapping</source>
+        <translation>Check the column mapping</translation>
+    </message>
+    <message>
+        <source>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.</source>
+        <translation>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.</translation>
+    </message>
+    <message>
+        <source>Read the dry run</source>
+        <translation>Read the dry run</translation>
+    </message>
+    <message>
+        <source>Per row: create, update (old and new values), unchanged, skip or error with the reason.</source>
+        <translation>Per row: create, update (old and new values), unchanged, skip or error with the reason.</translation>
+    </message>
+    <message>
+        <source>Import the changes</source>
+        <translation>Import the changes</translation>
+    </message>
+    <message>
+        <source>Only the changed attributes of each row are written; a row with an error writes nothing.</source>
+        <translation>Only the changed attributes of each row are written; a row with an error writes nothing.</translation>
+    </message>
+    <message>
+        <source>Matching</source>
+        <translation>Matching</translation>
+    </message>
+    <message>
+        <source>Remote ID: a row updates the object with the same remote id (the remote-id column), otherwise it creates one with that remote id. Best for moving content between sites.</source>
+        <translation>Remote ID: a row updates the object with the same remote id (the remote-id column), otherwise it creates one with that remote id. Best for moving content between sites.</translation>
+    </message>
+    <message>
+        <source>Object ID: a row updates the object with that id (the object-id column); for changes made to an export of the same site.</source>
+        <translation>Object ID: a row updates the object with that id (the object-id column); for changes made to an export of the same site.</translation>
+    </message>
+    <message>
+        <source>Always create: every row is a new object.</source>
+        <translation>Always create: every row is a new object.</translation>
+    </message>
+    <message>
+        <source>Values</source>
+        <translation>Values</translation>
+    </message>
+    <message>
+        <source>Dates: 2026-09-29, 2026-09-29 12:00, ISO 8601 or Unix time.</source>
+        <translation>Dates: 2026-09-29, 2026-09-29 12:00, ISO 8601 or Unix time.</translation>
+    </message>
+    <message>
+        <source>Checkboxes: 1 or 0, yes or no, ja or nein.</source>
+        <translation>Checkboxes: 1 or 0, yes or no, ja or nein.</translation>
+    </message>
+    <message>
+        <source>Relations: the attribute-ids or attribute-remote-ids columns; names are ambiguous and refused.</source>
+        <translation>Relations: the attribute-ids or attribute-remote-ids columns; names are ambiguous and refused.</translation>
+    </message>
+    <message>
+        <source>Images and files: a path below var/storage or an address on this site.</source>
+        <translation>Images and files: a path below var/storage or an address on this site.</translation>
+    </message>
+    <message>
+        <source>Rich text: the HTML the export writes.</source>
+        <translation>Rich text: the HTML the export writes.</translation>
+    </message>
+    <message>
+        <source>Importable datatypes</source>
+        <translation>Importable datatypes</translation>
+    </message>
+    <message>
+        <source>Other datatypes are shown in the mapping as not supported, with the reason, and never written.</source>
+        <translation>Other datatypes are shown in the mapping as not supported, with the reason, and never written.</translation>
+    </message>
+    <message>
+        <source>Your permissions apply to every row: creating below the parent, editing the matched object.</source>
+        <translation>Your permissions apply to every row: creating below the parent, editing the matched object.</translation>
+    </message>
+    <message>
+        <source>Every import publishes new versions; keep a backup or an export of the class before a large import.</source>
+        <translation>Every import publishes new versions; keep a backup or an export of the class before a large import.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a day.</source>
+        <translation>The uploaded file is kept privately on the server and removed after the import or after a day.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:import --file ... (a dry run unless --apply).</source>
+        <translation>Command line: ext:xrowextract:import --file ... (a dry run unless --apply).</translation>
+    </message>
+    <message>
+        <source>Exports that run in the background, for selections too large for one page request. Start one with &quot;Run in the background&quot; in the One class or Site archive tab.</source>
+        <translation>Exports that run in the background, for selections too large for one page request. Start one with &quot;Run in the background&quot; in the One class or Site archive tab.</translation>
+    </message>
+    <message>
+        <source>Set up the export as usual</source>
+        <translation>Set up the export as usual</translation>
+    </message>
+    <message>
+        <source>Everything you chose (nodes, classes, languages, filters, sort, columns, format) goes into the job.</source>
+        <translation>Everything you chose (nodes, classes, languages, filters, sort, columns, format) goes into the job.</translation>
+    </message>
+    <message>
+        <source>The job starts at once; this page shows its progress and updates on its own.</source>
+        <translation>The job starts at once; this page shows its progress and updates on its own.</translation>
+    </message>
+    <message>
+        <source>Download the file</source>
+        <translation>Download the file</translation>
+    </message>
+    <message>
+        <source>When the job is done; you can leave and come back.</source>
+        <translation>When the job is done; you can leave and come back.</translation>
+    </message>
+    <message>
+        <source>Good to know</source>
+        <translation>Good to know</translation>
+    </message>
+    <message>
+        <source>A job exports with your read access, like the page does.</source>
+        <translation>A job exports with your read access, like the page does.</translation>
+    </message>
+    <message>
+        <source>You see your own jobs; users with the policy xrowextract/all_jobs see the jobs of every user.</source>
+        <translation>You see your own jobs; users with the policy xrowextract/all_jobs see the jobs of every user.</translation>
+    </message>
+    <message>
+        <source>Finished jobs and their files are removed after the days set in csv.ini [Jobs] RetentionDays.</source>
+        <translation>Finished jobs and their files are removed after the days set in csv.ini [Jobs] RetentionDays.</translation>
+    </message>
+    <message>
+        <source>Files are kept privately on the server and are only sent to their owner.</source>
+        <translation>Files are kept privately on the server and are only sent to their owner.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</source>
+        <translation>Command line: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</translation>
+    </message>
+    <message>
         <source>Job started: </source>
         <translation>Job started: </translation>
     </message>

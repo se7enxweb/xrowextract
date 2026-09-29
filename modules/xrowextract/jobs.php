@@ -68,6 +68,6 @@ $Result['path'] = array(
     array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
     array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Jobs' ) ),
 );
-$Result['left_menu'] = 'design:xrowextract/menu.tpl';
+$Result['left_menu'] = 'design:xrowextract/menu_jobs.tpl';
 
 ?>

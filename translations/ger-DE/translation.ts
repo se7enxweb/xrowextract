@@ -2,6 +2,178 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Start from a template</source>
+        <translation>Mit einer Vorlage beginnen</translation>
+    </message>
+    <message>
+        <source>Download a template for this class</source>
+        <translation>Vorlage für diese Klasse herunterladen</translation>
+    </message>
+    <message>
+        <source>Choose a class first</source>
+        <translation>Zuerst eine Klasse wählen</translation>
+    </message>
+    <message>
+        <source>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.</source>
+        <translation>Eine leere Datei mit jeder Spalte, die der Import für die Klasse versteht (der Spaltensatz Migration): Zeilen ausfüllen und importieren. Ein Export mit dem Satz Migration ist dieselbe Datei mit ausgefüllten Zeilen.</translation>
+    </message>
+    <message>
+        <source>Reads a CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</source>
+        <translation>Liest eine CSV- oder JSON-Datei in eine Klasse ein: Zeilen aktualisieren die passenden Objekte und legen die übrigen an. Geschrieben wird erst, nachdem Sie den Probelauf gesehen haben.</translation>
+    </message>
+    <message>
+        <source>Choose the class, matching, language and parent</source>
+        <translation>Klasse, Zuordnung, Sprache und Elternknoten wählen</translation>
+    </message>
+    <message>
+        <source>Before or after the upload; a class, language or parent column in the file wins for its rows.</source>
+        <translation>Vor oder nach dem Hochladen; eine Klassen-, Sprach- oder Elternspalte in der Datei gilt für ihre Zeilen.</translation>
+    </message>
+    <message>
+        <source>Upload the file</source>
+        <translation>Datei hochladen</translation>
+    </message>
+    <message>
+        <source>An export of this tool (the Migration column set carries everything needed), or a filled template.</source>
+        <translation>Ein Export dieses Werkzeugs (der Spaltensatz Migration enthält alles Nötige) oder eine ausgefüllte Vorlage.</translation>
+    </message>
+    <message>
+        <source>Check the column mapping</source>
+        <translation>Spaltenzuordnung prüfen</translation>
+    </message>
+    <message>
+        <source>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.</source>
+        <translation>Spalten werden nach Namen Attributen, Attributformaten und Sonderspalten zugeordnet; jede lässt sich ändern oder ignorieren.</translation>
+    </message>
+    <message>
+        <source>Read the dry run</source>
+        <translation>Probelauf lesen</translation>
+    </message>
+    <message>
+        <source>Per row: create, update (old and new values), unchanged, skip or error with the reason.</source>
+        <translation>Je Zeile: anlegen, aktualisieren (alte und neue Werte), unverändert, überspringen oder Fehler mit Grund.</translation>
+    </message>
+    <message>
+        <source>Import the changes</source>
+        <translation>Änderungen importieren</translation>
+    </message>
+    <message>
+        <source>Only the changed attributes of each row are written; a row with an error writes nothing.</source>
+        <translation>Nur die geänderten Attribute jeder Zeile werden geschrieben; eine Zeile mit Fehler schreibt nichts.</translation>
+    </message>
+    <message>
+        <source>Matching</source>
+        <translation>Zuordnung</translation>
+    </message>
+    <message>
+        <source>Remote ID: a row updates the object with the same remote id (the remote-id column), otherwise it creates one with that remote id. Best for moving content between sites.</source>
+        <translation>Remote-ID: eine Zeile aktualisiert das Objekt mit derselben Remote-ID (Spalte remote-id), sonst legt sie eines mit dieser Remote-ID an. Am besten für Inhalte zwischen Websites.</translation>
+    </message>
+    <message>
+        <source>Object ID: a row updates the object with that id (the object-id column); for changes made to an export of the same site.</source>
+        <translation>Objekt-ID: eine Zeile aktualisiert das Objekt mit dieser ID (Spalte object-id); für Änderungen an einem Export derselben Website.</translation>
+    </message>
+    <message>
+        <source>Always create: every row is a new object.</source>
+        <translation>Immer anlegen: jede Zeile ist ein neues Objekt.</translation>
+    </message>
+    <message>
+        <source>Values</source>
+        <translation>Werte</translation>
+    </message>
+    <message>
+        <source>Dates: 2026-09-29, 2026-09-29 12:00, ISO 8601 or Unix time.</source>
+        <translation>Datumsangaben: 2026-09-29, 2026-09-29 12:00, ISO 8601 oder Unix-Zeit.</translation>
+    </message>
+    <message>
+        <source>Checkboxes: 1 or 0, yes or no, ja or nein.</source>
+        <translation>Checkboxen: 1 oder 0, yes oder no, ja oder nein.</translation>
+    </message>
+    <message>
+        <source>Relations: the attribute-ids or attribute-remote-ids columns; names are ambiguous and refused.</source>
+        <translation>Beziehungen: die Spalten attribut-ids oder attribut-remote-ids; Namen sind mehrdeutig und werden abgelehnt.</translation>
+    </message>
+    <message>
+        <source>Images and files: a path below var/storage or an address on this site.</source>
+        <translation>Bilder und Dateien: ein Pfad unter var/storage oder eine Adresse auf dieser Website.</translation>
+    </message>
+    <message>
+        <source>Rich text: the HTML the export writes.</source>
+        <translation>Rich Text: das HTML, das der Export schreibt.</translation>
+    </message>
+    <message>
+        <source>Importable datatypes</source>
+        <translation>Importierbare Datentypen</translation>
+    </message>
+    <message>
+        <source>Other datatypes are shown in the mapping as not supported, with the reason, and never written.</source>
+        <translation>Andere Datentypen erscheinen in der Zuordnung als nicht unterstützt, mit Grund, und werden nie geschrieben.</translation>
+    </message>
+    <message>
+        <source>Your permissions apply to every row: creating below the parent, editing the matched object.</source>
+        <translation>Ihre Rechte gelten für jede Zeile: Anlegen unter dem Elternknoten, Bearbeiten des gefundenen Objekts.</translation>
+    </message>
+    <message>
+        <source>Every import publishes new versions; keep a backup or an export of the class before a large import.</source>
+        <translation>Jeder Import veröffentlicht neue Versionen; sichern oder exportieren Sie die Klasse vor einem großen Import.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a day.</source>
+        <translation>Die hochgeladene Datei bleibt privat auf dem Server und wird nach dem Import oder nach einem Tag entfernt.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:import --file ... (a dry run unless --apply).</source>
+        <translation>Kommandozeile: ext:xrowextract:import --file ... (ein Probelauf, außer mit --apply).</translation>
+    </message>
+    <message>
+        <source>Exports that run in the background, for selections too large for one page request. Start one with &quot;Run in the background&quot; in the One class or Site archive tab.</source>
+        <translation>Exporte, die im Hintergrund laufen, für Auswahlen, die für eine Seitenanfrage zu groß sind. Starten mit „Im Hintergrund ausführen“ im Reiter Eine Klasse oder Seitenarchiv.</translation>
+    </message>
+    <message>
+        <source>Set up the export as usual</source>
+        <translation>Den Export wie gewohnt einrichten</translation>
+    </message>
+    <message>
+        <source>Everything you chose (nodes, classes, languages, filters, sort, columns, format) goes into the job.</source>
+        <translation>Alles Gewählte (Knoten, Klassen, Sprachen, Filter, Sortierung, Spalten, Format) geht in den Job ein.</translation>
+    </message>
+    <message>
+        <source>The job starts at once; this page shows its progress and updates on its own.</source>
+        <translation>Der Job startet sofort; diese Seite zeigt den Fortschritt und aktualisiert sich von selbst.</translation>
+    </message>
+    <message>
+        <source>Download the file</source>
+        <translation>Die Datei herunterladen</translation>
+    </message>
+    <message>
+        <source>When the job is done; you can leave and come back.</source>
+        <translation>Wenn der Job fertig ist; Sie können gehen und wiederkommen.</translation>
+    </message>
+    <message>
+        <source>Good to know</source>
+        <translation>Gut zu wissen</translation>
+    </message>
+    <message>
+        <source>A job exports with your read access, like the page does.</source>
+        <translation>Ein Job exportiert mit Ihren Leserechten, wie die Seite.</translation>
+    </message>
+    <message>
+        <source>You see your own jobs; users with the policy xrowextract/all_jobs see the jobs of every user.</source>
+        <translation>Sie sehen Ihre eigenen Jobs; Benutzer mit der Richtlinie xrowextract/all_jobs sehen die Jobs aller Benutzer.</translation>
+    </message>
+    <message>
+        <source>Finished jobs and their files are removed after the days set in csv.ini [Jobs] RetentionDays.</source>
+        <translation>Fertige Jobs und ihre Dateien werden nach den in csv.ini [Jobs] RetentionDays gesetzten Tagen entfernt.</translation>
+    </message>
+    <message>
+        <source>Files are kept privately on the server and are only sent to their owner.</source>
+        <translation>Dateien bleiben privat auf dem Server und gehen nur an ihren Eigentümer.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</source>
+        <translation>Kommandozeile: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</translation>
+    </message>
+    <message>
         <source>Job started: </source>
         <translation>Job gestartet: </translation>
     </message>
