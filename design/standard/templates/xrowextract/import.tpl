@@ -37,13 +37,13 @@
                 <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
                 {* Every kind of file this page takes, at a glance; the package chip opens its reference section *}
                 <ul class="xe-filetypes" aria-label="{'Files you can import'|i18n('design/standard/extract')|wash}">
-                    <li class="xe-filetype xe-filetype-main"><strong>XML</strong> <small>{'recommended'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><strong>CSV</strong></li>
-                    <li class="xe-filetype"><strong>JSON</strong></li>
+                    <li class="xe-filetype xe-filetype-main"><a href="#xe-ref-xml"><strong>XML</strong></a> <small>{'recommended'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><a href="#xe-ref-csv"><strong>CSV</strong></a></li>
+                    <li class="xe-filetype"><a href="#xe-ref-json"><strong>JSON</strong></a></li>
                     <li class="xe-filetype xe-filetype-package"><a href="#xe-ref-packages"><strong>{'Content package'|i18n('design/standard/extract')}</strong> <code>.ezpkg</code> <code>.tar.gz</code></a>
                         <small>{'classes and content together, installed through the package system'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><strong>{'Class XML'|i18n('design/standard/extract')}</strong> <small>{'one class definition'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><strong>{'Object XML'|i18n('design/standard/extract')}</strong> <small>{'content objects of a package'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><a href="#xe-ref-packages"><strong>{'Class XML'|i18n('design/standard/extract')}</strong></a> <small>{'one class definition'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><a href="#xe-ref-packages"><strong>{'Object XML'|i18n('design/standard/extract')}</strong></a> <small>{'content objects of a package'|i18n('design/standard/extract')}</small></li>
                 </ul>
                 <p class="xe-help">{'A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.'|i18n('design/standard/extract')} <a href={'xrowextract/package'|ezurl}>{'Package tab'|i18n('design/standard/extract')}</a></p>
                 <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
@@ -271,7 +271,7 @@
                 </div>
             </header>
 
-            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_xml'|ezurl}{if ezpreference( 'admin_xrowextract_ref_xml' )|eq( 'open' )} open{/if}>
+            <details id="xe-ref-xml" class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_xml'|ezurl}{if ezpreference( 'admin_xrowextract_ref_xml' )|eq( 'open' )} open{/if}>
                 <summary>{'XML - the recommended format'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root <export>, its class and when it was written; a <columns> block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one <object> per row, one <field name="..."> per column, matched to the <columns> block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).'|i18n('design/standard/extract')|wash}</p>
                 {if $ReferenceExamples.xml.rowCount|gt( 0 )}
@@ -298,7 +298,7 @@
                 {/if}
             </details>
 
-            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_csv'|ezurl}{if ezpreference( 'admin_xrowextract_ref_csv' )|ne( 'closed' )} open{/if}>
+            <details id="xe-ref-csv" class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_csv'|ezurl}{if ezpreference( 'admin_xrowextract_ref_csv' )|ne( 'closed' )} open{/if}>
                 <summary>{'CSV'|i18n('design/standard/extract')}</summary>
                 <ul>
                     <li>{'The header row holds the column names (an attribute identifier with "-" for "_", an attribute format as identifier-format, or a special column such as remote-id); the importer maps them by name, or lets you change any mapping by hand.'|i18n('design/standard/extract')}</li>
@@ -320,7 +320,7 @@
                 {/if}
             </details>
 
-            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_json'|ezurl}{if ezpreference( 'admin_xrowextract_ref_json' )|ne( 'closed' )} open{/if}>
+            <details id="xe-ref-json" class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_json'|ezurl}{if ezpreference( 'admin_xrowextract_ref_json' )|ne( 'closed' )} open{/if}>
                 <summary>{'JSON'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.'|i18n('design/standard/extract')}</p>
                 {if $ReferenceExamples.json.rowCount|gt( 0 )}

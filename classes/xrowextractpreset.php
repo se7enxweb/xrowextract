@@ -251,6 +251,13 @@ class XrowExtractPreset
                 $aliasDefinition = XrowExtractFetchAlias::find( $parts[0], isset( $parts[1] ) ? $parts[1] : '' );
                 if ( !$aliasDefinition )
                     return array( 'definition' => $definition, 'placeholders' => $placeholders, 'chain' => $chain, 'error' => "named fetch not found: $aliasSpec" );
+                // A preset names its start node "node" (the word its users see); a content fetch alias
+                // calls the same thing Parameter[parent_node_id]. One fills the other unless both are given.
+                if ( isset( $paramOverrides['node'] ) && trim( (string)$paramOverrides['node'] ) !== ''
+                     && ( !isset( $paramOverrides['parent_node_id'] ) || trim( (string)$paramOverrides['parent_node_id'] ) === '' ) )
+                {
+                    $paramOverrides['parent_node_id'] = $paramOverrides['node'];
+                }
                 $applied = XrowExtractFetchAlias::apply( $aliasDefinition, $nodeIDForAlias, $paramOverrides );
                 $layer = self::definitionFromAliasValues( $applied['values'] );
                 $definition = array_replace_recursive( $layer, $definition );
