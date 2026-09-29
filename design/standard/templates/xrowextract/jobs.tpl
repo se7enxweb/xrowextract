@@ -110,8 +110,8 @@
                     {* The job's own log: live while it runs (the poll appends from data-offset), kept afterwards *}
                     {if or( $job.log_text|ne( '' ), $job.active )}
                     <details class="xe-job-log"{if $job.active} open{/if}>
-                        <summary>{'Log'|i18n('design/standard/extract')}{if $job.log_cut} <small>{'(the last 64 KB)'|i18n('design/standard/extract')}</small>{/if}</summary>
-                        <pre class="xe-job-log-text" data-role="log" data-offset="{$job.log_offset}" tabindex="0">{$job.log_text|wash}</pre>
+                        <summary>{'Log'|i18n('design/standard/extract')}{if $job.log_cut} <small>{'(the last 8 MB)'|i18n('design/standard/extract')}</small>{/if}</summary>
+                        <pre class="xe-job-log-text" data-role="log" data-offset="{$job.log_offset}" data-phase="{$job.log_phase|wash}" data-step="{$job.log_step}" tabindex="0">{$job.log_text|wash}</pre>
                     </details>
                     {/if}
                     {if $job.type|eq( 'import' )|and( $job.counts )}

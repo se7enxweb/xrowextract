@@ -338,26 +338,78 @@ class XrowExtractJob
 
     /**
      * A job log as a person reads it: terminal colour codes removed (eZCLI writes them, the kernel's
-     * progress bars included), carriage-return redraws flattened, and the progress bar's own lines
-     * ("Installing content objects | 12.6% (548/4339) | elapsed ... | end @ 16:15") left out - they are
-     * shown as the job's progress bar instead (logProgress()), and would otherwise bury the steps,
-     * warnings and errors under thousands of near-identical lines.
+     * progress bars included) and carriage-return redraws flattened. A progress bar redraws itself after
+     * every item ("Installing content objects | 12.6% (548/4339) | elapsed ... | end @ 16:15"), thousands of
+     * near-identical lines that would bury the steps, warnings and errors; of those only a short timeline is
+     * kept: the first line of each phase, then one line each time the phase passes another 10 %.
+     * $state carries the phase and 10 % step already written between calls (the Jobs page appends a running
+     * log in pieces), so the timeline does not start over with every piece.
      */
-    public static function cleanLog( $text )
+    public static function cleanLog( $text, array &$state = null )
     {
+        if ( !is_array( $state ) )
+            $state = array( 'phase' => '', 'step' => -1 );
         $text = preg_replace( '/\x1b\[[0-9;?]*[A-Za-z]/', '', (string)$text );
         $text = preg_replace( '/(?<![\x1b])\[[0-9;]{1,12}m/', '', $text ); // codes whose ESC byte got lost
         $text = str_replace( "\r\n", "\n", $text );
         $lines = array();
         foreach ( preg_split( '/[\n\r]/', $text ) as $line )
         {
-            if ( self::parseProgressLine( $line ) )
+            $progress = self::parseProgressLine( $line );
+            if ( $progress )
+            {
+                $phase = $progress['phase'] !== '' ? $progress['phase'] : 'Working';
+                $step = (int)floor( $progress['percent'] / 10 );
+                if ( $phase === $state['phase'] && $step <= $state['step'] )
+                    continue;
+                $state = array( 'phase' => $phase, 'step' => $step );
+                $lines[] = sprintf( '%s · %s%% (%d/%d)%s%s', $phase, rtrim( rtrim( number_format( $progress['percent'], 1 ), '0' ), '.' ),
+                                    $progress['done'], $progress['total'],
+                                    $progress['elapsed'] !== '' ? ' · elapsed ' . $progress['elapsed'] : '',
+                                    $progress['end_at'] !== '' ? ' · expected end ' . $progress['end_at'] : '' );
                 continue;
+            }
             if ( trim( $line ) === '' && $lines && trim( end( $lines ) ) === '' )
                 continue;
             $lines[] = rtrim( $line );
         }
         return implode( "\n", $lines );
+    }
+
+    /**
+     * A whole job log, cleaned (cleanLog()), read line by line so a long log costs no memory: the text, the
+     * timeline state reached at its end (for the page to continue from) and the byte size read.
+     * Beyond $maxBytes (default 8 MB) only the last $maxBytes are read, after a marker line.
+     */
+    public static function cleanLogFile( $path, $maxBytes = 8388608 )
+    {
+        $state = null;
+        $size = is_file( $path ) ? (int)@filesize( $path ) : 0;
+        $out = '';
+        $fp = $size ? @fopen( $path, 'rb' ) : false;
+        if ( $fp )
+        {
+            if ( $size > $maxBytes )
+            {
+                fseek( $fp, $size - $maxBytes );
+                fgets( $fp ); // the line the cut runs through
+                $out .= "…\n";
+            }
+            $batch = '';
+            while ( ( $line = fgets( $fp ) ) !== false )
+            {
+                $batch .= $line;
+                if ( strlen( $batch ) > 262144 )
+                {
+                    $out .= self::cleanLog( $batch, $state ) . "\n";
+                    $batch = '';
+                }
+            }
+            if ( $batch !== '' )
+                $out .= self::cleanLog( $batch, $state );
+            fclose( $fp );
+        }
+        return array( 'text' => trim( $out, "\n" ), 'state' => $state ? $state : array( 'phase' => '', 'step' => -1 ), 'size' => $size );
     }
 
     /** One eZCLI progress bar line, as array( phase, percent, done, total, elapsed, end_at ), or null. */

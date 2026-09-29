@@ -59,6 +59,12 @@ if ( $logSize > $logOffset )
     }
 }
 $logRead = strlen( $logText );
+// The log's progress timeline continues where the page left off (the phase and 10 % step it has shown)
+$logState = array(
+    'phase' => isset( $_GET['log_phase'] ) ? mb_substr( (string)$_GET['log_phase'], 0, 120 ) : '',
+    'step' => isset( $_GET['log_step'] ) && preg_match( '/^-?\d{1,3}$/', (string)$_GET['log_step'] ) ? (int)$_GET['log_step'] : -1,
+);
+$logClean = XrowExtractJob::cleanLog( $logText, $logState );
 
 // The job's own progress bar (the kernel's installers print one: "40% (1736/4339) ... end @ 16:16") is the
 // most exact source while it runs; the database count and the progress file come after it
@@ -76,6 +82,7 @@ echo json_encode( array(
     'has_file' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $id ) . '/' . $job['output_file'] ),
     'progress' => $progress,
     'install' => $installProgress,
-    'log' => array( 'text' => XrowExtractJob::cleanLog( $logText ), 'offset' => $logOffset + $logRead, 'size' => $logSize ),
+    'log' => array( 'text' => $logClean !== '' ? $logClean . "\n" : '', 'offset' => $logOffset + $logRead, 'size' => $logSize,
+                    'phase' => $logState['phase'], 'step' => $logState['step'] ),
 ), JSON_INVALID_UTF8_SUBSTITUTE );
 eZExecution::cleanExit();

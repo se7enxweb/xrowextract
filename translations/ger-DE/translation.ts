@@ -2,6 +2,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>(the last 8 MB)</source>
+        <translation>(die letzten 8 MB)</translation>
+    </message>
+    <message>
         <source>Cancel this job?</source>
         <translation>Diesen Auftrag abbrechen?</translation>
     </message>

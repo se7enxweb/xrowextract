@@ -836,12 +836,19 @@
             row.insertBefore(details, anchor);
             el = details.querySelector('[data-role="log"]');
         }
-        if (!el || !log.text) {
+        if (!el) {
+            return;
+        }
+        // Always move on past what was read, also when all of it was progress bar lines left out, or the
+        // page would ask for the same piece again and never reach the new lines
+        el.setAttribute('data-offset', String(log.offset));
+        el.setAttribute('data-phase', log.phase || '');
+        el.setAttribute('data-step', String(log.step));
+        if (!log.text) {
             return;
         }
         var atEnd = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
         el.appendChild(document.createTextNode(log.text));
-        el.setAttribute('data-offset', String(log.offset));
         if (atEnd) {
             el.scrollTop = el.scrollHeight;
         }
@@ -940,7 +947,7 @@
             var id = row.getAttribute('data-job-id');
             var logEl = row.querySelector('[data-role="log"]');
             var logOffset = logEl ? (parseInt(logEl.getAttribute('data-offset'), 10) || 0) : 0;
-            fetch(pollBase + '/' + id + '?log_offset=' + logOffset, { credentials: 'same-origin' })
+            fetch(pollBase + '/' + id + '?log_offset=' + logOffset + '&log_phase=' + encodeURIComponent(logEl ? (logEl.getAttribute('data-phase') || '') : '') + '&log_step=' + (logEl ? (logEl.getAttribute('data-step') || '-1') : '-1'), { credentials: 'same-origin' })
                 .then(function (response) { return response.ok ? response.json() : null; })
                 .then(function (data) { if (data && !data.error) { applyState(row, data); } })
                 .catch(function () {});

@@ -101,30 +101,14 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
             $progress = array( 'done' => $install['done'], 'total' => $install['total'],
                                'phase' => sprintf( '%d/%d classes, %d/%d objects', $install['classes_done'], $install['classes_total'], $install['objects_done'], $install['objects_total'] ) );
     }
-    // The end of the job's log (what it printed: steps, warnings, errors), 64 KB at most; the page's poll
-    // appends to it from this offset while the job runs
+    // The whole job log as a person reads it (XrowExtractJob::cleanLogFile(): steps, warnings, errors, and a
+    // progress timeline of one line per phase and 10 %), read line by line; the page's poll appends to it from
+    // this offset and timeline state while the job runs
     $logPath = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::LOG_FILE;
-    $logSize = is_file( $logPath ) ? (int)@filesize( $logPath ) : 0;
-    $logFrom = max( 0, $logSize - 65536 );
-    $logText = '';
-    if ( $logSize )
-    {
-        // The start of the log (the command, what the job set out to do) and its end (the latest steps,
-        // warnings, errors); a line the cut runs through is left out rather than shown in pieces
-        $tail = (string)@file_get_contents( $logPath, false, null, $logFrom );
-        if ( $logFrom > 0 )
-        {
-            $head = (string)@file_get_contents( $logPath, false, null, 0, 8192 );
-            $head = substr( $head, 0, max( (int)strrpos( $head, "\n" ), (int)strrpos( $head, "\r" ) ) );
-            $cut = strcspn( $tail, "\r\n" );
-            $tail = substr( $tail, $cut < strlen( $tail ) ? $cut + 1 : 0 );
-            $logText = trim( XrowExtractJob::cleanLog( $head ) ) . "\n…\n" . trim( XrowExtractJob::cleanLog( $tail ) );
-        }
-        else
-        {
-            $logText = XrowExtractJob::cleanLog( $tail );
-        }
-    }
+    $cleaned = XrowExtractJob::cleanLogFile( $logPath );
+    $logText = $cleaned['text'];
+    $logSize = $cleaned['size'];
+    $logFrom = $logSize > 8388608 ? 1 : 0;
     // The job's own progress bar in its log is the most exact progress while it runs
     if ( $job['state'] === 'running' && ( $fromLog = XrowExtractJob::logProgress( $logPath ) ) )
         $progress = $fromLog;
@@ -143,6 +127,8 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'log_text' => $logText,
         'log_offset' => $logSize,
         'log_cut' => $logFrom > 0,
+        'log_phase' => $cleaned['state']['phase'],
+        'log_step' => (int)$cleaned['state']['step'],
         'state' => $job['state'],
         'owner' => $job['owner'],
         'owner_user' => $ownerInfo( (string)$job['owner'] ),
