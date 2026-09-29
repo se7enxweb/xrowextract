@@ -2,6 +2,58 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>File type</source>
+        <translation>Dateityp</translation>
+    </message>
+    <message>
+        <source>JSON: an array of objects, one per row, keyed by the column names; values as they are.</source>
+        <translation>JSON: eine Liste von Objekten, eines je Zeile, mit den Spaltennamen als Schlüsseln; Werte unverändert.</translation>
+    </message>
+    <message>
+        <source>XML: an export element with the columns, then one object element per row with a field element per column.</source>
+        <translation>XML: ein export-Element mit den Spalten, dann je Zeile ein object-Element mit einem field-Element je Spalte.</translation>
+    </message>
+    <message>
+        <source>CSV for spreadsheets; the settings below apply to it.</source>
+        <translation>CSV für Tabellenkalkulationen; die Einstellungen darunter gelten dafür.</translation>
+    </message>
+    <message>
+        <source>Download %type</source>
+        <translation>%type herunterladen</translation>
+    </message>
+    <message>
+        <source>The first rows as %type</source>
+        <translation>Die ersten Zeilen als %type</translation>
+    </message>
+    <message>
+        <source>Files</source>
+        <translation>Dateien</translation>
+    </message>
+    <message>
+        <source>One file per class in this format; the separator, line endings and quoting apply to CSV.</source>
+        <translation>Eine Datei je Klasse in diesem Format; Trennzeichen, Zeilenenden und Anführungszeichen gelten für CSV.</translation>
+    </message>
+    <message>
+        <source>Sites</source>
+        <translation>Websites</translation>
+    </message>
+    <message>
+        <source>Remove this site from the selection</source>
+        <translation>Diese Website aus der Auswahl entfernen</translation>
+    </message>
+    <message>
+        <source>Add this site to the selection</source>
+        <translation>Diese Website zur Auswahl hinzufügen</translation>
+    </message>
+    <message>
+        <source>the root node of the default siteaccess</source>
+        <translation>der Wurzelknoten des Standard-Siteaccess</translation>
+    </message>
+    <message>
+        <source>the class with the most objects in the selection</source>
+        <translation>die Klasse mit den meisten Objekten in der Auswahl</translation>
+    </message>
+    <message>
         <source>Languages and columns</source>
         <translation>Sprachen und Spalten</translation>
     </message>

@@ -67,12 +67,62 @@ class XrowExtractArchive
         $media = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'MediaRootNode' ) );
         $users = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'UserRootNode' ) );
         return array(
+            'sites'         => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Sites' ),                  'nodes' => self::defaultSiteNodeIDs() ),
             'content_media' => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content and media' ),      'nodes' => array( $root, $media ) ),
             'content'       => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content structure' ),      'nodes' => array( $root ) ),
             'media'         => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Media library' ),          'nodes' => array( $media ) ),
             'users'         => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'User accounts' ),          'nodes' => array( $users ) ),
             'everything'    => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content, media and users' ), 'nodes' => array( $root, $media, $users ) ),
         );
+    }
+
+    /** export.ini [SiteArchive] SitesParentNodeID: the node whose children are the sites (default: the content structure). */
+    public static function sitesParentNodeID()
+    {
+        $ini = eZINI::instance( 'export.ini' );
+        $parent = $ini->hasVariable( 'SiteArchive', 'SitesParentNodeID' ) ? (int)$ini->variable( 'SiteArchive', 'SitesParentNodeID' ) : 0;
+        return $parent > 0 ? $parent : self::topLevelNodeID( (int)eZINI::instance( 'content.ini' )->variable( 'NodeSettings', 'RootNode' ) );
+    }
+
+    /**
+     * The sites the "Sites" set selects: export.ini [SiteArchive] DefaultSiteNodeIDs[], else the root node of
+     * the default (public) siteaccess, else every site.
+     */
+    public static function defaultSiteNodeIDs()
+    {
+        $ini = eZINI::instance( 'export.ini' );
+        $ids = $ini->hasVariable( 'SiteArchive', 'DefaultSiteNodeIDs' ) ? array_filter( array_map( 'intval', (array)$ini->variable( 'SiteArchive', 'DefaultSiteNodeIDs' ) ) ) : array();
+        if ( !$ids )
+        {
+            $site = eZINI::instance();
+            $public = eZSiteAccess::getIni( $site->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
+            $root = (int)$public->variable( 'NodeSettings', 'RootNode' );
+            if ( $root > 0 && $root !== self::sitesParentNodeID() )
+                $ids = array( $root );
+        }
+        if ( !$ids )
+        {
+            foreach ( self::siteList() as $siteNode )
+                $ids[] = $siteNode['node_id'];
+        }
+        return array_values( array_unique( $ids ) );
+    }
+
+    /** The sites: the children of SitesParentNodeID the user may read, with object counts. */
+    public static function siteList()
+    {
+        $parent = eZContentObjectTreeNode::fetch( self::sitesParentNodeID() );
+        $sites = array();
+        if ( !$parent instanceof eZContentObjectTreeNode )
+            return $sites;
+        foreach ( (array)$parent->subTree( array( 'Depth' => 1, 'SortBy' => $parent->sortArray(), 'Limit' => 50 ) ) as $child )
+        {
+            if ( !$child->canRead() )
+                continue;
+            $sites[] = array( 'node_id' => (int)$child->attribute( 'node_id' ), 'name' => $child->attribute( 'name' ),
+                              'class_name' => $child->attribute( 'class_name' ), 'count' => self::subtreeCount( $child ) );
+        }
+        return $sites;
     }
 
     /**

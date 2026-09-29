@@ -4,6 +4,58 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>File type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>JSON: an array of objects, one per row, keyed by the column names; values as they are.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>XML: an export element with the columns, then one object element per row with a field element per column.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CSV for spreadsheets; the settings below apply to it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download %type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The first rows as %type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One file per class in this format; the separator, line endings and quoting apply to CSV.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove this site from the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add this site to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the root node of the default siteaccess</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the class with the most objects in the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Languages and columns</source>
         <translation type="unfinished"></translation>
     </message>

@@ -14,7 +14,7 @@ $state = $http->hasSessionVariable( 'eZExtractArchive' ) ? $http->sessionVariabl
 if ( !is_array( $state ) )
 {
     $sets = XrowExtractArchive::nodeSets();
-    $state = array( 'nodes' => $sets['content_media']['nodes'], 'excluded' => array(), 'format' => 'zip',
+    $state = array( 'nodes' => $sets['sites']['nodes'], 'excluded' => array(), 'format' => 'zip',
                     'separator' => ',', 'escape' => true, 'line' => 'win32' );
 }
 $nodeSets = XrowExtractArchive::nodeSets();
@@ -85,6 +85,10 @@ if ( $http->hasPostVariable( 'ArchiveColumns' ) && isset( $columnChoices[$http->
     $state['columns'] = $http->postVariable( 'ArchiveColumns' );
 if ( !isset( $state['columns'] ) || !isset( $columnChoices[$state['columns']] ) )
     $state['columns'] = 'standard';
+if ( $http->hasPostVariable( 'OutputFormat' ) && XrowExtractWriter::isFormat( $http->postVariable( 'OutputFormat' ) ) )
+    $state['output'] = $http->postVariable( 'OutputFormat' );
+if ( !isset( $state['output'] ) || !XrowExtractWriter::isFormat( $state['output'] ) )
+    $state['output'] = 'csv';
 if ( $http->hasPostVariable( 'LanguageSelection' ) )
     $state['plain_text'] = $http->hasPostVariable( 'PlainText' );
 if ( !isset( $state['plain_text'] ) )
@@ -151,7 +155,7 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
         try
         {
             $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']], $state['password_hashes'],
-                                                  array( 'languages' => $state['languages'], 'columns' => $state['columns'], 'plain_text' => $state['plain_text'] ) );
+                                                  array( 'languages' => $state['languages'], 'columns' => $state['columns'], 'plain_text' => $state['plain_text'], 'output' => $state['output'] ) );
         }
         catch ( Exception $e )
         {
@@ -238,6 +242,10 @@ foreach ( $classes as $class )
 $tpl->setVariable( 'state', $state );
 $tpl->setVariable( 'separator_display', $state['separator'] === "\t" ? '\t' : $state['separator'] );
 $tpl->setVariable( 'node_sets', $nodeSets );
+$siteList = XrowExtractArchive::siteList();
+foreach ( $siteList as $i => $siteNode )
+    $siteList[$i]['selected'] = in_array( $siteNode['node_id'], $state['nodes'], true );
+$tpl->setVariable( 'site_list', $siteList );
 $tpl->setVariable( 'active_set', $activeSet );
 $tpl->setVariable( 'nodes', $nodes );
 $tpl->setVariable( 'suggestions', array_values( $suggestions ) );
@@ -256,6 +264,7 @@ $choices = array();
 foreach ( $columnChoices as $id => $choice )
     $choices[] = array( 'id' => $id, 'name' => $choice[0], 'description' => $choice[1] );
 $tpl->setVariable( 'column_choices', $choices );
+$tpl->setVariable( 'output_formats', array_values( XrowExtractWriter::formats() ) );
 $tpl->setVariable( 'TabNotation', '\t' );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
 $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );

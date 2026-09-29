@@ -26,6 +26,12 @@
     <p class="xe-note">{'%count cells start like a spreadsheet formula; they are exported with a leading apostrophe so they open as text.'|i18n( 'design/standard/extract',, hash( '%count', $preview.formulas ) )}</p>
     {/if}
 
+    {if and( is_set( $preview_sample ), $preview_sample )}
+    <details class="xe-picker xe-output-sample" open>
+        <summary>{'The first rows as %type'|i18n( 'design/standard/extract',, hash( '%type', $preview_sample_format ) )}</summary>
+        <pre class="xe-sample-line">{$preview_sample|wash}</pre>
+    </details>
+    {/if}
     <div class="xe-toolbar">
         <label class="xe-filter">
             <span class="xe-visually-hidden">{'Filter rows'|i18n( 'design/standard/extract' )}</span>

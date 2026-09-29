@@ -27,10 +27,10 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][output:][dry-run][list-sets][list-formats][list-classes][user:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][output:][dry-run][list-sets][list-formats][list-classes][user:]',
     '',
     array(
-        'set'             => 'A ready-made node set (default content_media); --list-sets shows them',
+        'set'             => 'A ready-made node set (default sites: the default site, see export.ini [SiteArchive]); --list-sets shows them',
         'nodes'           => 'Comma list of node ids instead of a set (a node inside another is read once, with it)',
         'classes'         => 'Comma list of class ids or identifiers to export (default: every class with objects)',
         'exclude-classes' => 'Comma list of class ids or identifiers to leave out',
@@ -41,6 +41,7 @@ $options = $script->getOptions(
         'languages'       => 'all (default) or a comma list of locales: one row per object per language',
         'columns'         => 'standard (default: identity and every attribute), migration, attributes',
         'plain-text'      => 'Add the plain text of every rich text field',
+        'files'           => 'The files in the archive: csv (default), json, xml',
         'password-hashes' => 'Add the password hash and hash type to classes with a user account (needs the policy xrowextract/password_hash)',
         'output'          => 'File, or directory to write the archive into (default: the current directory, named <site>_export_<date>.<format>)',
         'dry-run'         => 'Show what would be exported, write nothing',
@@ -89,7 +90,7 @@ if ( $options['nodes'] )
 }
 else
 {
-    $setID = $options['set'] ? $options['set'] : 'content_media';
+    $setID = $options['set'] ? $options['set'] : 'sites';
     if ( !isset( $sets[$setID] ) )
         $fail( "Unknown set $setID (--set). Sets: " . implode( ', ', array_keys( $sets ) ) . '.' );
     $nodeIDs = $sets[$setID]['nodes'];
@@ -114,6 +115,9 @@ else
 $columnChoice = $options['columns'] ? $options['columns'] : 'standard';
 if ( !array_key_exists( $columnChoice, XrowExtractArchive::columnChoices() ) )
     $fail( "Unknown column choice $columnChoice (--columns). Choices: " . implode( ', ', array_keys( XrowExtractArchive::columnChoices() ) ) . '.' );
+$files = $options['files'] ? $options['files'] : 'csv';
+if ( !XrowExtractWriter::isFormat( $files ) )
+    $fail( "Unknown file format $files (--files). Formats: " . implode( ', ', array_keys( XrowExtractWriter::formats() ) ) . '.' );
 $counts = XrowExtractArchive::classCounts( $roots, $languages );
 
 // Classes
@@ -173,7 +177,7 @@ $started = microtime( true );
 try
 {
     $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'],
-                                          array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'] ) );
+                                          array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'], 'output' => $files ) );
 }
 catch ( Exception $e )
 {

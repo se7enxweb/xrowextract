@@ -150,7 +150,16 @@
                     <p>{'How the cells and rows are separated.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
-            <div class="xe-grid">
+            <div class="xe-field">
+                <span class="xe-label" id="xe-output-label">{'File type'|i18n('design/standard/extract')}</span>
+                <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-output-label">
+                    {foreach $OutputFormats as $format}
+                    <label><input type="radio" name="OutputFormat" value="{$format.id|wash}" class="xe-autosubmit"{if $format.id|eq( $OutputFormat )} checked{/if} /><span>{$format.name|wash}</span></label>
+                    {/foreach}
+                </div>
+                <p class="xe-help">{if $OutputFormat|eq( 'json' )}{'JSON: an array of objects, one per row, keyed by the column names; values as they are.'|i18n('design/standard/extract')}{elseif $OutputFormat|eq( 'xml' )}{'XML: an export element with the columns, then one object element per row with a field element per column.'|i18n('design/standard/extract')}{else}{'CSV for spreadsheets; the settings below apply to it.'|i18n('design/standard/extract')}{/if}</p>
+            </div>
+            <div class="xe-grid{if $OutputFormat|ne( 'csv' )} xe-inactive{/if}">
                 <div class="xe-field">
                     <label class="xe-label" for="Separator">{'Column separator'|i18n('design/standard/extract')}</label>
                     <div class="xe-presets" data-tab="{$TabNotation|wash}">
@@ -182,7 +191,7 @@
                     <p class="xe-help">{'Recommended. Quoted cells may hold the separator, quotes and line breaks (%rfc). Unquoted removes line breaks, and a separator inside a value shifts the columns.'|i18n( 'design/standard/extract',, hash( '%rfc', '<a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a>' ) )}</p>
                 </div>
             </div>
-            <div class="xe-sample" aria-live="polite">
+            <div class="xe-sample{if $OutputFormat|ne( 'csv' )} xe-inactive{/if}" aria-live="polite">
                 <span class="xe-label">{'A row will look like this'|i18n('design/standard/extract')}</span>
                 <code class="xe-sample-line" data-value="{'Hello, "world"'|i18n('design/standard/extract')|wash}"
                       data-columns="{foreach $Attributes as $item max 3}{$item.exportname|wash}{delimiter}&#10;{/delimiter}{/foreach}"></code>
@@ -301,7 +310,7 @@
         </div>
         <div class="xe-actionbar-buttons">
             <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
-            <input class="defaultbutton" name="Download" type="submit" value="{'Download CSV'|i18n('design/standard/extract')}" />
+            <input class="defaultbutton" name="Download" type="submit" value="{'Download %type'|i18n('design/standard/extract',, hash( '%type', $OutputFormat|upcase ))}" />
         </div>
     </div>
 </div>

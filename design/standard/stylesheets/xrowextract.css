@@ -478,3 +478,11 @@
 .xe-column.xe-added { background: #ecfdf3; box-shadow: inset 3px 0 0 #12b76a; }
 .xe-column-notice { margin: .6em 0; background: #ecfdf3; color: #05603a; }
 .xe-column-notice-none { background: #f3f5f8; color: var(--xe-muted); }
+
+/* The sites of the "Sites" set, as toggles */
+.xe-site-toggles { margin-top: .8em; }
+.xe-set small { margin-left: .3em; opacity: .75; font-size: .82em; }
+
+/* The preview's sample in JSON or XML */
+.xe-output-sample { margin: .75em 1em 0; }
+.xe-output-sample pre { max-height: 22em; overflow: auto; margin: 0 .8em .8em; white-space: pre; }

@@ -34,6 +34,20 @@
                     <button type="submit" name="UseNodeSet" value="{$id|wash}" class="xe-set{if $active_set|eq( $id )} xe-active{/if}" title="{'Nodes'|i18n('design/standard/extract')|wash}: {$set.nodes|implode( ', ' )}">{$set.name|wash}</button>
                     {/foreach}
                 </div>
+                {if $site_list|count}
+                <div class="xe-site-toggles">
+                    <span class="xe-label">{'Sites'|i18n('design/standard/extract')}</span>
+                    <div class="xe-sets">
+                        {foreach $site_list as $siteNode}
+                        {if $siteNode.selected}
+                        <button type="submit" name="RemoveNodeID[{$siteNode.node_id}]" value="1" class="xe-set xe-active" title="{'Remove this site from the selection'|i18n('design/standard/extract')|wash}">✓ {$siteNode.name|wash} <small>{$siteNode.count}</small></button>
+                        {else}
+                        <button type="submit" name="AddNodeID[{$siteNode.node_id}]" value="1" class="xe-set" title="{'Add this site to the selection'|i18n('design/standard/extract')|wash}">+ {$siteNode.name|wash} <small>{$siteNode.count}</small></button>
+                        {/if}
+                        {/foreach}
+                    </div>
+                </div>
+                {/if}
                 <p class="xe-help">{'User accounts hold personal data and are only exported when you choose them.'|i18n('design/standard/extract')}</p>
             </div>
 
@@ -191,6 +205,15 @@
                         {/foreach}
                     </div>
                     <p class="xe-help">{'ZIP opens everywhere with a double click. Formats that are greyed out need a program the server does not have.'|i18n('design/standard/extract')}</p>
+                </div>
+                <div class="xe-field">
+                    <span class="xe-label" id="xe-a-files-label">{'Files'|i18n('design/standard/extract')}</span>
+                    <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-a-files-label">
+                        {foreach $output_formats as $format}
+                        <label><input type="radio" name="OutputFormat" value="{$format.id|wash}"{if $format.id|eq( $state.output )} checked{/if} /><span>{$format.name|wash}</span></label>
+                        {/foreach}
+                    </div>
+                    <p class="xe-help">{'One file per class in this format; the separator, line endings and quoting apply to CSV.'|i18n('design/standard/extract')}</p>
                 </div>
                 <div class="xe-field">
                     <label class="xe-label" for="Separator">{'Column separator'|i18n('design/standard/extract')}</label>

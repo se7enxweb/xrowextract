@@ -160,7 +160,15 @@ if ( ! $http->hasPostVariable( 'Subtree' ) && isset( $sessionConfig['Subtree'] )
 }
 elseif ( ! $http->hasPostVariable( 'Subtree' ) )
 {
-    $Subtree = ( $ini_bis->variable( 'ExportSettings', 'StartNodeID' ) == '' ) ? $ini->variable( 'UserSettings', 'DefaultUserPlacement' ) : $ini_bis->variable( 'ExportSettings', 'StartNodeID' );
+    // export.ini StartNodeID, else the root node of the default (public) siteaccess, else the content structure
+    $Subtree = (int)$ini_bis->variable( 'ExportSettings', 'StartNodeID' );
+    if ( $Subtree <= 0 )
+    {
+        $publicContentINI = eZSiteAccess::getIni( $ini->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
+        $Subtree = (int)$publicContentINI->variable( 'NodeSettings', 'RootNode' );
+    }
+    if ( $Subtree <= 0 )
+        $Subtree = 2;
 }
 else
 {
@@ -177,12 +185,26 @@ $Mainnodeonly = ( $http->hasPostVariable( 'mainnodeonly' ) && $http->postVariabl
 
 $Escape = $http->hasPostVariable( 'Escape' ) ? (bool)$http->postVariable( 'Escape' ) : true;
 
+// Output format: CSV, JSON or XML, remembered
+if ( $http->hasPostVariable( 'OutputFormat' ) && XrowExtractWriter::isFormat( $http->postVariable( 'OutputFormat' ) ) )
+    $OutputFormat = $http->postVariable( 'OutputFormat' );
+else
+    $OutputFormat = isset( $sessionConfig['OutputFormat'] ) && XrowExtractWriter::isFormat( $sessionConfig['OutputFormat'] ) ? $sessionConfig['OutputFormat'] : 'csv';
+$sessionConfig['OutputFormat'] = $OutputFormat;
+$tpl->setVariable( 'OutputFormat', $OutputFormat );
+$tpl->setVariable( 'OutputFormats', array_values( XrowExtractWriter::formats() ) );
+
 if ( ! $hasPreFilledData )
 {
     // What is the default class
+    // The class chosen before, else export.ini DefaultClassID, else (0) the class with the most objects
+    // in the selection, found once the node and scope are known
     if ( ! $http->hasPostVariable( 'Class_id' ) )
     {
-        $Class_id = ( $ini_bis->variable( 'ExportSettings', 'DefaultClassID' ) == '' ) ? $ini->variable( 'UserSettings', 'UserClassID' ) : $ini_bis->variable( 'ExportSettings', 'DefaultClassID' );
+        if ( isset( $sessionConfig['Class_id'] ) && (int)$sessionConfig['Class_id'] > 0 )
+            $Class_id = (int)$sessionConfig['Class_id'];
+        else
+            $Class_id = (int)$ini_bis->variable( 'ExportSettings', 'DefaultClassID' );
     }
     else
     {
@@ -195,6 +217,7 @@ else
     $Class_id = $obj ? $obj->attribute( 'contentclass_id' ) : 0;
 }
 $Class_id = (int)$Class_id;
+$pickBestClass = !$hasPreFilledData && $Class_id <= 0;
 // The attribute formats of the class (identifier:format columns)
 $FormatColumns = XrowExtractCatalogue::formatColumns( $Class_id );
 
@@ -233,6 +256,30 @@ if ( $Scope === 'all' )
     $FetchMainnodeonly = '1';
 }
 $tpl->setVariable( 'Scope', $Scope );
+
+// No class chosen and none configured: the one with the most objects in this selection
+if ( $pickBestClass )
+{
+    $exportClassFilter = array_filter( (array)$ini_bis->variable( 'ExportSettings', 'ExportClasses' ) );
+    $bestCount = -1;
+    foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, true, false, array( 'name' => 'asc' ) ) as $candidate )
+    {
+        if ( $exportClassFilter && !in_array( $candidate->attribute( 'id' ), $exportClassFilter ) && !in_array( $candidate->attribute( 'identifier' ), $exportClassFilter ) )
+            continue;
+        $candidateCount = eZContentFunctionCollection::fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array( $candidate->attribute( 'id' ) ),
+                                                                             false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+        $candidateCount = isset( $candidateCount['result'] ) ? (int)$candidateCount['result'] : 0;
+        if ( $candidateCount > $bestCount )
+        {
+            $bestCount = $candidateCount;
+            $Class_id = (int)$candidate->attribute( 'id' );
+        }
+    }
+    if ( $Class_id <= 0 )
+        $Class_id = (int)$ini->variable( 'UserSettings', 'UserClassID' );
+    $FormatColumns = XrowExtractCatalogue::formatColumns( $Class_id );
+}
+$sessionConfig['Class_id'] = $Class_id;
 
 // Languages: every content language by default; the form posts the ticked ones (LanguageSelection marks it)
 $ContentLanguages = XrowExtractColumns::contentLanguages();
@@ -578,7 +625,6 @@ $tpl->setVariable( 'PreviewRowChoices', $previewRowChoices );
 if ( $http->hasPostVariable( 'Download' ) || $isPreview )
 {
     $started = microtime( true );
-    $parser = new ParserInterface( $Separator, $Escape );
     $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];
 
     // More than one language: a language column in front tells the rows apart
@@ -588,16 +634,25 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         $hasLanguageColumn = $hasLanguageColumn || $item['id'] === 'ezcontentobject.language';
     if ( count( $SelectedLanguages ) > 1 && !$hasLanguageColumn )
         array_unshift( $ExportColumns, $ExtraAttributes['ezcontentobject.language'] );
-    $data = implode( $Separator, XrowExtractColumns::headerCells( $ExportColumns, $parser ) ) . $newLine;
+    // The preview reads CSV back into its table; JSON and XML get a sample of the first rows next to it
+    $writerMeta = array( 'class' => ( $metaClass = eZContentClass::fetch( $Class_id ) ) ? $metaClass->attribute( 'identifier' ) : '', 'created' => date( 'c' ) );
+    $writer = new XrowExtractWriter( $isPreview ? 'csv' : $OutputFormat, $ExportColumns, $Separator, $Escape, $newLine, $writerMeta );
+    $parser = $writer->parser();
+    $sampleWriter = ( $isPreview && $OutputFormat !== 'csv' ) ? new XrowExtractWriter( $OutputFormat, $ExportColumns, $Separator, $Escape, "\n", $writerMeta ) : null;
+    $sample = '';
+    $sampleWriterExtension = $sampleWriter ? $sampleWriter->extension() : 'csv';
+    $data = $writer->begin();
     $file = 'export.csv';
     $exportTotal = 0;
 
     $maxRows = $isPreview ? ( $Limit ? min( $Limit, $PreviewRows ) : $PreviewRows ) : ( $Limit ? $Limit : PHP_INT_MAX );
     $written = 0;
-    $writeRow = function ( eZContentObject $obj, $locale ) use ( &$data, &$written, $ExportColumns, $parser, $ExtraAttributes, $allowPasswordHash, $Separator, $newLine )
+    $writeRow = function ( eZContentObject $obj, $locale ) use ( &$data, &$written, &$sample, $writer, $sampleWriter, $ExportColumns, $parser, $ExtraAttributes, $allowPasswordHash )
     {
         XrowExtractColumns::$language = $locale;
-        $data .= implode( $Separator, XrowExtractColumns::rowCells( $ExportColumns, $obj, $parser, $ExtraAttributes, $allowPasswordHash ) ) . $newLine;
+        $data .= $writer->row( XrowExtractColumns::rowCells( $ExportColumns, $obj, $parser, $ExtraAttributes, $allowPasswordHash ) );
+        if ( $sampleWriter && $written < 3 )
+            $sample .= $sampleWriter->row( XrowExtractColumns::rowCells( $ExportColumns, $obj, $sampleWriter->parser(), $ExtraAttributes, $allowPasswordHash ) );
         $written++;
     };
 
@@ -678,11 +733,14 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         }
     }
     XrowExtractColumns::$language = null;
+    $data .= $writer->end();
 
     if ( $isPreview )
     {
+        $tpl->setVariable( 'preview_sample', $sampleWriter ? $sampleWriter->begin() . $sample . $sampleWriter->end() : '' );
+        $tpl->setVariable( 'preview_sample_format', $sampleWriter ? strtoupper( $OutputFormat ) : '' );
         $tpl->setVariable( 'PreviewColumns', $ExportColumns );
-        $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, $file, microtime( true ) - $started ) );
+        $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, preg_replace( '/\.csv$/', '.' . $sampleWriterExtension, $file ), microtime( true ) - $started ) );
         if ( $http->hasPostVariable( 'PreviewOnly' ) )
         {
             // The preview panel alone, for the view's script
@@ -703,7 +761,8 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         header( 'Cache-Control: private, no-store, max-age=0' );
         header( 'Pragma: no-cache' );
         header( 'X-Content-Type-Options: nosniff' );
-        header( 'Content-Type: text/csv; charset=' . $httpCharset );
+        $file = preg_replace( '/\.csv$/', '.' . $writer->extension(), $file );
+        header( 'Content-Type: ' . $writer->contentType( $httpCharset ) );
         header( 'Content-Length: ' . strlen( $data ) );
         header( 'Content-Disposition: attachment; filename="' . $file . '"' );
 

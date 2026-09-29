@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
-    '[languages:][output:][preview;][list-classes][list-columns][user:]',
+    '[languages:][format:][output:][preview;][list-classes][list-columns][user:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export)',
@@ -45,6 +45,7 @@ $options = $script->getOptions(
         'line-endings' => 'win32/crlf, unix/lf (default), mac/cr',
         'unquoted'     => 'Do not quote cells (line breaks are removed; a separator in a value shifts the columns)',
         'languages'    => 'all (default) or a comma list of locales (eng-US,ger-DE): one row per object per language',
+        'format'       => 'csv (default), json (an array of objects), xml',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
         'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
         'list-classes' => 'List the classes with how many objects each has in the selection',
@@ -233,6 +234,9 @@ $lineKey = $options['line-endings'] ? strtolower( $options['line-endings'] ) : '
 if ( !isset( $lines[$lineKey] ) )
     $fail( '--line-endings is win32 (crlf), unix (lf) or mac (cr).' );
 $newLine = $lines[$lineKey];
+$outputFormat = $options['format'] ? $options['format'] : 'csv';
+if ( !XrowExtractWriter::isFormat( $outputFormat ) )
+    $fail( "Unknown format $outputFormat (--format). Formats: " . implode( ', ', array_keys( XrowExtractWriter::formats() ) ) . '.' );
 $parser = new ParserInterface( $separator, !$options['unquoted'] );
 
 // Rows, in batches with the object cache cleared
@@ -253,10 +257,13 @@ if ( $limit )
 if ( $previewRows )
     $wantRows = min( $wantRows, $previewRows );
 
+$writer = new XrowExtractWriter( $previewRows ? 'csv' : $outputFormat, $columns, $separator, !$options['unquoted'], $previewRows ? "\n" : $newLine,
+                                 array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ) ) );
+$parser = $writer->parser();
 $file = $options['output'];
 if ( !$previewRows && !$file )
-    $file = $scope === 'all' ? XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_all_export.csv' )
-                              : XrowExtractColumns::fileName( $node->attribute( 'name' ) );
+    $file = $scope === 'all' ? XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_all_export.' . $writer->extension() )
+                              : XrowExtractColumns::fileName( $node->attribute( 'name' ), '_export.' . $writer->extension() );
 $fh = null;
 if ( !$previewRows )
 {
@@ -265,10 +272,10 @@ if ( !$previewRows )
         $fail( "Cannot write $file (--output)." );
 }
 $started = microtime( true );
-$header = implode( $separator, XrowExtractColumns::headerCells( $columns, $parser ) );
-$buffer = $previewRows ? $header . "\n" : null;
+$begin = $writer->begin();
+$buffer = $previewRows ? $begin : null;
 if ( $fh )
-    fwrite( $fh, $header . $newLine );
+    fwrite( $fh, $begin );
 $written = 0;
 $skip = $offset;
 foreach ( $languages as $locale )
@@ -292,11 +299,11 @@ foreach ( $languages as $locale )
             $obj = $treeNode->attribute( 'object' );
             if ( !$obj instanceof eZContentObject || !$obj->canRead() )
                 continue;
-            $line = implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $allowHash ) );
+            $line = $writer->row( XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $allowHash ) );
             if ( $fh )
-                fwrite( $fh, $line . $newLine );
+                fwrite( $fh, $line );
             else
-                $buffer .= $line . "\n";
+                $buffer .= $line;
             $written++;
         }
         eZContentObject::clearCache();
@@ -306,6 +313,8 @@ foreach ( $languages as $locale )
     $skip = 0;
 }
 XrowExtractColumns::$language = null;
+if ( $fh )
+    fwrite( $fh, $writer->end() );
 
 if ( $previewRows )
 {

@@ -82,9 +82,9 @@
         <dt>export.ini ExportClasses</dt>
         <dd>{if ezini( 'ExportSettings', 'ExportClasses', 'export.ini' )}{ezini( 'ExportSettings', 'ExportClasses', 'export.ini' )|implode( ', ' )|wash}{else}{'every class'|i18n( 'design/standard/extract' )}{/if}</dd>
         <dt>export.ini StartNodeID</dt>
-        <dd>{if ezini( 'ExportSettings', 'StartNodeID', 'export.ini' )}{ezini( 'ExportSettings', 'StartNodeID', 'export.ini' )|wash}{else}{'the user placement (site.ini)'|i18n( 'design/standard/extract' )}{/if}</dd>
+        <dd>{if ezini( 'ExportSettings', 'StartNodeID', 'export.ini' )}{ezini( 'ExportSettings', 'StartNodeID', 'export.ini' )|wash}{else}{'the root node of the default siteaccess'|i18n( 'design/standard/extract' )}{/if}</dd>
         <dt>export.ini DefaultClassID</dt>
-        <dd>{if ezini( 'ExportSettings', 'DefaultClassID', 'export.ini' )}{ezini( 'ExportSettings', 'DefaultClassID', 'export.ini' )|wash}{else}{'the user class (site.ini)'|i18n( 'design/standard/extract' )}{/if}</dd>
+        <dd>{if ezini( 'ExportSettings', 'DefaultClassID', 'export.ini' )}{ezini( 'ExportSettings', 'DefaultClassID', 'export.ini' )|wash}{else}{'the class with the most objects in the selection'|i18n( 'design/standard/extract' )}{/if}</dd>
         <dt>export.ini PreselectAttributes</dt>
         <dd>{ezini( 'ExportSettings', 'PreselectAttributes', 'export.ini' )|wash}</dd>
         <dt>csv.ini StripURLText</dt>
