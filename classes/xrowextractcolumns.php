@@ -39,8 +39,13 @@ class XrowExtractColumns
         );
         if ( !$allowPasswordHash )
             unset( $list['ezuser.password_hash'], $list['ezuser.password_hash_type'] );
+        foreach ( XrowExtractCatalogue::extraColumns() as $id => $column )
+            $list[$id] = array( 'exportname' => $column[0], 'name' => $column[1] );
         foreach ( $list as $id => $column )
+        {
             $list[$id]['id'] = $id;
+            $list[$id]['group'] = XrowExtractCatalogue::groupOf( $id );
+        }
         return $list;
     }
 
@@ -86,7 +91,7 @@ class XrowExtractColumns
             'ezselection' => 'chosen option', 'ezenhancedselection' => 'chosen options', 'ezcountry' => 'country',
             'ezenum' => 'value', 'ezkeyword' => 'keywords', 'eztags' => 'tags',
             'ezobjectrelation' => 'related object name', 'ezobjectrelationlist' => 'related object names',
-            'ezenhancedobjectrelation' => 'related object names',
+            'ezenhancedobjectrelation' => 'related object names', 'xrowmetadata' => 'title',
         );
         return ezpI18n::tr( 'design/standard/extract', isset( $cells[$datatype] ) ? $cells[$datatype] : 'value' );
     }
@@ -132,12 +137,20 @@ class XrowExtractColumns
             'ezcontentobject.main_parent_name' => 'node name', 'ezcontentobject.main_node_id' => 'number',
             'ezcontentobject.main_parent_node_id' => 'number', 'ezcontentobject.parent_nodes' => 'node names',
         );
+        foreach ( XrowExtractCatalogue::extraColumns() as $id => $column )
+            $extraCells[$id] = $column[2];
+        foreach ( XrowExtractCatalogue::formatColumns( $classID ) as $id => $column )
+        {
+            $base = $meta[substr( $id, 0, strpos( $id, ':' ) )];
+            $meta[$id] = array_merge( $base, array( 'format' => $column['format'], 'cell' => $column['format'], 'exportable' => true ) );
+        }
         foreach ( self::extraAttributes() as $id => $column )
         {
             $meta[$id] = array(
+                'group' => $column['group'],
                 'special' => true, 'sensitive' => strpos( $id, 'ezuser.password_hash' ) === 0, 'datatype' => strtok( $id, '.' ), 'datatype_name' => ezpI18n::tr( 'design/standard/extract', 'Special column' ),
                 'required' => false, 'translatable' => false, 'searchable' => false, 'collector' => false, 'exportable' => true,
-                'cell' => ezpI18n::tr( 'design/standard/extract', isset( $extraCells[$id] ) ? $extraCells[$id] : 'value' ), 'position' => 0,
+                'cell' => isset( XrowExtractCatalogue::extraColumns()[$id] ) ? $extraCells[$id] : ezpI18n::tr( 'design/standard/extract', isset( $extraCells[$id] ) ? $extraCells[$id] : 'value' ), 'position' => 0,
             );
         }
         return $meta;
@@ -180,7 +193,14 @@ class XrowExtractColumns
         $cells = array();
         foreach ( $columns as $column )
         {
-            if ( isset( $extras[$column['id']] ) )
+            if ( strpos( $column['id'], ':' ) !== false )
+            {
+                // An attribute format: identifier:format
+                list( $identifier, $format ) = explode( ':', $column['id'], 2 );
+                $cells[] = $parser->escape( isset( $datamap[$identifier] ) && is_object( $datamap[$identifier] )
+                                            ? XrowExtractCatalogue::formatValue( $datamap[$identifier], $format ) : '' );
+            }
+            elseif ( isset( $extras[$column['id']] ) )
                 $cells[] = $parser->escape( self::extraValue( $column['id'], $obj, $allowPasswordHash ) );
             elseif ( isset( $datamap[$column['id']] ) && is_object( $datamap[$column['id']] ) )
                 $cells[] = $parser->exportValue( $datamap[$column['id']] );
@@ -234,6 +254,13 @@ class XrowExtractColumns
         return $siteINI;
     }
 
+    /** The public site's scheme and host only: stored files (images) are served from there, not from a siteaccess path. */
+    public static function publicHostURL()
+    {
+        $url = self::publicSiteURL();
+        return preg_match( '#^(https?://[^/]+)#', $url, $m ) ? $m[1] : $url;
+    }
+
     /** The public site's address (DefaultAccess), not the admin one the view runs in. */
     public static function publicSiteURL()
     {
@@ -253,6 +280,9 @@ class XrowExtractColumns
      */
     public static function extraValue( $key, eZContentObject $obj, $allowPasswordHash )
     {
+        $value = XrowExtractCatalogue::extraValue( $key, $obj );
+        if ( $value !== null )
+            return $value;
         if ( strpos( $key, 'ezuser.' ) === 0 )
         {
             $user = eZUser::fetch( $obj->attribute( 'id' ) );

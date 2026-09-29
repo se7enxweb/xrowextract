@@ -30,6 +30,7 @@ ExportableDatatypes[]=ezmatrix
 ExportableDatatypes[]=ezobjectrelationlist
 ExportableDatatypes[]=hmregexpline
 ExportableDatatypes[]=ezprice
+ExportableDatatypes[]=xrowmetadata
 StripURLText=true
 # A cell starting with = + - @ (not a number) gets a leading ' so a
 # spreadsheet shows it as text instead of running it as a formula.
@@ -157,5 +158,9 @@ HandlerClass=XroweZKeywordHandler
 [ezobjectrelation]
 HandlerFile=extension/xrowextract/classes/parsers/xrowezobjectrelationhandler.php
 HandlerClass=XroweZObjectRelationHandler
+
+[xrowmetadata]
+HandlerFile=extension/xrowextract/classes/parsers/xrowxrowmetadatahandler.php
+HandlerClass=XrowxrowmetadataHandler
 
 */ ?>

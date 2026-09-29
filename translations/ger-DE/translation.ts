@@ -2,6 +2,246 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Filter the columns: name, identifier, datatype, format</source>
+        <translation>Spalten filtern: Name, Bezeichner, Datentyp, Format</translation>
+    </message>
+    <message>
+        <source>Attribute formats</source>
+        <translation>Attributformate</translation>
+    </message>
+    <message>
+        <source>%attributes class attributes, %formats attribute formats and %special special columns.</source>
+        <translation>%attributes Klassenattribute, %formats Attributformate und %special Sonderspalten.</translation>
+    </message>
+    <message>
+        <source>Column sets</source>
+        <translation>Spaltensätze</translation>
+    </message>
+    <message>
+        <source>A set adds its columns that are not in the list yet; hover a set to see what it holds.</source>
+        <translation>Ein Satz fügt seine Spalten hinzu, die noch nicht in der Liste sind; zeigen Sie auf einen Satz, um zu sehen, was er enthält.</translation>
+    </message>
+    <message>
+        <source>Dates</source>
+        <translation>Datumsangaben</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Platzierung</translation>
+    </message>
+    <message>
+        <source>Object</source>
+        <translation>Objekt</translation>
+    </message>
+    <message>
+        <source>Relations</source>
+        <translation>Beziehungen</translation>
+    </message>
+    <message>
+        <source>User account</source>
+        <translation>Benutzerkonto</translation>
+    </message>
+    <message>
+        <source>Identity</source>
+        <translation>Identität</translation>
+    </message>
+    <message>
+        <source>URLs and SEO</source>
+        <translation>URLs und SEO</translation>
+    </message>
+    <message>
+        <source>Publishing</source>
+        <translation>Veröffentlichung</translation>
+    </message>
+    <message>
+        <source>Migration</source>
+        <translation>Migration</translation>
+    </message>
+    <message>
+        <source>Object id, remote id, class, name, language</source>
+        <translation>Objekt-ID, Remote-ID, Klasse, Name, Sprache</translation>
+    </message>
+    <message>
+        <source>Name, URL alias, absolute URL, path, last change, meta data</source>
+        <translation>Name, URL-Alias, absolute URL, Pfad, letzte Änderung, Metadaten</translation>
+    </message>
+    <message>
+        <source>Dates, version, owner, creator, section, states, visibility</source>
+        <translation>Datumsangaben, Version, Eigentümer, Ersteller, Sektion, Zustände, Sichtbarkeit</translation>
+    </message>
+    <message>
+        <source>Nodes, parent, path, depth, priority, locations, children</source>
+        <translation>Knoten, Eltern, Pfad, Tiefe, Priorität, Platzierungen, Unterelemente</translation>
+    </message>
+    <message>
+        <source>Everything to rebuild the content elsewhere: identity, parent, languages, dates, every attribute</source>
+        <translation>Alles, um den Inhalt anderswo neu aufzubauen: Identität, Eltern, Sprachen, Datumsangaben, jedes Attribut</translation>
+    </message>
+    <message>
+        <source>ISO 8601</source>
+        <translation>ISO 8601</translation>
+    </message>
+    <message>
+        <source>Unix time</source>
+        <translation>Unix-Zeit</translation>
+    </message>
+    <message>
+        <source>MIME type</source>
+        <translation>MIME-Typ</translation>
+    </message>
+    <message>
+        <source>Open Graph image</source>
+        <translation>Open-Graph-Bild</translation>
+    </message>
+    <message>
+        <source>Open Graph image text</source>
+        <translation>Open-Graph-Bildtext</translation>
+    </message>
+    <message>
+        <source>URL aliases</source>
+        <translation>URL-Aliase</translation>
+    </message>
+    <message>
+        <source>URL only</source>
+        <translation>nur die URL</translation>
+    </message>
+    <message>
+        <source>VAT rate %</source>
+        <translation>MwSt.-Satz %</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DDTHH:MM:SS+00:00</source>
+        <translation>JJJJ-MM-TTTHH:MM:SS+00:00</translation>
+    </message>
+    <message>
+        <source>absolute URL</source>
+        <translation>absolute URL</translation>
+    </message>
+    <message>
+        <source>all fields as JSON</source>
+        <translation>alle Felder als JSON</translation>
+    </message>
+    <message>
+        <source>alternative text</source>
+        <translation>Alternativtext</translation>
+    </message>
+    <message>
+        <source>as JSON</source>
+        <translation>als JSON</translation>
+    </message>
+    <message>
+        <source>canonical URL</source>
+        <translation>kanonische URL</translation>
+    </message>
+    <message>
+        <source>change frequency</source>
+        <translation>Änderungshäufigkeit</translation>
+    </message>
+    <message>
+        <source>description</source>
+        <translation>Beschreibung</translation>
+    </message>
+    <message>
+        <source>download URL</source>
+        <translation>Download-URL</translation>
+    </message>
+    <message>
+        <source>file name</source>
+        <translation>Dateiname</translation>
+    </message>
+    <message>
+        <source>group/state</source>
+        <translation>Gruppe/Zustand</translation>
+    </message>
+    <message>
+        <source>hidden</source>
+        <translation>versteckt</translation>
+    </message>
+    <message>
+        <source>hidden by a parent</source>
+        <translation>durch Eltern versteckt</translation>
+    </message>
+    <message>
+        <source>in the sitemap</source>
+        <translation>in der Sitemap</translation>
+    </message>
+    <message>
+        <source>language codes</source>
+        <translation>Sprachcodes</translation>
+    </message>
+    <message>
+        <source>link text</source>
+        <translation>Linktext</translation>
+    </message>
+    <message>
+        <source>numbers</source>
+        <translation>Zahlen</translation>
+    </message>
+    <message>
+        <source>object ids</source>
+        <translation>Objekt-IDs</translation>
+    </message>
+    <message>
+        <source>option ids</source>
+        <translation>Options-IDs</translation>
+    </message>
+    <message>
+        <source>plain text</source>
+        <translation>reiner Text</translation>
+    </message>
+    <message>
+        <source>price excl. VAT</source>
+        <translation>Preis ohne MwSt.</translation>
+    </message>
+    <message>
+        <source>remote ids</source>
+        <translation>Remote-IDs</translation>
+    </message>
+    <message>
+        <source>seconds since 1970</source>
+        <translation>Sekunden seit 1970</translation>
+    </message>
+    <message>
+        <source>sitemap priority</source>
+        <translation>Sitemap-Priorität</translation>
+    </message>
+    <message>
+        <source>size in bytes</source>
+        <translation>Größe in Bytes</translation>
+    </message>
+    <message>
+        <source>tag ids</source>
+        <translation>Tag-IDs</translation>
+    </message>
+    <message>
+        <source>user name</source>
+        <translation>Benutzername</translation>
+    </message>
+    <message>
+        <source>visible</source>
+        <translation>sichtbar</translation>
+    </message>
+    <message>
+        <source>visible, hidden or hidden by a parent</source>
+        <translation>sichtbar, versteckt oder durch Eltern versteckt</translation>
+    </message>
+    <message>
+        <source>width × height</source>
+        <translation>Breite × Höhe</translation>
+    </message>
+    <message>
+        <source>word count</source>
+        <translation>Wortanzahl</translation>
+    </message>
+    <message>
+        <source>yes or no</source>
+        <translation>ja oder nein</translation>
+    </message>
+    <message>
+        <source>title</source>
+        <translation>Titel</translation>
+    </message>
+    <message>
         <source>Languages</source>
         <translation>Sprachen</translation>
     </message>

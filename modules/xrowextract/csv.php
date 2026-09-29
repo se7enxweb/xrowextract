@@ -195,6 +195,8 @@ else
     $Class_id = $obj ? $obj->attribute( 'contentclass_id' ) : 0;
 }
 $Class_id = (int)$Class_id;
+// The attribute formats of the class (identifier:format columns)
+$FormatColumns = XrowExtractCatalogue::formatColumns( $Class_id );
 
 if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
 {
@@ -250,7 +252,7 @@ $sessionConfig['Languages'] = $SelectedLanguages;
 // The posted column list is kept by every action on the same class (the form holds the columns of
 // AttributesClassID); a class change, or a first visit, starts from the saved or preselected list
 $columnActions = array( 'Remove', 'RemoveAttribute', 'RemoveAllAttributes', 'ResetAttributes', 'MoveAttributeUp', 'MoveAttributeDown',
-                        'AddAttribute', 'AddAllAttributes', 'Download', 'Preview', 'BrowseSubtree', 'Update' );
+                        'AddAttribute', 'AddAllAttributes', 'AddColumnSet', 'Download', 'Preview', 'BrowseSubtree', 'Update' );
 $keepPosted = false;
 foreach ( $columnActions as $action )
 {
@@ -312,6 +314,36 @@ if ( $http->hasPostVariable( 'AddAttribute' ) )
     elseif ( isset( $ExtraAttributes[$addID] ) )
     {
         $Attributes[] = $ExtraAttributes[$addID];
+    }
+    elseif ( isset( $FormatColumns[$addID] ) )
+    {
+        $Attributes[] = $FormatColumns[$addID];
+    }
+}
+
+// A column set: its columns that are not in the list yet, in the set's order
+if ( $http->hasPostVariable( 'AddColumnSet' ) )
+{
+    $present = array();
+    foreach ( (array)$Attributes as $item )
+    {
+        if ( is_array( $item ) && isset( $item['id'] ) )
+            $present[$item['id']] = true;
+    }
+    $classColumnsByID = array();
+    foreach ( XrowExtractColumns::classColumns( $Class_id ) as $column )
+        $classColumnsByID[$column['id']] = $column;
+    foreach ( XrowExtractCatalogue::setColumnIDs( (string)$http->postVariable( 'AddColumnSet' ), $Class_id ) as $id )
+    {
+        if ( isset( $present[$id] ) )
+            continue;
+        if ( isset( $classColumnsByID[$id] ) )
+            $Attributes[] = $classColumnsByID[$id];
+        elseif ( isset( $FormatColumns[$id] ) )
+            $Attributes[] = $FormatColumns[$id];
+        elseif ( isset( $ExtraAttributes[$id] ) )
+            $Attributes[] = $ExtraAttributes[$id];
+        $present[$id] = true;
     }
 }
 
@@ -388,7 +420,12 @@ foreach ( (array)$Attributes as $item )
 {
     if ( !is_array( $item ) || !isset( $item['id'] ) || !is_string( $item['id'] ) )
         continue;
-    if ( strpos( $item['id'], '.' ) !== false )
+    if ( strpos( $item['id'], ':' ) !== false )
+    {
+        if ( !isset( $FormatColumns[$item['id']] ) )
+            continue;
+    }
+    elseif ( strpos( $item['id'], '.' ) !== false )
     {
         if ( !isset( $ExtraAttributes[$item['id']] ) )
             continue;
@@ -417,6 +454,18 @@ $tpl->setVariable( 'ChosenClass', $chosenClass ? array( 'identifier' => $chosenC
                                                         'name' => $chosenClass->attribute( 'name' ),
                                                         'attributes' => count( $chosenClass->dataMap() ) ) : false );
 $tpl->setVariable( 'ExtraAttributes', $ExtraAttributes );
+// The picker: special columns by group, attribute formats, column sets
+$ExtraGroups = array();
+foreach ( XrowExtractCatalogue::groups() as $group => $label )
+    $ExtraGroups[$group] = array( 'label' => $label, 'columns' => array() );
+foreach ( $ExtraAttributes as $id => $column )
+    $ExtraGroups[$column['group']]['columns'][] = $column;
+$tpl->setVariable( 'ExtraGroups', $ExtraGroups );
+$tpl->setVariable( 'FormatColumns', array_values( $FormatColumns ) );
+$ColumnSets = array();
+foreach ( XrowExtractCatalogue::columnSets() as $id => $set )
+    $ColumnSets[] = array( 'id' => $id, 'name' => $set[0], 'description' => $set[1] );
+$tpl->setVariable( 'ColumnSets', $ColumnSets );
 $tpl->setVariable( 'Mainnodeonly', $Mainnodeonly );
 $tpl->setVariable( 'has_prefilledata', $hasPreFilledData );
 $tpl->setVariable( 'Escape', $Escape ? 1 : 0 );

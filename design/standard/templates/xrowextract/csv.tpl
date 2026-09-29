@@ -201,6 +201,7 @@
             </header>
             <div class="xe-field">
                 <label class="xe-label" for="xe-add">{'Add a column'|i18n('design/standard/extract')}</label>
+                <input type="search" class="xe-picker-filter xe-add-filter" placeholder="{'Filter the columns: name, identifier, datatype, format'|i18n('design/standard/extract')|wash}" autocomplete="off" aria-controls="xe-add" />
                 <div class="xe-inline">
                     <select name="AddAttributeID" id="xe-add">
                         <optgroup label="{'Class attributes'|i18n('design/standard/extract')|wash}">
@@ -208,15 +209,34 @@
                             <option value="{$attribute.id|wash}">{$attribute.name|wash} ({$attribute.identifier|wash}) · {if is_set( $AttributeMeta[$attribute.identifier] )}{$AttributeMeta[$attribute.identifier].datatype_name|wash}{else}{$attribute.data_type_string|wash}{/if}{if $ExportableDatatypes|contains( $attribute.data_type_string )|not} – {'empty: no export handler for %type'|i18n('design/standard/extract',, hash( '%type', $attribute.data_type_string ))|wash}{/if}</option>
                         {/foreach}
                         </optgroup>
-                        <optgroup label="{'Special columns'|i18n('design/standard/extract')|wash}">
-                        {foreach $ExtraAttributes as $extra}
-                            <option value="{$extra.id|wash}">{$extra.name|wash}</option>
+                        {if $FormatColumns|count}
+                        <optgroup label="{'Attribute formats'|i18n('design/standard/extract')|wash}">
+                        {foreach $FormatColumns as $format}
+                            <option value="{$format.id|wash}">{$format.name|wash} ({$format.id|wash})</option>
                         {/foreach}
                         </optgroup>
+                        {/if}
+                        {foreach $ExtraGroups as $group}{if $group.columns|count}
+                        <optgroup label="{'Special columns'|i18n('design/standard/extract')|wash}: {$group.label|wash}">
+                        {foreach $group.columns as $extra}
+                            <option value="{$extra.id|wash}">{$extra.name|wash}{if is_set( $AttributeMeta[$extra.id] )} → {$AttributeMeta[$extra.id].cell|wash}{/if}</option>
+                        {/foreach}
+                        </optgroup>
+                        {/if}{/foreach}
                     </select>
                     <input class="button" name="AddAttribute" type="submit" value="{'Add attribute'|i18n('design/standard/extract')}" />
                     <input class="button" name="AddAllAttributes" type="submit" value="{'Add all class attributes'|i18n('design/standard/extract')}" title="{'Adds every attribute of the class that is not a column yet'|i18n('design/standard/extract')|wash}" />
                 </div>
+                <p class="xe-help">{'%attributes class attributes, %formats attribute formats and %special special columns.'|i18n('design/standard/extract',, hash( '%attributes', $class_attributes|count, '%formats', $FormatColumns|count, '%special', $ExtraAttributes|count ))}</p>
+            </div>
+            <div class="xe-field">
+                <span class="xe-label">{'Column sets'|i18n('design/standard/extract')}</span>
+                <div class="xe-sets">
+                    {foreach $ColumnSets as $set}
+                    <button type="submit" name="AddColumnSet" value="{$set.id|wash}" class="xe-set" title="{$set.description|wash}">+ {$set.name|wash}</button>
+                    {/foreach}
+                </div>
+                <p class="xe-help">{'A set adds its columns that are not in the list yet; hover a set to see what it holds.'|i18n('design/standard/extract')}</p>
             </div>
             <input type="hidden" name="AttributesClassID" value="{$Class_id}" />
             <div class="xe-columns-head">

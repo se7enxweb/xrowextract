@@ -4,6 +4,246 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Filter the columns: name, identifier, datatype, format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attribute formats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%attributes class attributes, %formats attribute formats and %special special columns.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Column sets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A set adds its columns that are not in the list yet; hover a set to see what it holds.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Relations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>User account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Identity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URLs and SEO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Publishing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Migration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object id, remote id, class, name, language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name, URL alias, absolute URL, path, last change, meta data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dates, version, owner, creator, section, states, visibility</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nodes, parent, path, depth, priority, locations, children</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything to rebuild the content elsewhere: identity, parent, languages, dates, every attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ISO 8601</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unix time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MIME type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open Graph image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open Graph image text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL aliases</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>VAT rate %</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DDTHH:MM:SS+00:00</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>absolute URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>all fields as JSON</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>alternative text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>as JSON</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>canonical URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>change frequency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>download URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>group/state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>hidden by a parent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>in the sitemap</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>language codes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>link text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>numbers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>object ids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>option ids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>plain text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>price excl. VAT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>remote ids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>seconds since 1970</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sitemap priority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>size in bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>tag ids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>user name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>visible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>visible, hidden or hidden by a parent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>width × height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>word count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>yes or no</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Languages</source>
         <translation type="unfinished"></translation>
     </message>

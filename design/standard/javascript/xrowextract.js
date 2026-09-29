@@ -652,3 +652,45 @@
         });
     }
 }());
+
+/*
+ * The column picker's filter: narrows the options (name, identifier, datatype, format) and selects the
+ * first match, so typing and pressing "Add attribute" is enough.
+ */
+(function () {
+    'use strict';
+
+    var filter = document.querySelector('.xe-add-filter');
+    var select = document.getElementById('xe-add');
+    if (!filter || !select) {
+        return;
+    }
+    filter.addEventListener('input', function () {
+        var needle = filter.value.trim().toLowerCase();
+        var first = null;
+        Array.prototype.forEach.call(select.options, function (option) {
+            var match = !needle || option.textContent.toLowerCase().indexOf(needle) !== -1 || option.value.toLowerCase().indexOf(needle) !== -1;
+            option.hidden = !match;
+            option.disabled = !match;
+            if (match && !first) {
+                first = option;
+            }
+        });
+        Array.prototype.forEach.call(select.querySelectorAll('optgroup'), function (group) {
+            group.hidden = !group.querySelector('option:not([hidden])');
+        });
+        if (first) {
+            select.value = first.value;
+        }
+    });
+    filter.addEventListener('keydown', function (event) {
+        // Enter adds the selected column
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            var add = document.querySelector('input[name="AddAttribute"]');
+            if (add && select.value) {
+                add.click();
+            }
+        }
+    });
+}());

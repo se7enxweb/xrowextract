@@ -26,7 +26,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][names:][separator:][line-endings:][unquoted]' .
+    '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
     '[languages:][output:][preview;][list-classes][list-columns][user:]',
     '',
     array(
@@ -39,6 +39,7 @@ $options = $script->getOptions(
         'limit'        => 'Take at most this many rows (default 0 = all)',
         'columns'      => 'Comma list of attribute identifiers and special column ids (default: every attribute of the class)',
         'add'          => 'Comma list of columns to add after the default or --columns ones (e.g. ezcontentobject.id,ezuser.email)',
+        'sets'         => 'Comma list of column sets to add: identity, urls, publishing, location, migration',
         'names'        => 'Column names in the file: id=name,id=name (default: the identifier)',
         'separator'    => 'One character, or comma, semicolon, tab, pipe (default comma)',
         'line-endings' => 'win32/crlf, unix/lf (default), mac/cr',
@@ -152,9 +153,25 @@ if ( $options['list-columns'] )
         $cli->output( sprintf( '  %-32s %-26s %-22s %s%s', $column['id'], $m['datatype_name'] . ' (' . $m['datatype'] . ')',
                                $m['exportable'] ? '-> ' . $m['cell'] : 'EMPTY: no export handler', $column['name'], $flags ? '  [' . implode( ', ', $flags ) . ']' : '' ) );
     }
-    $cli->output( 'Special columns:' );
-    foreach ( $extras as $id => $column )
-        $cli->output( sprintf( '  %-36s %-22s %s', $id, '-> ' . $meta[$id]['cell'], $column['name'] ) );
+    $formats = XrowExtractCatalogue::formatColumns( $classID );
+    if ( $formats )
+    {
+        $cli->output( 'Attribute formats (identifier:format):' );
+        foreach ( $formats as $id => $column )
+            $cli->output( sprintf( '  %-36s %s', $id, $column['name'] ) );
+    }
+    foreach ( XrowExtractCatalogue::groups() as $group => $label )
+    {
+        $cli->output( 'Special columns, ' . $label . ':' );
+        foreach ( $extras as $id => $column )
+        {
+            if ( $column['group'] === $group )
+                $cli->output( sprintf( '  %-36s %-30s %s', $id, '-> ' . $meta[$id]['cell'], $column['name'] ) );
+        }
+    }
+    $cli->output( 'Column sets (--sets):' );
+    foreach ( XrowExtractCatalogue::columnSets() as $id => $set )
+        $cli->output( sprintf( '  %-12s %s', $id, $set[1] ) );
     $script->shutdown( 0 );
 }
 
@@ -165,10 +182,22 @@ foreach ( XrowExtractColumns::classColumns( $classID ) as $column )
     $byId[$column['id']] = $column;
 foreach ( $extras as $id => $column )
     $byId[$id] = $column;
+foreach ( XrowExtractCatalogue::formatColumns( $classID ) as $id => $column )
+    $byId[$id] = $column;
 $wanted = $options['columns'] ? array_filter( array_map( 'trim', explode( ',', $options['columns'] ) ) )
                                : array_map( function ( $c ) { return $c['id']; }, XrowExtractColumns::classColumns( $classID ) );
+if ( $options['sets'] )
+{
+    foreach ( array_filter( array_map( 'trim', explode( ',', $options['sets'] ) ) ) as $setID )
+    {
+        if ( !array_key_exists( $setID, XrowExtractCatalogue::columnSets() ) )
+            $fail( "Unknown column set $setID (--sets). Sets: " . implode( ', ', array_keys( XrowExtractCatalogue::columnSets() ) ) . '.' );
+        $wanted = array_merge( $wanted, XrowExtractCatalogue::setColumnIDs( $setID, $classID ) );
+    }
+}
 if ( $options['add'] )
     $wanted = array_merge( $wanted, array_filter( array_map( 'trim', explode( ',', $options['add'] ) ) ) );
+$wanted = array_values( array_unique( $wanted ) );
 foreach ( $wanted as $id )
 {
     if ( !isset( $byId[$id] ) )
