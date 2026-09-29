@@ -47,6 +47,18 @@
                 </div>
                 <p class="xe-help">{if $Scope|eq( 'all' )}{'Every object of the class, wherever it is placed, one row each at its main location. The node and main locations below do not apply.'|i18n('design/standard/extract')}{elseif $Scope|eq( 'list' )}{'The direct children of the node below.'|i18n('design/standard/extract')}{else}{'Everything below the node, at every depth.'|i18n('design/standard/extract')}{/if}</p>
             </div>
+            <div class="xe-field{if $Scope|ne( 'tree' )} xe-inactive{/if}">
+                <label class="xe-label" for="xe-filter-depth-mode">{'Depth below the node'|i18n('design/standard/extract')}</label>
+                <div class="xe-inline">
+                    <select name="Filter[depth_mode]" id="xe-filter-depth-mode" class="xe-autosubmit">
+                        {foreach $FilterDepthModes as $mode => $label}
+                        <option value="{$mode|wash}"{if $Filters.depth_mode|eq( $mode )} selected{/if}>{$label|wash}</option>
+                        {/foreach}
+                    </select>
+                    <input type="number" name="Filter[depth_value]" min="0" max="50" step="1" value="{$Filters.depth_value|wash}" class="xe-autosubmit" inputmode="numeric" aria-label="{'Depth'|i18n('design/standard/extract')|wash}" />
+                </div>
+                <p class="xe-help">{'Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).'|i18n('design/standard/extract')}</p>
+            </div>
             <div class="xe-field{if $Scope|eq( 'all' )} xe-inactive{/if}">
                 <span class="xe-label">{'Node'|i18n('design/standard/extract')}</span>
                 <div class="xe-node">
@@ -63,6 +75,36 @@
                     <input class="button" type="submit" name="BrowseSubtree" value="{'Change'|i18n('design/standard/extract')}" />
                 </div>
                 <input name="Subtree" type="hidden" id="Subtree" value="{$Subtree|wash}" />
+            </div>
+            <div class="xe-field">
+                <label class="xe-label" for="xe-fetch-alias">{'Named fetch'|i18n('design/standard/extract')}</label>
+                <div class="xe-inline">
+                    <select name="FetchAliasChoice" id="xe-fetch-alias" aria-label="{'A fetchalias.ini named fetch'|i18n('design/standard/extract')|wash}">
+                        <option value="">{'Choose one to apply...'|i18n('design/standard/extract')}</option>
+                        {foreach $FetchAliasChoices as $group}
+                        {if $group.aliases|count}
+                        <optgroup label="{$group.label|wash}">
+                        {foreach $group.aliases as $alias}
+                        <option value="{concat( $group.siteaccess, '|', $alias.name )|wash}"{if $Filters.fetch_alias|eq( $alias.name )|and( $Filters.fetch_alias_siteaccess|eq( $group.siteaccess ) )} selected{/if}>{$alias.name|wash} — {$alias.summary|wash}</option>
+                        {/foreach}
+                        </optgroup>
+                        {/if}
+                        {/foreach}
+                    </select>
+                    <input type="text" name="FetchAliasParams" value="{$FetchAliasParamsRaw|wash}" aria-label="{'Parameters, key=value,key=value'|i18n('design/standard/extract')|wash}" placeholder="{'key=value,key=value'|wash}" />
+                    <input class="button" type="submit" name="ApplyFetchAlias" value="{'Apply'|i18n('design/standard/extract')}" />
+                </div>
+                <p class="xe-help">{'A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.'|i18n('design/standard/extract')}
+                {if $FetchAliasFillable|count}{'This one also takes: %list.'|i18n('design/standard/extract',, hash( '%list', $FetchAliasFillable|implode( ', ' ) ))}{/if}</p>
+                {if $FetchAliasApplied|count|or( $FetchAliasUnknown|count )}
+                <div class="xe-note{if $FetchAliasUnknown|count} xe-note-bad{/if}">
+                    {if $FetchAliasApplied|count}<p>{'Applied: %list.'|i18n('design/standard/extract',, hash( '%list', $FetchAliasApplied|implode( '; ' ) ))}</p>{/if}
+                    {if $FetchAliasUnknown|count}<p>{'Not understood: %list.'|i18n('design/standard/extract',, hash( '%list', $FetchAliasUnknown|implode( '; ' ) ))}</p>{/if}
+                </div>
+                {/if}
+                {if $Filters.fetch_alias|ne( '' )}
+                <p class="xe-help xe-meta">{'Remembered choice: %name.'|i18n('design/standard/extract',, hash( '%name', $Filters.fetch_alias ))}</p>
+                {/if}
             </div>
             {/if}
 
@@ -222,6 +264,82 @@
                 </div>
                 <p class="xe-help">{'For text, number, checkbox (1 or 0), e-mail, date and selection attributes. Dates can be written as 2026-09-29, or 7d, 2w, 3m, 1y for that long ago.'|i18n('design/standard/extract')}</p>
             </div>
+
+            {* Several conditions, on a class attribute or an object field, joined with and/or *}
+            <div class="xe-field">
+                <div class="xe-columns-head">
+                    <span class="xe-label" id="xe-conditions-label">{'Additional conditions'|i18n('design/standard/extract')}</span>
+                    <span class="xe-columns-hint">{'%count rows'|i18n('design/standard/extract',, hash( '%count', $Filters.conditions|count ))}</span>
+                    <span class="xe-spacer"></span>
+                    <span class="xe-segmented" role="radiogroup" aria-label="{'Join'|i18n('design/standard/extract')|wash}">
+                        <label><input type="radio" name="Filter[conditions_join]" value="and" class="xe-autosubmit"{if $Filters.conditions_join|eq( 'and' )} checked{/if} /><span>{'All conditions (and)'|i18n('design/standard/extract')}</span></label>
+                        <label><input type="radio" name="Filter[conditions_join]" value="or" class="xe-autosubmit"{if $Filters.conditions_join|eq( 'or' )} checked{/if} /><span>{'Any condition (or)'|i18n('design/standard/extract')}</span></label>
+                    </span>
+                    <input class="button" type="submit" name="AddCondition" value="{'Add condition'|i18n('design/standard/extract')}" />
+                </div>
+                {if $Filters.conditions|count|eq( 0 )}
+                <p class="xe-columns-empty">{'No additional conditions. "Add condition" adds a row.'|i18n('design/standard/extract')}</p>
+                {/if}
+                <ol class="xe-conditions" aria-labelledby="xe-conditions-label">
+                    {foreach $Filters.conditions as $index => $condition}
+                    <li class="xe-condition">
+                        <span class="xe-colpos">{$index|sum( 1 )}</span>
+                        <select name="Filter[conditions][{$index}][field]" class="xe-autosubmit" aria-label="{'Field'|i18n('design/standard/extract')|wash}">
+                            <option value="">{'Choose a field...'|i18n('design/standard/extract')}</option>
+                            <optgroup label="{'Object fields'|i18n('design/standard/extract')|wash}">
+                            {foreach $FilterObjectFields as $field}
+                            <option value="{$field.identifier|wash}"{if $condition.field|eq( $field.identifier )} selected{/if}>{$field.name|wash}</option>
+                            {/foreach}
+                            </optgroup>
+                            {if $FilterFields|count}
+                            <optgroup label="{'Class attributes'|i18n('design/standard/extract')|wash}">
+                            {foreach $FilterFields as $field}
+                            <option value="{$field.identifier|wash}"{if $condition.field|eq( $field.identifier )} selected{/if}>{$field.name|wash} ({$field.identifier|wash})</option>
+                            {/foreach}
+                            </optgroup>
+                            {/if}
+                        </select>
+                        <label class="xe-check xe-negate" title="{'Invert this condition'|i18n('design/standard/extract')|wash}"><input type="checkbox" name="Filter[conditions][{$index}][negate]" value="1" class="xe-autosubmit"{if $condition.negate} checked{/if} /> {'not'|i18n('design/standard/extract')}</label>
+                        <select name="Filter[conditions][{$index}][op]" class="xe-autosubmit" aria-label="{'Operator'|i18n('design/standard/extract')|wash}">
+                            {foreach $FilterConditionOperators as $op => $label}
+                            <option value="{$op|wash}"{if $condition.op|eq( $op )} selected{/if}>{$label|wash}</option>
+                            {/foreach}
+                        </select>
+                        <input type="text" name="Filter[conditions][{$index}][value]" value="{$condition.value|wash}" class="xe-autosubmit" aria-label="{'Value (or a comma list for in / not in)'|i18n('design/standard/extract')|wash}" placeholder="{'value, or a,b,c for in/not in'|i18n('design/standard/extract')|wash}" />
+                        <input type="text" name="Filter[conditions][{$index}][value2]" value="{$condition.value2|wash}" class="xe-autosubmit" aria-label="{'Second value, for between / not between'|i18n('design/standard/extract')|wash}" placeholder="{'second value (between)'|i18n('design/standard/extract')|wash}" />
+                        <button type="submit" class="xe-icon xe-remove" name="RemoveCondition[{$index}]" value="1" title="{'Remove this condition'|i18n('design/standard/extract')|wash}">×</button>
+                    </li>
+                    {/foreach}
+                </ol>
+                <p class="xe-help">{'The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).'|i18n('design/standard/extract')}
+                {if $FilterConditionsJoinAffectsEverything}{'"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.'|i18n('design/standard/extract')}{/if}</p>
+                <p class="xe-help xe-meta">{'Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.'|i18n('design/standard/extract')}</p>
+            </div>
+
+            {* The resolved fetch parameters, to copy into a template *}
+            <details class="xe-field xe-fetchparams">
+                <summary class="xe-label">{'Fetch parameters'|i18n('design/standard/extract')}</summary>
+                <p class="xe-help">{'What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.'|i18n('design/standard/extract')}</p>
+                <pre class="xe-fetchparams-code">{$ResolvedFetchParams|wash}</pre>
+            </details>
+
+            {* An extended attribute filter (extendedattributefilter.ini) chained with the language filter *}
+            {if $ExtendedFilters|count}
+            <div class="xe-field">
+                <label class="xe-label" for="xe-extended-filter">{'Extended attribute filter'|i18n('design/standard/extract')}</label>
+                <div class="xe-inline">
+                    <select name="Filter[extended_filter]" id="xe-extended-filter" class="xe-autosubmit">
+                        <option value="">{'None'|i18n('design/standard/extract')}</option>
+                        {foreach $ExtendedFilters as $id => $label}
+                        <option value="{$id|wash}"{if $Filters.extended_filter|eq( $id )} selected{/if}>{$label|wash}</option>
+                        {/foreach}
+                    </select>
+                    <input type="text" name="Filter[extended_params]" value="{$Filters.extended_params|wash}" class="xe-autosubmit" aria-label="{'Its parameters, as JSON'|i18n('design/standard/extract')|wash}" placeholder="{'{&quot;tag_id&quot;:12}'|wash}" />
+                </div>
+                <p class="xe-help">{'A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.'|i18n('design/standard/extract')}</p>
+            </div>
+            {/if}
+
             <div class="xe-field">
                 <label class="xe-label" for="xe-sort-field">{'Sort the rows by'|i18n('design/standard/extract')}</label>
                 <div class="xe-inline">
@@ -243,6 +361,31 @@
                     </div>
                 </div>
                 <p class="xe-help">{'Tree order keeps the order the node gives its children. With several languages, the rows of each language are sorted this way.'|i18n('design/standard/extract')}</p>
+            </div>
+            <div class="xe-field{if $SortField|eq( 'tree' )} xe-inactive{/if}">
+                <label class="xe-label" for="xe-sort-field-2">{'Then sort by'|i18n('design/standard/extract')}</label>
+                <div class="xe-inline">
+                    <select name="SortField2" id="xe-sort-field-2" class="xe-autosubmit">
+                        <option value="">{'None'|i18n('design/standard/extract')}</option>
+                        <option value="name"{if $SortField2|eq( 'name' )} selected{/if}>{'Name'|i18n('design/standard/extract')}</option>
+                        <option value="published"{if $SortField2|eq( 'published' )} selected{/if}>{'Published'|i18n('design/standard/extract')}</option>
+                        <option value="modified"{if $SortField2|eq( 'modified' )} selected{/if}>{'Modified'|i18n('design/standard/extract')}</option>
+                        <option value="priority"{if $SortField2|eq( 'priority' )} selected{/if}>{'Priority'|i18n('design/standard/extract')}</option>
+                        <option value="path"{if $SortField2|eq( 'path' )} selected{/if}>{'Location in the tree'|i18n('design/standard/extract')}</option>
+                        {if $FilterFields|count}
+                        <optgroup label="{'Class attributes'|i18n('design/standard/extract')|wash}">
+                        {foreach $FilterFields as $field}
+                        <option value="{$field.identifier|wash}"{if $SortField2|eq( $field.identifier )} selected{/if}>{$field.name|wash} ({$field.identifier|wash})</option>
+                        {/foreach}
+                        </optgroup>
+                        {/if}
+                    </select>
+                    <div class="xe-segmented" role="radiogroup" aria-label="{'Order'|i18n('design/standard/extract')|wash}">
+                        <label><input type="radio" name="SortOrder2" value="asc" class="xe-autosubmit"{if $SortAscending2} checked{/if} /><span>{'Ascending'|i18n('design/standard/extract')}</span></label>
+                        <label><input type="radio" name="SortOrder2" value="desc" class="xe-autosubmit"{if $SortAscending2|not} checked{/if} /><span>{'Descending'|i18n('design/standard/extract')}</span></label>
+                    </div>
+                </div>
+                <p class="xe-help">{'Breaks ties in the sort above. Only applies once the sort above is not tree order.'|i18n('design/standard/extract')}</p>
             </div>
         </section>
 

@@ -26,14 +26,16 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
-    '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][output:][preview;][list-classes][list-columns][user:][progress-file:]',
+    '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
+    '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
+    '[extended-filter:][extended-params:][fetch-alias:][alias-param:][output:][preview;][list-classes][list-columns][user:][progress-file:]',
     '',
     array(
-        'class'        => 'Class id or identifier (required to export)',
+        'class'        => 'Class id or identifier (required to export, unless --fetch-alias names one)',
         'node'         => 'Node id to export below (default: export.ini StartNodeID or the user placement)',
         'scope'        => 'node (default): below --node; all: every object of the class in the whole site',
-        'depth'        => 'tree (default): the whole subtree; list: direct children only',
+        'depth'        => 'tree (default): the whole subtree; list: direct children only; or a whole number: exactly/at most/at least that many levels below --node, per --depth-operator',
+        'depth-operator' => 'eq (default), le or ge — only with a numeric --depth',
         'main-only'    => 'Only main locations: an object with several locations is one row',
         'offset'       => 'Skip this many rows (default 0)',
         'limit'        => 'Take at most this many rows (default 0 = all)',
@@ -56,7 +58,15 @@ $options = $script->getOptions(
         'name'         => 'Only objects whose name contains this',
         'sort'         => 'tree (default: as the node sorts), name, published, modified, priority, path, or an attribute identifier',
         'order'        => 'asc (default) or desc',
-        'where'        => 'A condition on an attribute: "<identifier> <op> <value>", op: contains, starts, eq (=), ne (!=), gt (>), lt (<), empty, filled',
+        'sort2'        => 'A second sort field, breaking ties in --sort (same choices, no tree)',
+        'order2'       => 'asc (default) or desc, for --sort2',
+        'where'        => 'One or more conditions: "<field> <op> <value>", several joined with " && " (and) or " || " (or) but not both in one value. ' .
+                          'field: a class attribute, or name, published, modified, section, owner, priority, depth, class_identifier, node_id, contentobject_id, state. ' .
+                          'op: contains, starts, eq (=), ne (!=), gt (>), lt (<), gte (>=), lte (<=), empty, filled, in, not_in (comma list), between, not_between ("A..B"), like, not_like (* wildcard)',
+        'extended-filter' => 'An extendedattributefilter.ini id to chain with the language filter (e.g. an eztags filter); --list-columns lists the ids',
+        'extended-params' => 'Its params as a JSON object, e.g. {"tag_id":12}',
+        'fetch-alias'  => 'Apply a fetchalias.ini named fetch (Module=content, FunctionName tree/list/tree_count/list_count): its node, class, sort, depth, limit/offset, main-only and a simple condition, where they can be read back',
+        'alias-param'  => 'Values for the named fetch\'s own Parameter[] entries (besides parent_node_id, which takes --node): key=value,key=value',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
         'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
         'list-classes' => 'List the classes with how many objects each has in the selection',
@@ -83,15 +93,76 @@ $user->loginCurrent();
 $exportINI = eZINI::instance( 'export.ini' );
 $siteINI = eZINI::instance();
 
+// A named fetch (fetchalias.ini): its Constant values become defaults for the node, class, sort, depth,
+// limit/offset, main-only and (where it can be read back) a condition — the same options below still work,
+// but the alias's own values take over the moment it names one, exactly as applying it in the view does.
+$aliasApplied = array(); $aliasUnknown = array(); $aliasValues = array(); $aliasFunction = '';
+if ( $options['fetch-alias'] )
+{
+    $aliasDefinition = XrowExtractFetchAlias::find( $options['fetch-alias'], '' );
+    if ( !$aliasDefinition )
+        $fail( "No named fetch {$options['fetch-alias']} for content tree/list/tree_count/list_count (--fetch-alias)." );
+    $aliasParamOverrides = array();
+    if ( $options['alias-param'] )
+    {
+        foreach ( explode( ',', $options['alias-param'] ) as $pair )
+        {
+            $pair = trim( $pair );
+            if ( $pair === '' || strpos( $pair, '=' ) === false )
+                continue;
+            list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
+            if ( $pKey !== '' )
+                $aliasParamOverrides[$pKey] = $pValue;
+        }
+    }
+    $aliasResult = XrowExtractFetchAlias::apply( $aliasDefinition, $options['node'] ? (int)$options['node'] : 0, $aliasParamOverrides );
+    $aliasApplied = $aliasResult['applied'];
+    $aliasUnknown = $aliasResult['unknown'];
+    $aliasValues = $aliasResult['values'];
+    $aliasFunction = $aliasDefinition['function'];
+    $cli->output( 'Named fetch ' . $options['fetch-alias'] . ': ' . ( $aliasApplied ? implode( '; ', $aliasApplied ) : 'nothing recognised' ) );
+    foreach ( $aliasUnknown as $note )
+        $cli->output( '  not understood: ' . $note );
+    $aliasFillable = XrowExtractFetchAlias::fillableParameters( $aliasDefinition );
+    if ( $aliasFillable )
+        $cli->output( '  fillable with --alias-param: ' . implode( ', ', $aliasFillable ) );
+}
+
 // Selection
 $scope = $options['scope'] === 'all' ? 'all' : 'node';
 if ( $options['scope'] && !in_array( $options['scope'], array( 'node', 'all' ), true ) )
     $fail( '--scope is node or all.' );
-$nodeID = $options['node'] ? (int)$options['node']
-        : (int)( $exportINI->variable( 'ExportSettings', 'StartNodeID' ) ?: $siteINI->variable( 'UserSettings', 'DefaultUserPlacement' ) );
-$depth = $options['depth'] === 'list' ? 1 : false;
-$depthOperator = $depth ? 'eq' : false;
-$mainOnly = (bool)$options['main-only'];
+$nodeID = isset( $aliasValues['parent_node_id'] ) ? $aliasValues['parent_node_id']
+        : ( $options['node'] ? (int)$options['node']
+          : (int)( $exportINI->variable( 'ExportSettings', 'StartNodeID' ) ?: $siteINI->variable( 'UserSettings', 'DefaultUserPlacement' ) ) );
+$depthOption = $options['depth'];
+if ( $depthOption === '' && $aliasFunction !== '' )
+    $depthOption = in_array( $aliasFunction, array( 'list', 'list_count' ), true ) ? 'list' : 'tree';
+if ( $depthOption === 'list' )
+{
+    $depth = 1;
+    $depthOperator = 'eq';
+}
+elseif ( $depthOption && $depthOption !== 'tree' )
+{
+    if ( !ctype_digit( (string)$depthOption ) )
+        $fail( '--depth is tree, list, or a whole number (the depth below --node).' );
+    $depth = (int)$depthOption;
+    $depthOperator = $options['depth-operator'] ? $options['depth-operator'] : 'eq';
+    if ( !in_array( $depthOperator, array( 'eq', 'le', 'ge' ), true ) )
+        $fail( '--depth-operator is eq, le or ge.' );
+}
+elseif ( isset( $aliasValues['depth'] ) )
+{
+    $depth = $aliasValues['depth'];
+    $depthOperator = in_array( $aliasValues['depth_operator'], array( 'eq', 'le', 'ge' ), true ) ? $aliasValues['depth_operator'] : 'le';
+}
+else
+{
+    $depth = false;
+    $depthOperator = false;
+}
+$mainOnly = isset( $aliasValues['main_node_only'] ) ? (bool)$aliasValues['main_node_only'] : (bool)$options['main-only'];
 $fetchNode = $nodeID;
 if ( $scope === 'all' )
 {
@@ -106,8 +177,8 @@ else
     if ( !$node instanceof eZContentObjectTreeNode || !$node->canRead() )
         $fail( "Node $nodeID does not exist or $login may not read it (--node)." );
 }
-$offset = max( 0, (int)$options['offset'] );
-$limit = max( 0, (int)$options['limit'] );
+$offset = isset( $aliasValues['offset'] ) ? $aliasValues['offset'] : max( 0, (int)$options['offset'] );
+$limit = isset( $aliasValues['limit'] ) ? $aliasValues['limit'] : max( 0, (int)$options['limit'] );
 
 // Languages: all, or the given locales, in the order of the content languages (site default first)
 $contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
@@ -154,14 +225,59 @@ if ( $options['visibility'] && !in_array( $options['visibility'], array( 'visibl
     $fail( '--visibility is visible or hidden.' );
 $filterValues['visibility'] = $options['visibility'] ? $options['visibility'] : 'any';
 $filterValues['name'] = (string)$options['name'];
+$filterValues['conditions'] = array();
 if ( $options['where'] )
 {
-    $ops = array( '=' => 'eq', '!=' => 'ne', '>' => 'gt', '<' => 'lt' );
-    if ( !preg_match( '/^\s*([A-Za-z0-9_]+)\s+(contains|starts|eq|ne|gt|lt|empty|filled|=|!=|>|<)\s*(.*)$/', $options['where'], $m ) )
-        $fail( '--where is "<identifier> <op> <value>", op: contains, starts, eq, ne, gt, lt, empty, filled.' );
-    $filterValues['where_attribute'] = $m[1];
-    $filterValues['where_op'] = isset( $ops[$m[2]] ) ? $ops[$m[2]] : $m[2];
-    $filterValues['where_value'] = trim( $m[3], " \"'" );
+    $whereText = $options['where'];
+    $hasAnd = strpos( $whereText, ' && ' ) !== false;
+    $hasOr = strpos( $whereText, ' || ' ) !== false;
+    if ( $hasAnd && $hasOr )
+        $fail( '--where: a single value cannot mix " && " and " || " (the fetch has one join for the whole condition set).' );
+    $join = $hasOr ? 'or' : 'and';
+    $pieces = preg_split( $hasOr ? '/\s*\|\|\s*/' : '/\s*&&\s*/', $whereText );
+    $opAlt = 'not_between|between|not_in|in|not_like|like|contains|starts|empty|filled|gte|lte|eq|ne|gt|lt|>=|<=|!=|=|>|<';
+    $symbolMap = array( '=' => 'eq', '!=' => 'ne', '>' => 'gt', '<' => 'lt', '>=' => 'gte', '<=' => 'lte' );
+    foreach ( $pieces as $piece )
+    {
+        if ( trim( $piece ) === '' )
+            continue;
+        if ( !preg_match( '/^\s*([A-Za-z0-9_]+)\s+(not\s+)?(' . $opAlt . ')\s*(.*)$/', $piece, $m ) )
+            $fail( "--where: \"$piece\" is not \"<field> [not] <op> [value]\". op: contains, starts, eq, ne, gt, lt, gte, lte, empty, filled, in, not_in, between, not_between, like, not_like." );
+        $field = $m[1];
+        $negate = $m[2] !== '';
+        $op = isset( $symbolMap[$m[3]] ) ? $symbolMap[$m[3]] : $m[3];
+        $value = trim( $m[4], " \"'" );
+        $value2 = '';
+        if ( in_array( $op, XrowExtractFilters::twoValueOperators(), true ) )
+        {
+            $dotPos = strpos( $value, '..' );
+            if ( $dotPos === false )
+                $fail( "--where: \"$piece\": $op needs \"A..B\"." );
+            $value2 = trim( substr( $value, $dotPos + 2 ) );
+            $value = trim( substr( $value, 0, $dotPos ) );
+        }
+        $filterValues['conditions'][] = array( 'field' => $field, 'op' => $op, 'value' => $value, 'value2' => $value2, 'negate' => $negate );
+    }
+    $filterValues['conditions_join'] = $join;
+}
+if ( isset( $aliasValues['condition'] ) )
+{
+    // The named fetch's own condition, folded in the same way the view folds it
+    $filterValues['conditions'] = array( array_merge( array( 'value2' => '' ), $aliasValues['condition'] ) );
+    $filterValues['conditions_join'] = 'and';
+}
+if ( $options['extended-filter'] )
+{
+    if ( !array_key_exists( $options['extended-filter'], XrowExtractFilters::extendedFilters() ) )
+        $fail( "--extended-filter: {$options['extended-filter']} is not registered in extendedattributefilter.ini." );
+    $filterValues['extended_filter'] = $options['extended-filter'];
+    if ( $options['extended-params'] )
+    {
+        json_decode( $options['extended-params'], true );
+        if ( json_last_error() !== JSON_ERROR_NONE )
+            $fail( '--extended-params is not valid JSON.' );
+        $filterValues['extended_params'] = $options['extended-params'];
+    }
 }
 $filters = new XrowExtractFilters( $filterValues );
 $attributeFilter = false;   // set once the class is known
@@ -171,7 +287,7 @@ $countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $dep
     $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, $locale !== false, $locale, 'include', array( (int)$classID ),
                                                                  $attributeFilter === false ? $filters->attributeFilter( false ) : $attributeFilter,
                                                                  $depth, $depthOperator, true, false, $mainOnly,
-                                                                 $locale !== false ? XrowExtractTranslationFilter::params( $locale ) : false, false );
+                                                                 $locale !== false ? XrowExtractTranslationFilter::chainedParams( $locale, $filters->values['extended_filter'], $filters->extendedParamsArray() ) : false, false );
     return isset( $result['result'] ) ? (int)$result['result'] : 0;
 };
 
@@ -192,15 +308,24 @@ if ( $options['list-classes'] )
     $script->shutdown( 0 );
 }
 
-// The class
-if ( !$options['class'] )
+// The class: --class, or the named fetch's own class_id / class_filter_array (its first class)
+$classOption = $options['class'];
+if ( !$classOption && isset( $aliasValues['class_id'] ) )
+    $classOption = $aliasValues['class_id'];
+elseif ( !$classOption && isset( $aliasValues['class_filter_array'] ) && $aliasValues['class_filter_array'] )
+    $classOption = reset( $aliasValues['class_filter_array'] );
+if ( !$classOption )
     $fail( 'Missing --class (id or identifier). --list-classes shows them.' );
-$class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)$options['class'] ) : eZContentClass::fetchByIdentifier( $options['class'] );
+$class = ctype_digit( (string)$classOption ) ? eZContentClass::fetch( (int)$classOption ) : eZContentClass::fetchByIdentifier( $classOption );
 if ( !$class instanceof eZContentClass )
-    $fail( "No class {$options['class']} (--class)." );
+    $fail( "No class $classOption (--class)." );
 $classID = (int)$class->attribute( 'id' );
-if ( $filters->values['where_attribute'] !== '' && !array_key_exists( $filters->values['where_attribute'], XrowExtractFilters::classFields( $classID ) ) )
-    $fail( "--where: {$filterValues['where_attribute']} is not a text, number, date or selection attribute of " . $class->attribute( 'identifier' ) . '.' );
+$conditionFields = array_merge( XrowExtractFilters::classFields( $classID ), XrowExtractFilters::objectFields() );
+foreach ( $filters->values['conditions'] as $condition )
+{
+    if ( $condition['field'] !== '' && !array_key_exists( $condition['field'], $conditionFields ) )
+        $fail( "--where: {$condition['field']} is not a class attribute of " . $class->attribute( 'identifier' ) . ' or a known object field.' );
+}
 $attributeFilter = $filters->attributeFilter( $class->attribute( 'identifier' ) );
 $meta = XrowExtractColumns::attributeMeta( $classID );
 $extras = XrowExtractColumns::extraAttributes();
@@ -236,6 +361,12 @@ if ( $options['list-columns'] )
     $cli->output( 'Column sets (--sets):' );
     foreach ( XrowExtractCatalogue::columnSets() as $id => $set )
         $cli->output( sprintf( '  %-12s %s', $id, $set[1] ) );
+    $cli->output( 'Object fields a condition (--where) can also use, besides a class attribute:' );
+    foreach ( XrowExtractFilters::objectFields() as $id => $field )
+        $cli->output( sprintf( '  %-20s %s', $id, $field['name'] ) );
+    $cli->output( 'Extended attribute filters (--extended-filter):' );
+    foreach ( XrowExtractFilters::extendedFilters() as $id => $label )
+        $cli->output( '  ' . $label );
     $script->shutdown( 0 );
 }
 
@@ -311,11 +442,32 @@ if ( $scope === 'node' )
 }
 if ( $options['order'] && !in_array( $options['order'], array( 'asc', 'desc' ), true ) )
     $fail( '--order is asc or desc.' );
-if ( $options['sort'] && $options['sort'] !== 'tree' )
+if ( $options['order2'] && !in_array( $options['order2'], array( 'asc', 'desc' ), true ) )
+    $fail( '--order2 is asc or desc.' );
+$sortOption = $options['sort'];
+$orderOption = $options['order'];
+$sort2Option = $options['sort2'];
+$order2Option = $options['order2'];
+if ( isset( $aliasValues['sort_by'] ) )
 {
-    if ( !array_key_exists( $options['sort'], XrowExtractFilters::sortFields() ) && !array_key_exists( $options['sort'], XrowExtractFilters::classFields( $classID ) ) )
-        $fail( "--sort: {$options['sort']} is not a sort field or a sortable attribute of " . $class->attribute( 'identifier' ) . '.' );
-    $sortBy = XrowExtractFilters::sortParam( $options['sort'], $options['order'] !== 'desc', $classID, $class->attribute( 'identifier' ), $sortBy );
+    $aliasSort = $aliasValues['sort_by'];
+    $aliasSortPairs = ( isset( $aliasSort[0] ) && is_array( $aliasSort[0] ) ) ? $aliasSort : array( $aliasSort );
+    $sortOption = isset( $aliasSortPairs[0][0] ) ? $aliasSortPairs[0][0] : '';
+    $orderOption = ( isset( $aliasSortPairs[0][1] ) && $aliasSortPairs[0][1] ) ? 'asc' : 'desc';
+    $sort2Option = isset( $aliasSortPairs[1][0] ) ? $aliasSortPairs[1][0] : '';
+    $order2Option = ( isset( $aliasSortPairs[1][1] ) && $aliasSortPairs[1][1] ) ? 'asc' : 'desc';
+}
+if ( $sortOption && $sortOption !== 'tree' )
+{
+    if ( !array_key_exists( $sortOption, XrowExtractFilters::sortFields() ) && !array_key_exists( $sortOption, XrowExtractFilters::classFields( $classID ) ) )
+        $fail( "--sort: $sortOption is not a sort field or a sortable attribute of " . $class->attribute( 'identifier' ) . '.' );
+    $sortBy = XrowExtractFilters::sortParam( $sortOption, $orderOption !== 'desc', $classID, $class->attribute( 'identifier' ), $sortBy );
+}
+if ( $sort2Option )
+{
+    if ( !array_key_exists( $sort2Option, XrowExtractFilters::sortFields() ) && !array_key_exists( $sort2Option, XrowExtractFilters::classFields( $classID ) ) )
+        $fail( "--sort2: $sort2Option is not a sort field or a sortable attribute of " . $class->attribute( 'identifier' ) . '.' );
+    $sortBy = XrowExtractFilters::combineSort( $sortBy, XrowExtractFilters::sortParam( $sort2Option, $order2Option !== 'desc', $classID, $class->attribute( 'identifier' ), $sortBy ) );
 }
 $languageCounts = array();
 foreach ( $languages as $locale )
@@ -363,7 +515,7 @@ foreach ( $languages as $locale )
     {
         $take = min( 100, $wantRows - $written );
         $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator,
-                                                                $classID, $attributeFilter, XrowExtractTranslationFilter::params( $locale ), 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+                                                                $classID, $attributeFilter, XrowExtractTranslationFilter::chainedParams( $locale, $filters->values['extended_filter'], $filters->extendedParamsArray() ), 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
         $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
         foreach ( $batch as $treeNode )
         {

@@ -125,6 +125,63 @@ if ( $http->hasPostVariable( 'ResetView' ) )
     return $module->redirectTo( 'xrowextract/csv' );
 }
 
+// Named fetch (fetchalias.ini): apply one's Constant values into the view. Read early, so the node,
+// class, sort, depth, limit/offset, main-locations and a condition below all see the override.
+$FetchAliasChoices = XrowExtractFetchAlias::choices();
+$FetchAliasApplyResult = false;
+$FetchAliasFunction = '';
+$fetchAliasName = '';
+$fetchAliasSiteaccess = '';
+if ( $http->hasPostVariable( 'FetchAliasChoice' ) )
+{
+    $choiceRaw = (string)$http->postVariable( 'FetchAliasChoice' );
+    $pipePos = strpos( $choiceRaw, '|' );
+    if ( $pipePos !== false )
+    {
+        $fetchAliasSiteaccess = substr( $choiceRaw, 0, $pipePos );
+        $fetchAliasName = substr( $choiceRaw, $pipePos + 1 );
+    }
+}
+// Free-form "key=value,key=value" for the alias's own Parameter[] entries (besides parent_node_id, which
+// always takes the node currently chosen in the view); the same shape as the CLI's --alias-param.
+$fetchAliasParamsRaw = (string)( $http->hasPostVariable( 'FetchAliasParams' ) ? $http->postVariable( 'FetchAliasParams' ) : '' );
+$FetchAliasParamOverrides = array();
+foreach ( explode( ',', $fetchAliasParamsRaw ) as $pair )
+{
+    $pair = trim( $pair );
+    if ( $pair === '' || strpos( $pair, '=' ) === false )
+        continue;
+    list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
+    if ( $pKey !== '' )
+        $FetchAliasParamOverrides[$pKey] = $pValue;
+}
+$FetchAliasFillable = array();
+if ( $http->hasPostVariable( 'ApplyFetchAlias' ) && $fetchAliasName !== '' )
+{
+    $aliasDefinition = XrowExtractFetchAlias::find( $fetchAliasName, $fetchAliasSiteaccess );
+    if ( $aliasDefinition )
+    {
+        $FetchAliasFunction = $aliasDefinition['function'];
+        $FetchAliasFillable = XrowExtractFetchAlias::fillableParameters( $aliasDefinition );
+        $currentNodeGuess = $http->hasPostVariable( 'Subtree' ) ? (int)$http->postVariable( 'Subtree' )
+                           : ( isset( $sessionConfig['Subtree'] ) ? (int)$sessionConfig['Subtree'] : 0 );
+        $FetchAliasApplyResult = XrowExtractFetchAlias::apply( $aliasDefinition, $currentNodeGuess, $FetchAliasParamOverrides );
+    }
+    else
+    {
+        $FetchAliasApplyResult = array( 'applied' => array(), 'unknown' => array( "alias not found: $fetchAliasName" ), 'values' => array() );
+    }
+}
+elseif ( $fetchAliasName !== '' )
+{
+    // Not applying yet: still tell the view which Parameter[] entries the chosen alias would take,
+    // so the "Parameters" field can be filled in before "Apply" is clicked.
+    $chosenAliasDefinition = XrowExtractFetchAlias::find( $fetchAliasName, $fetchAliasSiteaccess );
+    if ( $chosenAliasDefinition )
+        $FetchAliasFillable = XrowExtractFetchAlias::fillableParameters( $chosenAliasDefinition );
+}
+$FetchAliasValues = $FetchAliasApplyResult ? $FetchAliasApplyResult['values'] : array();
+
 // Set col & row separator: one character (\t is a tab), never a quote or a line break
 $Separator = $http->hasPostVariable( 'Separator' ) ? (string)$http->postVariable( 'Separator' ) : ',';
 if ( $Separator === '\t' )
@@ -159,14 +216,20 @@ $tpl->setVariable( 'LineSeparator', $LineSeparator );
 $tpl->setVariable( 'LineSeparatorArray', $LineSeparatorArray );
 
 // Set limit & offset
-$Limit = max( 0, (int)( $http->hasPostVariable( 'Limit' ) ? $http->postVariable( 'Limit' ) : $ini_bis->variable( 'ExportSettings', 'Limit' ) ) );
-$Offset = max( 0, (int)( $http->hasPostVariable( 'Offset' ) ? $http->postVariable( 'Offset' ) : $ini_bis->variable( 'ExportSettings', 'Offset' ) ) );
+$Limit = isset( $FetchAliasValues['limit'] ) ? $FetchAliasValues['limit']
+       : max( 0, (int)( $http->hasPostVariable( 'Limit' ) ? $http->postVariable( 'Limit' ) : $ini_bis->variable( 'ExportSettings', 'Limit' ) ) );
+$Offset = isset( $FetchAliasValues['offset'] ) ? $FetchAliasValues['offset']
+        : max( 0, (int)( $http->hasPostVariable( 'Offset' ) ? $http->postVariable( 'Offset' ) : $ini_bis->variable( 'ExportSettings', 'Offset' ) ) );
 
 $tpl->setVariable( 'Limit', $Limit );
 $tpl->setVariable( 'Offset', $Offset );
 
 // What is the default subtree
-if ( ! $http->hasPostVariable( 'Subtree' ) && isset( $sessionConfig['Subtree'] ) && (int)$sessionConfig['Subtree'] > 0 )
+if ( isset( $FetchAliasValues['parent_node_id'] ) && $FetchAliasValues['parent_node_id'] > 0 )
+{
+    $Subtree = (int)$FetchAliasValues['parent_node_id'];
+}
+elseif ( ! $http->hasPostVariable( 'Subtree' ) && isset( $sessionConfig['Subtree'] ) && (int)$sessionConfig['Subtree'] > 0 )
 {
     $Subtree = (int)$sessionConfig['Subtree'];
 }
@@ -193,7 +256,8 @@ $type = ( $http->hasPostVariable( 'type' ) && $http->postVariable( 'type' ) === 
 $depth = $type == 'list' ? 1 : false;
 $depthOperator = $type == 'list' ? 'eq' : false;
 
-$Mainnodeonly = ( $http->hasPostVariable( 'mainnodeonly' ) && $http->postVariable( 'mainnodeonly' ) ) ? '1' : '0';
+$Mainnodeonly = isset( $FetchAliasValues['main_node_only'] ) ? ( $FetchAliasValues['main_node_only'] ? '1' : '0' )
+              : ( ( $http->hasPostVariable( 'mainnodeonly' ) && $http->postVariable( 'mainnodeonly' ) ) ? '1' : '0' );
 
 $Escape = $http->hasPostVariable( 'Escape' ) ? (bool)$http->postVariable( 'Escape' ) : true;
 
@@ -229,6 +293,17 @@ else
     $Class_id = $obj ? $obj->attribute( 'contentclass_id' ) : 0;
 }
 $Class_id = (int)$Class_id;
+if ( !$hasPreFilledData && isset( $FetchAliasValues['class_id'] ) && $FetchAliasValues['class_id'] > 0 )
+{
+    $Class_id = (int)$FetchAliasValues['class_id'];
+}
+elseif ( !$hasPreFilledData && isset( $FetchAliasValues['class_filter_array'] ) && $FetchAliasValues['class_filter_array'] )
+{
+    $aliasFirstClass = reset( $FetchAliasValues['class_filter_array'] );
+    $aliasResolvedClass = ctype_digit( (string)$aliasFirstClass ) ? eZContentClass::fetch( (int)$aliasFirstClass ) : eZContentClass::fetchByIdentifier( $aliasFirstClass );
+    if ( $aliasResolvedClass )
+        $Class_id = (int)$aliasResolvedClass->attribute( 'id' );
+}
 $pickBestClass = !$hasPreFilledData && $Class_id <= 0;
 // The attribute formats of the class (identifier:format columns)
 $FormatColumns = XrowExtractCatalogue::formatColumns( $Class_id );
@@ -250,6 +325,8 @@ $scopeIn = $http->hasPostVariable( 'Scope' ) ? (string)$http->postVariable( 'Sco
                                              : ( isset( $sessionConfig['Scope'] ) ? (string)$sessionConfig['Scope'] : '' );
 if ( $scopeIn === 'node' || $scopeIn === '' )
     $scopeIn = $type;
+if ( $FetchAliasApplyResult !== false && $FetchAliasFunction !== '' )
+    $scopeIn = in_array( $FetchAliasFunction, array( 'list', 'list_count' ), true ) ? 'list' : 'tree';
 $Scope = in_array( $scopeIn, array( 'list', 'tree', 'all' ), true ) ? $scopeIn : 'tree';
 if ( $Scope !== 'all' )
 {
@@ -271,20 +348,80 @@ $tpl->setVariable( 'Scope', $Scope );
 
 // Filters: from the form (FilterSelection marks it), cleared, or as saved
 if ( $http->hasPostVariable( 'ClearFilters' ) )
+{
     $Filters = new XrowExtractFilters();
+}
 elseif ( $http->hasPostVariable( 'FilterSelection' ) )
-    $Filters = new XrowExtractFilters( (array)( $http->hasPostVariable( 'Filter' ) ? $http->postVariable( 'Filter' ) : array() ) );
+{
+    $filterInput = (array)( $http->hasPostVariable( 'Filter' ) ? $http->postVariable( 'Filter' ) : array() );
+    $filterInput['conditions'] = array_values( (array)( isset( $filterInput['conditions'] ) ? $filterInput['conditions'] : array() ) );
+    // Add / remove a condition row (several rows, joined with and/or)
+    if ( $http->hasPostVariable( 'AddCondition' ) )
+        $filterInput['conditions'][] = array( 'field' => '', 'op' => 'contains', 'value' => '', 'value2' => '' );
+    if ( $http->hasPostVariable( 'RemoveCondition' ) && is_array( $http->postVariable( 'RemoveCondition' ) ) )
+    {
+        $removeConditionKeys = array_keys( $http->postVariable( 'RemoveCondition' ) );
+        $removeConditionIndex = (int)$removeConditionKeys[0];
+        if ( isset( $filterInput['conditions'][$removeConditionIndex] ) )
+            array_splice( $filterInput['conditions'], $removeConditionIndex, 1 );
+    }
+    $Filters = new XrowExtractFilters( $filterInput );
+}
 else
+{
     $Filters = new XrowExtractFilters( isset( $sessionConfig['Filters'] ) && is_array( $sessionConfig['Filters'] ) ? $sessionConfig['Filters'] : array() );
+}
+if ( $FetchAliasApplyResult !== false )
+{
+    // A named fetch just applied: fold its depth and condition into the filters, and remember the choice
+    $aliasFilterValues = $Filters->values;
+    if ( isset( $FetchAliasValues['depth'] ) )
+    {
+        $aliasDepthModeMap = array( 'eq' => 'exact', 'le' => 'atmost', 'ge' => 'atleast' );
+        if ( isset( $aliasDepthModeMap[$FetchAliasValues['depth_operator']] ) )
+        {
+            $aliasFilterValues['depth_mode'] = $aliasDepthModeMap[$FetchAliasValues['depth_operator']];
+            $aliasFilterValues['depth_value'] = max( 0, $FetchAliasValues['depth'] );
+        }
+    }
+    if ( isset( $FetchAliasValues['condition'] ) )
+    {
+        $aliasFilterValues['conditions'] = array( array_merge( array( 'value2' => '' ), $FetchAliasValues['condition'] ) );
+        $aliasFilterValues['where_attribute'] = ''; // the alias's own condition replaces the legacy single one
+    }
+    $aliasFilterValues['fetch_alias'] = $fetchAliasName;
+    $aliasFilterValues['fetch_alias_siteaccess'] = $fetchAliasSiteaccess;
+    $Filters = new XrowExtractFilters( $aliasFilterValues );
+}
 $sessionConfig['Filters'] = $Filters->values;
+// An exact / at most / at least depth below the node, the tree scope only (list is already depth 1 = eq,
+// all has no depth); a named fetch's own depth (folded into $Filters above) is applied the same way.
+if ( $Scope === 'tree' )
+    list( $depth, $depthOperator ) = $Filters->depthParams( $depth, $depthOperator );
 
-// Sort: the node's own order by default, or a field / attribute, ascending or descending
+// Sort: the node's own order by default, or a field / attribute, ascending or descending; a second field
+// breaks ties in the first. A named fetch's own sort_by overrides both.
 $SortField = $http->hasPostVariable( 'SortField' ) ? (string)$http->postVariable( 'SortField' ) : ( isset( $sessionConfig['SortField'] ) ? $sessionConfig['SortField'] : 'tree' );
 if ( !preg_match( '/^[A-Za-z0-9_]+$/', $SortField ) )
     $SortField = 'tree';
 $SortAscending = $http->hasPostVariable( 'SortOrder' ) ? $http->postVariable( 'SortOrder' ) !== 'desc' : ( isset( $sessionConfig['SortAscending'] ) ? (bool)$sessionConfig['SortAscending'] : true );
+$SortField2 = $http->hasPostVariable( 'SortField2' ) ? (string)$http->postVariable( 'SortField2' ) : ( isset( $sessionConfig['SortField2'] ) ? $sessionConfig['SortField2'] : '' );
+if ( $SortField2 !== '' && !preg_match( '/^[A-Za-z0-9_]+$/', $SortField2 ) )
+    $SortField2 = '';
+$SortAscending2 = $http->hasPostVariable( 'SortOrder2' ) ? $http->postVariable( 'SortOrder2' ) !== 'desc' : ( isset( $sessionConfig['SortAscending2'] ) ? (bool)$sessionConfig['SortAscending2'] : true );
+if ( $FetchAliasApplyResult !== false && isset( $FetchAliasValues['sort_by'] ) )
+{
+    $aliasSort = $FetchAliasValues['sort_by'];
+    $aliasSortPairs = ( isset( $aliasSort[0] ) && is_array( $aliasSort[0] ) ) ? $aliasSort : array( $aliasSort );
+    $SortField = isset( $aliasSortPairs[0][0] ) ? $aliasSortPairs[0][0] : 'tree';
+    $SortAscending = isset( $aliasSortPairs[0][1] ) ? (bool)$aliasSortPairs[0][1] : true;
+    $SortField2 = isset( $aliasSortPairs[1][0] ) ? $aliasSortPairs[1][0] : '';
+    $SortAscending2 = isset( $aliasSortPairs[1][1] ) ? (bool)$aliasSortPairs[1][1] : true;
+}
 $sessionConfig['SortField'] = $SortField;
 $sessionConfig['SortAscending'] = $SortAscending;
+$sessionConfig['SortField2'] = $SortField2;
+$sessionConfig['SortAscending2'] = $SortAscending2;
 // The parts that work for every class (dates of the object, section, state, visibility, name)
 $GenericAttributeFilter = $Filters->attributeFilter( false, null );
 
@@ -315,6 +452,20 @@ $sessionConfig['Class_id'] = $Class_id;
 $filterClass = eZContentClass::fetch( $Class_id );
 $LastExport = (int)eZPreferences::value( XrowExtractFilters::lastExportPreference( $Class_id ) );
 $AttributeFilter = $Filters->attributeFilter( $filterClass ? $filterClass->attribute( 'identifier' ) : false, $LastExport );
+
+// "Fetch parameters": the same values as a literal fetch('content','tree', hash(...)) call, to copy into a
+// template. Sort is shown symbolically here (the node's own order is not resolved without fetching it).
+$resolvedSortLiteral = null;
+if ( $SortField !== 'tree' )
+{
+    $resolvedSortLiteral = XrowExtractFilters::sortParam( $SortField, $SortAscending, $Class_id, $filterClass ? $filterClass->attribute( 'identifier' ) : false, array( $SortField, $SortAscending ) );
+    if ( $SortField2 !== '' )
+        $resolvedSortLiteral = XrowExtractFilters::combineSort( $resolvedSortLiteral, XrowExtractFilters::sortParam( $SortField2, $SortAscending2, $Class_id, $filterClass ? $filterClass->attribute( 'identifier' ) : false, $resolvedSortLiteral ) );
+}
+$resolvedExtendedFilter = false;
+if ( $Filters->values['extended_filter'] !== '' )
+    $resolvedExtendedFilter = XrowExtractTranslationFilter::chainedParams( '<locale>', $Filters->values['extended_filter'], $Filters->extendedParamsArray() );
+$tpl->setVariable( 'ResolvedFetchParams', XrowExtractFilters::fetchLiteral( $FetchSubtree, $Class_id, $depth, $depthOperator, $FetchMainnodeonly, $AttributeFilter, $resolvedExtendedFilter, $resolvedSortLiteral ) );
 
 // Languages: every content language by default; the form posts the ticked ones (LanguageSelection marks it)
 $ContentLanguages = XrowExtractColumns::contentLanguages();
@@ -582,7 +733,29 @@ $tpl->setVariable( 'FilterStates', $filterStates );
 $tpl->setVariable( 'LastExport', $LastExport );
 $tpl->setVariable( 'SortField', $SortField );
 $tpl->setVariable( 'SortAscending', $SortAscending );
+$tpl->setVariable( 'SortField2', $SortField2 );
+$tpl->setVariable( 'SortAscending2', $SortAscending2 );
 $tpl->setVariable( 'SortFields', XrowExtractFilters::sortFields() );
+// Condition rows: several, joined with and/or, on a class attribute or an object field
+$tpl->setVariable( 'FilterConditionOperators', XrowExtractFilters::conditionOperators() );
+$tpl->setVariable( 'FilterTwoValueOperators', XrowExtractFilters::twoValueOperators() );
+$tpl->setVariable( 'FilterListOperators', XrowExtractFilters::listOperators() );
+$tpl->setVariable( 'FilterNoValueOperators', XrowExtractFilters::noValueOperators() );
+$filterObjectFields = array();
+foreach ( XrowExtractFilters::objectFields() as $id => $field )
+    $filterObjectFields[] = array_merge( array( 'identifier' => $id ), $field );
+$tpl->setVariable( 'FilterObjectFields', $filterObjectFields );
+$tpl->setVariable( 'FilterConditionsJoinAffectsEverything', $Filters->conditionsJoinAffectsEverything() );
+// An exact / at most / at least depth below the node
+$tpl->setVariable( 'FilterDepthModes', XrowExtractFilters::depthModes() );
+// An extended attribute filter chained with the language filter
+$tpl->setVariable( 'ExtendedFilters', XrowExtractFilters::extendedFilters() );
+// Named fetches (fetchalias.ini): this siteaccess's, and the default siteaccess's
+$tpl->setVariable( 'FetchAliasChoices', $FetchAliasChoices );
+$tpl->setVariable( 'FetchAliasApplied', $FetchAliasApplyResult ? $FetchAliasApplyResult['applied'] : array() );
+$tpl->setVariable( 'FetchAliasUnknown', $FetchAliasApplyResult ? $FetchAliasApplyResult['unknown'] : array() );
+$tpl->setVariable( 'FetchAliasFillable', $FetchAliasFillable );
+$tpl->setVariable( 'FetchAliasParamsRaw', $fetchAliasParamsRaw );
 // The picker: special columns by group, attribute formats, column sets
 $ExtraGroups = array();
 foreach ( XrowExtractCatalogue::groups() as $group => $label )
@@ -614,7 +787,7 @@ foreach ( $ContentLanguages as $locale => $language )
 {
     $languageCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, true, $locale, 'include', array( $Class_id ),
                                                          $AttributeFilter, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly,
-                                                         XrowExtractTranslationFilter::params( $locale ), false );
+                                                         XrowExtractTranslationFilter::chainedParams( $locale, $Filters->values['extended_filter'], $Filters->extendedParamsArray() ), false );
     $LanguageCounts[$locale] = isset( $languageCount['result'] ) ? (int)$languageCount['result'] : 0;
     $LanguageChoices[] = array_merge( $language, array( 'count' => $LanguageCounts[$locale],
                                                         'selected' => in_array( $locale, $SelectedLanguages, true ) ) );
@@ -746,6 +919,11 @@ if ( $http->hasPostVariable( 'RunInBackground' ) )
             $jobArgs[] = '--sort=' . $SortField;
             $jobArgs[] = '--order=' . ( $SortAscending ? 'asc' : 'desc' );
         }
+        if ( $SortField2 !== '' )
+        {
+            $jobArgs[] = '--sort2=' . $SortField2;
+            $jobArgs[] = '--order2=' . ( $SortAscending2 ? 'asc' : 'desc' );
+        }
         $jobExtension = XrowExtractWriter::formats()[$OutputFormat]['extension'];
 
         $className = $chosenClass ? $chosenClass->attribute( 'name' ) : ( 'class ' . $Class_id );
@@ -858,7 +1036,16 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             $sortBy = $sortBy[0];
         }
         if ( $SortField !== 'tree' )
-            $sortBy = XrowExtractFilters::sortParam( $SortField, $SortAscending, $Class_id, ( $sortClass = eZContentClass::fetch( $Class_id ) ) ? $sortClass->attribute( 'identifier' ) : false, $sortBy );
+        {
+            $sortClass = eZContentClass::fetch( $Class_id );
+            $sortBy = XrowExtractFilters::sortParam( $SortField, $SortAscending, $Class_id, $sortClass ? $sortClass->attribute( 'identifier' ) : false, $sortBy );
+        }
+        if ( $SortField2 !== '' )
+        {
+            if ( !isset( $sortClass ) )
+                $sortClass = eZContentClass::fetch( $Class_id );
+            $sortBy = XrowExtractFilters::combineSort( $sortBy, XrowExtractFilters::sortParam( $SortField2, $SortAscending2, $Class_id, $sortClass ? $sortClass->attribute( 'identifier' ) : false, $sortBy ) );
+        }
         $exportTotal = $Limit ? min( $Limit, max( 0, $translationRows - $Offset ) ) : max( 0, $translationRows - $Offset );
 
         // The chosen languages one after the other; skip and take count over all of them.
@@ -876,7 +1063,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             for ( $batchOffset = $skip; $written < $maxRows; $batchOffset += 100 )
             {
                 $take = min( 100, $maxRows - $written );
-                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, $AttributeFilter, XrowExtractTranslationFilter::params( $locale ), 'include', array(
+                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, $AttributeFilter, XrowExtractTranslationFilter::chainedParams( $locale, $Filters->values['extended_filter'], $Filters->extendedParamsArray() ), 'include', array(
                     $Class_id
                 ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
                 $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();

@@ -2091,6 +2091,302 @@
         <source>Choose a file first.</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Depth below the node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Named fetch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini named fetch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose one to apply...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Applied: %list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not understood: %list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remembered choice: %name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Additional conditions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%count rows</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Join</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All conditions (and)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any condition (or)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No additional conditions. "Add condition" adds a row.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose a field...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object fields</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Value (or a comma list for in / not in)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>value, or a,b,c for in/not in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Second value, for between / not between</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>second value (between)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove this condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extended attribute filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Its parameters, as JSON</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Then sort by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Breaks ties in the sort above. Only applies once the sort above is not tree order.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>greater than or equal to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>less than or equal to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>in list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not in list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>between (both ends included)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not between</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>matches pattern (* wildcard)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>does not match pattern (* wildcard)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Section (id)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Owner (user id)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tree depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class identifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Node id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object state (id)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exactly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>At most</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>At least</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parameters, key=value,key=value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This one also takes: %list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invert this condition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An object property</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>owner is admin (a login also works), section is 2, name contains report, published is since 7d.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A node / tree property</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A class attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inverts a row: owner is not admin, state not in 4,7.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A named fetch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open it at the bottom of the Filters card to copy the same fetch() call into a template.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modified, including sub items</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Owner (user id or login)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tree depth (absolute)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class name</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
