@@ -221,6 +221,45 @@ class XrowExtractJob
     }
 
     /**
+     * Who a login is, for the Jobs page's and the Presets card's user bubble: the login resolved once to
+     * the user's name, initials, a colour that stays the same for that login, and the user's node in the
+     * admin (false when the account no longer exists).
+     */
+    public static function ownerInfo( $ownerLogin )
+    {
+        static $owners = array();
+        if ( isset( $owners[$ownerLogin] ) )
+            return $owners[$ownerLogin];
+        $name = $ownerLogin;
+        $nodeID = false;
+        $user = $ownerLogin !== '' ? eZUser::fetchByName( $ownerLogin ) : null;
+        if ( $user instanceof eZUser )
+        {
+            $object = $user->attribute( 'contentobject' );
+            if ( $object instanceof eZContentObject )
+            {
+                if ( trim( (string)$object->attribute( 'name' ) ) !== '' )
+                    $name = $object->attribute( 'name' );
+                $nodeID = (int)$object->attribute( 'main_node_id' ) ?: false;
+            }
+        }
+        $initials = '';
+        foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) as $part )
+        {
+            $initials .= mb_strtoupper( mb_substr( $part, 0, 1 ) );
+            if ( mb_strlen( $initials ) >= 2 )
+                break;
+        }
+        return $owners[$ownerLogin] = array(
+            'login' => $ownerLogin,
+            'name' => $name,
+            'initials' => $initials !== '' ? $initials : '?',
+            'hue' => hexdec( substr( md5( $ownerLogin ), 0, 4 ) ) % 360,
+            'node_id' => $nodeID,
+        );
+    }
+
+    /**
      * Writes progress.json (or another path) atomically. $phase is free text:
      * a class identifier (archive) or a locale (csv), whatever is being
      * written when the progress was last reported.

@@ -38,6 +38,24 @@
 </details>
 
 <details>
+    <summary>{'Filters'|i18n( 'design/standard/extract' )}</summary>
+    <dl>
+        <dt>{'An object property'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'owner is admin (a login also works), section is 2, name contains report, published is since 7d.'|i18n( 'design/standard/extract' )}</dd>
+        <dt>{'A node / tree property'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.'|i18n( 'design/standard/extract' )}</dd>
+        <dt>{'A class attribute'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).'|i18n( 'design/standard/extract' )}</dd>
+        <dt>{'not'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'Inverts a row: owner is not admin, state not in 4,7.'|i18n( 'design/standard/extract' )}</dd>
+        <dt>{'A named fetch'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.'|i18n( 'design/standard/extract' )}</dd>
+        <dt>{'Fetch parameters'|i18n( 'design/standard/extract' )}</dt>
+        <dd>{'Open it at the bottom of the Filters card to copy the same fetch() call into a template.'|i18n( 'design/standard/extract' )}</dd>
+    </dl>
+</details>
+
+<details>
     <summary>{'Special columns'|i18n( 'design/standard/extract' )}</summary>
     <dl>
         <dt>{'Login, E-Mail, User Status'|i18n( 'design/standard/extract' )}</dt>

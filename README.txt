@@ -38,3 +38,79 @@ rar) are installed. Objects are read with the user's read access, at
 their main location, and written once. Password hashes are never
 exported. The archive is written to a private folder in the cache
 directory and removed after the download.
+
+Filters (the Filters card of xrowextract/csv)
+
+Besides the date range, section, state, visibility and name quick filters,
+several conditions can be built, each on a class attribute or an object /
+tree field the kernel's own AttributeFilter already supports: name,
+published, modified, modified_subnode, section, owner (by id or login),
+priority, depth (the object's absolute tree depth), class_identifier,
+class_name, node_id, contentobject_id, path, state. Operators: contains,
+starts with, is, is not, greater/less (also >=, <=), is empty/not empty,
+in list, not in list, between/not between, matches/does not match a *
+pattern; every row can be inverted with "not". The rows join with "all
+(and)" or "any (or)" — the kernel's AttributeFilter has one join for its
+whole filter, not one per group, so "any" widens every active filter, not
+only the condition rows, when more than one is set.
+
+The tree scope also takes an exact / at most / at least depth below the
+node (the kernel's own Depth/DepthOperator), and a second sort field that
+breaks ties in the first.
+
+An extended attribute filter (extendedattributefilter.ini — an eztags
+filter, XrowExtractHasChildren, XrowExtractRelation, or any other
+registered one) can be chained with the language filter: its own
+parameters as one JSON object. XrowExtractHasChildren: {"has_children":
+true|false}. XrowExtractRelation: {"object_id": <id>} (objects that
+relate to it) or {"object_id": <id>, "reverse": true} (objects it relates
+to).
+
+"Named fetch" applies a fetchalias.ini alias (Module=content,
+FunctionName tree/list/tree_count/list_count) from this siteaccess, any
+active extension or the default siteaccess: its node, class, sort, depth,
+limit/offset, main-locations and, where a Constant[attribute_filter] is a
+plain "field;op;value", a condition. A Parameter[] entry it declares is
+filled in through "Parameters", key=value,key=value.
+
+The "Fetch parameters" box at the end of the card shows the resolved
+filters as the literal fetch('content','tree', hash(...)) call a
+template would make.
+
+ext:xrowextract:csv: --where "<field> [not] <op> <value>", several joined
+with " && " or " || " in one value; --depth accepting a plain number (with
+--depth-operator); --sort2/--order2; --extended-filter/--extended-params;
+--fetch-alias/--alias-param.
+
+Presets (the Presets card of xrowextract/csv)
+
+A preset is a complete, named export definition: scope, node (by id and
+remote_id, so it survives a reinstall's renumbering), class, columns,
+languages, every filter above, sort and output settings. "Save as preset"
+captures the form as it stands; the picker loads one back, in place, or
+"Run in the background" resolves and starts it as a job without loading
+it first. A preset may declare {placeholder} tokens (for example a node
+or a date), filled in through "Parameters" the same way a named fetch's
+Parameter[] is, with its own defaults otherwise.
+
+A preset may Extend another preset ("user:<id>") or a named fetch
+("alias:<name>" or "alias:<name>:<siteaccess>"), overriding single keys —
+strictly more expressive than a fetch alias alone: inheritance, and every
+filter/column/sort/output setting, not only the fetch parameters.
+
+Two layers: a person's own presets (private, or shared with every extract
+user — editable by their owner or a user with the xrowextract/all_jobs
+policy) are created and edited from the view and kept as JSON in
+ezsite_data (name "xrowextract_preset_<20 hex>"); site presets are
+`[Preset_<id>]` blocks of xrowextract.ini (Name, Description, View,
+Extends, Definition as one JSON object, Placeholders), read only from the
+view — ship one with an extension the way the two examples in
+extension/xrowextract/settings/xrowextract.ini do. Each preset row's "INI"
+disclosure shows the same block, to copy into settings.
+
+A background job started from a preset records which one; the Jobs page
+shows it next to the job.
+
+ext:xrowextract:csv --preset "user:<id>"/"site:<id>" --param
+key=value,key=value; --list-presets; --show-preset "<ref>" prints the
+resolved definition (its own Extends chain followed) as JSON.

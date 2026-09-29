@@ -336,6 +336,56 @@
 .xe-icon:disabled { opacity: .35; cursor: default; }
 .xe-icon.xe-remove:hover { border-color: #b42318; color: #b42318; background: #fdecea; }
 .xe-remove-all:hover:not(:disabled) { color: #b42318; }
+.xe-conditions { margin: .4em 0 0; padding: 0; list-style: none; border: 1px solid var(--xe-line); border-radius: 6px; overflow: hidden; }
+.xe-conditions:empty { display: none; }
+.xe-condition {
+    display: grid;
+    grid-template-columns: 1.6em minmax(9em, 1fr) 3.6em minmax(8em, 11em) minmax(6em, 1fr) minmax(6em, 9em) auto;
+    align-items: center;
+    gap: .5em;
+    margin: 0;
+    padding: .4em .6em;
+    border-bottom: 1px solid var(--xe-line);
+    background: #fff;
+}
+.xe-condition:last-child { border-bottom: 0; }
+.xe-condition:hover { background: #f8fafc; }
+.xe-negate { margin: 0; font-weight: normal; white-space: nowrap; justify-self: center; }
+@media (max-width: 720px) {
+    .xe-condition { grid-template-columns: 1.4em 1fr auto auto; }
+    .xe-condition select[name$="[op]"] { grid-column: 2 / 4; }
+    .xe-condition input[name$="[value]"] { grid-column: 2 / 3; }
+    .xe-condition input[name$="[value2]"] { grid-column: 3 / 4; }
+}
+.xe-fetchparams summary { cursor: pointer; }
+.xe-fetchparams-code {
+    margin: .5em 0 0;
+    padding: .7em .9em;
+    background: #0b1522;
+    color: #d7e3f4;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: .88em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.xe-preset-list { margin: .6em 0 0; padding: 0; list-style: none; border: 1px solid var(--xe-line); border-radius: 6px; overflow: hidden; }
+.xe-preset-row {
+    display: flex;
+    align-items: center;
+    gap: .6em;
+    margin: 0;
+    padding: .5em .7em;
+    border-bottom: 1px solid var(--xe-line);
+    background: #fff;
+}
+.xe-preset-row:last-child { border-bottom: 0; }
+.xe-preset-row:hover { background: #f8fafc; }
+.xe-preset-row .xe-colinfo { flex: 1 1 auto; min-width: 0; }
+.xe-preset-row details { flex: 0 0 auto; }
+.xe-preset-row details summary { cursor: pointer; color: var(--xe-muted); font-size: .88em; }
+.xe-preset-row details[open] { flex-basis: 100%; }
+.xe-preset-row details[open] .xe-fetchparams-code { max-width: 100%; }
 @media (max-width: 720px) {
     .xe-column { grid-template-columns: auto 1.8em 1fr auto; }
     .xe-colname-edit { grid-column: 3 / 5; grid-row: 2; }

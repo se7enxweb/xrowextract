@@ -2802,6 +2802,302 @@
         <translation>Zuerst eine Datei wählen.</translation>
     </message>
     <message>
+        <source>Depth below the node</source>
+        <translation>Tiefe unterhalb des Knotens</translation>
+    </message>
+    <message>
+        <source>Any depth takes the whole subtree. Exactly / at most / at least count levels below the node (the node itself is depth 0).</source>
+        <translation>Beliebige Tiefe nimmt den gesamten Teilbaum. Genau / höchstens / mindestens zählt Ebenen unterhalb des Knotens (der Knoten selbst hat Tiefe 0).</translation>
+    </message>
+    <message>
+        <source>Named fetch</source>
+        <translation>Benannter Abruf</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini named fetch</source>
+        <translation>Ein benannter Abruf aus fetchalias.ini</translation>
+    </message>
+    <message>
+        <source>Choose one to apply...</source>
+        <translation>Zum Anwenden auswählen …</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>Anwenden</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>Ein Abruf aus fetchalias.ini (Module=content, tree, list, tree_count oder list_count) dieses Siteaccess oder des Standard-Siteaccess. Beim Anwenden werden Knoten, Klasse, Sortierung, Tiefe, Limit/Offset, Hauptorte und — soweit lesbar — eine Bedingung übernommen.</translation>
+    </message>
+    <message>
+        <source>Applied: %list.</source>
+        <translation>Angewendet: %list.</translation>
+    </message>
+    <message>
+        <source>Not understood: %list.</source>
+        <translation>Nicht verstanden: %list.</translation>
+    </message>
+    <message>
+        <source>Remembered choice: %name.</source>
+        <translation>Gemerkte Auswahl: %name.</translation>
+    </message>
+    <message>
+        <source>Additional conditions</source>
+        <translation>Weitere Bedingungen</translation>
+    </message>
+    <message>
+        <source>%count rows</source>
+        <translation>%count Zeilen</translation>
+    </message>
+    <message>
+        <source>Join</source>
+        <translation>Verknüpfung</translation>
+    </message>
+    <message>
+        <source>All conditions (and)</source>
+        <translation>Alle Bedingungen (und)</translation>
+    </message>
+    <message>
+        <source>Any condition (or)</source>
+        <translation>Eine Bedingung (oder)</translation>
+    </message>
+    <message>
+        <source>Add condition</source>
+        <translation>Bedingung hinzufügen</translation>
+    </message>
+    <message>
+        <source>No additional conditions. "Add condition" adds a row.</source>
+        <translation>Keine weiteren Bedingungen. „Bedingung hinzufügen“ fügt eine Zeile hinzu.</translation>
+    </message>
+    <message>
+        <source>Field</source>
+        <translation>Feld</translation>
+    </message>
+    <message>
+        <source>Choose a field...</source>
+        <translation>Feld auswählen …</translation>
+    </message>
+    <message>
+        <source>Object fields</source>
+        <translation>Objektfelder</translation>
+    </message>
+    <message>
+        <source>Value (or a comma list for in / not in)</source>
+        <translation>Wert (oder eine Kommaliste für „in Liste“ / „nicht in Liste“)</translation>
+    </message>
+    <message>
+        <source>value, or a,b,c for in/not in</source>
+        <translation>Wert, oder a,b,c für in/nicht in</translation>
+    </message>
+    <message>
+        <source>Second value, for between / not between</source>
+        <translation>Zweiter Wert, für zwischen / nicht zwischen</translation>
+    </message>
+    <message>
+        <source>second value (between)</source>
+        <translation>zweiter Wert (zwischen)</translation>
+    </message>
+    <message>
+        <source>Remove this condition</source>
+        <translation>Diese Bedingung entfernen</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list.</source>
+        <translation>Der Wert wird wie eingegeben verwendet; eine Kommaliste für „in Liste“ / „nicht in Liste“, beide Wertfelder für „zwischen“ / „nicht zwischen“. Status akzeptiert nur ist / ist nicht / in Liste / nicht in Liste.</translation>
+    </message>
+    <message>
+        <source>"Any condition" is chosen: the fetch has one join for its whole filter, so date, section, state, visibility and name above join the conditions with "or" too, not just the conditions among themselves.</source>
+        <translation>„Eine Bedingung (oder)“ ist gewählt: Der Abruf hat nur eine Verknüpfung für den gesamten Filter, daher werden Datum, Bereich, Status, Sichtbarkeit und Name oben ebenfalls mit „oder“ verknüpft, nicht nur die Bedingungen untereinander.</translation>
+    </message>
+    <message>
+        <source>Extended attribute filter</source>
+        <translation>Erweiterter Attributfilter</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Keiner</translation>
+    </message>
+    <message>
+        <source>Its parameters, as JSON</source>
+        <translation>Seine Parameter, als JSON</translation>
+    </message>
+    <message>
+        <source>A filter registered in extendedattributefilter.ini (e.g. an eztags filter), chained with the language filter. Its parameters as a JSON object; invalid JSON is dropped rather than failing the export.</source>
+        <translation>Ein in extendedattributefilter.ini registrierter Filter (z. B. ein eztags-Filter), verkettet mit dem Sprachfilter. Seine Parameter als JSON-Objekt; ungültiges JSON wird verworfen, statt den Export scheitern zu lassen.</translation>
+    </message>
+    <message>
+        <source>Then sort by</source>
+        <translation>Dann sortieren nach</translation>
+    </message>
+    <message>
+        <source>Breaks ties in the sort above. Only applies once the sort above is not tree order.</source>
+        <translation>Löst Gleichstände der obigen Sortierung auf. Gilt erst, wenn die obige Sortierung nicht die Baumreihenfolge ist.</translation>
+    </message>
+    <message>
+        <source>greater than or equal to</source>
+        <translation>größer oder gleich</translation>
+    </message>
+    <message>
+        <source>less than or equal to</source>
+        <translation>kleiner oder gleich</translation>
+    </message>
+    <message>
+        <source>in list</source>
+        <translation>in Liste</translation>
+    </message>
+    <message>
+        <source>not in list</source>
+        <translation>nicht in Liste</translation>
+    </message>
+    <message>
+        <source>between (both ends included)</source>
+        <translation>zwischen (beide Enden eingeschlossen)</translation>
+    </message>
+    <message>
+        <source>not between</source>
+        <translation>nicht zwischen</translation>
+    </message>
+    <message>
+        <source>matches pattern (* wildcard)</source>
+        <translation>entspricht Muster (* Platzhalter)</translation>
+    </message>
+    <message>
+        <source>does not match pattern (* wildcard)</source>
+        <translation>entspricht nicht Muster (* Platzhalter)</translation>
+    </message>
+    <message>
+        <source>Section (id)</source>
+        <translation>Bereich (ID)</translation>
+    </message>
+    <message>
+        <source>Owner (user id)</source>
+        <translation>Eigentümer (Benutzer-ID)</translation>
+    </message>
+    <message>
+        <source>Tree depth</source>
+        <translation>Baumtiefe</translation>
+    </message>
+    <message>
+        <source>Class identifier</source>
+        <translation>Klassenkennung</translation>
+    </message>
+    <message>
+        <source>Node id</source>
+        <translation>Knoten-ID</translation>
+    </message>
+    <message>
+        <source>Object state (id)</source>
+        <translation>Objektstatus (ID)</translation>
+    </message>
+    <message>
+        <source>Any depth</source>
+        <translation>Beliebige Tiefe</translation>
+    </message>
+    <message>
+        <source>Exactly</source>
+        <translation>Genau</translation>
+    </message>
+    <message>
+        <source>At most</source>
+        <translation>Höchstens</translation>
+    </message>
+    <message>
+        <source>At least</source>
+        <translation>Mindestens</translation>
+    </message>
+    <message>
+        <source>Parameters, key=value,key=value</source>
+        <translation>Parameter, Schlüssel=Wert,Schlüssel=Wert</translation>
+    </message>
+    <message>
+        <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess, every active extension or the default siteaccess. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
+        <translation>Ein Abruf aus fetchalias.ini (Module=content, tree, list, tree_count oder list_count) dieses Siteaccess, jeder aktiven Extension oder des Standard-Siteaccess. Beim Anwenden werden Knoten, Klasse, Sortierung, Tiefe, Limit/Offset, Hauptorte und — soweit lesbar — eine Bedingung übernommen.</translation>
+    </message>
+    <message>
+        <source>This one also takes: %list.</source>
+        <translation>Dieser nimmt außerdem: %list.</translation>
+    </message>
+    <message>
+        <source>Invert this condition</source>
+        <translation>Diese Bedingung umkehren</translation>
+    </message>
+    <message>
+        <source>not</source>
+        <translation>nicht</translation>
+    </message>
+    <message>
+        <source>The value is used as typed; a comma list for "in list" / "not in list", both value fields for "between" / "not between". State only takes is / is not / in list / not in list. "not" inverts the condition (is becomes is not, in list becomes not in list, and so on).</source>
+        <translation>Der Wert wird wie eingegeben verwendet; eine Kommaliste für „in Liste“ / „nicht in Liste“, beide Wertfelder für „zwischen“ / „nicht zwischen“. Status akzeptiert nur ist / ist nicht / in Liste / nicht in Liste. „nicht“ kehrt die Bedingung um (aus ist wird ist nicht, aus in Liste wird nicht in Liste, und so weiter).</translation>
+    </message>
+    <message>
+        <source>Examples: name contains report; owner is admin (a login also works); depth is 3; published is since 7d; priority is between 1..5.</source>
+        <translation>Beispiele: Name enthält Bericht; Eigentümer ist admin (ein Login geht auch); Tiefe ist 3; Veröffentlicht ist seit 7d; Priorität ist zwischen 1..5.</translation>
+    </message>
+    <message>
+        <source>Fetch parameters</source>
+        <translation>Abrufparameter</translation>
+    </message>
+    <message>
+        <source>What the filters above resolve to: the same call a template would make with fetch(). Copy it, or read off the pieces for your own fetch_alias.</source>
+        <translation>Wozu die obigen Filter aufgelöst werden: derselbe Aufruf, den ein Template mit fetch() machen würde. Kopieren, oder die Teile für einen eigenen fetch_alias ablesen.</translation>
+    </message>
+    <message>
+        <source>An object property</source>
+        <translation>Eine Objekteigenschaft</translation>
+    </message>
+    <message>
+        <source>owner is admin (a login also works), section is 2, name contains report, published is since 7d.</source>
+        <translation>Eigentümer ist admin (ein Login geht auch), Bereich ist 2, Name enthält Bericht, Veröffentlicht ist seit 7d.</translation>
+    </message>
+    <message>
+        <source>A node / tree property</source>
+        <translation>Eine Knoten-/Baumeigenschaft</translation>
+    </message>
+    <message>
+        <source>depth is 3 (absolute), priority is between 1..5, class identifier is ng_article, node id in 91,92,95.</source>
+        <translation>Tiefe ist 3 (absolut), Priorität ist zwischen 1..5, Klassenkennung ist ng_article, Knoten-ID in 91,92,95.</translation>
+    </message>
+    <message>
+        <source>A class attribute</source>
+        <translation>Ein Klassenattribut</translation>
+    </message>
+    <message>
+        <source>Pick it from the same list; the operators fit its datatype (checkbox: is/is not 1 or 0; number: also between).</source>
+        <translation>Aus derselben Liste wählen; die Operatoren passen zum Datentyp (Checkbox: ist/ist nicht 1 oder 0; Zahl: auch zwischen).</translation>
+    </message>
+    <message>
+        <source>Inverts a row: owner is not admin, state not in 4,7.</source>
+        <translation>Kehrt eine Zeile um: Eigentümer ist nicht admin, Status nicht in 4,7.</translation>
+    </message>
+    <message>
+        <source>A named fetch</source>
+        <translation>Ein benannter Abruf</translation>
+    </message>
+    <message>
+        <source>Choose one under "Named fetch" and Apply: its node, class, sort, depth and a condition load into the form. Fillable ones (Parameter[]) take values in "Parameters", key=value,key=value.</source>
+        <translation>Unter „Benannter Abruf“ auswählen und Anwenden: Knoten, Klasse, Sortierung, Tiefe und eine Bedingung werden ins Formular geladen. Ausfüllbare (Parameter[]) nehmen Werte in „Parameter“, Schlüssel=Wert,Schlüssel=Wert.</translation>
+    </message>
+    <message>
+        <source>Open it at the bottom of the Filters card to copy the same fetch() call into a template.</source>
+        <translation>Am Ende der Filter-Karte öffnen, um denselben fetch()-Aufruf in ein Template zu kopieren.</translation>
+    </message>
+    <message>
+        <source>Modified, including sub items</source>
+        <translation>Geändert, einschließlich Unterobjekte</translation>
+    </message>
+    <message>
+        <source>Owner (user id or login)</source>
+        <translation>Eigentümer (Benutzer-ID oder Login)</translation>
+    </message>
+    <message>
+        <source>Tree depth (absolute)</source>
+        <translation>Baumtiefe (absolut)</translation>
+    </message>
+    <message>
+        <source>Class name</source>
+        <translation>Klassenname</translation>
+    </message>
+    <message>
         <source>An XML, CSV or JSON file written by the export views, any column set.</source>
         <translation>Eine XML-, CSV- oder JSON-Datei, wie sie die Export-Ansichten schreiben, jede Spaltenauswahl.</translation>
     </message>
@@ -3084,6 +3380,126 @@
     <message>
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
         <translation>XML, CSV oder JSON, aus einem Export dieses Werkzeugs (die Spaltenauswahl Migration trägt alles Nötige) oder einer heruntergeladenen Vorlage; XML trägt eigene Spalten-IDs und die Klasse und ist am genauesten.</translation>
+    </message>
+    <message>
+        <source>Presets</source>
+        <translation>Vorlagen</translation>
+    </message>
+    <message>
+        <source>Save everything below as a named preset, load one back, or run it directly.</source>
+        <translation>Alles unten als benannte Vorlage speichern, eine wieder laden oder direkt ausführen.</translation>
+    </message>
+    <message>
+        <source>loaded</source>
+        <translation>geladen</translation>
+    </message>
+    <message>
+        <source>Placeholders with no value: %list.</source>
+        <translation>Platzhalter ohne Wert: %list.</translation>
+    </message>
+    <message>
+        <source>Load a preset</source>
+        <translation>Eine Vorlage laden</translation>
+    </message>
+    <message>
+        <source>Choose one...</source>
+        <translation>Auswählen …</translation>
+    </message>
+    <message>
+        <source>Your presets and shared with you</source>
+        <translation>Ihre Vorlagen und mit Ihnen geteilte</translation>
+    </message>
+    <message>
+        <source>shared</source>
+        <translation>geteilt</translation>
+    </message>
+    <message>
+        <source>Site presets</source>
+        <translation>Website-Vorlagen</translation>
+    </message>
+    <message>
+        <source>Placeholder values, key=value,key=value</source>
+        <translation>Platzhalterwerte, Schlüssel=Wert,Schlüssel=Wert</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Laden</translation>
+    </message>
+    <message>
+        <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
+        <translation>Diese Vorlage auflösen und sofort als Auftrag starten, ohne sie zuerst ins Formular zu laden</translation>
+    </message>
+    <message>
+        <source>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</source>
+        <translation>Eine Vorlage kann Platzhalter deklarieren, zum Beispiel einen Knoten oder ein Datum; hier als Schlüssel=Wert,Schlüssel=Wert ausfüllen, sonst gelten ihre eigenen Standardwerte.</translation>
+    </message>
+    <message>
+        <source>extends %ref</source>
+        <translation>erweitert %ref</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplizieren</translation>
+    </message>
+    <message>
+        <source>Delete this preset?</source>
+        <translation>Diese Vorlage löschen?</translation>
+    </message>
+    <message>
+        <source>Duplicate as your own</source>
+        <translation>Als eigene Vorlage duplizieren</translation>
+    </message>
+    <message>
+        <source>INI</source>
+        <translation>INI</translation>
+    </message>
+    <message>
+        <source>Defined in xrowextract.ini; edit it there</source>
+        <translation>In xrowextract.ini definiert; dort bearbeiten</translation>
+    </message>
+    <message>
+        <source>site</source>
+        <translation>Website</translation>
+    </message>
+    <message>
+        <source>Save the current settings as a preset</source>
+        <translation>Aktuelle Einstellungen als Vorlage speichern</translation>
+    </message>
+    <message>
+        <source>Preset name</source>
+        <translation>Name der Vorlage</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Beschreibung</translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation>Beschreibung (optional)</translation>
+    </message>
+    <message>
+        <source>Shared with everyone</source>
+        <translation>Für alle freigegeben</translation>
+    </message>
+    <message>
+        <source>Save as preset</source>
+        <translation>Als Vorlage speichern</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
+        <translation>Erfasst Bereich, Knoten, Klasse, Spalten, Sprachen, alle Filter, die Sortierung und die Ausgabeeinstellungen oben. Speichern bei bereits geladener Vorlage aktualisiert diese (nur deren Eigentümer oder ein Benutzer mit all_jobs); ein neuer Name legt immer eine neue an.</translation>
+    </message>
+    <message>
+        <source>Started from a saved preset</source>
+        <translation>Aus einer gespeicherten Vorlage gestartet</translation>
+    </message>
+    <message>
+        <source>Name the preset first.</source>
+        <translation>Zuerst die Vorlage benennen.</translation>
+    </message>
+    <message>
+        <source>Preset "%name" saved.</source>
+        <translation>Vorlage „%name“ gespeichert.</translation>
     </message>
 </context>
 <context>
