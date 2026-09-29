@@ -3727,6 +3727,86 @@
         <source>Preset "%name" saved.</source>
         <translation>Preset "%name" saved.</translation>
     </message>
+    <message>
+        <source>Presets: load a preset</source>
+        <translation>Presets: load a preset</translation>
+    </message>
+    <message>
+        <source>A preset is a whole export definition — node, class, columns, languages, every filter, sort, output — saved under a name. Unlike a fetchalias.ini named fetch, it also carries the columns, languages and output settings, and can be edited from here. Loading one replaces the settings below with its own.</source>
+        <translation>A preset is a whole export definition — node, class, columns, languages, every filter, sort, output — saved under a name. Unlike a fetchalias.ini named fetch, it also carries the columns, languages and output settings, and can be edited from here. Loading one replaces the settings below with its own.</translation>
+    </message>
+    <message>
+        <source>No presets yet. Set up the export below the way you want it, then use "Save the current settings as a preset" to keep it.</source>
+        <translation>No presets yet. Set up the export below the way you want it, then use "Save the current settings as a preset" to keep it.</translation>
+    </message>
+    <message>
+        <source>private</source>
+        <translation>private</translation>
+    </message>
+    <message>
+        <source>Run now</source>
+        <translation>Run now</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>More</translation>
+    </message>
+    <message>
+        <source>New name</source>
+        <translation>New name</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Rename</translation>
+    </message>
+    <message>
+        <source>Copy as INI</source>
+        <translation>Copy as INI</translation>
+    </message>
+    <message>
+        <source>Advanced</source>
+        <translation>Advanced</translation>
+    </message>
+    <message>
+        <source>Placeholder values not shown above, key=value,key=value</source>
+        <translation>Placeholder values not shown above, key=value,key=value</translation>
+    </message>
+    <message>
+        <source>Presets: currently loaded</source>
+        <translation>Presets: currently loaded</translation>
+    </message>
+    <message>
+        <source>What the loaded preset set below. Remove one setting, or all of them, without losing the rest of what you have changed since.</source>
+        <translation>What the loaded preset set below. Remove one setting, or all of them, without losing the rest of what you have changed since.</translation>
+    </message>
+    <message>
+        <source>Unload</source>
+        <translation>Unload</translation>
+    </message>
+    <message>
+        <source>Remove %what</source>
+        <translation>Remove %what</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Clear all</translation>
+    </message>
+    <message>
+        <source>This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).</source>
+        <translation>This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).</translation>
+    </message>
+    <message>
+        <source>Presets: save the current settings</source>
+        <translation>Presets: save the current settings</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings below, under a name.</source>
+        <translation>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings below, under a name.</translation>
+    </message>
+    <message>
+        <source>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</source>
+        <translation>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

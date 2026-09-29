@@ -3729,6 +3729,86 @@
         <source>Preset "%name" saved.</source>
         <translation>Vorlage „%name“ gespeichert.</translation>
     </message>
+    <message>
+        <source>Presets: load a preset</source>
+        <translation>Vorlagen: eine Vorlage laden</translation>
+    </message>
+    <message>
+        <source>A preset is a whole export definition — node, class, columns, languages, every filter, sort, output — saved under a name. Unlike a fetchalias.ini named fetch, it also carries the columns, languages and output settings, and can be edited from here. Loading one replaces the settings below with its own.</source>
+        <translation>Eine Vorlage ist eine vollständige Exportdefinition — Knoten, Klasse, Spalten, Sprachen, alle Filter, Sortierung, Ausgabe — unter einem Namen gespeichert. Anders als ein benannter Abruf aus fetchalias.ini trägt sie auch Spalten, Sprachen und Ausgabeeinstellungen und kann hier bearbeitet werden. Das Laden ersetzt die Einstellungen unten durch ihre eigenen.</translation>
+    </message>
+    <message>
+        <source>No presets yet. Set up the export below the way you want it, then use "Save the current settings as a preset" to keep it.</source>
+        <translation>Noch keine Vorlagen. Den Export unten wie gewünscht einrichten und dann mit „Aktuelle Einstellungen als Vorlage speichern“ behalten.</translation>
+    </message>
+    <message>
+        <source>private</source>
+        <translation>privat</translation>
+    </message>
+    <message>
+        <source>Run now</source>
+        <translation>Jetzt ausführen</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Mehr</translation>
+    </message>
+    <message>
+        <source>New name</source>
+        <translation>Neuer Name</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Umbenennen</translation>
+    </message>
+    <message>
+        <source>Copy as INI</source>
+        <translation>Als INI kopieren</translation>
+    </message>
+    <message>
+        <source>Advanced</source>
+        <translation>Erweitert</translation>
+    </message>
+    <message>
+        <source>Placeholder values not shown above, key=value,key=value</source>
+        <translation>Platzhalterwerte, die oben nicht angezeigt werden, Schlüssel=Wert,Schlüssel=Wert</translation>
+    </message>
+    <message>
+        <source>Presets: currently loaded</source>
+        <translation>Vorlagen: aktuell geladen</translation>
+    </message>
+    <message>
+        <source>What the loaded preset set below. Remove one setting, or all of them, without losing the rest of what you have changed since.</source>
+        <translation>Was die geladene Vorlage unten gesetzt hat. Eine Einstellung entfernen, oder alle, ohne den Rest der seitherigen Änderungen zu verlieren.</translation>
+    </message>
+    <message>
+        <source>Unload</source>
+        <translation>Entladen</translation>
+    </message>
+    <message>
+        <source>Remove %what</source>
+        <translation>%what entfernen</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Alle entfernen</translation>
+    </message>
+    <message>
+        <source>This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).</source>
+        <translation>Diese Vorlage hat nichts gesetzt, das als Chip angezeigt wird (eine leere Vorlage, oder eine, deren eigene Felder bereits entfernt wurden).</translation>
+    </message>
+    <message>
+        <source>Presets: save the current settings</source>
+        <translation>Vorlagen: aktuelle Einstellungen speichern</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings below, under a name.</source>
+        <translation>Erfasst Bereich, Knoten, Klasse, Spalten, Sprachen, alle Filter, die Sortierung und die Ausgabeeinstellungen unten, unter einem Namen.</translation>
+    </message>
+    <message>
+        <source>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</source>
+        <translation>Speichern bei bereits geladener Vorlage überschreibt diese (nur deren Eigentümer oder ein Benutzer mit all_jobs); ein neuer Name legt stattdessen immer eine neue an.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

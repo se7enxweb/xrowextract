@@ -21,81 +21,145 @@
     {include uri='design:xrowextract/tabs.tpl' active='csv'}
     <div class="xe-cards">
 
-        {* Presets: a complete, named export definition (everything below), saved, loaded, run *}
+        {* Presets: a complete, named export definition (everything below), saved, loaded, run. Three
+           parts: pick one to load/run, see and clear what is currently loaded, save the current settings. *}
+        <input type="hidden" name="PresetActionRef" value="" />
+        <input type="hidden" name="PresetRef" value="{$LoadedPresetRef|wash}" />
+
+        {* (a) Load a preset *}
         <section class="xe-card xe-export-presets" aria-labelledby="xe-card-presets">
             <header class="xe-card-head">
                 <span class="xe-step">★</span>
                 <div>
-                    <h2 id="xe-card-presets">{'Presets'|i18n('design/standard/extract')}</h2>
-                    <p>{'Save everything below as a named preset, load one back, or run it directly.'|i18n('design/standard/extract')}</p>
+                    <h2 id="xe-card-presets">{'Presets: load a preset'|i18n('design/standard/extract')}</h2>
+                    <p>{'A preset is a whole export definition — node, class, columns, languages, every filter, sort, output — saved under a name. Unlike a fetchalias.ini named fetch, it also carries the columns, languages and output settings, and can be edited from here. Loading one replaces the settings below with its own.'|i18n('design/standard/extract')}</p>
                 </div>
-                {if $LoadedPresetRef|ne( '' )}<span class="xe-count">{'loaded'|i18n('design/standard/extract')}</span>{/if}
+                <span class="xe-count">{$UserPresets|count|sum( $SitePresets|count )}</span>
             </header>
             {if $PresetNotice}
             <div class="xe-note{if $PresetNotice.error} xe-note-bad{/if}"><p>{$PresetNotice.text|wash}</p></div>
             {/if}
-            {if $LoadedPresetUnresolved|count}
-            <div class="xe-note xe-note-bad"><p>{'Placeholders with no value: %list.'|i18n('design/standard/extract',, hash( '%list', $LoadedPresetUnresolved|implode( ', ' ) ))}</p></div>
-            {/if}
-            <input type="hidden" name="PresetActionRef" value="" />
-            <div class="xe-field">
-                <label class="xe-label" for="xe-preset-load">{'Load a preset'|i18n('design/standard/extract')}</label>
-                <div class="xe-inline">
-                    <select name="PresetRef" id="xe-preset-load">
-                        <option value="">{'Choose one...'|i18n('design/standard/extract')}</option>
-                        {if $UserPresets|count}
-                        <optgroup label="{'Your presets and shared with you'|i18n('design/standard/extract')|wash}">
-                        {foreach $UserPresets as $preset}
-                        <option value="{$preset.ref|wash}"{if $LoadedPresetRef|eq( $preset.ref )} selected{/if}>{$preset.name|wash}{if $preset.shared} ({'shared'|i18n('design/standard/extract')}){/if} — {$preset.owner_user.name|wash}</option>
-                        {/foreach}
-                        </optgroup>
-                        {/if}
-                        {if $SitePresets|count}
-                        <optgroup label="{'Site presets'|i18n('design/standard/extract')|wash}">
-                        {foreach $SitePresets as $preset}
-                        <option value="{$preset.ref|wash}"{if $LoadedPresetRef|eq( $preset.ref )} selected{/if}>{$preset.name|wash}</option>
-                        {/foreach}
-                        </optgroup>
-                        {/if}
-                    </select>
-                    <input type="text" name="PresetParams" aria-label="{'Placeholder values, key=value,key=value'|i18n('design/standard/extract')|wash}" placeholder="{'key=value,key=value'|wash}" />
-                    <input class="button" type="submit" name="LoadPreset" value="{'Load'|i18n('design/standard/extract')}" />
-                    {if $BackgroundAvailable}<input class="button" type="submit" name="RunPresetInBackground" value="{'Run in the background'|i18n('design/standard/extract')}" title="{'Resolve this preset and start it as a job right away, without loading it into the form first'|i18n('design/standard/extract')|wash}" />{/if}
-                </div>
-                <p class="xe-help">{'A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.'|i18n('design/standard/extract')}</p>
-            </div>
-            {if $UserPresets|count|or( $SitePresets|count )}
+            {if $UserPresets|count|eq( 0 )|and( $SitePresets|count|eq( 0 ) )}
+            <p class="xe-columns-empty">{'No presets yet. Set up the export below the way you want it, then use "Save the current settings as a preset" to keep it.'|i18n('design/standard/extract')}</p>
+            {else}
             <ul class="xe-preset-list">
                 {foreach $UserPresets as $preset}
-                <li class="xe-preset-row">
-                    <span class="xe-user" style="--xe-user-hue: {$preset.owner_user.hue}" title="{$preset.owner_user.name|wash}"><span class="xe-user-avatar" aria-hidden="true">{$preset.owner_user.initials|wash}</span></span>
-                    <span class="xe-colinfo">
-                        <strong>{$preset.name|wash}</strong>
-                        <small>{$preset.description|wash}{if $preset.shared} · <span class="xe-badge">{'shared'|i18n('design/standard/extract')}</span>{/if}{if $preset.extends|ne( '' )} · {'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}{/if}</small>
-                    </span>
-                    {if $preset.can_edit}
-                    <button type="submit" class="xe-icon" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'" title="{'Duplicate'|i18n('design/standard/extract')|wash}">⧉</button>
-                    <button type="submit" class="xe-icon xe-remove" name="DeletePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'; return confirm('{'Delete this preset?'|i18n('design/standard/extract')|wash}')" title="{'Delete'|i18n('design/standard/extract')|wash}">×</button>
-                    {else}
-                    <button type="submit" class="xe-icon" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'" title="{'Duplicate as your own'|i18n('design/standard/extract')|wash}">⧉</button>
+                <li class="xe-preset-row{if $LoadedPresetRef|eq( $preset.ref )} xe-preset-row-loaded{/if}">
+                    <div class="xe-preset-row-main">
+                        <span class="xe-user" style="--xe-user-hue: {$preset.owner_user.hue}" title="{$preset.owner_user.name|wash}"><span class="xe-user-avatar" aria-hidden="true">{$preset.owner_user.initials|wash}</span></span>
+                        <span class="xe-colinfo">
+                            <strong>{$preset.name|wash}</strong>{if $preset.shared} <span class="xe-badge">{'shared'|i18n('design/standard/extract')}</span>{else} <span class="xe-badge xe-badge-muted">{'private'|i18n('design/standard/extract')}</span>{/if}
+                            <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
+                        </span>
+                        <span class="xe-preset-buttons">
+                            <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
+                            <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
+                            {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
+                            <details class="xe-preset-more">
+                                <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
+                                <div class="xe-preset-more-menu">
+                                    <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{if $preset.can_edit}{'Duplicate'|i18n('design/standard/extract')}{else}{'Duplicate as your own'|i18n('design/standard/extract')}{/if}</button>
+                                    {if $preset.can_edit}
+                                    <span class="xe-preset-rename"><input type="text" name="PresetNewName" placeholder="{'New name'|i18n('design/standard/extract')|wash}" aria-label="{'New name'|i18n('design/standard/extract')|wash}" /><button type="submit" name="RenamePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Rename'|i18n('design/standard/extract')}</button></span>
+                                    <button type="submit" class="xe-remove" name="DeletePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'; return confirm('{'Delete this preset?'|i18n('design/standard/extract')|wash}')">{'Delete'|i18n('design/standard/extract')}</button>
+                                    {/if}
+                                    <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
+                                </div>
+                            </details>
+                        </span>
+                    </div>
+                    {if $preset.extends|ne( '' )}<p class="xe-help xe-meta">{'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}</p>{/if}
+                    {if $preset.placeholder_list|count}
+                    <div class="xe-preset-placeholders">
+                        {foreach $preset.placeholder_list as $placeholder}
+                        <label class="xe-preset-placeholder">{$placeholder.name|wash}
+                            <input type="text" name="PresetPlaceholder[{$preset.ref|wash}][{$placeholder.name|wash}]" value="{$placeholder.default|wash}" />
+                        </label>
+                        {/foreach}
+                    </div>
                     {/if}
-                    <details><summary>{'INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
                 </li>
                 {/foreach}
                 {foreach $SitePresets as $preset}
-                <li class="xe-preset-row">
-                    <span class="xe-badge" title="{'Defined in xrowextract.ini; edit it there'|i18n('design/standard/extract')|wash}">{'site'|i18n('design/standard/extract')}</span>
-                    <span class="xe-colinfo">
-                        <strong>{$preset.name|wash}</strong>
-                        <small>{$preset.description|wash}{if $preset.extends|ne( '' )} · {'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}{/if}</small>
-                    </span>
-                    <details><summary>{'INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
+                <li class="xe-preset-row{if $LoadedPresetRef|eq( $preset.ref )} xe-preset-row-loaded{/if}">
+                    <div class="xe-preset-row-main">
+                        <span class="xe-badge" title="{'Defined in xrowextract.ini; edit it there'|i18n('design/standard/extract')|wash}">{'site'|i18n('design/standard/extract')}</span>
+                        <span class="xe-colinfo">
+                            <strong>{$preset.name|wash}</strong>
+                            <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
+                        </span>
+                        <span class="xe-preset-buttons">
+                            <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
+                            <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
+                            {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
+                            <details class="xe-preset-more">
+                                <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
+                                <div class="xe-preset-more-menu">
+                                    <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Duplicate as your own'|i18n('design/standard/extract')}</button>
+                                    <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
+                                </div>
+                            </details>
+                        </span>
+                    </div>
+                    {if $preset.extends|ne( '' )}<p class="xe-help xe-meta">{'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}</p>{/if}
+                    {if $preset.placeholder_list|count}
+                    <div class="xe-preset-placeholders">
+                        {foreach $preset.placeholder_list as $placeholder}
+                        <label class="xe-preset-placeholder">{$placeholder.name|wash}
+                            <input type="text" name="PresetPlaceholder[{$preset.ref|wash}][{$placeholder.name|wash}]" value="{$placeholder.default|wash}" />
+                        </label>
+                        {/foreach}
+                    </div>
+                    {/if}
                 </li>
                 {/foreach}
             </ul>
             {/if}
+            <details class="xe-preset-advanced">
+                <summary>{'Advanced'|i18n('design/standard/extract')}</summary>
+                <label class="xe-preset-placeholder">{'Placeholder values not shown above, key=value,key=value'|i18n('design/standard/extract')}
+                    <input type="text" name="PresetParams" placeholder="{'key=value,key=value'|wash}" />
+                </label>
+            </details>
+        </section>
+
+        {* (b) Currently loaded *}
+        {if $LoadedPresetRef|ne( '' )}
+        <section class="xe-card xe-export-presets-loaded" aria-labelledby="xe-card-presets-loaded">
+            <header class="xe-card-head">
+                <span class="xe-step">★</span>
+                <div>
+                    <h2 id="xe-card-presets-loaded">{'Presets: currently loaded'|i18n('design/standard/extract')}</h2>
+                    <p>{'What the loaded preset set below. Remove one setting, or all of them, without losing the rest of what you have changed since.'|i18n('design/standard/extract')}</p>
+                </div>
+                <button type="submit" class="button" name="UnloadPreset" value="1">{'Unload'|i18n('design/standard/extract')}</button>
+            </header>
+            {if $LoadedPresetUnresolved|count}
+            <div class="xe-note xe-note-bad"><p>{'Placeholders with no value: %list.'|i18n('design/standard/extract',, hash( '%list', $LoadedPresetUnresolved|implode( ', ' ) ))}</p></div>
+            {/if}
+            {if $LoadedPresetFields|count}
+            <ul class="xe-chips">
+                {foreach $LoadedPresetFields as $field}
+                <li class="xe-chip">{$field.label|wash} <button type="submit" name="ClearPresetField" value="{$field.key|wash}" title="{'Remove'|i18n('design/standard/extract')|wash}" aria-label="{'Remove %what'|i18n('design/standard/extract',, hash( '%what', $field.label ))|wash}">×</button></li>
+                {/foreach}
+            </ul>
+            <input class="button" type="submit" name="ClearAllPresetFields" value="{'Clear all'|i18n('design/standard/extract')}" />
+            {else}
+            <p class="xe-help">{'This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).'|i18n('design/standard/extract')}</p>
+            {/if}
+        </section>
+        {/if}
+
+        {* (c) Save the current settings as a preset *}
+        <section class="xe-card xe-export-presets-save" aria-labelledby="xe-card-presets-save">
+            <header class="xe-card-head">
+                <span class="xe-step">★</span>
+                <div>
+                    <h2 id="xe-card-presets-save">{'Presets: save the current settings'|i18n('design/standard/extract')}</h2>
+                    <p>{'Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings below, under a name.'|i18n('design/standard/extract')}</p>
+                </div>
+            </header>
             <div class="xe-field">
-                <span class="xe-label">{'Save the current settings as a preset'|i18n('design/standard/extract')}</span>
                 <div class="xe-inline">
                     <input type="text" name="PresetSaveName" value="{if $LoadedPresetRef|ne( '' )}{foreach $UserPresets as $p}{if $p.ref|eq( $LoadedPresetRef )}{$p.name|wash}{/if}{/foreach}{/if}" aria-label="{'Preset name'|i18n('design/standard/extract')|wash}" placeholder="{'Preset name'|i18n('design/standard/extract')|wash}" />
                     <input type="text" name="PresetSaveDescription" aria-label="{'Description'|i18n('design/standard/extract')|wash}" placeholder="{'Description (optional)'|i18n('design/standard/extract')|wash}" />
@@ -103,7 +167,7 @@
                     <input type="hidden" name="PresetSaveRef" value="{$LoadedPresetRef|wash}" />
                     <input class="button" type="submit" name="SavePreset" value="{'Save as preset'|i18n('design/standard/extract')}"{if $has_prefilledata} disabled{/if} />
                 </div>
-                <p class="xe-help">{'Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.'|i18n('design/standard/extract')}</p>
             </div>
         </section>
 

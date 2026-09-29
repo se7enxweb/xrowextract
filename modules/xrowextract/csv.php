@@ -189,6 +189,59 @@ $FetchAliasValues = $FetchAliasApplyResult ? $FetchAliasApplyResult['values'] : 
 $xePresetLogin = eZUser::currentUser()->attribute( 'login' );
 $xePresetAllowAll = XrowExtractJob::allowAllJobs();
 $PresetNotice = false;
+
+/** What a resolved, filled preset definition set, as removable chips (key + label) for "Currently loaded". */
+$buildPresetChips = function ( array $presetDef, $presetNodeID, $presetClassID )
+{
+    $chips = array();
+    if ( $presetNodeID )
+    {
+        $chipNode = eZContentObjectTreeNode::fetch( $presetNodeID );
+        $chips[] = array( 'key' => 'node', 'label' => 'Node: ' . ( $chipNode ? $chipNode->attribute( 'name' ) : $presetNodeID ) );
+    }
+    if ( $presetClassID )
+    {
+        $chipClass = eZContentClass::fetch( $presetClassID );
+        $chips[] = array( 'key' => 'class', 'label' => 'Class: ' . ( $chipClass ? $chipClass->attribute( 'name' ) : $presetClassID ) );
+    }
+    if ( !empty( $presetDef['attributes'] ) && is_array( $presetDef['attributes'] ) )
+        $chips[] = array( 'key' => 'columns', 'label' => count( $presetDef['attributes'] ) . ' ' . ( count( $presetDef['attributes'] ) === 1 ? 'column' : 'columns' ) );
+    if ( !empty( $presetDef['languages'] ) && is_array( $presetDef['languages'] ) )
+        $chips[] = array( 'key' => 'languages', 'label' => 'Languages: ' . implode( ', ', $presetDef['languages'] ) );
+    $sortLabel = '';
+    if ( isset( $presetDef['sort_field'] ) && $presetDef['sort_field'] !== 'tree' )
+        $sortLabel = $presetDef['sort_field'];
+    if ( !empty( $presetDef['sort_field2'] ) )
+        $sortLabel = ( $sortLabel !== '' ? $sortLabel . ', ' : '' ) . $presetDef['sort_field2'];
+    if ( $sortLabel !== '' )
+        $chips[] = array( 'key' => 'sort', 'label' => 'Sort: ' . $sortLabel );
+    if ( isset( $presetDef['output_format'] ) || isset( $presetDef['separator'] ) || isset( $presetDef['line_separator'] ) || isset( $presetDef['escape'] ) )
+        $chips[] = array( 'key' => 'output', 'label' => 'Output: ' . strtoupper( isset( $presetDef['output_format'] ) ? $presetDef['output_format'] : 'csv' ) );
+    $f = isset( $presetDef['filters'] ) && is_array( $presetDef['filters'] ) ? $presetDef['filters'] : array();
+    if ( isset( $f['depth_mode'] ) && $f['depth_mode'] !== 'any' )
+        $chips[] = array( 'key' => 'depth', 'label' => 'Depth: ' . $f['depth_mode'] . ' ' . ( isset( $f['depth_value'] ) ? $f['depth_value'] : '' ) );
+    if ( !empty( $f['extended_filter'] ) )
+        $chips[] = array( 'key' => 'extended_filter', 'label' => 'Extended filter: ' . $f['extended_filter'] );
+    if ( isset( $f['date_mode'] ) && $f['date_mode'] !== 'any' )
+        $chips[] = array( 'key' => 'date', 'label' => 'Date: ' . $f['date_mode'] );
+    if ( !empty( $f['section'] ) )
+        $chips[] = array( 'key' => 'section', 'label' => 'Section' );
+    if ( !empty( $f['state'] ) )
+        $chips[] = array( 'key' => 'state', 'label' => 'State' );
+    if ( isset( $f['visibility'] ) && $f['visibility'] !== 'any' )
+        $chips[] = array( 'key' => 'visibility', 'label' => 'Visibility: ' . $f['visibility'] );
+    if ( !empty( $f['name'] ) )
+        $chips[] = array( 'key' => 'name', 'label' => 'Name contains "' . $f['name'] . '"' );
+    if ( !empty( $f['conditions'] ) && is_array( $f['conditions'] ) )
+    {
+        foreach ( $f['conditions'] as $i => $c )
+        {
+            if ( !empty( $c['field'] ) )
+                $chips[] = array( 'key' => 'condition:' . $i, 'label' => trim( $c['field'] . ' ' . ( !empty( $c['negate'] ) ? 'not ' : '' ) . $c['op'] . ' ' . $c['value'] ) );
+        }
+    }
+    return $chips;
+};
 if ( $http->hasPostVariable( 'DeletePreset' ) && $http->hasPostVariable( 'PresetActionRef' ) )
 {
     $presetToDelete = XrowExtractPreset::fetch( (string)$http->postVariable( 'PresetActionRef' ) );
@@ -220,13 +273,28 @@ if ( $http->hasPostVariable( 'RenamePreset' ) && $http->hasPostVariable( 'Preset
     }
     return $module->redirectTo( 'xrowextract/csv' );
 }
-if ( ( $http->hasPostVariable( 'LoadPreset' ) || $http->hasPostVariable( 'RunPresetInBackground' ) ) && $http->hasPostVariable( 'PresetRef' ) )
+if ( ( $http->hasPostVariable( 'LoadPreset' ) || $http->hasPostVariable( 'RunPresetInBackground' ) || $http->hasPostVariable( 'RunPresetNow' ) ) && $http->hasPostVariable( 'PresetRef' ) )
 {
     $presetRefToLoad = (string)$http->postVariable( 'PresetRef' );
     $presetNodeGuess = $http->hasPostVariable( 'Subtree' ) ? (int)$http->postVariable( 'Subtree' )
                       : ( isset( $sessionConfig['Subtree'] ) ? (int)$sessionConfig['Subtree'] : 0 );
-    $presetParamsRaw = (string)( $http->hasPostVariable( 'PresetParams' ) ? $http->postVariable( 'PresetParams' ) : '' );
+    // Labelled placeholder inputs (one group of inputs per preset, PresetPlaceholder[<ref>][<name>]; only
+    // the loaded preset's own group is read) plus the free-text "Advanced" field, which wins if both set
+    // the same name.
     $presetParamOverrides = array();
+    if ( $http->hasPostVariable( 'PresetPlaceholder' ) )
+    {
+        $allPlaceholderGroups = (array)$http->postVariable( 'PresetPlaceholder' );
+        if ( isset( $allPlaceholderGroups[$presetRefToLoad] ) && is_array( $allPlaceholderGroups[$presetRefToLoad] ) )
+        {
+            foreach ( $allPlaceholderGroups[$presetRefToLoad] as $ppKey => $ppValue )
+            {
+                if ( trim( (string)$ppValue ) !== '' )
+                    $presetParamOverrides[(string)$ppKey] = trim( (string)$ppValue );
+            }
+        }
+    }
+    $presetParamsRaw = (string)( $http->hasPostVariable( 'PresetParams' ) ? $http->postVariable( 'PresetParams' ) : '' );
     foreach ( explode( ',', $presetParamsRaw ) as $pair )
     {
         $pair = trim( $pair );
@@ -290,10 +358,105 @@ if ( ( $http->hasPostVariable( 'LoadPreset' ) || $http->hasPostVariable( 'RunPre
         $presetSessionConfig['Languages'] = array_values( $presetDef['languages'] );
     $http->setSessionVariable( 'eZExtractConfig', $presetSessionConfig );
     $http->setSessionVariable( 'eZExtractLoadedPreset', $presetRefToLoad );
+    $http->setSessionVariable( 'eZExtractPresetFields', $buildPresetChips( $presetDef, $presetSessionConfig['Subtree'], $presetClassID ) );
     if ( $filledPreset['unresolved'] )
         $http->setSessionVariable( 'eZExtractPresetUnresolved', $filledPreset['unresolved'] );
     if ( $http->hasPostVariable( 'RunPresetInBackground' ) )
         $http->setSessionVariable( 'eZExtractRunPresetAfterLoad', $presetRefToLoad );
+    if ( $http->hasPostVariable( 'RunPresetNow' ) )
+        $http->setSessionVariable( 'eZExtractDownloadAfterLoad', $presetRefToLoad );
+    return $module->redirectTo( 'xrowextract/csv' );
+}
+// Clearing: one chip ("ClearPresetField", the chip's key), or all of them / the whole loaded preset
+// ("UnloadPreset" / "ClearAllPresetFields") — each field a preset set is put back to the export's own
+// default, the session it already reads from updated directly (this runs before that session is read
+// below, so the same request already reflects the change).
+if ( $http->hasPostVariable( 'ClearPresetField' ) || $http->hasPostVariable( 'UnloadPreset' ) || $http->hasPostVariable( 'ClearAllPresetFields' ) )
+{
+    $clearAllPresetFields = $http->hasPostVariable( 'UnloadPreset' ) || $http->hasPostVariable( 'ClearAllPresetFields' );
+    $singlePresetFieldKey = (string)( $http->hasPostVariable( 'ClearPresetField' ) ? $http->postVariable( 'ClearPresetField' ) : '' );
+    $currentPresetChips = $http->hasSessionVariable( 'eZExtractPresetFields' ) ? (array)$http->sessionVariable( 'eZExtractPresetFields' ) : array();
+    $presetFieldKeysToClear = $clearAllPresetFields ? array_map( function ( $c ) { return $c['key']; }, $currentPresetChips ) : array( $singlePresetFieldKey );
+    $liveExtractConfig = $http->hasSessionVariable( 'eZExtractConfig' ) ? (array)$http->sessionVariable( 'eZExtractConfig' ) : array();
+    $liveExtractFilters = isset( $liveExtractConfig['Filters'] ) && is_array( $liveExtractConfig['Filters'] ) ? $liveExtractConfig['Filters'] : array();
+    foreach ( $presetFieldKeysToClear as $presetFieldKey )
+    {
+        if ( $presetFieldKey === 'node' )
+            unset( $liveExtractConfig['Subtree'] );
+        elseif ( $presetFieldKey === 'class' )
+            unset( $liveExtractConfig['Class_id'] );
+        elseif ( $presetFieldKey === 'columns' )
+        {
+            if ( isset( $liveExtractConfig['Class_id'] ) )
+                unset( $liveExtractConfig['Attributes'][(int)$liveExtractConfig['Class_id']] );
+        }
+        elseif ( $presetFieldKey === 'languages' )
+            unset( $liveExtractConfig['Languages'] );
+        elseif ( $presetFieldKey === 'sort' )
+        {
+            $liveExtractConfig['SortField'] = 'tree'; $liveExtractConfig['SortAscending'] = true;
+            $liveExtractConfig['SortField2'] = ''; $liveExtractConfig['SortAscending2'] = true;
+        }
+        elseif ( $presetFieldKey === 'output' )
+        {
+            $liveExtractConfig['OutputFormat'] = 'csv'; $liveExtractConfig['Separator'] = ',';
+            $liveExtractConfig['LineSeparator'] = 'unix'; $liveExtractConfig['Escape'] = true;
+        }
+        elseif ( $presetFieldKey === 'depth' )
+        {
+            $liveExtractFilters['depth_mode'] = 'any'; $liveExtractFilters['depth_value'] = 0;
+        }
+        elseif ( $presetFieldKey === 'extended_filter' )
+        {
+            $liveExtractFilters['extended_filter'] = ''; $liveExtractFilters['extended_params'] = '';
+        }
+        elseif ( $presetFieldKey === 'date' )
+        {
+            $liveExtractFilters['date_mode'] = 'any'; $liveExtractFilters['date_from'] = ''; $liveExtractFilters['date_to'] = '';
+        }
+        elseif ( $presetFieldKey === 'section' )
+            $liveExtractFilters['section'] = 0;
+        elseif ( $presetFieldKey === 'state' )
+            $liveExtractFilters['state'] = 0;
+        elseif ( $presetFieldKey === 'visibility' )
+            $liveExtractFilters['visibility'] = 'any';
+        elseif ( $presetFieldKey === 'name' )
+            $liveExtractFilters['name'] = '';
+        elseif ( strpos( $presetFieldKey, 'condition:' ) === 0 )
+        {
+            $clearConditionIndex = (int)substr( $presetFieldKey, strlen( 'condition:' ) );
+            if ( isset( $liveExtractFilters['conditions'][$clearConditionIndex] ) )
+                array_splice( $liveExtractFilters['conditions'], $clearConditionIndex, 1 );
+        }
+    }
+    $liveExtractConfig['Filters'] = ( new XrowExtractFilters( $liveExtractFilters ) )->values;
+    $http->setSessionVariable( 'eZExtractConfig', $liveExtractConfig );
+    if ( $clearAllPresetFields )
+    {
+        $http->removeSessionVariable( 'eZExtractLoadedPreset' );
+        $http->removeSessionVariable( 'eZExtractPresetFields' );
+    }
+    else
+    {
+        // Condition chips are index-keyed ("condition:0", "condition:1", ...); removing one re-indexes the
+        // conditions that follow it (array_splice above), so their chips are rebuilt from the live filters
+        // rather than kept from the stale snapshot, or a later chip's × would remove the wrong row.
+        $remainingPresetChips = array_values( array_filter( $currentPresetChips, function ( $c ) use ( $singlePresetFieldKey ) {
+            return $c['key'] !== $singlePresetFieldKey && strpos( $c['key'], 'condition:' ) !== 0;
+        } ) );
+        foreach ( $liveExtractConfig['Filters']['conditions'] as $conditionIndex => $condition )
+        {
+            if ( $condition['field'] !== '' )
+                $remainingPresetChips[] = array( 'key' => 'condition:' . $conditionIndex, 'label' => trim( $condition['field'] . ' ' . ( !empty( $condition['negate'] ) ? 'not ' : '' ) . $condition['op'] . ' ' . $condition['value'] ) );
+        }
+        if ( $remainingPresetChips )
+            $http->setSessionVariable( 'eZExtractPresetFields', $remainingPresetChips );
+        else
+        {
+            $http->removeSessionVariable( 'eZExtractPresetFields' );
+            $http->removeSessionVariable( 'eZExtractLoadedPreset' );
+        }
+    }
     return $module->redirectTo( 'xrowextract/csv' );
 }
 if ( $http->hasSessionVariable( 'eZExtractPresetError' ) )
@@ -302,19 +465,26 @@ if ( $http->hasSessionVariable( 'eZExtractPresetError' ) )
     $http->removeSessionVariable( 'eZExtractPresetError' );
 }
 $LoadedPresetRef = $http->hasSessionVariable( 'eZExtractLoadedPreset' ) ? (string)$http->sessionVariable( 'eZExtractLoadedPreset' ) : '';
+$LoadedPresetFields = $http->hasSessionVariable( 'eZExtractPresetFields' ) ? (array)$http->sessionVariable( 'eZExtractPresetFields' ) : array();
 $LoadedPresetUnresolved = array();
 if ( $http->hasSessionVariable( 'eZExtractPresetUnresolved' ) )
 {
     $LoadedPresetUnresolved = (array)$http->sessionVariable( 'eZExtractPresetUnresolved' );
     $http->removeSessionVariable( 'eZExtractPresetUnresolved' );
 }
-// A "run in the background" requested when the preset was loaded (the redirect above), consumed once the
-// state it needs (Filters, Attributes, Languages ...) is fully resolved, further down this script.
+// A "run in the background" / "run now" requested when the preset was loaded (the redirect above),
+// consumed once the state it needs (Filters, Attributes, Languages ...) is fully resolved, further down.
 $AutoRunPresetInBackground = false;
 if ( $http->hasSessionVariable( 'eZExtractRunPresetAfterLoad' ) )
 {
     $AutoRunPresetInBackground = (string)$http->sessionVariable( 'eZExtractRunPresetAfterLoad' );
     $http->removeSessionVariable( 'eZExtractRunPresetAfterLoad' );
+}
+$AutoDownloadAfterLoad = false;
+if ( $http->hasSessionVariable( 'eZExtractDownloadAfterLoad' ) )
+{
+    $AutoDownloadAfterLoad = (string)$http->sessionVariable( 'eZExtractDownloadAfterLoad' );
+    $http->removeSessionVariable( 'eZExtractDownloadAfterLoad' );
 }
 
 // Set col & row separator: one character (\t is a tab), never a quote or a line break. A loaded preset
@@ -1050,11 +1220,14 @@ if ( $http->hasPostVariable( 'SavePreset' ) && !$hasPreFilledData )
         ), $saveExistingID );
         $LoadedPresetRef = 'user:' . $savedID;
         $http->setSessionVariable( 'eZExtractLoadedPreset', $LoadedPresetRef );
+        $http->setSessionVariable( 'eZExtractPresetFields', $buildPresetChips( $saveDefinition, $Subtree, $Class_id ) );
+        $LoadedPresetFields = $buildPresetChips( $saveDefinition, $Subtree, $Class_id );
         $PresetNotice = array( 'error' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Preset "%name" saved.', null, array( '%name' => $presetName ) ) );
     }
 }
 $tpl->setVariable( 'PresetNotice', $PresetNotice );
 $tpl->setVariable( 'LoadedPresetRef', $LoadedPresetRef );
+$tpl->setVariable( 'LoadedPresetFields', $LoadedPresetFields );
 $tpl->setVariable( 'LoadedPresetUnresolved', $LoadedPresetUnresolved );
 $UserPresets = array();
 foreach ( XrowExtractPreset::fetchUserList() as $preset )
@@ -1065,11 +1238,17 @@ foreach ( XrowExtractPreset::fetchUserList() as $preset )
             'mine' => $preset['owner_login'] === $xePresetLogin,
             'can_edit' => XrowExtractPreset::canEdit( $preset, $xePresetLogin, $xePresetAllowAll ),
             'ini_block' => XrowExtractPreset::toIniBlock( $preset ),
+            'summary' => XrowExtractPreset::summaryLine( $preset ),
+            'placeholder_list' => array_values( array_map( function ( $name, $spec ) { return array( 'name' => $name, 'default' => isset( $spec['default'] ) ? $spec['default'] : '' ); }, array_keys( $preset['placeholders'] ), $preset['placeholders'] ) ),
         ) );
 }
 $SitePresets = array();
 foreach ( XrowExtractPreset::fetchSiteList() as $preset )
-    $SitePresets[] = array_merge( $preset, array( 'ini_block' => XrowExtractPreset::toIniBlock( $preset ) ) );
+    $SitePresets[] = array_merge( $preset, array(
+        'ini_block' => XrowExtractPreset::toIniBlock( $preset ),
+        'summary' => XrowExtractPreset::summaryLine( $preset ),
+        'placeholder_list' => array_values( array_map( function ( $name, $spec ) { return array( 'name' => $name, 'default' => isset( $spec['default'] ) ? $spec['default'] : '' ); }, array_keys( $preset['placeholders'] ), $preset['placeholders'] ) ),
+    ) );
 $tpl->setVariable( 'UserPresets', $UserPresets );
 $tpl->setVariable( 'SitePresets', $SitePresets );
 
@@ -1178,7 +1357,7 @@ if ( $http->hasPostVariable( 'RunInBackground' ) || $AutoRunPresetInBackground )
     $tpl->setVariable( 'BackgroundError', $backgroundError );
 }
 
-if ( $http->hasPostVariable( 'Download' ) || $isPreview )
+if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoad )
 {
     $started = microtime( true );
     $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];
