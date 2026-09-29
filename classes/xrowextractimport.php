@@ -116,6 +116,9 @@ class XrowExtractImport
         if ( !@move_uploaded_file( $sourcePath, $target ) && !@copy( $sourcePath, $target ) )
             return false;
         @chmod( $target, 0600 );
+        // move_uploaded_file() bypasses Velocity's file layer, which would otherwise go on believing the new
+        // file is not there for the rest of the request (see XrowExtractPackage::withNativeFileStreams())
+        clearstatcache( true );
         return $target;
     }
 

@@ -1658,30 +1658,17 @@ class XrowExtractPackage
     }
 
     /**
-     * Runs a kernel package archive operation (eZPackage::import(), exportToArchive()) with PHP's own file
-     * stream wrapper in place. The kernel opens archives as "compress.zlib://<path>", and PHP's zlib stream
-     * needs a real file descriptor underneath; under Velocity the "file" wrapper is replaced by a userland
-     * one for the length of a request, which cannot provide one, so every package upload and download failed
-     * there ("can not be opened for reading"). Outside Velocity this is a plain call.
+     * Runs a kernel package archive operation (eZPackage::import(), exportToArchive()) with every remembered
+     * file status forgotten first. Under Velocity the file layer remembers which files exist for the length of
+     * a request; a file written by a function that bypasses it (move_uploaded_file() in storeUpload()) is then
+     * "not there" to the archive reader, which opens it as compress.zlib://<path>: "can not be opened for
+     * reading". clearstatcache() makes that layer forget at once (and is a plain stat cache reset elsewhere).
+     * Swapping the file stream wrapper out instead was tried and must not be: it kills the Velocity worker.
      */
     public static function withNativeFileStreams( callable $operation )
     {
-        $wrapperClass = 'Q_WebServer_CompatFileWrapper';
-        $restored = false;
-        if ( class_exists( $wrapperClass, false ) )
-            $restored = @stream_wrapper_restore( 'file' );
-        try
-        {
-            return $operation();
-        }
-        finally
-        {
-            if ( $restored )
-            {
-                @stream_wrapper_unregister( 'file' );
-                @stream_wrapper_register( 'file', $wrapperClass );
-            }
-        }
+        clearstatcache( true );
+        return $operation();
     }
 
     protected static function uniquePackageName( $base )
