@@ -186,6 +186,9 @@ $TemplateVariant = $http->hasPostVariable( 'TemplateVariant' ) && in_array( $htt
                  ? $http->postVariable( 'TemplateVariant' ) : 'both';
 $tpl->setVariable( 'TemplateVariant', $TemplateVariant );
 $tpl->setVariable( 'TemplateVariants', XrowExtractPackage::templateVariants() );
+// Where the sample objects will be created while a build runs (export.ini [PackageTemplate]
+// ScratchNodeID, default content.ini [NodeSettings] MediaRootNode) - never the public front page.
+$tpl->setVariable( 'ScratchLocation', XrowExtractPackage::scratchLocationInfo() );
 
 $templateError = '';
 $templateBuilt = false;

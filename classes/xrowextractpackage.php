@@ -449,7 +449,7 @@ class XrowExtractPackage
      */
     public static function buildTemplatePackage( $classID, $variant, array $options = array() )
     {
-        $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'sample_object_ids' => array() );
+        $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'sample_object_ids' => array(), 'scratch_location' => null );
 
         $variant = in_array( $variant, array( 'class', 'content', 'both' ), true ) ? $variant : 'both';
         $class = ctype_digit( (string)$classID ) ? eZContentClass::fetch( (int)$classID ) : eZContentClass::fetchByIdentifier( $classID );
@@ -468,6 +468,7 @@ class XrowExtractPackage
 
         $createdObjectIDs = array();
         $createdNodeIDs = array();
+        $scratchFolderNodeID = false;
 
         if ( $needsContent )
         {
@@ -475,18 +476,33 @@ class XrowExtractPackage
             $scratchNode = eZContentObjectTreeNode::fetch( $scratchNodeID );
             if ( !$scratchNode instanceof eZContentObjectTreeNode || !$scratchNode->checkAccess( 'create', $classID ) )
             {
-                $result['errors'][] = "Cannot create sample content of class '$classIdentifier' below node $scratchNodeID: no such node, or no create permission.";
+                $result['errors'][] = "Cannot create sample content of class '$classIdentifier' below node $scratchNodeID (export.ini [PackageTemplate] ScratchNodeID, or content.ini [NodeSettings] MediaRootNode): no such node, or no create permission.";
                 return $result;
             }
 
-            $created = self::createSampleObjects( $class, $objectCount, $languages, $scratchNodeID, $result['errors'] );
+            // A temporary, explicitly hidden folder below the scratch node, so the sample
+            // objects are not merely unrendered but hidden for the seconds they exist; if
+            // this site has no creatable 'folder' class here, they go straight below the
+            // scratch node instead (still never the public front page).
+            $scratchFolderNodeID = self::createScratchFolder( $scratchNodeID, $languages[0], $result['errors'] );
+            $creationNodeID = $scratchFolderNodeID ?: $scratchNodeID;
+
+            $created = self::createSampleObjects( $class, $objectCount, $languages, $creationNodeID, $result['errors'] );
             if ( !$created )
             {
+                if ( $scratchFolderNodeID )
+                    eZContentObjectTreeNode::removeSubtrees( array( $scratchFolderNodeID ), false );
                 $result['errors'][] = "Could not create any sample content object for class '$classIdentifier'; see the errors above.";
                 return $result;
             }
             $createdObjectIDs = $created['object_ids'];
             $createdNodeIDs = $created['node_ids'];
+            $result['scratch_location'] = array(
+                'node_id'           => $creationNodeID,
+                'base_node_id'      => $scratchNodeID,
+                'base_path'         => $scratchNode->attribute( 'path_identification_string' ) ?: ( 'node ' . $scratchNodeID ),
+                'used_hidden_folder' => (bool)$scratchFolderNodeID,
+            );
         }
 
         $packageName = isset( $options['package_name'] ) && $options['package_name'] !== ''
@@ -538,7 +554,14 @@ class XrowExtractPackage
         $package->setAttribute( 'is_active', true );
         $package->store();
 
-        if ( $createdNodeIDs )
+        // Removing the hidden scratch folder takes its children (the sample objects) with
+        // it in one call; without a folder, remove the sample objects directly. Either way
+        // $moveToTrash = false: a final removal, not a trip through the trash can, and the
+        // kernel's own remove path clears the search index and URL aliases for the removed
+        // ids along with it (checked in this extension's sandbox tests).
+        if ( $scratchFolderNodeID )
+            eZContentObjectTreeNode::removeSubtrees( array( $scratchFolderNodeID ), false );
+        elseif ( $createdNodeIDs )
             eZContentObjectTreeNode::removeSubtrees( $createdNodeIDs, false );
 
         $result['ok'] = true;
@@ -558,10 +581,93 @@ class XrowExtractPackage
         return array_slice( $languages, 0, 2 );
     }
 
-    protected static function defaultScratchNodeID()
+    /**
+     * Where the template builder's sample objects are created while a package
+     * is being built. Never the public site's front page: export.ini
+     * [PackageTemplate] ScratchNodeID if set, otherwise content.ini
+     * [NodeSettings] MediaRootNode of the default siteaccess - a location no
+     * shipped layout, search index or the static/content-view cache renders
+     * for a visitor, unlike RootNode.
+     */
+    public static function defaultScratchNodeID()
     {
+        $exportINI = eZINI::instance( 'export.ini' );
+        if ( $exportINI->hasVariable( 'PackageTemplate', 'ScratchNodeID' ) )
+        {
+            $configured = trim( (string)$exportINI->variable( 'PackageTemplate', 'ScratchNodeID' ) );
+            if ( $configured !== '' )
+                return (int)$configured;
+        }
         $publicContentINI = eZSiteAccess::getIni( eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
-        return (int)$publicContentINI->variable( 'NodeSettings', 'RootNode' );
+        return (int)$publicContentINI->variable( 'NodeSettings', 'MediaRootNode' );
+    }
+
+    /** Node id and path of where a template build's sample objects would be created, for display before/after a build. */
+    public static function scratchLocationInfo( $nodeID = false )
+    {
+        $nodeID = $nodeID ? (int)$nodeID : self::defaultScratchNodeID();
+        $node = eZContentObjectTreeNode::fetch( $nodeID );
+        $path = $node instanceof eZContentObjectTreeNode ? $node->attribute( 'path_identification_string' ) : false;
+        return array(
+            'node_id' => $nodeID,
+            'path'    => $path ?: ( 'node ' . $nodeID ),
+            'exists'  => $node instanceof eZContentObjectTreeNode,
+        );
+    }
+
+    /**
+     * Creates a temporary, hidden "scratch" folder below $parentNodeID to hold
+     * a template build's sample objects, so even the seconds they exist they
+     * are not merely unrendered but explicitly hidden. Returns the new
+     * folder's node id, or false if this site has no creatable 'folder' class
+     * here (the caller then creates the sample objects directly below
+     * $parentNodeID instead - still not the public front page, just without
+     * the extra hidden layer).
+     */
+    protected static function createScratchFolder( $parentNodeID, $language, array &$errors )
+    {
+        $folderClass = eZContentClass::fetchByIdentifier( 'folder' );
+        if ( !$folderClass instanceof eZContentClass )
+            return false;
+        $folderClassID = (int)$folderClass->attribute( 'id' );
+        $parentNode = eZContentObjectTreeNode::fetch( (int)$parentNodeID );
+        if ( !$parentNode instanceof eZContentObjectTreeNode || !$parentNode->checkAccess( 'create', $folderClassID ) )
+            return false;
+
+        $classAttributes = eZContentClassAttribute::fetchListByClassID( $folderClassID, eZContentClass::VERSION_STATUS_DEFINED, true );
+        $remoteID = 'xrowextract-pkgtpl-scratch-' . date( 'YmdHis' ) . '-' . substr( md5( uniqid( '', true ) ), 0, 6 );
+        list( $row, $mapping ) = self::sampleRow( $classAttributes, 'folder', 1, array( 1 => $remoteID ), $parentNodeID, $language );
+
+        $runResult = XrowExtractImport::run( array(
+            'rows'         => array( $row ),
+            'mapping'      => $mapping,
+            'classID'      => $folderClassID,
+            'match'        => 'remote_id',
+            'language'     => $language,
+            'parentNodeID' => $parentNodeID,
+            'apply'        => true,
+        ) );
+        $rowResult = $runResult['rows'][0];
+        if ( $rowResult['action'] === 'error' || !$rowResult['object_id'] )
+        {
+            $errors[] = 'scratch folder (not fatal, sample objects go directly below the scratch node instead): ' . $rowResult['reason'];
+            return false;
+        }
+
+        eZContentObject::clearCache( array( (int)$rowResult['object_id'] ) );
+        $object = eZContentObject::fetch( (int)$rowResult['object_id'] );
+        $mainNode = $object instanceof eZContentObject ? $object->attribute( 'main_node' ) : null;
+        if ( !$mainNode instanceof eZContentObjectTreeNode )
+            return false;
+        $folderNodeID = (int)$mainNode->attribute( 'node_id' );
+
+        // Hidden immediately: eZContentOperationCollection::changeHideStatus() is the same
+        // call kernel/content/action.php's HideButton uses, toggling is_hidden on a node
+        // that starts visible (a freshly published node always does).
+        if ( class_exists( 'eZContentOperationCollection' ) )
+            eZContentOperationCollection::changeHideStatus( $folderNodeID );
+
+        return $folderNodeID;
     }
 
     /** $base, or $base_2, $base_3, ... the first one not already in the local package repository. */

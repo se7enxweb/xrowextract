@@ -195,6 +195,11 @@ if ( $options['template'] )
     if ( $options['languages'] )
         $buildOptions['languages'] = array_filter( array_map( 'trim', explode( ',', $options['languages'] ) ) );
 
+    if ( $variant !== 'class' )
+    {
+        $scratch = XrowExtractPackage::scratchLocationInfo();
+        $cli->output( "Sample objects are created below {$scratch['path']} (node {$scratch['node_id']}), hidden the moment a folder is possible there - never the public front page (export.ini [PackageTemplate] ScratchNodeID)." );
+    }
     $build = XrowExtractPackage::buildTemplatePackage( $options['class'], $variant, $buildOptions );
     foreach ( $build['errors'] as $error )
         $cli->error( '  ' . $error );

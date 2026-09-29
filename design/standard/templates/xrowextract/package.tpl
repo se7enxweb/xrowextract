@@ -76,27 +76,31 @@
             </header>
 
             <div class="xe-field">
+            <div class="xe-scroll" tabindex="0">
                 <table class="xe-table" style="width: 100%">
-                    <tr><th>{'Name'|i18n('design/standard/extract')}</th><td>{$Inspection.meta.name|wash}</td>
+                    <tr><th>{'Name'|i18n('design/standard/extract')}</th><td class="xe-long">{$Inspection.meta.name|wash}</td>
                         <th>{'Version'|i18n('design/standard/extract')}</th><td>{$Inspection.meta.version|wash}{if $Inspection.meta.release}-{$Inspection.meta.release|wash}{/if}</td></tr>
-                    <tr><th>{'Summary'|i18n('design/standard/extract')}</th><td colspan="3">{$Inspection.meta.summary|wash}</td></tr>
+                    <tr><th>{'Summary'|i18n('design/standard/extract')}</th><td colspan="3" class="xe-long">{$Inspection.meta.summary|wash}</td></tr>
                     {if $Inspection.meta.description}<tr><th>{'Description'|i18n('design/standard/extract')}</th><td colspan="3" class="xe-long">{$Inspection.meta.description|wash|nl2br}</td></tr>{/if}
                     <tr><th>{'Licence'|i18n('design/standard/extract')}</th><td>{$Inspection.meta.licence|wash}</td>
                         <th>{'Installed already'|i18n('design/standard/extract')}</th><td>{if $Inspection.meta.is_installed}{'yes'|i18n('design/standard/extract')}{else}{'no'|i18n('design/standard/extract')}{/if}</td></tr>
                 </table>
             </div>
+            </div>
 
             {if $Inspection.meta.dependencies|count}
             <details>
                 <summary>{'Dependencies'|i18n('design/standard/extract')} ({$Inspection.meta.dependencies|count})</summary>
+                <div class="xe-scroll" tabindex="0">
                 <table class="xe-table" style="width: 100%">
                     <thead><tr><th>{'Section'|i18n('design/standard/extract')}</th><th>{'Type'|i18n('design/standard/extract')}</th><th>{'Name'|i18n('design/standard/extract')}</th><th>{'Value'|i18n('design/standard/extract')}</th></tr></thead>
                     <tbody>
                     {foreach $Inspection.meta.dependencies as $dependency}
-                    <tr><td>{$dependency.section|wash}</td><td><code>{$dependency.type|wash}</code></td><td>{$dependency.name|wash}</td><td>{$dependency.value|wash}</td></tr>
+                    <tr><td>{$dependency.section|wash}</td><td><code>{$dependency.type|wash}</code></td><td>{$dependency.name|wash}</td><td class="xe-long">{$dependency.value|wash}</td></tr>
                     {/foreach}
                     </tbody>
                 </table>
+                </div>
             </details>
             {/if}
 
@@ -290,22 +294,22 @@
             </div>
 
             <input class="defaultbutton" type="submit" name="BuildTemplate" value="{'Build the sample package'|i18n('design/standard/extract')}" />
-            <p class="xe-help">{'2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.'|i18n('design/standard/extract')}</p>
+            <p class="xe-help">{'2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree.'|i18n('design/standard/extract')} {'They are created below %path, hidden the moment a folder there is possible - never the public front page.'|i18n('design/standard/extract',, hash( '%path', concat( '<code>', $ScratchLocation.path|wash, '</code>' ) ))} {'The result opens below for inspection.'|i18n('design/standard/extract')}</p>
         </section>
         </form>
 
         {* 5. Package template reference *}
-        <section class="xe-card" aria-labelledby="xe-card-reference">
+        <section class="xe-card" id="xe-card-reference" aria-labelledby="xe-card-reference-h">
             <header class="xe-card-head">
                 <div>
-                    <h2 id="xe-card-reference">{'Package template reference'|i18n('design/standard/extract')}</h2>
+                    <h2 id="xe-card-reference-h">{'Package template reference'|i18n('design/standard/extract')}</h2>
                     <p>{'What a content package looks like on disk, every element package.xml carries, and how install-time matching works.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
 
             <details open>
                 <summary>{'Archive layout'|i18n('design/standard/extract')}</summary>
-                <pre class="xe-code"><code>{literal}&lt;package-name&gt;/
+                <pre class="xe-example">{literal}&lt;package-name&gt;/
   package.xml               # metadata + the install/uninstall item list
   ezcontentclass/
     &lt;filename&gt;.xml          # one file per class install item
@@ -315,7 +319,7 @@
   simplefiles/                # files an ezimage/ezbinaryfile/ezmedia attribute stores
   documents/                 # free-form package documents (readme, licence text, ...)
   .cache/package.php          # a generated cache of the parsed package.xml; never edit
-{/literal}</code></pre>
+{/literal}</pre>
                 <p class="xe-help">{'A "class only" template has only ezcontentclass/. A "content only" template has only ezcontentobject/ and simplefiles/. "Class + content" has all of it.'|i18n('design/standard/extract')}</p>
             </details>
 
@@ -351,7 +355,7 @@
             <details>
                 <summary>{'Annotated example, from a generated sample package'|i18n('design/standard/extract')}</summary>
                 <p class="xe-side-lead">{'A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).'|i18n('design/standard/extract')}</p>
-                <pre class="xe-code"><code>{literal}&lt;object-list&gt;
+                <pre class="xe-example">{literal}&lt;object-list&gt;
   &lt;object remote_id="xrowextract-pkgtpl-ng_article-20260929120000-ab12cd-2"
           name="Sample title 2 (eng-US)"
           class_remote_id="..."
@@ -378,7 +382,7 @@
       &lt;node-assignment is-main-node="1" name="Sample title 2" node-id="0" remote-id="..." /&gt;
     &lt;/node-assignment-list&gt;
   &lt;/object&gt;
-&lt;/object-list&gt;{/literal}</code></pre>
+&lt;/object-list&gt;{/literal}</pre>
                 <p class="xe-help">{'The remote ids the template builder assigns follow xrowextract-pkgtpl-&lt;class identifier&gt;-&lt;timestamp&gt;-&lt;object number&gt;, so a second sample for the same class never collides with the first on remote id.'|i18n('design/standard/extract')}</p>
             </details>
 
@@ -394,6 +398,16 @@
                     <li><strong>{'Files'|i18n('design/standard/extract')}</strong> <code>ezimage, ezbinaryfile, ezmedia</code> — {'a real bundled sample image/document, stored in the package.'|i18n('design/standard/extract')}</li>
                     <li><strong>{'Relations'|i18n('design/standard/extract')}</strong> <code>ezobjectrelation, ezobjectrelationlist</code> — {'the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.'|i18n('design/standard/extract')}</li>
                     <li>{'Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.'|i18n('design/standard/extract')}</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>{'Where the sample content is created'|i18n('design/standard/extract')}</summary>
+                <p>{'Currently: %path'|i18n('design/standard/extract',, hash( '%path', concat( '<code>', $ScratchLocation.path|wash, '</code> (node ', $ScratchLocation.node_id|wash, ')' ) ))}</p>
+                <ul>
+                    <li>{'The sample objects are real, published content while a build runs - they need a real place to live. That place is never the public front page: export.ini [PackageTemplate] ScratchNodeID if set, otherwise content.ini [NodeSettings] MediaRootNode (the Media/Images-Files-Multimedia structure, which no shipped layout, search result or the static/content-view cache renders for a visitor).'|i18n('design/standard/extract')}</li>
+                    <li>{'When a "folder" class exists and can be created there, the objects go inside a temporary folder that is explicitly hidden the moment it is created, one extra safety layer on top of the location itself; otherwise they go directly below the scratch node.'|i18n('design/standard/extract')}</li>
+                    <li>{'Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.'|i18n('design/standard/extract')}</li>
                 </ul>
             </details>
         </section>
