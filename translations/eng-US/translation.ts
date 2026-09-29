@@ -3612,6 +3612,70 @@
         <translation>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</translation>
     </message>
     <message>
+        <source>%free free on the server for uploads; no file size limit is enforced beyond that.</source>
+        <translation>%free free on the server for uploads; no file size limit is enforced beyond that.</translation>
+    </message>
+    <message>
+        <source>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.</source>
+        <translation>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pause</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Resume</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <source>Download report</source>
+        <translation>Download report</translation>
+    </message>
+    <message>
+        <source>Download error rows</source>
+        <translation>Download error rows</translation>
+    </message>
+    <message>
+        <source>Resume from row</source>
+        <translation>Resume from row</translation>
+    </message>
+    <message>
+        <source>Resume as a new job</source>
+        <translation>Resume as a new job</translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
+        <translation>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</translation>
+    </message>
+    <message>
+        <source>No file size limit</source>
+        <translation>No file size limit</translation>
+    </message>
+    <message>
+        <source>A large file uploads in chunks (a progress bar, pause and resume, and a dropped connection retries and resumes on its own) - independent of the server’s own upload size settings.</source>
+        <translation>A large file uploads in chunks (a progress bar, pause and resume, and a dropped connection retries and resumes on its own) - independent of the server’s own upload size settings.</translation>
+    </message>
+    <message>
+        <source>XML and CSV are read a row at a time while they import, however large the file; only a very large JSON file is read whole (JSON has no streaming format).</source>
+        <translation>XML and CSV are read a row at a time while they import, however large the file; only a very large JSON file is read whole (JSON has no streaming format).</translation>
+    </message>
+    <message>
+        <source>The only real limit is free disk space, checked before the upload starts.</source>
+        <translation>The only real limit is free disk space, checked before the upload starts.</translation>
+    </message>
+    <message>
+        <source>Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.</source>
+        <translation>Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.</translation>
+    </message>
+    <message>
+        <source>many rows (counted once queued)</source>
+        <translation>many rows (counted once queued)</translation>
+    </message>
+    <message>
         <source>Presets</source>
         <translation>Presets</translation>
     </message>

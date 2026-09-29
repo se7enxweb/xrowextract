@@ -29,13 +29,18 @@ $ViewList['job_status'] = array( 'script' => 'job_status.php',
 
 $ViewList['job_download'] = array( 'script' => 'job_download.php',
                                    'functions' => array( 'jobs' ),
-                                   'params' => array( 'JobID' ) );
+                                   'params' => array( 'JobID', 'What' ) );
 $ViewList['import'] = array( 'script' => 'import.php',
                              'functions' => array( 'import' ),
                              'default_navigation_part' => 'ezextractnavigationpart',
                              'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
-                                                      'InstallPackage', 'RunPackageInBackground' ),
+                                                      'RunInBackground', 'ResumeJobID', 'InstallPackage', 'RunPackageInBackground' ),
                              'params' => array() );
+// The chunked upload endpoint XrowExtractUploadJS talks to: same policy as xrowextract/import
+$ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
+                                   'functions' => array( 'import' ),
+                                   'post_actions' => array( 'Action' ),
+                                   'params' => array() );
 
 // Content packages (.ezpkg): upload or pick one from the repository, inspect it
 // (a dry run: nothing written), install it, or build a sample "content + class"

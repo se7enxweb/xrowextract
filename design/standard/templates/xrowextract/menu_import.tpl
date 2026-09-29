@@ -61,8 +61,18 @@
     <ul>
         <li>{'Your permissions apply to every row: creating below the parent, editing the matched object.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Every import publishes new versions; keep a backup or an export of the class before a large import.'|i18n( 'design/standard/extract' )}</li>
-        <li>{'The uploaded file is kept privately on the server and removed after the import or after a day.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'The uploaded file is kept privately on the server and removed after the import or after a set number of hours.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Command line: ext:xrowextract:import --file ... (a dry run unless --apply).'|i18n( 'design/standard/extract' )}</li>
+    </ul>
+</details>
+
+<details>
+    <summary>{'No file size limit'|i18n( 'design/standard/extract' )}</summary>
+    <ul>
+        <li>{'A large file uploads in chunks (a progress bar, pause and resume, and a dropped connection retries and resumes on its own) - independent of the server’s own upload size settings.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'XML and CSV are read a row at a time while they import, however large the file; only a very large JSON file is read whole (JSON has no streaming format).'|i18n( 'design/standard/extract' )}</li>
+        <li>{'The only real limit is free disk space, checked before the upload starts.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.'|i18n( 'design/standard/extract' )}</li>
     </ul>
 </details>
 </div>

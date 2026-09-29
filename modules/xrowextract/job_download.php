@@ -19,7 +19,23 @@ if ( !$job || !XrowExtractJob::canSee( $job, $login, $allJobs ) || $job['state']
     eZExecution::cleanExit();
 }
 
-$path = XrowExtractJob::path( $id ) . '/' . $job['output_file'];
+// The main output file, or (an import job only) its error-rows file: a re-importable file of exactly
+// the rows that errored, so fixing and re-uploading just that file is the whole recovery step
+$what = isset( $Params['What'] ) ? (string)$Params['What'] : '';
+$outputName = $job['output_file'];
+if ( $what === 'errors' && $job['type'] === 'import' )
+{
+    $errorsName = preg_replace( '/\.[^.]+$/', '', $outputName ) . '.errors.csv';
+    if ( is_file( XrowExtractJob::path( $id ) . '/' . $errorsName ) )
+        $outputName = $errorsName;
+    else
+    {
+        header( 'HTTP/1.1 404 Not Found' );
+        eZExecution::cleanExit();
+    }
+}
+
+$path = XrowExtractJob::path( $id ) . '/' . $outputName;
 if ( !is_file( $path ) )
 {
     header( 'HTTP/1.1 404 Not Found' );
@@ -41,7 +57,7 @@ header( 'Pragma: no-cache' );
 header( 'X-Content-Type-Options: nosniff' );
 header( 'Content-Type: ' . $type );
 header( 'Content-Length: ' . filesize( $path ) );
-header( 'Content-Disposition: attachment; filename="' . basename( $job['output_file'] ) . '"' );
+header( 'Content-Disposition: attachment; filename="' . basename( $outputName ) . '"' );
 
 while ( @ob_end_clean() );
 

@@ -18,11 +18,11 @@
     <div class="xe-cards">
 
         {* 1. Upload *}
-        <section class="xe-card" aria-labelledby="xe-card-upload">
+        <section class="xe-card" id="xe-card-upload" aria-labelledby="xe-card-upload-h">
             <header class="xe-card-head">
                 <span class="xe-step">1</span>
                 <div>
-                    <h2 id="xe-card-upload">{'File'|i18n('design/standard/extract')}</h2>
+                    <h2 id="xe-card-upload-h">{'File'|i18n('design/standard/extract')}</h2>
                     <p>{'An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
@@ -30,6 +30,7 @@
             {if $UploadError}<p class="xe-error">{$UploadError|wash}</p>{/if}
             {if $ParseError}<p class="xe-error">{$ParseError|wash}</p>{/if}
 
+            {if $UploadDiskFree}<p class="xe-help">{'%free free on the server for uploads; no file size limit is enforced beyond that.'|i18n('design/standard/extract',, hash( '%free', $UploadDiskFree ))}</p>{/if}
             {if $HasFile|not}
             <div class="xe-field">
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
@@ -45,7 +46,18 @@
                     <li class="xe-filetype"><strong>{'Object XML'|i18n('design/standard/extract')}</strong> <small>{'content objects of a package'|i18n('design/standard/extract')}</small></li>
                 </ul>
                 <p class="xe-help">{'A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.'|i18n('design/standard/extract')} <a href={'xrowextract/package'|ezurl}>{'Package tab'|i18n('design/standard/extract')}</a></p>
-                <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
+                <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
+                    <input type="hidden" name="UploadID" value="" />
+                    <input type="hidden" name="UploadName" value="" />
+                    <div class="xe-progress"><div class="xe-progress-bar" style="width: 0%"></div></div>
+                    <p class="xe-upload-status" aria-live="polite"></p>
+                    <div class="xe-inline">
+                        <button class="button xe-upload-pause" type="button" hidden>{'Pause'|i18n('design/standard/extract')}</button>
+                        <button class="button xe-upload-resume" type="button" hidden>{'Resume'|i18n('design/standard/extract')}</button>
+                        <button class="button xe-upload-cancel" type="button" hidden>{'Cancel'|i18n('design/standard/extract')}</button>
+                    </div>
+                </div>
                 <input class="defaultbutton" type="submit" name="Upload" value="{'Upload'|i18n('design/standard/extract')}" />
             </div>
 
@@ -74,7 +86,7 @@
             <div class="xe-node">
                 <span class="xe-node-text">
                     <span class="xe-node-name">{$UploadedName|wash}</span>
-                    <span class="xe-node-meta">{$FileRowCount} {'rows'|i18n('design/standard/extract')} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
+                    <span class="xe-node-meta">{if $UploadedSize} {$UploadedSize} · {/if}{if $FileRowCountKnown}{$FileRowCount} {'rows'|i18n('design/standard/extract')}{else}{'many rows (counted once queued)'|i18n('design/standard/extract')}{/if} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
                 </span>
                 <input class="button" type="submit" name="RemoveFile" value="{'Remove'|i18n('design/standard/extract')}" />
             </div>
@@ -410,3 +422,4 @@
 </div>
 </form>
 <script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>
+<script src={concat( 'javascript/xrowextract-upload.js'|ezdesign( 'no' ), '?v=', $UploadScriptVersion )|wash}></script>

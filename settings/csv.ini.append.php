@@ -172,4 +172,26 @@ HandlerClass=XroweZObjectRelationHandler
 HandlerFile=extension/xrowextract/classes/parsers/xrowxrowmetadatahandler.php
 HandlerClass=XrowxrowmetadataHandler
 
+[Uploads]
+# There is no fixed file size limit for an import: a large file uploads in
+# chunks (XrowExtractUpload) and is streamed while it is read, independent
+# of PHP's own upload_max_filesize/post_max_size. These settings are the
+# only real limits that remain.
+#
+# Hours an unfinished (or finished but never adopted) chunked upload is kept
+# before it is cleaned up.
+RetentionHours=24
+# Free disk space that must remain, beyond the incoming file itself, for an
+# upload to be accepted at all.
+MinFreeMarginMB=256
+# Above this many rows, or this many MB, both the dry run and the apply run
+# as a background job (xrowextract/jobs) instead of in the web request that
+# started them.
+QueueThresholdRows=2000
+QueueThresholdMB=20
+# A JSON import file above this size is still read in one go (json_decode()
+# has no streaming API); XML and CSV files never have this limitation, at
+# any size.
+JsonOneShotThresholdMB=20
+
 */ ?>
