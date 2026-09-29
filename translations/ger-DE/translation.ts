@@ -1445,6 +1445,106 @@
         <source>Special Attributes</source>
         <translation>Spezielle Attribute</translation>
     </message>
+    <message>
+        <source>Run in the background</source>
+        <translation>Im Hintergrund ausführen</translation>
+    </message>
+    <message>
+        <source>Start this export as a job and come back to it: see the Jobs tab</source>
+        <translation>Diesen Export als Job starten und später weiterverfolgen: siehe Reiter „Jobs“</translation>
+    </message>
+    <message>
+        <source>Job started. It runs in the background; this page updates on its own while it does.</source>
+        <translation>Job gestartet. Er läuft im Hintergrund; diese Seite aktualisiert sich währenddessen von selbst.</translation>
+    </message>
+    <message>
+        <source>All jobs</source>
+        <translation>Alle Jobs</translation>
+    </message>
+    <message>
+        <source>Your jobs</source>
+        <translation>Ihre Jobs</translation>
+    </message>
+    <message>
+        <source>Exports started with "Run in the background", kept for %days days after they finish.</source>
+        <translation>Exporte, gestartet mit „Im Hintergrund ausführen“, %days Tage nach Abschluss aufbewahrt.</translation>
+    </message>
+    <message>
+        <source>jobs</source>
+        <translation>Jobs</translation>
+    </message>
+    <message>
+        <source>No jobs yet. Start one from the "Run in the background" button on the class or site archive page.</source>
+        <translation>Noch keine Jobs. Über die Schaltfläche „Im Hintergrund ausführen“ auf der Klassen- oder Archivseite starten.</translation>
+    </message>
+    <message>
+        <source>queued</source>
+        <translation>wartet</translation>
+    </message>
+    <message>
+        <source>running</source>
+        <translation>läuft</translation>
+    </message>
+    <message>
+        <source>done</source>
+        <translation>fertig</translation>
+    </message>
+    <message>
+        <source>failed</source>
+        <translation>fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>Starting …</source>
+        <translation>Wird gestartet …</translation>
+    </message>
+    <message>
+        <source>started</source>
+        <translation>gestartet</translation>
+    </message>
+    <message>
+        <source>ended</source>
+        <translation>beendet</translation>
+    </message>
+    <message>
+        <source>Delete this job and its file?</source>
+        <translation>Diesen Job und seine Datei löschen?</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <source>Jobs</source>
+        <translation>Jobs</translation>
+    </message>
+    <message>
+        <source>Background exports: started, running and finished</source>
+        <translation>Hintergrund-Exporte: gestartet, laufend und abgeschlossen</translation>
+    </message>
+    <message>
+        <source>A pre filled selection cannot run in the background; download it directly.</source>
+        <translation>Eine vorausgefüllte Auswahl kann nicht im Hintergrund laufen; bitte direkt herunterladen.</translation>
+    </message>
+    <message>
+        <source>Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
+        <translation>Hintergrund-Exporte sind auf diesem Server nicht verfügbar (keine PHP-Kommandozeile gefunden, oder exec() ist deaktiviert).</translation>
+    </message>
+    <message>
+        <source>Add at least one column first.</source>
+        <translation>Bitte zuerst mindestens eine Spalte hinzufügen.</translation>
+    </message>
+    <message>
+        <source>Choose at least one language first.</source>
+        <translation>Bitte zuerst mindestens eine Sprache wählen.</translation>
+    </message>
+    <message>
+        <source>Could not start the background process.</source>
+        <translation>Der Hintergrundprozess konnte nicht gestartet werden.</translation>
+    </message>
+    <message>
+        <source>whole site</source>
+        <translation>ganze Site</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

@@ -1439,6 +1439,110 @@
         <source>Click the download button</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Run in the background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start this export as a job and come back to it: see the Jobs tab</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Job started. It runs in the background; this page updates on its own while it does.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exports started with "Run in the background", kept for %days days after they finish.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No jobs yet. Start one from the "Run in the background" button on the class or site archive page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>queued</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>running</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Starting …</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ended</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete this job and its file?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Background exports: started, running and finished</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A pre filled selection cannot run in the background; download it directly.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add at least one column first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose at least one language first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not start the background process.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>whole site</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
