@@ -369,7 +369,9 @@ class XrowExtractJob
                                     $progress['end_at'] !== '' ? ' · expected end ' . $progress['end_at'] : '' );
                 continue;
             }
-            if ( trim( $line ) === '' && $lines && trim( end( $lines ) ) === '' )
+            // Blank lines: never two in a row, and none at all around the progress timeline (they are the
+            // gaps the bar's redraws leave, not paragraphs)
+            if ( trim( $line ) === '' && ( !$lines || trim( end( $lines ) ) === '' || $state['step'] >= 0 ) )
                 continue;
             $lines[] = rtrim( $line );
         }
