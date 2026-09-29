@@ -12,6 +12,37 @@
         </ul>
     </header>
 
+    {* What goes where: the class(es) the rows import into, where new objects are placed, in which language, matched how *}
+    <dl class="xe-import-target">
+        <div class="xe-import-target-class">
+            <dt>{if $ResultClasses|count|gt( 1 )}{'Classes'|i18n('design/standard/extract')}{else}{'Class'|i18n('design/standard/extract')}{/if}</dt>
+            <dd>
+                {foreach $ResultClasses as $rc}
+                <span class="xe-class-chip">
+                    <a href={concat( 'class/view/', $rc.id )|ezurl} target="_blank" rel="noopener"><strong>{$rc.name|wash}</strong></a>
+                    <code>{$rc.identifier|wash}</code>
+                    <small>{'%count rows'|i18n('design/standard/extract',, hash( '%count', $rc.rows ))}{if $ResultClasses|count|gt( 1 )} · {$rc.create} {'create'|i18n('design/standard/extract')}, {$rc.update} {'update'|i18n('design/standard/extract')}, {$rc.unchanged} {'unchanged'|i18n('design/standard/extract')}, {$rc.error} {'error'|i18n('design/standard/extract')}{/if}</small>
+                </span>
+                {foreachelse}
+                <span class="xe-muted">{'No row could be given a class: choose one above, or map a "class" column.'|i18n('design/standard/extract')}</span>
+                {/foreach}
+            </dd>
+        </div>
+        <div>
+            <dt>{'New objects go below'|i18n('design/standard/extract')}</dt>
+            <dd>{if $ParentNode}<a href={concat( 'content/view/full/', $ParentNode.node_id )|ezurl} target="_blank" rel="noopener">{$ParentNode.name|wash}</a>{else}<code>{$ParentNodeID|wash}</code>{/if}
+                <small>{'unless a row has its own parent column'|i18n('design/standard/extract')}</small></dd>
+        </div>
+        <div>
+            <dt>{'Language'|i18n('design/standard/extract')}</dt>
+            <dd>{$ResultLanguageName|wash} <code>{$Language|wash}</code></dd>
+        </div>
+        <div>
+            <dt>{'Existing objects matched by'|i18n('design/standard/extract')}</dt>
+            <dd>{cond( $MatchMode|eq( 'object_id' ), 'Object ID'|i18n('design/standard/extract'), $MatchMode|eq( 'none' ), 'nothing (always create)'|i18n('design/standard/extract'), 'Remote ID'|i18n('design/standard/extract') )}</dd>
+        </div>
+    </dl>
+
     {if $IsSample}
     <p class="xe-note">{if $Applied}{'This was a sample built from the site’s own content: real content was just written (see below).'|i18n('design/standard/extract')}{else}{'This is a sample built from the site’s own content, to try the importer. Applying it writes real content.'|i18n('design/standard/extract')}{/if}</p>
     {/if}
@@ -37,7 +68,19 @@
                                                                         $row.action|eq( 'error' ), 'error'|i18n('design/standard/extract'),
                                                                         'skip'|i18n('design/standard/extract') )}</span>
                     {if $row.action|eq( 'error' )}<p class="xe-help">{$row.reason|wash}</p>{/if}</td>
-                <td>{if $row.object_id}{if $row.node_id}<a href={concat( 'content/view/full/', $row.node_id )|ezurl} target="_blank" rel="noopener"><code>{$row.object_id}</code></a>{else}<code>{$row.object_id}</code>{/if}{else}—{/if}</td>
+                <td class="xe-result-object">
+                    {* The object by name: the matched object's current name, else the name the row gives a new one *}
+                    {def $rowName = $row.object_name}
+                    {if $rowName|eq( '' )}{foreach $row.changes as $change}{if $change.field|eq( 'name' )}{set $rowName = $change.new}{/if}{/foreach}{/if}
+                    {if $row.node_id}<a href={concat( 'content/view/full/', $row.node_id )|ezurl} target="_blank" rel="noopener"><strong>{if $rowName|ne( '' )}{$rowName|wash}{else}{'Object %id'|i18n('design/standard/extract',, hash( '%id', $row.object_id ))}{/if}</strong></a>
+                    {elseif $rowName|ne( '' )}<strong>{$rowName|wash}</strong>
+                    {else}—{/if}
+                    <small>
+                        {if $row.object_id}#{$row.object_id}{elseif $row.action|eq( 'create' )}{'new'|i18n('design/standard/extract')}{/if}
+                        {if $row.class_identifier} · <code>{$row.class_identifier|wash}</code>{/if}
+                    </small>
+                    {undef $rowName}
+                </td>
                 <td>
                     {if $row.changes|count}
                     <table class="xe-table" style="width: 100%">

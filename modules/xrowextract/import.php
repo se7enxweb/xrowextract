@@ -334,6 +334,22 @@ if ( $hasFile && $parsed['rows'] && ( $http->hasPostVariable( 'Preview' ) || $ht
         'parentNodeID' => $ParentNodeID,
         'apply'        => $apply,
     ) );
+    // Which classes the file's rows go into, with their counts per action (a "class" column can mix several)
+    $resultClasses = array();
+    foreach ( $result['rows'] as $row )
+    {
+        if ( empty( $row['class_id'] ) )
+            continue;
+        $id = (int)$row['class_id'];
+        if ( !isset( $resultClasses[$id] ) )
+            $resultClasses[$id] = array( 'id' => $id, 'identifier' => $row['class_identifier'], 'name' => $row['class_name'], 'rows' => 0,
+                                         'create' => 0, 'update' => 0, 'unchanged' => 0, 'error' => 0 );
+        $resultClasses[$id]['rows']++;
+        if ( isset( $resultClasses[$id][$row['action']] ) )
+            $resultClasses[$id][$row['action']]++;
+    }
+    $tpl->setVariable( 'ResultClasses', array_values( $resultClasses ) );
+    $tpl->setVariable( 'ResultLanguageName', isset( $ContentLanguages[$Language]['name'] ) ? $ContentLanguages[$Language]['name'] : (string)$Language );
     $tpl->setVariable( 'Result', $result );
     $tpl->setVariable( 'Preview', !$apply );
     $tpl->setVariable( 'Applied', $apply );

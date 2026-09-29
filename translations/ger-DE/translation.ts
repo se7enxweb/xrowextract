@@ -2,6 +2,38 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%count rows</source>
+        <translation>%count Zeilen</translation>
+    </message>
+    <message>
+        <source>No row could be given a class: choose one above, or map a &quot;class&quot; column.</source>
+        <translation>Keiner Zeile konnte eine Klasse zugeordnet werden: oben eine wählen oder eine Spalte &quot;class&quot; zuordnen.</translation>
+    </message>
+    <message>
+        <source>New objects go below</source>
+        <translation>Neue Objekte kommen unter</translation>
+    </message>
+    <message>
+        <source>unless a row has its own parent column</source>
+        <translation>sofern eine Zeile keine eigene Elternspalte hat</translation>
+    </message>
+    <message>
+        <source>Existing objects matched by</source>
+        <translation>Vorhandene Objekte erkannt über</translation>
+    </message>
+    <message>
+        <source>nothing (always create)</source>
+        <translation>nichts (immer neu anlegen)</translation>
+    </message>
+    <message>
+        <source>Object %id</source>
+        <translation>Objekt %id</translation>
+    </message>
+    <message>
+        <source>new</source>
+        <translation>neu</translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation>Aufträge gesamt</translation>
     </message>

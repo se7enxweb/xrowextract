@@ -4,6 +4,38 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%count rows</source>
+        <translation>%count rows</translation>
+    </message>
+    <message>
+        <source>No row could be given a class: choose one above, or map a &quot;class&quot; column.</source>
+        <translation>No row could be given a class: choose one above, or map a &quot;class&quot; column.</translation>
+    </message>
+    <message>
+        <source>New objects go below</source>
+        <translation>New objects go below</translation>
+    </message>
+    <message>
+        <source>unless a row has its own parent column</source>
+        <translation>unless a row has its own parent column</translation>
+    </message>
+    <message>
+        <source>Existing objects matched by</source>
+        <translation>Existing objects matched by</translation>
+    </message>
+    <message>
+        <source>nothing (always create)</source>
+        <translation>nothing (always create)</translation>
+    </message>
+    <message>
+        <source>Object %id</source>
+        <translation>Object %id</translation>
+    </message>
+    <message>
+        <source>new</source>
+        <translation>new</translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation>Total jobs</translation>
     </message>

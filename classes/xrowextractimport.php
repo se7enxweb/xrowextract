@@ -797,6 +797,10 @@ class XrowExtractImport
                 $counts['error']++;
                 continue;
             }
+            // The result panel names the class of every row (a "class" column can mix several)
+            $rowResult['class_id'] = $classID;
+            $rowResult['class_identifier'] = $info['identifier'];
+            $rowResult['class_name'] = isset( $info['name'] ) ? $info['name'] : $info['identifier'];
 
             // Identity, language and placement columns
             $remoteID = $objectID = $language = $parentRemoteID = $parentNodeID = $published = $modified = $sectionID = '';
@@ -957,6 +961,10 @@ class XrowExtractImport
             }
 
             $rowResult['object_id'] = $isUpdate ? (int)$match->attribute( 'id' ) : null;
+            // The matched object's current name and node, so the preview links it by name
+            $rowResult['object_name'] = $isUpdate ? (string)$match->attribute( 'name' ) : '';
+            if ( $isUpdate && (int)$match->attribute( 'main_node_id' ) )
+                $rowResult['node_id'] = (int)$match->attribute( 'main_node_id' );
             $rowResult['changes'] = $changes;
 
             if ( $isUpdate && !$changes )
@@ -1343,7 +1351,7 @@ class XrowExtractImport
             }
             $attributes[$identifier] = array( 'datatype' => $datatype, 'options' => $options );
         }
-        return array( 'identifier' => $class->attribute( 'identifier' ), 'attributes' => $attributes );
+        return array( 'identifier' => $class->attribute( 'identifier' ), 'name' => $class->attribute( 'name' ), 'attributes' => $attributes );
     }
 
     public static function columnIsImportable( $datatype, $format )

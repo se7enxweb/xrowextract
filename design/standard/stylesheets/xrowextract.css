@@ -522,6 +522,18 @@
 .xe-progress { flex: 1 1 auto; height: .5em; border-radius: 999px; background: var(--xe-head); overflow: hidden; }
 .xe-progress-bar { height: 100%; background: var(--xe-accent); border-radius: 999px; transition: width .3s ease; }
 .xe-job-progress-text { flex: 0 0 auto; color: var(--xe-muted); font-size: .85em; white-space: nowrap; }
+/* Import preview: which class, where, which language, matched how */
+.xe-import-target { display: grid; grid-template-columns: repeat(auto-fit, minmax(13em, 1fr)); gap: .6em; margin: .8em 0; }
+.xe-import-target > div { min-width: 0; margin: 0; padding: .55em .8em; border: 1px solid var(--xe-line); border-radius: 6px; background: var(--xe-head); }
+.xe-import-target-class { grid-column: 1 / -1; border-left: 4px solid var(--xe-accent) !important; background: #eff6ff !important; }
+.xe-import-target dt { margin: 0 0 .15em; color: var(--xe-muted); font-size: .78em; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; }
+.xe-import-target dd { margin: 0; overflow-wrap: anywhere; }
+.xe-import-target dd small { display: block; color: var(--xe-muted); }
+.xe-class-chip { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: .1em .5em; margin: 0 1em .2em 0; font-size: 1.1em; }
+.xe-class-chip small { display: inline !important; font-size: .8em; }
+.xe-result-object strong { display: block; }
+.xe-result-object small { color: var(--xe-muted); }
+
 /* Jobs by state: Total, Completed, Running, Queued, Failed */
 .xe-job-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5em, 1fr)); gap: .6em; margin: 0 0 1em; }
 .xe-stat { margin: 0; padding: .6em .8em; border: 1px solid var(--xe-line); border-left-width: 4px; border-radius: 6px; background: #fff; }
