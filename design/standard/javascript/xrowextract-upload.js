@@ -162,6 +162,15 @@
         state.parts.widget.classList.add('xe-upload-done');
         state.parts.uploadIdInput.value = state.uploadId;
         state.parts.nameInput.value = state.file.name;
+        // The real <input type="file"> still holds the original selection: clearing it here is
+        // essential, not cosmetic. The click() below fires a genuine form submit, and a browser
+        // submits whatever a file input currently holds regardless of how it got there - if this
+        // were left alone, the "small" adopt-by-UploadID request would silently balloon back into
+        // a multipart body carrying the entire original file, defeating the chunking above and
+        // exceeding post_max_size exactly as an unchunked upload would (PHP then drops the whole
+        // $_POST body, including UploadID, with no error - the adopt request just goes nowhere).
+        var fileInput = state.form.querySelector('input[name=ImportFile]');
+        if (fileInput) fileInput.value = '';
         var submit = submitButtonFor(state.form);
         if (submit) {
             submit.disabled = false;

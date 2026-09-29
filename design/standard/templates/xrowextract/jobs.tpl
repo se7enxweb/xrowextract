@@ -44,7 +44,7 @@
                 {foreach $jobs as $job}
                 <li id="job-{$job.id|wash}" class="xe-job xe-job-{$job.state}" data-job-id="{$job.id|wash}" data-state="{$job.state|wash}"{if $job.active} data-poll="1"{/if}>
                     <div class="xe-job-main">
-                        <span class="xe-job-type" title="{if $job.type|eq( 'archive' )}{'Site archive'|i18n('design/standard/extract')|wash}{else}{'One class'|i18n('design/standard/extract')|wash}{/if}">{if $job.type|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
+                        <span class="xe-job-type" title="{if $job.type|eq( 'archive' )}{'Site archive'|i18n('design/standard/extract')|wash}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')|wash}{else}{'One class'|i18n('design/standard/extract')|wash}{/if}">{if $job.type|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
                         <span class="xe-colinfo">
                             <strong>{$job.what|wash}</strong>
                             <small><code>{$job.format|wash}</code></small>
@@ -94,10 +94,28 @@
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
+                    {if $job.type|eq( 'import' )|and( $job.counts )}
+                    <ul class="xe-stats xe-job-counts">
+                        <li class="xe-badge xe-badge-create"><strong>{$job.counts.create}</strong> {'create'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-update"><strong>{$job.counts.update}</strong> {'update'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-unchanged"><strong>{$job.counts.unchanged}</strong> {'unchanged'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-error"><strong>{$job.counts.error}</strong> {'error'|i18n('design/standard/extract')}</li>
+                    </ul>
+                    {/if}
 
                     <div class="xe-job-buttons">
                         {if $job.state|eq( 'done' )}
-                        <a class="button" data-role="download" href={concat( 'xrowextract/job_download/', $job.id )|ezurl}>{'Download'|i18n('design/standard/extract')}</a>
+                        <a class="button" data-role="download" href={concat( 'xrowextract/job_download/', $job.id )|ezurl}>{if $job.type|eq( 'import' )}{'Download report'|i18n('design/standard/extract')}{else}{'Download'|i18n('design/standard/extract')}{/if}</a>
+                        {if $job.has_errors_file}
+                        <a class="button" href={concat( 'xrowextract/job_download/', $job.id, '/errors' )|ezurl}>{'Download error rows'|i18n('design/standard/extract')}</a>
+                        {/if}
+                        {/if}
+                        {if $job.type|eq( 'import' )|and( or( $job.state|eq( 'failed' ), $job.counts.error|gt( 0 ) ) )}
+                        <form method="post" action={'xrowextract/import'|ezurl} class="xe-job-resume-form xe-inline">
+                            <input type="hidden" name="ResumeJobID" value="{$job.id|wash}" />
+                            <label>{'Resume from row'|i18n('design/standard/extract')} <input type="number" name="ResumeFromRow" min="1" value="1" class="xe-resume-row" /></label>
+                            <button type="submit" class="button">{'Resume as a new job'|i18n('design/standard/extract')}</button>
+                        </form>
                         {/if}
                         {if or( $job.mine, $all_jobs )}
                         <form method="post" action={'xrowextract/jobs'|ezurl} class="xe-job-delete-form">
