@@ -34,17 +34,18 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[list][inspect:][install:][export][template][parent:][dry-run][site-access:][object-mode:][class-mode:]' .
-    '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][user:][output:][progress-file:]',
+    '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:]' .
+    '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]',
     '',
     array(
         'list'         => 'List the packages in the repository that carry a content class or content object',
         'inspect'      => 'Package name: show what it carries and what installing it would do (nothing is written)',
         'install'      => 'Package name: install it (through the same eZPackage::install() the web view uses)',
-        'export'       => 'Export a node/subtree (or several, --nodes) of live content as a new package (--node, optionally --subtree/--class)',
-        'template'     => 'Build a sample content+class package for --class (--variant class/content/both, default both)',
+        'export'       => 'Export a node/subtree (or several, --nodes) of live content as a new package (--node, optionally --subtree/--class); registered in the repository only with --keep',
+        'template'     => 'Build a sample content+class package for --class (--variant class/content/both, default both); registered in the repository only with --keep',
+        'clean'        => 'Remove this extension\'s own leftover sample/export/template packages (xrowextract_sample_/xrowextract_export_/xrowextract_template_); lists them first, never touches any other package',
+        'dry-run'      => '--install: inspect only, do not write anything. --clean: list what would be removed, remove nothing',
         'parent'       => '--install: the parent node id for the package\'s own top-level objects',
-        'dry-run'      => '--install: inspect only, do not write anything',
         'site-access'  => '--install: site access to map templates/overrides to (default: SiteSettings.DefaultAccess)',
         'object-mode'  => '--install: skip, update (default) or new, for an object that already exists (matched by remote id)',
         'class-mode'   => '--install: skip (default), replace or new, for a class that already exists (matched by remote id/identifier)',
@@ -57,6 +58,7 @@ $options = $script->getOptions(
         'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages)',
         'name'         => '--export: package name (default: a name derived from the node)',
         'file'         => '--export/--template: file to write the .ezpkg to (default: --output, set by a background job)',
+        'keep'         => '--export/--template: also register the package in the repository (default: write the .ezpkg file only, remove it from the repository again)',
         'user'         => 'Run with the access rights of this login (default: admin)',
         'output'       => '--inspect/--install/--export: also write a JSON report (inspect/install) or the archive itself (export) here (for a background job; see bin/php/job.php)',
         'progress-file' => '--install/--export: write {"done":n,"total":m,"phase":"..."} to this path after each phase (for a background job)',
@@ -86,6 +88,32 @@ if ( $options['list'] )
         $cli->output( sprintf( '  %-40s %-8s %-6s classes=%-3d objects=%-3d %s', $row['name'], $row['version'] ?: '-', $row['is_installed'] ? 'installed' : '-',
                                $row['class_count'], $row['object_item_count'], $row['summary'] ) );
     }
+    $script->shutdown( 0 );
+}
+
+if ( $options['clean'] )
+{
+    // Every package this extension's own code ever builds and might, through a bug or a killed
+    // request, leave registered when it should not be - a "Try a sample" that skipped its own
+    // cleanup, an --export or --template run without --keep from before that default existed, and
+    // so on. Lists first, always; --dry-run removes nothing. Never touches a package this
+    // extension did not build (findLeftoverPackages() only matches its own name prefixes).
+    $leftovers = XrowExtractPackage::findLeftoverPackages();
+    if ( !$leftovers )
+    {
+        $cli->output( 'PASS nothing to clean: no ' . implode( '/', XrowExtractPackage::leftoverPackagePrefixes() ) . ' package in the repository.' );
+        $script->shutdown( 0 );
+    }
+    foreach ( $leftovers as $package )
+        $cli->output( '  ' . $package->attribute( 'name' ) . ( $package->attribute( 'is_installed' ) ? ' (installed)' : '' ) );
+    if ( $options['dry-run'] )
+    {
+        $cli->output( 'PASS ' . count( $leftovers ) . ' package(s) listed above would be removed (--dry-run: nothing removed).' );
+        $script->shutdown( 0 );
+    }
+    foreach ( $leftovers as $package )
+        $package->remove();
+    $cli->output( 'PASS removed ' . count( $leftovers ) . ' package(s).' );
     $script->shutdown( 0 );
 }
 
@@ -280,9 +308,22 @@ if ( $options['export'] )
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 3, 'archiving' );
     $exportPath = $package->exportToArchive( $exportFile );
-    if ( $options['progress-file'] )
-        XrowExtractJob::writeProgress( (string)$options['progress-file'], 3, 3, 'done' );
-    $cli->output( "PASS wrote $exportPath (package '{$package->attribute( 'name' )}')" );
+    // Registered in the repository only with --keep - "Export as package" (One class/Site archive,
+    // and this command run plainly) writes the .ezpkg file, nothing more, by default; the web views
+    // never pass --keep, so every export they queue leaves the repository exactly as it was.
+    if ( $options['keep'] )
+    {
+        if ( $options['progress-file'] )
+            XrowExtractJob::writeProgress( (string)$options['progress-file'], 3, 3, 'done' );
+        $cli->output( "PASS wrote $exportPath (package '{$package->attribute( 'name' )}', kept in the repository)" );
+    }
+    else
+    {
+        $package->remove();
+        if ( $options['progress-file'] )
+            XrowExtractJob::writeProgress( (string)$options['progress-file'], 3, 3, 'done' );
+        $cli->output( "PASS wrote $exportPath (not registered in the repository; --keep to do that)" );
+    }
     $script->shutdown( 0 );
 }
 
@@ -316,4 +357,4 @@ if ( $options['template'] )
     $script->shutdown( 0 );
 }
 
-$fail( 'Nothing to do: pass one of --list, --inspect, --install, --export, --template (see --help).' );
+$fail( 'Nothing to do: pass one of --list, --inspect, --install, --export, --template, --clean (see --help).' );

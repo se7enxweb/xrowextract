@@ -967,14 +967,18 @@ class XrowExtractPackage
      * (class missing). A class with no content yet gets the class definition
      * only, noted in the result.
      *
-     * The package is named with the SAMPLE_PACKAGE_PREFIX and left out of
-     * the ordinary "keep forever" repository convention: cleanupOldSamplePackages()
-     * removes it again after SAMPLE_PACKAGE_MAX_AGE unless keepSamplePackage()
-     * was called for it first ("Keep in the repository" on the page).
+     * The package never lands in the repository at all: it is built there
+     * only because eZContentClassPackageHandler/eZContentObjectPackageHandler
+     * need a real eZPackage to work with, then exported to a private .ezpkg
+     * file (exportToPrivateFile()) and removed again from the repository
+     * before this method returns - "Try a sample" leaves nothing registered
+     * unless keepSamplePackage() is called for it later (import.php imports
+     * the returned file transiently, one request at a time, and removes it
+     * again after each - see XrowExtractPackage::withTransientImport()).
      */
     public static function buildSamplePackage( $classID )
     {
-        $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'object_count' => 0, 'outcomes' => array(), 'note' => '' );
+        $result = array( 'ok' => false, 'errors' => array(), 'file' => null, 'object_count' => 0, 'outcomes' => array(), 'note' => '' );
         $class = ctype_digit( (string)$classID ) ? eZContentClass::fetch( (int)$classID ) : eZContentClass::fetchByIdentifier( $classID );
         if ( !$class instanceof eZContentClass )
         {
@@ -992,7 +996,7 @@ class XrowExtractPackage
             'summary' => "Sample content package for '$classIdentifier', built read-only from this site's own content.",
             'vendor'  => 'xrowextract',
         ) );
-        self::attachAboutDocument( $package, "Try-a-sample package for class '$classIdentifier'. Built read-only from this site's own content by xrowextract/import; not a file anyone uploaded. Safe to remove." );
+        self::attachAboutDocument( $package, "Try-a-sample package for class '$classIdentifier'. Built read-only from this site's own content by xrowextract/import; exists in the repository only for the moment it takes to write the .ezpkg file." );
 
         if ( !$objects )
         {
@@ -1008,10 +1012,61 @@ class XrowExtractPackage
         $package->setAttribute( 'is_active', true );
         $package->store();
 
+        $file = self::exportToPrivateFile( $package, 'sample_' . $classIdentifier );
+        $package->remove();
+
+        if ( $file === false )
+        {
+            $result['errors'][] = 'Could not write the sample package to a temporary file.';
+            return $result;
+        }
         $result['ok'] = true;
-        $result['package'] = $package;
+        $result['file'] = $file;
         $result['object_count'] = count( $objects );
         return $result;
+    }
+
+    /** Exports $package to a randomly-named .ezpkg inside XrowExtractImport::uploadDir() (the same private, 0700 folder a row sample/upload uses), never a public path. Returns the file path, or false on failure. */
+    public static function exportToPrivateFile( eZPackage $package, $baseName )
+    {
+        $dir = XrowExtractImport::uploadDir();
+        $safeBase = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $baseName );
+        $name = 'pkg_' . $safeBase . '_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
+        $target = $dir . '/' . $name;
+        $written = $package->exportToArchive( $target );
+        if ( !$written || !is_file( $target ) )
+            return false;
+        @chmod( $target, 0600 );
+        return $target;
+    }
+
+    /**
+     * Imports $ezpkgPath into the repository just long enough to run $callback( eZPackage $package )
+     * against it, then removes it again - "a package must never land in the
+     * repository unless the user keeps it" applied uniformly, for every
+     * request a sample's dry run/install touches (Preview, Apply, or simply
+     * the meta line on first load), not only at Remove/sweep time.
+     * $callback's return value is passed straight through. If $callback
+     * throws, the transient package is still removed before the exception
+     * continues up (a request that errors out must not leak one either).
+     */
+    public static function withTransientImport( $ezpkgPath, callable $callback )
+    {
+        $imported = self::importUploadedArchive( $ezpkgPath );
+        if ( !$imported['ok'] || !( $imported['package'] instanceof eZPackage ) )
+            return $callback( null, $imported['error'] );
+        try
+        {
+            return $callback( $imported['package'], null );
+        }
+        finally
+        {
+            // A fresh instance, not $imported['package']: install()/setInstalled() etc. inside the
+            // callback may have mutated attributes that make the original reference stale.
+            $stillThere = eZPackage::fetch( $imported['package']->attribute( 'name' ) );
+            if ( $stillThere instanceof eZPackage )
+                $stillThere->remove();
+        }
     }
 
     /**
@@ -1179,6 +1234,32 @@ class XrowExtractPackage
             $removed++;
         }
         return $removed;
+    }
+
+    /** The name prefixes ext:xrowextract:package --clean and cleanupOldSamplePackages() both look for - every package this extension itself builds and might leave behind, never another extension's. */
+    public static function leftoverPackagePrefixes()
+    {
+        return array( self::SAMPLE_PACKAGE_PREFIX, 'xrowextract_export_', 'xrowextract_template_' );
+    }
+
+    /** Every repository package whose name starts with one of leftoverPackagePrefixes() - what ext:xrowextract:package --clean lists and, without --dry-run, removes. Never matches a package this extension did not build (sevenx_*, and so on). */
+    public static function findLeftoverPackages()
+    {
+        $prefixes = self::leftoverPackagePrefixes();
+        $matches = array();
+        foreach ( eZPackage::fetchPackages() as $package )
+        {
+            $name = $package->attribute( 'name' );
+            foreach ( $prefixes as $prefix )
+            {
+                if ( strpos( $name, $prefix ) === 0 )
+                {
+                    $matches[] = $package;
+                    break;
+                }
+            }
+        }
+        return $matches;
     }
 
     /**
