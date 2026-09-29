@@ -66,7 +66,7 @@
                     {if $item.node}
                     <span class="xe-node-icon">{$item.node.class_identifier|class_icon( 'small', $item.node.class_name )}</span>
                     <span class="xe-colinfo">
-                        <strong><a href={$item.node.url_alias|ezurl}>{$item.node.name|wash}</a></strong>
+                        <strong><a href={cond( $item.node.url_alias|ne( '' ), $item.node.url_alias, concat( 'content/view/full/', $item.node.node_id ) )|ezurl}>{$item.node.name|wash}</a></strong>
                         <small>{$item.node.class_name|wash} · {'Node %id'|i18n('design/standard/extract',, hash( '%id', $item.node_id ))}{if $item.node.path_identification_string} · <code>{$item.node.path_identification_string|wash}</code>{/if}</small>
                     </span>
                     <span class="xe-node-count">

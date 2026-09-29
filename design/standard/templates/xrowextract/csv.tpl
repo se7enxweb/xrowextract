@@ -53,7 +53,7 @@
                     {if $subtree_node}
                     <span class="xe-node-icon">{$subtree_node.class_identifier|class_icon( 'small', $subtree_node.class_name )}</span>
                     <span class="xe-node-text">
-                        <a href={$subtree_node.url_alias|ezurl} class="xe-node-name">{$subtree_node.name|wash}</a>
+                        <a href={cond( $subtree_node.url_alias|ne( '' ), $subtree_node.url_alias, concat( 'content/view/full/', $subtree_node.node_id ) )|ezurl} class="xe-node-name">{$subtree_node.name|wash}</a>
                         <span class="xe-node-path">{$subtree_node.path_identification_string|wash}</span>
                         <span class="xe-node-meta">{$subtree_node.class_name|wash} · {'Node %id'|i18n('design/standard/extract',, hash( '%id', $subtree_node.node_id ))} · {'%count sub items'|i18n('design/standard/extract',, hash( '%count', $subtree_node.children_count ))}</span>
                     </span>
