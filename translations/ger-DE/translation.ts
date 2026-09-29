@@ -2,6 +2,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Reset to defaults</source>
+        <translation>Auf Standard zurücksetzen</translation>
+    </message>
+    <message>
+        <source>Start again from the default node, the class with the most objects and its attributes</source>
+        <translation>Neu beginnen mit dem Standardknoten, der Klasse mit den meisten Objekten und ihren Attributen</translation>
+    </message>
+    <message>
         <source>File type</source>
         <translation>Dateityp</translation>
     </message>

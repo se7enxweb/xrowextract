@@ -309,6 +309,7 @@
             {if $Scope|eq( 'all' )}· <span class="xe-actionbar-node">{'Whole site'|i18n('design/standard/extract')}</span>{elseif $subtree_node}· <span class="xe-actionbar-node">{$subtree_node.name|wash}</span>{/if}
         </div>
         <div class="xe-actionbar-buttons">
+            <input class="button" name="ResetView" type="submit" value="{'Reset to defaults'|i18n('design/standard/extract')}" title="{'Start again from the default node, the class with the most objects and its attributes'|i18n('design/standard/extract')|wash}" />
             <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
             <input class="defaultbutton" name="Download" type="submit" value="{'Download %type'|i18n('design/standard/extract',, hash( '%type', $OutputFormat|upcase ))}" />
         </div>

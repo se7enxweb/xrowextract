@@ -110,8 +110,20 @@ if ( $hasPreFilledData and $http->hasPostVariable( 'RemoveData' ) )
 
 }
 $sessionConfig = $http->sessionVariable( 'eZExtractConfig' );
-if ( !is_array( $sessionConfig ) )
+if ( !is_array( $sessionConfig ) || $http->hasPostVariable( 'ResetView' ) )
     $sessionConfig = array();
+// Version 2: the node starts at the default siteaccess's root and the class with the most objects. A node,
+// class or scope saved before (for example the old default, the user placement) is dropped once.
+if ( !isset( $sessionConfig['Version'] ) || (int)$sessionConfig['Version'] < 2 )
+{
+    unset( $sessionConfig['Subtree'], $sessionConfig['Class_id'], $sessionConfig['Scope'] );
+    $sessionConfig['Version'] = 2;
+}
+if ( $http->hasPostVariable( 'ResetView' ) )
+{
+    $http->setSessionVariable( 'eZExtractConfig', $sessionConfig );
+    return $module->redirectTo( 'xrowextract/csv' );
+}
 
 // Set col & row separator: one character (\t is a tab), never a quote or a line break
 $Separator = $http->hasPostVariable( 'Separator' ) ? (string)$http->postVariable( 'Separator' ) : ',';

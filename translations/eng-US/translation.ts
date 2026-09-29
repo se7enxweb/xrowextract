@@ -4,6 +4,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Reset to defaults</source>
+        <translation>Reset to defaults</translation>
+    </message>
+    <message>
+        <source>Start again from the default node, the class with the most objects and its attributes</source>
+        <translation>Start again from the default node, the class with the most objects and its attributes</translation>
+    </message>
+    <message>
         <source>File type</source>
         <translation>File type</translation>
     </message>
