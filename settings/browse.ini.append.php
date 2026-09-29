@@ -15,4 +15,10 @@ StartNode=content
 SelectionType=multiple
 ReturnType=NodeID
 
+# The parent for new objects of the import (xrowextract/import)
+[ImportParentNode]
+StartNode=content
+SelectionType=single
+ReturnType=NodeID
+
 */ ?>
