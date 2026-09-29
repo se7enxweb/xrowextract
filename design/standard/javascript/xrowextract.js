@@ -345,3 +345,171 @@
     markPreset();
     renderSample();
 }());
+
+/*
+ * The column list: remove one or all, move with the arrows (or Alt+Up/Down), drag to reorder.
+ * Done in place; the buttons also work without JavaScript. The form posts the list in its
+ * order with every action, so nothing is lost.
+ */
+(function () {
+    'use strict';
+
+    var form = document.forms.eZExtract;
+    var list = form && form.querySelector('.xe-columns');
+    if (!list) {
+        return;
+    }
+    var empty = form.querySelector('.xe-columns-empty');
+    var removeAll = form.querySelector('.xe-remove-all');
+
+    function items() {
+        return Array.prototype.slice.call(list.querySelectorAll('.xe-column'));
+    }
+
+    // Names and positions follow the order on screen: Attributes[<position>][...], Action[<position>]
+    function renumber() {
+        var rows = items();
+        rows.forEach(function (row, index) {
+            row.querySelectorAll('input[name^="Attributes["]').forEach(function (input) {
+                input.name = input.name.replace(/^Attributes\[\d+\]/, 'Attributes[' + index + ']');
+            });
+            row.querySelectorAll('button[name]').forEach(function (button) {
+                button.name = button.name.replace(/\[\d+\]$/, '[' + index + ']');
+            });
+            row.querySelector('.xe-colpos').textContent = index + 1;
+            row.querySelector('.xe-up').disabled = index === 0;
+            row.querySelector('.xe-down').disabled = index === rows.length - 1;
+        });
+        form.querySelectorAll('.xe-column-total').forEach(function (n) { n.textContent = rows.length; });
+        var badge = form.querySelector('[aria-labelledby="xe-card-columns"] .xe-count strong');
+        if (badge) {
+            badge.textContent = rows.length;
+        }
+        if (empty) {
+            empty.hidden = rows.length > 0;
+        }
+        if (removeAll) {
+            removeAll.disabled = rows.length === 0;
+        }
+    }
+
+    function flash(row) {
+        row.classList.remove('xe-flash');
+        void row.offsetWidth;
+        row.classList.add('xe-flash');
+    }
+
+    function move(row, step) {
+        var rows = items();
+        var index = rows.indexOf(row);
+        var target = rows[index + step];
+        if (!target) {
+            return;
+        }
+        list.insertBefore(row, step < 0 ? target : target.nextSibling);
+        renumber();
+        flash(row);
+    }
+
+    list.addEventListener('click', function (event) {
+        var button = event.target.closest('button');
+        if (!button) {
+            return;
+        }
+        event.preventDefault();
+        var row = button.closest('.xe-column');
+        if (button.classList.contains('xe-remove')) {
+            var next = row.nextElementSibling || row.previousElementSibling;
+            row.parentNode.removeChild(row);
+            renumber();
+            var focus = next && next.querySelector('.xe-remove');
+            if (focus) {
+                focus.focus();
+            }
+        } else if (button.classList.contains('xe-up')) {
+            move(row, -1);
+            button.disabled || button.focus();
+        } else if (button.classList.contains('xe-down')) {
+            move(row, 1);
+            button.disabled || button.focus();
+        }
+    });
+
+    list.addEventListener('keydown', function (event) {
+        if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+            var row = event.target.closest('.xe-column');
+            if (row) {
+                event.preventDefault();
+                move(row, event.key === 'ArrowUp' ? -1 : 1);
+                event.target.focus();
+            }
+        }
+    });
+
+    if (removeAll) {
+        removeAll.addEventListener('click', function (event) {
+            event.preventDefault();
+            items().forEach(function (row) { row.parentNode.removeChild(row); });
+            renumber();
+        });
+    }
+
+    // Drag and drop: the row follows the pointer; a line shows where it will land
+    var dragged = null;
+    // Only the handle starts a drag, so text in the name field can be selected as usual
+    list.addEventListener('pointerdown', function (event) {
+        var handle = event.target.closest('.xe-handle');
+        items().forEach(function (row) { row.draggable = false; });
+        if (handle) {
+            handle.closest('.xe-column').draggable = true;
+        }
+    });
+    list.addEventListener('dragstart', function (event) {
+        var row = event.target.closest && event.target.closest('.xe-column');
+        if (!row || event.target.closest('input')) {
+            event.preventDefault();
+            return;
+        }
+        dragged = row;
+        row.classList.add('xe-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', row.querySelector('.xe-colinfo strong').textContent);
+    });
+    function clearMarks() {
+        items().forEach(function (row) { row.classList.remove('xe-drop-before', 'xe-drop-after'); });
+    }
+    list.addEventListener('dragover', function (event) {
+        if (!dragged) {
+            return;
+        }
+        event.preventDefault();
+        var row = event.target.closest('.xe-column');
+        clearMarks();
+        if (row && row !== dragged) {
+            var box = row.getBoundingClientRect();
+            row.classList.add(event.clientY < box.top + box.height / 2 ? 'xe-drop-before' : 'xe-drop-after');
+        }
+    });
+    list.addEventListener('drop', function (event) {
+        if (!dragged) {
+            return;
+        }
+        event.preventDefault();
+        var row = event.target.closest('.xe-column');
+        if (row && row !== dragged) {
+            var box = row.getBoundingClientRect();
+            list.insertBefore(dragged, event.clientY < box.top + box.height / 2 ? row : row.nextSibling);
+        }
+        clearMarks();
+        renumber();
+        flash(dragged);
+    });
+    list.addEventListener('dragend', function () {
+        if (dragged) {
+            dragged.classList.remove('xe-dragging');
+            dragged.draggable = false;
+        }
+        dragged = null;
+        clearMarks();
+    });
+}());

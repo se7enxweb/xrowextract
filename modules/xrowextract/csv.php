@@ -349,15 +349,27 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
 }
 $Subtree = (int)$Subtree;
 
-// If we don't remove, add or download then or we load all attributes or we start empty
-if ( $http->hasPostVariable( 'Remove' ) || $http->hasPostVariable( 'AddAttribute' ) || $http->hasPostVariable( 'AddAllAttributes' )
-     || $http->hasPostVariable( 'Download' ) || $http->hasPostVariable( 'Preview' ) )
+// The posted column list is kept by every action on the same class (the form holds the columns of
+// AttributesClassID); a class change, or a first visit, starts from the saved or preselected list
+$columnActions = array( 'Remove', 'RemoveAttribute', 'RemoveAllAttributes', 'ResetAttributes', 'MoveAttributeUp', 'MoveAttributeDown',
+                        'AddAttribute', 'AddAllAttributes', 'Download', 'Preview', 'BrowseSubtree', 'Update' );
+$keepPosted = false;
+foreach ( $columnActions as $action )
+{
+    $keepPosted = $keepPosted || $http->hasPostVariable( $action );
+}
+if ( $keepPosted && $http->hasPostVariable( 'AttributesClassID' ) && (int)$http->postVariable( 'AttributesClassID' ) !== $Class_id )
+    $keepPosted = false;
+if ( $keepPosted && !$http->hasPostVariable( 'AttributesClassID' ) && $http->hasPostVariable( 'Update' ) )
+    $keepPosted = false;
+if ( $keepPosted )
 {
     $Attributes = $http->hasPostVariable( 'Attributes' ) ? $http->postVariable( 'Attributes' ) : array();
 }
 else
 {
-    if ( isset( $sessionConfig['Attributes'][$Class_id] ) && is_array( $sessionConfig['Attributes'][$Class_id] ) )
+    // An empty saved list means "start from the class", so a class always comes with its attributes
+    if ( isset( $sessionConfig['Attributes'][$Class_id] ) && is_array( $sessionConfig['Attributes'][$Class_id] ) && count( $sessionConfig['Attributes'][$Class_id] ) > 0 )
     {
         $Attributes = $sessionConfig['Attributes'][$Class_id];
     }
@@ -405,8 +417,14 @@ if ( $http->hasPostVariable( 'AddAttribute' ) )
     }
 }
 
+// Remove all columns, or start again from every class attribute
+if ( $http->hasPostVariable( 'RemoveAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) )
+{
+    $Attributes = array();
+}
+
 // Add every class attribute that is not a column yet, in class order
-if ( $http->hasPostVariable( 'AddAllAttributes' ) )
+if ( $http->hasPostVariable( 'AddAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) )
 {
     $present = array();
     foreach ( (array)$Attributes as $item )
@@ -423,6 +441,32 @@ if ( $http->hasPostVariable( 'AddAllAttributes' ) )
                 'name' => $classattribute->attribute( 'name' ) ,
                 'exportname' => $classattribute->attribute( 'identifier' )
             );
+        }
+    }
+}
+
+// One column: remove it, or move it one place (the buttons are named Action[<position>])
+$Attributes = array_values( (array)$Attributes );
+foreach ( array( 'RemoveAttribute', 'MoveAttributeUp', 'MoveAttributeDown' ) as $action )
+{
+    if ( !$http->hasPostVariable( $action ) || !is_array( $http->postVariable( $action ) ) )
+        continue;
+    $keys = array_keys( $http->postVariable( $action ) );
+    $index = (int)$keys[0];
+    if ( !isset( $Attributes[$index] ) )
+        continue;
+    if ( $action === 'RemoveAttribute' )
+    {
+        array_splice( $Attributes, $index, 1 );
+    }
+    else
+    {
+        $other = $action === 'MoveAttributeUp' ? $index - 1 : $index + 1;
+        if ( isset( $Attributes[$other] ) )
+        {
+            $moved = $Attributes[$index];
+            $Attributes[$index] = $Attributes[$other];
+            $Attributes[$other] = $moved;
         }
     }
 }
@@ -488,6 +532,29 @@ if ( $Limit && !$hasPreFilledData )
 $tpl->setVariable( 'export_rows', $exportRows );
 $tpl->setVariable( 'prefilled_count', count( $preFilledIDs ) );
 $tpl->setVariable( 'TabNotation', '\t' );
+
+// The classes to choose from, each with how many objects it has in this selection (node, depth,
+// main locations, the user's read access), so the list itself shows where the content is
+$exportClasses = array_filter( (array)$ini_bis->variable( 'ExportSettings', 'ExportClasses' ) );
+$ClassChoices = array();
+foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, true, false, array( 'name' => 'asc' ) ) as $class )
+{
+    if ( $exportClasses && !in_array( $class->attribute( 'id' ), $exportClasses ) && !in_array( $class->attribute( 'identifier' ), $exportClasses ) )
+        continue;
+    $count = null;
+    if ( !$hasPreFilledData )
+    {
+        $classCount = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array( $class->attribute( 'id' ) ),
+                                                          false, $depth, $depthOperator, true, false, (bool)$Mainnodeonly, false, false );
+        $count = isset( $classCount['result'] ) ? (int)$classCount['result'] : 0;
+    }
+    $ClassChoices[] = array( 'id' => (int)$class->attribute( 'id' ), 'name' => $class->attribute( 'name' ), 'count' => $count );
+}
+$tpl->setVariable( 'ClassChoices', $ClassChoices );
+
+// The script's URL carries a hash of its content: a changed script is a new URL, never a stale cached copy
+$scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
 $tpl->setVariable( 'ExportableDatatypes', (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) );
 
 // Download and preview build the file the same way; the preview reads it back as a spreadsheet would

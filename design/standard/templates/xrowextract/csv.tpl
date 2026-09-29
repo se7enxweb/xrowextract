@@ -4,11 +4,6 @@
 {def $types = array()
      $subtree_node = fetch( 'content', 'node', hash( 'node_id', $Subtree ) )
      $class_attributes = fetch( 'class', 'attribute_list', hash( 'class_id', $Class_id ) )}
-{if ezini( 'ExportSettings', 'ExportClasses', 'export.ini' )}
-    {def $classes = fetch( 'class', 'list', hash( 'class_filter', ezini( 'ExportSettings', 'ExportClasses', 'export.ini' ), 'sort_by', array( 'name', true() ) ) )}
-{else}
-    {def $classes = fetch( 'class', 'list', hash( 'sort_by', array( 'name', true() ) ) )}
-{/if}
 <div class="context-block xe-view">
 
     {* DESIGN: Header START *}<div class="box-header"><div class="box-tc"><div class="box-ml"><div class="box-mr"><div class="box-tl"><div class="box-tr">
@@ -66,13 +61,26 @@
                     <label class="xe-label" for="xe-class">{'Class'|i18n('design/standard/extract')}</label>
                     <div class="xe-inline">
                         <select name="Class_id" id="xe-class" class="xe-autosubmit"{if $has_prefilledata} disabled{/if}>
-                            {foreach $classes as $class}
+                            {if $has_prefilledata}
+                            {foreach $ClassChoices as $class}
                             <option value="{$class.id}"{if $class.id|eq( $Class_id )} selected{/if}>{$class.name|wash}</option>
                             {/foreach}
+                            {else}
+                            <optgroup label="{'In this selection'|i18n('design/standard/extract')|wash}">
+                            {foreach $ClassChoices as $class}{if $class.count|gt( 0 )}
+                            <option value="{$class.id}"{if $class.id|eq( $Class_id )} selected{/if}>{$class.name|wash} ({$class.count})</option>
+                            {/if}{/foreach}
+                            </optgroup>
+                            <optgroup label="{'Not in this selection'|i18n('design/standard/extract')|wash}">
+                            {foreach $ClassChoices as $class}{if $class.count|gt( 0 )|not}
+                            <option value="{$class.id}"{if $class.id|eq( $Class_id )} selected{/if}>{$class.name|wash} (0)</option>
+                            {/if}{/foreach}
+                            </optgroup>
+                            {/if}
                         </select>
                         <input class="button xe-update" name="Update" type="submit" value="{'Update'|i18n('design/standard/extract')}" title="{'Load the columns of this class'|i18n('design/standard/extract')|wash}" />
                     </div>
-                    <p class="xe-help">{'%count objects of this class in the selection.'|i18n('design/standard/extract',, hash( '%count', $max_count ))}</p>
+                    <p class="xe-help">{'%count objects of this class in the selection. The list shows the number for every class.'|i18n('design/standard/extract',, hash( '%count', $max_count ))}</p>
                 </div>
 
                 {if $has_prefilledata|not}
@@ -175,56 +183,58 @@
                     <input class="button" name="AddAllAttributes" type="submit" value="{'Add all class attributes'|i18n('design/standard/extract')}" title="{'Adds every attribute of the class that is not a column yet'|i18n('design/standard/extract')|wash}" />
                 </div>
             </div>
+            <input type="hidden" name="AttributesClassID" value="{$Class_id}" />
+            <div class="xe-columns-head">
+                <span class="xe-label">{'Columns of the file'|i18n('design/standard/extract')}</span>
+                <span class="xe-columns-hint">{'Drag a column, or use the arrows, to change the order; the names are the header of the file.'|i18n('design/standard/extract')}</span>
+                <span class="xe-spacer"></span>
+                <input class="button" type="submit" name="ResetAttributes" value="{'Reset to all class attributes'|i18n('design/standard/extract')}" title="{'Every attribute of the class, in class order, with its identifier as name'|i18n('design/standard/extract')|wash}" />
+                <input class="button xe-remove-all" type="submit" name="RemoveAllAttributes" value="{'Remove all'|i18n('design/standard/extract')}"{if $Attributes|count|eq( 0 )} disabled{/if} />
+            </div>
+            <p class="xe-columns-empty"{if $Attributes|count|gt( 0 )} hidden{/if}>{'No columns yet. Add a column above, or reset to all class attributes.'|i18n('design/standard/extract')}</p>
+            <ol class="xe-columns" data-up="{'Move up'|i18n('design/standard/extract')|wash}" data-down="{'Move down'|i18n('design/standard/extract')|wash}">
+                {foreach $Attributes as $index => $item}
+                <li class="xe-column">
+                    <span class="xe-handle" title="{'Drag to move'|i18n('design/standard/extract')|wash}" aria-hidden="true">⠿</span>
+                    <span class="xe-colpos">{$index|sum( 1 )}</span>
+                    <span class="xe-colinfo">
+                        <strong>{$item.name|wash}</strong>
+                        <small>{if $item.id|contains( '.' )}<span class="xe-badge">{'Special column'|i18n('design/standard/extract')}</span>{else}<code>{$item.id|wash}</code>{/if}</small>
+                    </span>
+                    <input name="Attributes[{$index}][id]" type="hidden" value="{$item.id|wash}" />
+                    <input name="Attributes[{$index}][name]" type="hidden" value="{$item.name|wash}" />
+                    <label class="xe-colname-edit">
+                        <span class="xe-visually-hidden">{'Column name in the file'|i18n('design/standard/extract')}</span>
+                        <input name="Attributes[{$index}][exportname]" type="text" value="{$item.exportname|wash}" spellcheck="false" />
+                    </label>
+                    <span class="xe-colbuttons">
+                        <button type="submit" class="xe-icon xe-up" name="MoveAttributeUp[{$index}]" value="1" title="{'Move up'|i18n('design/standard/extract')|wash}"{if $index|eq( 0 )} disabled{/if}>↑</button>
+                        <button type="submit" class="xe-icon xe-down" name="MoveAttributeDown[{$index}]" value="1" title="{'Move down'|i18n('design/standard/extract')|wash}"{if $index|eq( $Attributes|count|sub( 1 ) )} disabled{/if}>↓</button>
+                        <button type="submit" class="xe-icon xe-remove" name="RemoveAttribute[{$index}]" value="1" title="{'Remove this column'|i18n('design/standard/extract')|wash}" aria-label="{'Remove %name'|i18n('design/standard/extract',, hash( '%name', $item.name ))|wash}">×</button>
+                    </span>
+                </li>
+                {/foreach}
+            </ol>
         </section>
     </div>
-        {if $Attributes|gt(0)}
-        <div class="break"></div>
-        <fieldset>
-            <legend>{'Selected attribute(s)'|i18n('design/standard/extract')}</legend>
-            <div class="content-navigation-childlist">
-                <table class="list" cellspacing="0">
-                    <tr>
-                        <th class="tight">{'Position'|i18n('design/standard/extract')}</th>
-                        <th>{'Name'|i18n('design/standard/extract')}</th>
-                        <th class="tight">{'Identifier'|i18n('design/standard/extract')}</th>
-                        <th class="tight">&nbsp;</th>
-                    </tr>
-                    {section loop=$Attributes}
-                    <tr>
-                        <th scope="row">{1|sum($:index)}</th>
-                        <td>
-                            <input name="Attributes[{$:index}][id]" type="hidden" value="{$:item.id|wash}" />
-                            <input name="Attributes[{$:index}][name]" type="hidden" value="{$:item.name|wash}" />
-                            {$:item.name|wash}
-                        </td>
-                        <td><input name="Attributes[{$:index}][exportname]" type="text" value="{$:item.exportname|wash}" /></td>
-                        <td><input type="checkbox" name="RemoveIDArray[]" value="{$:index}" /></td>
-                    </tr>
-                    {/section}
-                </table>
-            </div>
-            <div class="block">
-                <div class="right">
-                    <input class="button" name="Remove" type="submit" value="{'Remove selected attribute(s)'|i18n('design/standard/extract')}" />
-                </div>
-            </div>
-        </fieldset>
-        {/if}
     </div>
 
     <div id="xe-preview-slot" class="xe-preview-slot">{if is_set( $preview )}{include uri='design:xrowextract/csv_preview.tpl'}{/if}</div>
 
     {* DESIGN: Content END *}</div></div></div>
 
-    <div class="controlbar">
-    {* DESIGN: Control bar START *}<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-tc"><div class="box-bl"><div class="box-br">
-        <div class="block">
-            <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
-            <input class="defaultbutton" name="Download" type="submit" value="{'Download'|i18n('design/standard/extract')}" />
+    <div class="controlbar xe-actionbar">
+        <div class="xe-actionbar-summary" aria-live="polite">
+            <strong>{$export_rows}</strong> {'rows'|i18n('design/standard/extract')} ·
+            <strong class="xe-column-total">{$Attributes|count}</strong> {'columns'|i18n('design/standard/extract')}
+            {if $subtree_node}· <span class="xe-actionbar-node">{$subtree_node.name|wash}</span>{/if}
         </div>
-    {* DESIGN: Control bar END *}</div></div></div></div></div></div>
+        <div class="xe-actionbar-buttons">
+            <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
+            <input class="defaultbutton" name="Download" type="submit" value="{'Download CSV'|i18n('design/standard/extract')}" />
+        </div>
     </div>
 </div>
 
 </form>
-<script src={'javascript/xrowextract.js'|ezdesign}></script>
+<script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>

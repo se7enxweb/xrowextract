@@ -4,6 +4,74 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Columns of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Drag a column, or use the arrows, to change the order; the names are the header of the file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reset to all class attributes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every attribute of the class, in class order, with its identifier as name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No columns yet. Add a column above, or reset to all class attributes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Drag to move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Special column</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Column name in the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove this column</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove %name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download CSV</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>In this selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not in this selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%count objects of this class in the selection. The list shows the number for every class.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Which objects become rows.</source>
         <translation type="unfinished"></translation>
     </message>

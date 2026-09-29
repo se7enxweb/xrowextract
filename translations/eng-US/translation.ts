@@ -4,6 +4,74 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Columns of the file</source>
+        <translation>Columns of the file</translation>
+    </message>
+    <message>
+        <source>Drag a column, or use the arrows, to change the order; the names are the header of the file.</source>
+        <translation>Drag a column, or use the arrows, to change the order; the names are the header of the file.</translation>
+    </message>
+    <message>
+        <source>Reset to all class attributes</source>
+        <translation>Reset to all class attributes</translation>
+    </message>
+    <message>
+        <source>Every attribute of the class, in class order, with its identifier as name</source>
+        <translation>Every attribute of the class, in class order, with its identifier as name</translation>
+    </message>
+    <message>
+        <source>Remove all</source>
+        <translation>Remove all</translation>
+    </message>
+    <message>
+        <source>No columns yet. Add a column above, or reset to all class attributes.</source>
+        <translation>No columns yet. Add a column above, or reset to all class attributes.</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Move up</translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation>Move down</translation>
+    </message>
+    <message>
+        <source>Drag to move</source>
+        <translation>Drag to move</translation>
+    </message>
+    <message>
+        <source>Special column</source>
+        <translation>Special column</translation>
+    </message>
+    <message>
+        <source>Column name in the file</source>
+        <translation>Column name in the file</translation>
+    </message>
+    <message>
+        <source>Remove this column</source>
+        <translation>Remove this column</translation>
+    </message>
+    <message>
+        <source>Remove %name</source>
+        <translation>Remove %name</translation>
+    </message>
+    <message>
+        <source>Download CSV</source>
+        <translation>Download CSV</translation>
+    </message>
+    <message>
+        <source>In this selection</source>
+        <translation>In this selection</translation>
+    </message>
+    <message>
+        <source>Not in this selection</source>
+        <translation>Not in this selection</translation>
+    </message>
+    <message>
+        <source>%count objects of this class in the selection. The list shows the number for every class.</source>
+        <translation>%count objects of this class in the selection. The list shows the number for every class.</translation>
+    </message>
+    <message>
         <source>Which objects become rows.</source>
         <translation>Which objects become rows.</translation>
     </message>

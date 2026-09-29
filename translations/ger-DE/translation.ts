@@ -2,6 +2,74 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Columns of the file</source>
+        <translation>Spalten der Datei</translation>
+    </message>
+    <message>
+        <source>Drag a column, or use the arrows, to change the order; the names are the header of the file.</source>
+        <translation>Ziehen Sie eine Spalte oder nutzen Sie die Pfeile, um die Reihenfolge zu ändern; die Namen sind die Kopfzeile der Datei.</translation>
+    </message>
+    <message>
+        <source>Reset to all class attributes</source>
+        <translation>Auf alle Klassenattribute zurücksetzen</translation>
+    </message>
+    <message>
+        <source>Every attribute of the class, in class order, with its identifier as name</source>
+        <translation>Jedes Attribut der Klasse, in Klassenreihenfolge, mit seinem Bezeichner als Namen</translation>
+    </message>
+    <message>
+        <source>Remove all</source>
+        <translation>Alle entfernen</translation>
+    </message>
+    <message>
+        <source>No columns yet. Add a column above, or reset to all class attributes.</source>
+        <translation>Noch keine Spalten. Fügen Sie oben eine Spalte hinzu oder setzen Sie auf alle Klassenattribute zurück.</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Nach oben</translation>
+    </message>
+    <message>
+        <source>Move down</source>
+        <translation>Nach unten</translation>
+    </message>
+    <message>
+        <source>Drag to move</source>
+        <translation>Zum Verschieben ziehen</translation>
+    </message>
+    <message>
+        <source>Special column</source>
+        <translation>Sonderspalte</translation>
+    </message>
+    <message>
+        <source>Column name in the file</source>
+        <translation>Spaltenname in der Datei</translation>
+    </message>
+    <message>
+        <source>Remove this column</source>
+        <translation>Diese Spalte entfernen</translation>
+    </message>
+    <message>
+        <source>Remove %name</source>
+        <translation>%name entfernen</translation>
+    </message>
+    <message>
+        <source>Download CSV</source>
+        <translation>CSV herunterladen</translation>
+    </message>
+    <message>
+        <source>In this selection</source>
+        <translation>In dieser Auswahl</translation>
+    </message>
+    <message>
+        <source>Not in this selection</source>
+        <translation>Nicht in dieser Auswahl</translation>
+    </message>
+    <message>
+        <source>%count objects of this class in the selection. The list shows the number for every class.</source>
+        <translation>%count Objekte dieser Klasse in der Auswahl. Die Liste zeigt die Anzahl für jede Klasse.</translation>
+    </message>
+    <message>
         <source>Which objects become rows.</source>
         <translation>Welche Objekte zu Zeilen werden.</translation>
     </message>
