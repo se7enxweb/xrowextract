@@ -17,14 +17,15 @@
         <div class="xe-import-target-class">
             <dt>{if $ResultClasses|count|gt( 1 )}{'Classes'|i18n('design/standard/extract')}{else}{'Class'|i18n('design/standard/extract')}{/if}</dt>
             <dd>
+                {if $ResultClasses|count|eq( 0 )}
+                <span class="xe-muted">{'No row could be given a class: choose one above, or map a "class" column.'|i18n('design/standard/extract')}</span>
+                {/if}
                 {foreach $ResultClasses as $rc}
                 <span class="xe-class-chip">
                     <a href={concat( 'class/view/', $rc.id )|ezurl} target="_blank" rel="noopener"><strong>{$rc.name|wash}</strong></a>
                     <code>{$rc.identifier|wash}</code>
                     <small>{'%count rows'|i18n('design/standard/extract',, hash( '%count', $rc.rows ))}{if $ResultClasses|count|gt( 1 )} · {$rc.create} {'create'|i18n('design/standard/extract')}, {$rc.update} {'update'|i18n('design/standard/extract')}, {$rc.unchanged} {'unchanged'|i18n('design/standard/extract')}, {$rc.error} {'error'|i18n('design/standard/extract')}{/if}</small>
                 </span>
-                {foreachelse}
-                <span class="xe-muted">{'No row could be given a class: choose one above, or map a "class" column.'|i18n('design/standard/extract')}</span>
                 {/foreach}
             </dd>
         </div>
