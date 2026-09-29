@@ -110,7 +110,8 @@ else
 $countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly )
 {
     $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, $locale !== false, $locale, 'include', array( (int)$classID ),
-                                                                 false, $depth, $depthOperator, true, false, $mainOnly, false, false );
+                                                                 false, $depth, $depthOperator, true, false, $mainOnly,
+                                                                 $locale !== false ? XrowExtractTranslationFilter::params( $locale ) : false, false );
     return isset( $result['result'] ) ? (int)$result['result'] : 0;
 };
 
@@ -284,7 +285,7 @@ foreach ( $languages as $locale )
     {
         $take = min( 100, $wantRows - $written );
         $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator,
-                                                                $classID, false, false, 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+                                                                $classID, false, XrowExtractTranslationFilter::params( $locale ), 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
         $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
         foreach ( $batch as $treeNode )
         {

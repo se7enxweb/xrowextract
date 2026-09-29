@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][output:][dry-run][list-sets][list-formats][list-classes][user:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][output:][dry-run][list-sets][list-formats][list-classes][user:]',
     '',
     array(
         'set'             => 'A ready-made node set (default content_media); --list-sets shows them',
@@ -38,6 +38,9 @@ $options = $script->getOptions(
         'separator'       => 'One character, or comma (default), semicolon, tab, pipe',
         'line-endings'    => 'win32/crlf (default), unix/lf, mac/cr',
         'unquoted'        => 'Do not quote cells',
+        'languages'       => 'all (default) or a comma list of locales: one row per object per language',
+        'columns'         => 'standard (default: identity and every attribute), migration, attributes',
+        'plain-text'      => 'Add the plain text of every rich text field',
         'password-hashes' => 'Add the password hash and hash type to classes with a user account (needs the policy xrowextract/password_hash)',
         'output'          => 'File, or directory to write the archive into (default: the current directory, named <site>_export_<date>.<format>)',
         'dry-run'         => 'Show what would be exported, write nothing',
@@ -98,7 +101,20 @@ foreach ( $resolved as $item )
         $fail( "Node {$item['id']} does not exist or $login may not read it." );
 }
 $roots = XrowExtractArchive::exportRoots( $resolved );
-$counts = XrowExtractArchive::classCounts( $roots );
+$contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
+if ( !$options['languages'] || $options['languages'] === 'all' )
+    $languages = $contentLanguages;
+else
+{
+    $languages = array_values( array_filter( array_map( 'trim', explode( ',', $options['languages'] ) ) ) );
+    foreach ( $languages as $locale )
+        if ( !in_array( $locale, $contentLanguages, true ) )
+            $fail( "Unknown language $locale (--languages). Languages: " . implode( ', ', $contentLanguages ) . '.' );
+}
+$columnChoice = $options['columns'] ? $options['columns'] : 'standard';
+if ( !array_key_exists( $columnChoice, XrowExtractArchive::columnChoices() ) )
+    $fail( "Unknown column choice $columnChoice (--columns). Choices: " . implode( ', ', array_keys( XrowExtractArchive::columnChoices() ) ) . '.' );
+$counts = XrowExtractArchive::classCounts( $roots, $languages );
 
 // Classes
 $classID = function ( $value ) use ( $fail )
@@ -130,7 +146,8 @@ if ( $options['list-classes'] || $options['dry-run'] )
         $rows += $on ? $count : 0;
         $cli->output( sprintf( '  %s %5d  %-32s %6d rows', $on ? '[x]' : '[ ]', $id, $class->attribute( 'identifier' ) . '.csv', $count ) );
     }
-    $cli->output( sprintf( '%d files, %d rows, format %s', count( $selected ), $rows, $options['format'] ? $options['format'] : 'zip' ) );
+    $cli->output( sprintf( '%d files, %d rows, format %s, languages %s, columns %s', count( $selected ), $rows, $options['format'] ? $options['format'] : 'zip',
+                           implode( '+', $languages ), $columnChoice ) );
     $script->shutdown( 0 );
 }
 if ( !$selected )
@@ -155,7 +172,8 @@ if ( !isset( $lines[$lineKey] ) )
 $started = microtime( true );
 try
 {
-    $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'] );
+    $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'],
+                                          array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'] ) );
 }
 catch ( Exception $e )
 {

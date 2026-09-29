@@ -20,6 +20,11 @@ class XrowBaseHandler
     public function escape( $stringtoescape )
     {
         $stringtoescape = (string)$stringtoescape;
+        // Raw: the value as it is, for writers that do their own escaping (JSON, XML)
+        if ( $this->raw )
+        {
+            return $stringtoescape;
+        }
         if ( $this->neutralizeFormulas && self::looksLikeFormula( $stringtoescape ) )
         {
             $stringtoescape = "'" . $stringtoescape;
@@ -56,5 +61,6 @@ class XrowBaseHandler
     public $separationChar = ",";
     public $escape = false;
     public $neutralizeFormulas = true;
+    public $raw = false;
 }
 ?>

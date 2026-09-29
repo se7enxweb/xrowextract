@@ -68,10 +68,33 @@ if ( $http->hasPostVariable( 'LineSeparator' ) && isset( $lineSeparators[$http->
 if ( !isset( $formats[$state['format']] ) || !$formats[$state['format']]['available'] )
     $state['format'] = 'zip';
 
-// What the selection holds
+// Languages (every content language by default) and columns
+$contentLanguages = XrowExtractColumns::contentLanguages();
+$allLocales = array_keys( $contentLanguages );
+if ( !isset( $state['languages'] ) || !is_array( $state['languages'] ) )
+    $state['languages'] = $allLocales;
+if ( $http->hasPostVariable( 'SelectAllLanguages' ) )
+    $state['languages'] = $allLocales;
+elseif ( $http->hasPostVariable( 'SelectNoLanguages' ) )
+    $state['languages'] = array();
+elseif ( $http->hasPostVariable( 'LanguageSelection' ) )
+    $state['languages'] = (array)( $http->hasPostVariable( 'Languages' ) ? $http->postVariable( 'Languages' ) : array() );
+$state['languages'] = array_values( array_intersect( $allLocales, $state['languages'] ) );
+$columnChoices = XrowExtractArchive::columnChoices();
+if ( $http->hasPostVariable( 'ArchiveColumns' ) && isset( $columnChoices[$http->postVariable( 'ArchiveColumns' )] ) )
+    $state['columns'] = $http->postVariable( 'ArchiveColumns' );
+if ( !isset( $state['columns'] ) || !isset( $columnChoices[$state['columns']] ) )
+    $state['columns'] = 'standard';
+if ( $http->hasPostVariable( 'LanguageSelection' ) )
+    $state['plain_text'] = $http->hasPostVariable( 'PlainText' );
+if ( !isset( $state['plain_text'] ) )
+    $state['plain_text'] = false;
+
+// What the selection holds: rows per class in the chosen languages
 $resolved = XrowExtractArchive::resolveNodes( $state['nodes'] );
 $roots = XrowExtractArchive::exportRoots( $resolved );
-$counts = XrowExtractArchive::classCounts( $roots );
+$counts = $state['languages'] ? XrowExtractArchive::classCounts( $roots, $state['languages'] ) : array();
+$languageCounts = XrowExtractArchive::languageCounts( $roots );
 
 // Classes: every class with objects is exported unless it was switched off; the form posts the ones kept
 if ( $http->hasPostVariable( 'ClassSelection' ) )
@@ -127,7 +150,8 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
         $result = false;
         try
         {
-            $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']], $state['password_hashes'] );
+            $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']], $state['password_hashes'],
+                                                  array( 'languages' => $state['languages'], 'columns' => $state['columns'], 'plain_text' => $state['plain_text'] ) );
         }
         catch ( Exception $e )
         {
@@ -224,6 +248,14 @@ $tpl->setVariable( 'total_rows', $totalRows );
 $tpl->setVariable( 'formats', $formats );
 $tpl->setVariable( 'error', $error );
 $tpl->setVariable( 'allow_password_hashes', $allowHashes );
+$languageChoices = array();
+foreach ( $contentLanguages as $locale => $language )
+    $languageChoices[] = array_merge( $language, array( 'count' => $languageCounts[$locale], 'selected' => in_array( $locale, $state['languages'], true ) ) );
+$tpl->setVariable( 'language_choices', $languageChoices );
+$choices = array();
+foreach ( $columnChoices as $id => $choice )
+    $choices[] = array( 'id' => $id, 'name' => $choice[0], 'description' => $choice[1] );
+$tpl->setVariable( 'column_choices', $choices );
 $tpl->setVariable( 'TabNotation', '\t' );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
 $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );

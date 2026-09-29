@@ -13,9 +13,11 @@ class ParserInterface
     public $separationChar = ",";
     public $escape = true;
     public $neutralizeFormulas = true;
+    public $raw = false;
 
-    public function __construct( $separationChar = null, $escape = null )
+    public function __construct( $separationChar = null, $escape = null, $raw = false )
     {
+        $this->raw = (bool)$raw;
         if ( $escape === true or $escape === false )
            $this->escape = $escape;
         if ( $separationChar !== null )
@@ -42,6 +44,10 @@ class ParserInterface
                  if( property_exists( $handler, 'neutralizeFormulas' ) )
                  {
                      $handler->neutralizeFormulas = $this->neutralizeFormulas;
+                 }
+                 if( property_exists( $handler, 'raw' ) )
+                 {
+                     $handler->raw = $this->raw;
                  }
                  $this->handlerMap[$typename] = array( "handler" => $handler,
                                                        "exportable" => true );
@@ -84,6 +90,7 @@ class ParserInterface
         $handler->separationChar = $this->separationChar;
         $handler->escape = $this->escape;
         $handler->neutralizeFormulas = $this->neutralizeFormulas;
+        $handler->raw = $this->raw;
         return $handler->escape( $text );
     }
 }

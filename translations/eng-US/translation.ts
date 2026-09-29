@@ -4,6 +4,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages and columns</source>
+        <translation>Languages and columns</translation>
+    </message>
+    <message>
+        <source>Which translations become rows, and which columns each file has.</source>
+        <translation>Which translations become rows, and which columns each file has.</translation>
+    </message>
+    <message>
+        <source>Each object is one row per chosen language it is translated into; with more than one, a language column leads.</source>
+        <translation>Each object is one row per chosen language it is translated into; with more than one, a language column leads.</translation>
+    </message>
+    <message>
+        <source>No language chosen: the archive would be empty.</source>
+        <translation>No language chosen: the archive would be empty.</translation>
+    </message>
+    <message>
+        <source>Add the plain text of every rich text field</source>
+        <translation>Add the plain text of every rich text field</translation>
+    </message>
+    <message>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <source>Attributes only</source>
+        <translation>Attributes only</translation>
+    </message>
+    <message>
+        <source>Object id, remote id, main node, parent node, URL alias and dates, then every attribute</source>
+        <translation>Object id, remote id, main node, parent node, URL alias and dates, then every attribute</translation>
+    </message>
+    <message>
+        <source>Every attribute of the class and nothing else</source>
+        <translation>Every attribute of the class and nothing else</translation>
+    </message>
+    <message>
         <source>Added %count columns at the end of the list: %names</source>
         <translation>Added %count columns at the end of the list: %names</translation>
     </message>

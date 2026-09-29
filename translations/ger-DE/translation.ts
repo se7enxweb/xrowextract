@@ -2,6 +2,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages and columns</source>
+        <translation>Sprachen und Spalten</translation>
+    </message>
+    <message>
+        <source>Which translations become rows, and which columns each file has.</source>
+        <translation>Welche Übersetzungen zu Zeilen werden und welche Spalten jede Datei hat.</translation>
+    </message>
+    <message>
+        <source>Each object is one row per chosen language it is translated into; with more than one, a language column leads.</source>
+        <translation>Jedes Objekt ist eine Zeile je gewählter Sprache, in die es übersetzt ist; bei mehr als einer steht eine Sprachspalte vorne.</translation>
+    </message>
+    <message>
+        <source>No language chosen: the archive would be empty.</source>
+        <translation>Keine Sprache gewählt: das Archiv wäre leer.</translation>
+    </message>
+    <message>
+        <source>Add the plain text of every rich text field</source>
+        <translation>Den reinen Text jedes Rich-Text-Felds hinzufügen</translation>
+    </message>
+    <message>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <source>Attributes only</source>
+        <translation>Nur Attribute</translation>
+    </message>
+    <message>
+        <source>Object id, remote id, main node, parent node, URL alias and dates, then every attribute</source>
+        <translation>Objekt-ID, Remote-ID, Hauptknoten, Elternknoten, URL-Alias und Datumsangaben, dann jedes Attribut</translation>
+    </message>
+    <message>
+        <source>Every attribute of the class and nothing else</source>
+        <translation>Jedes Attribut der Klasse und sonst nichts</translation>
+    </message>
+    <message>
         <source>Added %count columns at the end of the list: %names</source>
         <translation>%count Spalten am Ende der Liste hinzugefügt: %names</translation>
     </message>

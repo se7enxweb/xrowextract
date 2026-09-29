@@ -511,7 +511,8 @@ $LanguageCounts = array();
 foreach ( $ContentLanguages as $locale => $language )
 {
     $languageCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, true, $locale, 'include', array( $Class_id ),
-                                                         false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+                                                         false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly,
+                                                         XrowExtractTranslationFilter::params( $locale ), false );
     $LanguageCounts[$locale] = isset( $languageCount['result'] ) ? (int)$languageCount['result'] : 0;
     $LanguageChoices[] = array_merge( $language, array( 'count' => $LanguageCounts[$locale],
                                                         'selected' => in_array( $locale, $SelectedLanguages, true ) ) );
@@ -658,7 +659,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             for ( $batchOffset = $skip; $written < $maxRows; $batchOffset += 100 )
             {
                 $take = min( 100, $maxRows - $written );
-                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, false, false, 'include', array(
+                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, false, XrowExtractTranslationFilter::params( $locale ), 'include', array(
                     $Class_id
                 ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
                 $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();

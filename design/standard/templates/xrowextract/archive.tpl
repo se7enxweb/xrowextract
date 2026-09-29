@@ -127,10 +127,56 @@
             {/if}
         </section>
 
-        {* 3. Format *}
-        <section class="xe-card" aria-labelledby="xe-card-archive-format">
+        {* 3. Languages and columns *}
+        <section class="xe-card" aria-labelledby="xe-card-languages">
             <header class="xe-card-head">
                 <span class="xe-step">3</span>
+                <div>
+                    <h2 id="xe-card-languages">{'Languages and columns'|i18n('design/standard/extract')}</h2>
+                    <p>{'Which translations become rows, and which columns each file has.'|i18n('design/standard/extract')}</p>
+                </div>
+            </header>
+            <input type="hidden" name="LanguageSelection" value="1" />
+            <div class="xe-field xe-languages">
+                <div class="xe-columns-head">
+                    <span class="xe-label" id="xe-a-lang-label">{'Languages'|i18n('design/standard/extract')}</span>
+                    <span class="xe-columns-hint">{'Each object is one row per chosen language it is translated into; with more than one, a language column leads.'|i18n('design/standard/extract')}</span>
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="SelectAllLanguages" value="{'Select all'|i18n('design/standard/extract')}" />
+                    <input class="button" type="submit" name="SelectNoLanguages" value="{'Select none'|i18n('design/standard/extract')}" />
+                </div>
+                <ul class="xe-language-list" aria-labelledby="xe-a-lang-label">
+                    {foreach $language_choices as $language}
+                    <li>
+                        <label class="xe-class-item">
+                            <input type="checkbox" name="Languages[]" value="{$language.locale|wash}" class="xe-autosubmit"{if $language.selected} checked{/if} />
+                            <span class="xe-colinfo">
+                                <strong>{$language.name|wash}</strong>
+                                <small><code>{$language.locale|wash}</code>{if $language.default} · <span class="xe-badge">{'site default'|i18n('design/standard/extract')}</span>{/if}</small>
+                            </span>
+                            <span class="xe-node-count"><strong>{$language.count}</strong> {'objects'|i18n('design/standard/extract')}</span>
+                        </label>
+                    </li>
+                    {/foreach}
+                </ul>
+                {if $state.languages|count|eq( 0 )}<p class="xe-note xe-note-bad">{'No language chosen: the archive would be empty.'|i18n('design/standard/extract')}</p>{/if}
+            </div>
+            <div class="xe-field">
+                <span class="xe-label" id="xe-a-cols-label">{'Columns'|i18n('design/standard/extract')}</span>
+                <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-a-cols-label">
+                    {foreach $column_choices as $choice}
+                    <label title="{$choice.description|wash}"><input type="radio" name="ArchiveColumns" value="{$choice.id|wash}"{if $choice.id|eq( $state.columns )} checked{/if} /><span>{$choice.name|wash}</span></label>
+                    {/foreach}
+                </div>
+                {foreach $column_choices as $choice}{if $choice.id|eq( $state.columns )}<p class="xe-help">{$choice.description|wash}</p>{/if}{/foreach}
+                <label class="xe-check"><input type="checkbox" name="PlainText" value="1"{if $state.plain_text} checked{/if} /> {'Add the plain text of every rich text field'|i18n('design/standard/extract')}</label>
+            </div>
+        </section>
+
+        {* 4. Format *}
+        <section class="xe-card" aria-labelledby="xe-card-archive-format">
+            <header class="xe-card-head">
+                <span class="xe-step">4</span>
                 <div>
                     <h2 id="xe-card-archive-format">{'File format'|i18n('design/standard/extract')}</h2>
                     <p>{'The archive, and how the CSV files in it are written.'|i18n('design/standard/extract')}</p>

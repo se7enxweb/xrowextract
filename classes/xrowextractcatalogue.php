@@ -367,6 +367,22 @@ class XrowExtractCatalogue
         );
     }
 
+    /** Column ids of a class resolved to column entries (class attributes, attribute formats, special columns). */
+    public static function resolveColumns( array $ids, $classID, array $extras )
+    {
+        $byID = array();
+        foreach ( XrowExtractColumns::classColumns( $classID ) as $column )
+            $byID[$column['id']] = $column;
+        $byID = array_merge( $byID, self::formatColumns( $classID ), $extras );
+        $columns = array();
+        foreach ( $ids as $id )
+        {
+            if ( isset( $byID[$id] ) )
+                $columns[] = $byID[$id];
+        }
+        return $columns;
+    }
+
     /** The column ids of a set for a class, placeholders expanded. */
     public static function setColumnIDs( $setID, $classID )
     {

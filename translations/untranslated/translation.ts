@@ -4,6 +4,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Languages and columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Which translations become rows, and which columns each file has.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Each object is one row per chosen language it is translated into; with more than one, a language column leads.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No language chosen: the archive would be empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add the plain text of every rich text field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Standard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attributes only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object id, remote id, main node, parent node, URL alias and dates, then every attribute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every attribute of the class and nothing else</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Added %count columns at the end of the list: %names</source>
         <translation type="unfinished"></translation>
     </message>

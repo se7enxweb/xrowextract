@@ -63,9 +63,9 @@ class XrowExtractArchive
     public static function nodeSets()
     {
         $content = eZINI::instance( 'content.ini' );
-        $root  = (int)$content->variable( 'NodeSettings', 'RootNode' );
-        $media = (int)$content->variable( 'NodeSettings', 'MediaRootNode' );
-        $users = (int)$content->variable( 'NodeSettings', 'UserRootNode' );
+        $root  = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'RootNode' ) );
+        $media = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'MediaRootNode' ) );
+        $users = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'UserRootNode' ) );
         return array(
             'content_media' => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content and media' ),      'nodes' => array( $root, $media ) ),
             'content'       => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content structure' ),      'nodes' => array( $root ) ),
@@ -73,6 +73,19 @@ class XrowExtractArchive
             'users'         => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'User accounts' ),          'nodes' => array( $users ) ),
             'everything'    => array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Content, media and users' ), 'nodes' => array( $root, $media, $users ) ),
         );
+    }
+
+    /**
+     * The top-level node (a child of the tree's top node 1) a node is in: a siteaccess may set RootNode to a
+     * site below the content structure, the sets mean the whole tree.
+     */
+    public static function topLevelNodeID( $nodeID )
+    {
+        $node = $nodeID > 0 ? eZContentObjectTreeNode::fetch( $nodeID ) : null;
+        if ( !$node instanceof eZContentObjectTreeNode )
+            return $nodeID;
+        $path = array_values( array_filter( explode( '/', trim( $node->attribute( 'path_string' ), '/' ) ) ) );
+        return isset( $path[1] ) ? (int)$path[1] : $nodeID;
     }
 
     /**
@@ -120,7 +133,7 @@ class XrowExtractArchive
         return $roots;
     }
 
-    protected static function treeParams( $classID, $offset = 0, $limit = null )
+    protected static function treeParams( $classID, $offset = 0, $limit = null, $language = null )
     {
         $params = array(
             'ClassFilterType' => 'include',
@@ -128,6 +141,12 @@ class XrowExtractArchive
             'MainNodeOnly' => true,
             'IgnoreVisibility' => true,
         );
+        if ( $language )
+        {
+            // Only the objects translated into this language, read in it
+            $params['Language'] = $language;
+            $params['ExtendedAttributeFilter'] = XrowExtractTranslationFilter::params( $language );
+        }
         if ( $limit !== null )
         {
             $params['Offset'] = $offset;
@@ -138,21 +157,52 @@ class XrowExtractArchive
         return $params;
     }
 
-    /** How many objects of every class the roots hold: class id => count (classes with objects only). */
-    public static function classCounts( array $roots )
+    /**
+     * How many rows every class has below the roots: class id => count (classes with rows only). With
+     * languages, a row is one object in one of them (a translation); without, one object.
+     */
+    public static function classCounts( array $roots, $languages = null )
     {
         $counts = array();
         if ( !$roots )
             return $counts;
+        $languages = $languages === null ? array( null ) : (array)$languages;
         foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, false, false ) as $class )
         {
             $total = 0;
             foreach ( $roots as $root )
-                $total += (int)eZContentObjectTreeNode::subTreeCountByNodeID( self::treeParams( $class['id'] ), $root->attribute( 'node_id' ) );
+                foreach ( $languages as $language )
+                    $total += (int)eZContentObjectTreeNode::subTreeCountByNodeID( self::treeParams( $class['id'], 0, null, $language ), $root->attribute( 'node_id' ) );
             if ( $total > 0 )
                 $counts[(int)$class['id']] = $total;
         }
         return $counts;
+    }
+
+    /** Translations per language below the roots (any class, main locations): locale => count. */
+    public static function languageCounts( array $roots )
+    {
+        $counts = array();
+        foreach ( XrowExtractColumns::contentLanguages() as $locale => $language )
+        {
+            $counts[$locale] = 0;
+            foreach ( $roots as $root )
+                $counts[$locale] += (int)eZContentObjectTreeNode::subTreeCountByNodeID(
+                    array( 'MainNodeOnly' => true, 'IgnoreVisibility' => true, 'Language' => $locale,
+                           'ExtendedAttributeFilter' => XrowExtractTranslationFilter::params( $locale ) ), $root->attribute( 'node_id' ) );
+        }
+        return $counts;
+    }
+
+    /** The column choices of an archive: id => (name, description). */
+    public static function columnChoices()
+    {
+        $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
+        return array(
+            'standard'   => array( $t( 'Standard' ), $t( 'Object id, remote id, main node, parent node, URL alias and dates, then every attribute' ) ),
+            'migration'  => array( $t( 'Migration' ), $t( 'Everything to rebuild the content elsewhere: identity, parent, languages, dates, every attribute' ) ),
+            'attributes' => array( $t( 'Attributes only' ), $t( 'Every attribute of the class and nothing else' ) ),
+        );
     }
 
     /** How many objects (any class, main locations) a node holds below it, the node itself included. */
@@ -165,8 +215,15 @@ class XrowExtractArchive
      * Write the archive. Returns array( 'path' => archive file, 'name' => download name,
      * 'work' => the work directory to remove afterwards, 'manifest' => ... ).
      */
-    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false )
+    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false, array $options = array() )
     {
+        // Languages (default: every content language), columns (standard, migration, attributes), plain text of rich text
+        $languages = isset( $options['languages'] ) && is_array( $options['languages'] ) ? array_values( $options['languages'] )
+                                                                                          : array_keys( XrowExtractColumns::contentLanguages() );
+        $columnChoice = isset( $options['columns'] ) && array_key_exists( $options['columns'], self::columnChoices() ) ? $options['columns'] : 'standard';
+        $plainText = !empty( $options['plain_text'] );
+        $progress = isset( $options['progress'] ) && is_callable( $options['progress'] ) ? $options['progress'] : null;
+        $output = isset( $options['output'] ) && XrowExtractWriter::isFormat( $options['output'] ) ? $options['output'] : 'csv';
         $formats = self::formats();
         if ( !isset( $formats[$format] ) || !$formats[$format]['available'] )
             throw new RuntimeException( 'Archive format not available: ' . $format );
@@ -200,49 +257,86 @@ class XrowExtractArchive
                 $class = eZContentClass::fetch( (int)$classID );
                 if ( !$class instanceof eZContentClass )
                     continue;
-                $columns = array_merge( $identity, XrowExtractColumns::classColumns( $classID ) );
+                if ( $columnChoice === 'migration' )
+                    $columns = XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $classID ), $classID, $extras );
+                elseif ( $columnChoice === 'attributes' )
+                    $columns = XrowExtractColumns::classColumns( $classID );
+                else
+                    $columns = array_merge( $identity, XrowExtractColumns::classColumns( $classID ) );
+                if ( $plainText )
+                {
+                    // The plain text of every rich text attribute, right after it
+                    $withText = array();
+                    $formatColumns = XrowExtractCatalogue::formatColumns( $classID );
+                    foreach ( $columns as $column )
+                    {
+                        $withText[] = $column;
+                        if ( isset( $formatColumns[$column['id'] . ':text'] ) && $formatColumns[$column['id'] . ':text']['datatype'] === 'ezxmltext' )
+                            $withText[] = $formatColumns[$column['id'] . ':text'];
+                    }
+                    $columns = $withText;
+                }
+                $ids = array_map( function ( $c ) { return $c['id']; }, $columns );
+                if ( count( $languages ) > 1 && !in_array( 'ezcontentobject.language', $ids, true ) )
+                    array_unshift( $columns, $extras['ezcontentobject.language'] );
                 if ( $passwordHashes && self::hasUserAccount( $class ) )
                 {
                     $columns[] = $extras['ezuser.password_hash'];
                     $columns[] = $extras['ezuser.password_hash_type'];
                 }
-                $name = XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '.csv', 'class_' . (int)$classID );
+                $writer = new XrowExtractWriter( $output, $columns, $separator, $escape, $newLine,
+                                                 array( 'class' => $class->attribute( 'identifier' ), 'site' => $siteName, 'created' => date( 'c' ) ) );
+                $parser = $writer->parser();
+                $name = XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '.' . $writer->extension(), 'class_' . (int)$classID );
                 $fh = fopen( $dir . '/' . $name, 'w' );
-                fwrite( $fh, implode( $separator, XrowExtractColumns::headerCells( $columns, $parser ) ) . $newLine );
+                fwrite( $fh, $writer->begin() );
                 $rows = 0;
-                $seen = array();
-                foreach ( $roots as $root )
+                $rowsPerLanguage = array();
+                foreach ( $languages as $locale )
                 {
-                    for ( $offset = 0; ; $offset += self::BATCH )
+                    // Each object once per language, even when the roots overlap
+                    $seen = array();
+                    $rowsPerLanguage[$locale] = 0;
+                    XrowExtractColumns::$language = $locale;
+                    foreach ( $roots as $root )
                     {
-                        $batch = eZContentObjectTreeNode::subTreeByNodeID( self::treeParams( $classID, $offset, self::BATCH ), $root->attribute( 'node_id' ) );
-                        if ( !$batch )
-                            break;
-                        foreach ( $batch as $treeNode )
+                        for ( $offset = 0; ; $offset += self::BATCH )
                         {
-                            $obj = $treeNode->attribute( 'object' );
-                            if ( !$obj instanceof eZContentObject || isset( $seen[$obj->attribute( 'id' )] ) )
-                                continue;
-                            $seen[$obj->attribute( 'id' )] = true;
-                            fwrite( $fh, implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $passwordHashes ) ) . $newLine );
-                            $rows++;
+                            $batch = eZContentObjectTreeNode::subTreeByNodeID( self::treeParams( $classID, $offset, self::BATCH, $locale ), $root->attribute( 'node_id' ) );
+                            if ( !$batch )
+                                break;
+                            foreach ( $batch as $treeNode )
+                            {
+                                $obj = $treeNode->attribute( 'object' );
+                                if ( !$obj instanceof eZContentObject || isset( $seen[$obj->attribute( 'id' )] ) )
+                                    continue;
+                                $seen[$obj->attribute( 'id' )] = true;
+                                fwrite( $fh, $writer->row( XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $passwordHashes ) ) );
+                                $rows++;
+                                $rowsPerLanguage[$locale]++;
+                            }
+                            // Keep memory flat on large sites
+                            eZContentObject::clearCache();
+                            if ( $progress )
+                                call_user_func( $progress, $class->attribute( 'identifier' ), $rows );
+                            if ( count( $batch ) < self::BATCH )
+                                break;
                         }
-                        // Keep memory flat on large sites
-                        eZContentObject::clearCache();
-                        if ( count( $batch ) < self::BATCH )
-                            break;
                     }
                 }
+                XrowExtractColumns::$language = null;
+                fwrite( $fh, $writer->end() );
                 fclose( $fh );
                 $files[] = $name;
                 $manifestClasses[] = array( 'file' => $name, 'class' => $class->attribute( 'identifier' ),
-                                            'name' => $class->attribute( 'name' ), 'rows' => $rows, 'columns' => count( $columns ) );
+                                            'name' => $class->attribute( 'name' ), 'rows' => $rows, 'columns' => count( $columns ),
+                                            'rows_per_language' => $rowsPerLanguage );
             }
 
             $manifest = array(
                 'site' => $siteName,
                 'created' => date( 'c' ),
-                'format' => array( 'archive' => $format, 'separator' => $separator === "\t" ? 'tab' : $separator,
+                'format' => array( 'archive' => $format, 'files' => $output, 'separator' => $separator === "\t" ? 'tab' : $separator,
                                    'quoted' => (bool)$escape, 'line_endings' => $newLine === "\r\n" ? 'CRLF' : ( $newLine === "\r" ? 'CR' : 'LF' ),
                                    'encoding' => 'UTF-8' ),
                 'nodes' => array_map( function ( $root ) {
@@ -251,6 +345,9 @@ class XrowExtractArchive
                 }, $roots ),
                 'classes' => $manifestClasses,
                 'password_hashes' => $passwordHashes,
+                'languages' => $languages,
+                'columns' => $columnChoice,
+                'plain_text' => $plainText,
                 'rows' => array_sum( array_map( function ( $c ) { return $c['rows']; }, $manifestClasses ) ),
                 'seconds' => round( microtime( true ) - $started, 2 ),
             );
@@ -277,9 +374,12 @@ class XrowExtractArchive
         $lines = array(
             'Content export of ' . $manifest['site'] . ', ' . $manifest['created'],
             '',
-            'One CSV file per class (UTF-8, separator "' . $manifest['format']['separator'] . '", '
-                . ( $manifest['format']['quoted'] ? 'quoted cells' : 'unquoted cells' ) . ', ' . $manifest['format']['line_endings'] . ' line endings).',
-            'Each row is one object at its main location; the first columns identify it',
+            $manifest['format']['files'] === 'csv'
+                ? 'One CSV file per class (UTF-8, separator "' . $manifest['format']['separator'] . '", '
+                  . ( $manifest['format']['quoted'] ? 'quoted cells' : 'unquoted cells' ) . ', ' . $manifest['format']['line_endings'] . ' line endings).'
+                : 'One ' . strtoupper( $manifest['format']['files'] ) . ' file per class (UTF-8): '
+                  . ( $manifest['format']['files'] === 'json' ? 'an array of objects keyed by column name.' : '<export> with <columns>, then an <object> of <field name="..."> per row.' ),
+            'Each row is one object at its main location in one language (' . implode( ', ', $manifest['languages'] ) . '); the first columns identify it',
             '(object id, remote id, main node, parent node, URL alias, published, modified),',
             'the others are the attributes of its class, named by their identifiers.',
             'manifest.json lists the nodes, the classes and the rows of each file.',
