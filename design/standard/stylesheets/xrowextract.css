@@ -486,3 +486,8 @@
 /* The preview's sample in JSON or XML */
 .xe-output-sample { margin: .75em 1em 0; }
 .xe-output-sample pre { max-height: 22em; overflow: auto; margin: 0 .8em .8em; white-space: pre; }
+
+/* The Filters card */
+.xe-date-range { margin-top: .5em; }
+.xe-date-range input { width: auto; }
+#xe-filter-name { width: 100%; box-sizing: border-box; }

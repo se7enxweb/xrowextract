@@ -4,6 +4,242 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Sort the rows by</source>
+        <translation>Sort the rows by</translation>
+    </message>
+    <message>
+        <source>Order</source>
+        <translation>Order</translation>
+    </message>
+    <message>
+        <source>Ascending</source>
+        <translation>Ascending</translation>
+    </message>
+    <message>
+        <source>Descending</source>
+        <translation>Descending</translation>
+    </message>
+    <message>
+        <source>Tree order keeps the order the node gives its children. With several languages, the rows of each language are sorted this way.</source>
+        <translation>Tree order keeps the order the node gives its children. With several languages, the rows of each language are sorted this way.</translation>
+    </message>
+    <message>
+        <source>Tree order (as the node sorts)</source>
+        <translation>Tree order (as the node sorts)</translation>
+    </message>
+    <message>
+        <source>Priority</source>
+        <translation>Priority</translation>
+    </message>
+    <message>
+        <source>Location in the tree</source>
+        <translation>Location in the tree</translation>
+    </message>
+    <message>
+        <source>Languages, filters and columns</source>
+        <translation>Languages, filters and columns</translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation>Filters</translation>
+    </message>
+    <message>
+        <source>%count active; they apply to every class.</source>
+        <translation>%count active; they apply to every class.</translation>
+    </message>
+    <message>
+        <source>Clear filters</source>
+        <translation>Clear filters</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Date</translation>
+    </message>
+    <message>
+        <source>Modified</source>
+        <translation>Modified</translation>
+    </message>
+    <message>
+        <source>Published</source>
+        <translation>Published</translation>
+    </message>
+    <message>
+        <source>Date range</source>
+        <translation>Date range</translation>
+    </message>
+    <message>
+        <source>From</source>
+        <translation>From</translation>
+    </message>
+    <message>
+        <source>To</source>
+        <translation>To</translation>
+    </message>
+    <message>
+        <source>Section</source>
+        <translation>Section</translation>
+    </message>
+    <message>
+        <source>Any section</source>
+        <translation>Any section</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Visibility</translation>
+    </message>
+    <message>
+        <source>Visible and hidden</source>
+        <translation>Visible and hidden</translation>
+    </message>
+    <message>
+        <source>Visible</source>
+        <translation>Visible</translation>
+    </message>
+    <message>
+        <source>Hidden</source>
+        <translation>Hidden</translation>
+    </message>
+    <message>
+        <source>Name contains</source>
+        <translation>Name contains</translation>
+    </message>
+    <message>
+        <source>Narrow the objects down by date, section, state, visibility, name or an attribute; counts, preview and download follow.</source>
+        <translation>Narrow the objects down by date, section, state, visibility, name or an attribute; counts, preview and download follow.</translation>
+    </message>
+    <message>
+        <source>active</source>
+        <translation>active</translation>
+    </message>
+    <message>
+        <source>From is used by &quot;Since&quot; and &quot;Between&quot;, To by &quot;Before&quot; and &quot;Between&quot;. In the future / in the past are for date attributes such as an event date.</source>
+        <translation>From is used by &quot;Since&quot; and &quot;Between&quot;, To by &quot;Before&quot; and &quot;Between&quot;. In the future / in the past are for date attributes such as an event date.</translation>
+    </message>
+    <message>
+        <source>Your last export of this class: %date.</source>
+        <translation>Your last export of this class: %date.</translation>
+    </message>
+    <message>
+        <source>No export of this class yet: &quot;changed since my last export&quot; takes everything.</source>
+        <translation>No export of this class yet: &quot;changed since my last export&quot; takes everything.</translation>
+    </message>
+    <message>
+        <source>Object state</source>
+        <translation>Object state</translation>
+    </message>
+    <message>
+        <source>Any state</source>
+        <translation>Any state</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>All</translation>
+    </message>
+    <message>
+        <source>Condition on an attribute</source>
+        <translation>Condition on an attribute</translation>
+    </message>
+    <message>
+        <source>Attribute</source>
+        <translation>Attribute</translation>
+    </message>
+    <message>
+        <source>No condition</source>
+        <translation>No condition</translation>
+    </message>
+    <message>
+        <source>Operator</source>
+        <translation>Operator</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Value</translation>
+    </message>
+    <message>
+        <source>For text, number, checkbox (1 or 0), e-mail, date and selection attributes. Dates can be written as 2026-09-29, or 7d, 2w, 3m, 1y for that long ago.</source>
+        <translation>For text, number, checkbox (1 or 0), e-mail, date and selection attributes. Dates can be written as 2026-09-29, or 7d, 2w, 3m, 1y for that long ago.</translation>
+    </message>
+    <message>
+        <source>Any time</source>
+        <translation>Any time</translation>
+    </message>
+    <message>
+        <source>Today</source>
+        <translation>Today</translation>
+    </message>
+    <message>
+        <source>Last 7 days</source>
+        <translation>Last 7 days</translation>
+    </message>
+    <message>
+        <source>Last 30 days</source>
+        <translation>Last 30 days</translation>
+    </message>
+    <message>
+        <source>Last 90 days</source>
+        <translation>Last 90 days</translation>
+    </message>
+    <message>
+        <source>Last year</source>
+        <translation>Last year</translation>
+    </message>
+    <message>
+        <source>Since</source>
+        <translation>Since</translation>
+    </message>
+    <message>
+        <source>Before</source>
+        <translation>Before</translation>
+    </message>
+    <message>
+        <source>Between</source>
+        <translation>Between</translation>
+    </message>
+    <message>
+        <source>In the future</source>
+        <translation>In the future</translation>
+    </message>
+    <message>
+        <source>In the past</source>
+        <translation>In the past</translation>
+    </message>
+    <message>
+        <source>Changed since my last export</source>
+        <translation>Changed since my last export</translation>
+    </message>
+    <message>
+        <source>contains</source>
+        <translation>contains</translation>
+    </message>
+    <message>
+        <source>starts with</source>
+        <translation>starts with</translation>
+    </message>
+    <message>
+        <source>is</source>
+        <translation>is</translation>
+    </message>
+    <message>
+        <source>is not</source>
+        <translation>is not</translation>
+    </message>
+    <message>
+        <source>greater than</source>
+        <translation>greater than</translation>
+    </message>
+    <message>
+        <source>less than</source>
+        <translation>less than</translation>
+    </message>
+    <message>
+        <source>is empty</source>
+        <translation>is empty</translation>
+    </message>
+    <message>
+        <source>is not empty</source>
+        <translation>is not empty</translation>
+    </message>
+    <message>
         <source>Reset to defaults</source>
         <translation>Reset to defaults</translation>
     </message>

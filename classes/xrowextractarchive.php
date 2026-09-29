@@ -13,6 +13,9 @@ class XrowExtractArchive
 {
     const BATCH = 100;
 
+    /** The kernel AttributeFilter every count and fetch of the archive uses (XrowExtractFilters), or false. */
+    public static $attributeFilter = false;
+
     /** The archive formats, each with whether this server can write it and why not. */
     public static function formats()
     {
@@ -191,6 +194,8 @@ class XrowExtractArchive
             'MainNodeOnly' => true,
             'IgnoreVisibility' => true,
         );
+        if ( self::$attributeFilter )
+            $params['AttributeFilter'] = self::$attributeFilter;
         if ( $language )
         {
             // Only the objects translated into this language, read in it
@@ -239,6 +244,7 @@ class XrowExtractArchive
             foreach ( $roots as $root )
                 $counts[$locale] += (int)eZContentObjectTreeNode::subTreeCountByNodeID(
                     array( 'MainNodeOnly' => true, 'IgnoreVisibility' => true, 'Language' => $locale,
+                           'AttributeFilter' => self::$attributeFilter,
                            'ExtendedAttributeFilter' => XrowExtractTranslationFilter::params( $locale ) ), $root->attribute( 'node_id' ) );
         }
         return $counts;

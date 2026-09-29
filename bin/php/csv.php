@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
-    '[languages:][format:][output:][preview;][list-classes][list-columns][user:]',
+    '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][output:][preview;][list-classes][list-columns][user:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export)',
@@ -46,6 +46,17 @@ $options = $script->getOptions(
         'unquoted'     => 'Do not quote cells (line breaks are removed; a separator in a value shifts the columns)',
         'languages'    => 'all (default) or a comma list of locales (eng-US,ger-DE): one row per object per language',
         'format'       => 'csv (default), json (an array of objects), xml',
+        'date-field'   => 'The date the date filters use: modified (default), published, or a date attribute identifier',
+        'since'        => 'Only objects dated on or after this: 2026-09-01, 2026-09-01 12:00, or 7d / 2w / 3m / 1y ago',
+        'before'       => 'Only objects dated on or before this (same forms)',
+        'date'         => 'A date range by name: today, 7, 30, 90, 365 (last days), future, past',
+        'section'      => 'Only objects in this section (id or identifier)',
+        'state'        => 'Only objects in this object state (id)',
+        'visibility'   => 'visible or hidden',
+        'name'         => 'Only objects whose name contains this',
+        'sort'         => 'tree (default: as the node sorts), name, published, modified, priority, path, or an attribute identifier',
+        'order'        => 'asc (default) or desc',
+        'where'        => 'A condition on an attribute: "<identifier> <op> <value>", op: contains, starts, eq (=), ne (!=), gt (>), lt (<), empty, filled',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
         'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
         'list-classes' => 'List the classes with how many objects each has in the selection',
@@ -108,10 +119,57 @@ else
         if ( !in_array( $locale, $contentLanguages, true ) )
             $fail( "Unknown language $locale (--languages). Languages: " . implode( ', ', $contentLanguages ) . '.' );
 }
-$countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly )
+// Filters, as in the view
+$filterValues = array();
+$dateMode = 'any';
+if ( $options['since'] && $options['before'] )
+    $dateMode = 'between';
+elseif ( $options['since'] )
+    $dateMode = 'since';
+elseif ( $options['before'] )
+    $dateMode = 'before';
+if ( $options['date'] )
+{
+    if ( !in_array( $options['date'], array( 'today', '7', '30', '90', '365', 'future', 'past' ), true ) )
+        $fail( '--date is today, 7, 30, 90, 365, future or past.' );
+    $dateMode = $options['date'];
+}
+foreach ( array( 'since', 'before' ) as $dateOption )
+    if ( $options[$dateOption] && XrowExtractFilters::timestamp( $options[$dateOption] ) === false )
+        $fail( "Cannot read the date in --$dateOption: {$options[$dateOption]}" );
+$filterValues['date_mode'] = $dateMode;
+$filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['since'] ) ) : '';
+$filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
+$filterValues['date_field'] = $options['date-field'] ? $options['date-field'] : 'modified';
+if ( $options['section'] )
+{
+    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( (int)$options['section'] ) : eZSection::fetchByIdentifier( $options['section'] );
+    if ( !$section )
+        $fail( "No section {$options['section']} (--section)." );
+    $filterValues['section'] = (int)$section->attribute( 'id' );
+}
+$filterValues['state'] = (int)$options['state'];
+if ( $options['visibility'] && !in_array( $options['visibility'], array( 'visible', 'hidden' ), true ) )
+    $fail( '--visibility is visible or hidden.' );
+$filterValues['visibility'] = $options['visibility'] ? $options['visibility'] : 'any';
+$filterValues['name'] = (string)$options['name'];
+if ( $options['where'] )
+{
+    $ops = array( '=' => 'eq', '!=' => 'ne', '>' => 'gt', '<' => 'lt' );
+    if ( !preg_match( '/^\s*([A-Za-z0-9_]+)\s+(contains|starts|eq|ne|gt|lt|empty|filled|=|!=|>|<)\s*(.*)$/', $options['where'], $m ) )
+        $fail( '--where is "<identifier> <op> <value>", op: contains, starts, eq, ne, gt, lt, empty, filled.' );
+    $filterValues['where_attribute'] = $m[1];
+    $filterValues['where_op'] = isset( $ops[$m[2]] ) ? $ops[$m[2]] : $m[2];
+    $filterValues['where_value'] = trim( $m[3], " \"'" );
+}
+$filters = new XrowExtractFilters( $filterValues );
+$attributeFilter = false;   // set once the class is known
+
+$countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly, &$attributeFilter, $filters )
 {
     $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, $locale !== false, $locale, 'include', array( (int)$classID ),
-                                                                 false, $depth, $depthOperator, true, false, $mainOnly,
+                                                                 $attributeFilter === false ? $filters->attributeFilter( false ) : $attributeFilter,
+                                                                 $depth, $depthOperator, true, false, $mainOnly,
                                                                  $locale !== false ? XrowExtractTranslationFilter::params( $locale ) : false, false );
     return isset( $result['result'] ) ? (int)$result['result'] : 0;
 };
@@ -140,6 +198,9 @@ $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)
 if ( !$class instanceof eZContentClass )
     $fail( "No class {$options['class']} (--class)." );
 $classID = (int)$class->attribute( 'id' );
+if ( $filters->values['where_attribute'] !== '' && !array_key_exists( $filters->values['where_attribute'], XrowExtractFilters::classFields( $classID ) ) )
+    $fail( "--where: {$filterValues['where_attribute']} is not a text, number, date or selection attribute of " . $class->attribute( 'identifier' ) . '.' );
+$attributeFilter = $filters->attributeFilter( $class->attribute( 'identifier' ) );
 $meta = XrowExtractColumns::attributeMeta( $classID );
 $extras = XrowExtractColumns::extraAttributes();
 $allowHash = XrowExtractColumns::allowPasswordHash();
@@ -247,6 +308,14 @@ if ( $scope === 'node' )
     $sort = $node->sortArray();
     $sortBy = $sort[0];
 }
+if ( $options['order'] && !in_array( $options['order'], array( 'asc', 'desc' ), true ) )
+    $fail( '--order is asc or desc.' );
+if ( $options['sort'] && $options['sort'] !== 'tree' )
+{
+    if ( !array_key_exists( $options['sort'], XrowExtractFilters::sortFields() ) && !array_key_exists( $options['sort'], XrowExtractFilters::classFields( $classID ) ) )
+        $fail( "--sort: {$options['sort']} is not a sort field or a sortable attribute of " . $class->attribute( 'identifier' ) . '.' );
+    $sortBy = XrowExtractFilters::sortParam( $options['sort'], $options['order'] !== 'desc', $classID, $class->attribute( 'identifier' ), $sortBy );
+}
 $languageCounts = array();
 foreach ( $languages as $locale )
     $languageCounts[$locale] = $countIn( $classID, $locale );
@@ -292,7 +361,7 @@ foreach ( $languages as $locale )
     {
         $take = min( 100, $wantRows - $written );
         $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator,
-                                                                $classID, false, XrowExtractTranslationFilter::params( $locale ), 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+                                                                $classID, $attributeFilter, XrowExtractTranslationFilter::params( $locale ), 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
         $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
         foreach ( $batch as $treeNode )
         {

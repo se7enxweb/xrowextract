@@ -141,10 +141,115 @@
             {/if}
         </section>
 
-        {* 2. How the file is written *}
-        <section class="xe-card" aria-labelledby="xe-card-format">
+        {* 2. Filters *}
+        <section class="xe-card" aria-labelledby="xe-card-filters">
             <header class="xe-card-head">
                 <span class="xe-step">2</span>
+                <div>
+                    <h2 id="xe-card-filters">{'Filters'|i18n('design/standard/extract')}</h2>
+                    <p>{'Narrow the objects down by date, section, state, visibility, name or an attribute; counts, preview and download follow.'|i18n('design/standard/extract')}</p>
+                </div>
+                <span class="xe-count"><strong>{$FilterCount}</strong> {'active'|i18n('design/standard/extract')}</span>
+            </header>
+            <input type="hidden" name="FilterSelection" value="1" />
+            <div class="xe-grid">
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-filter-date-field">{'Date'|i18n('design/standard/extract')}</label>
+                    <div class="xe-inline">
+                        <select name="Filter[date_field]" id="xe-filter-date-field" class="xe-autosubmit">
+                            <option value="modified"{if $Filters.date_field|eq( 'modified' )} selected{/if}>{'Modified'|i18n('design/standard/extract')}</option>
+                            <option value="published"{if $Filters.date_field|eq( 'published' )} selected{/if}>{'Published'|i18n('design/standard/extract')}</option>
+                            {foreach $FilterFields as $field}{if $field.is_date}
+                            <option value="{$field.identifier|wash}"{if $Filters.date_field|eq( $field.identifier )} selected{/if}>{$field.name|wash} ({$field.identifier|wash})</option>
+                            {/if}{/foreach}
+                        </select>
+                        <select name="Filter[date_mode]" class="xe-autosubmit" aria-label="{'Date range'|i18n('design/standard/extract')|wash}">
+                            {foreach $FilterDateModes as $mode => $label}
+                            <option value="{$mode|wash}"{if $Filters.date_mode|eq( $mode )} selected{/if}>{$label|wash}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                    <div class="xe-range xe-date-range">
+                        <label>{'From'|i18n('design/standard/extract')} <input type="date" name="Filter[date_from]" value="{$Filters.date_from|wash}" class="xe-autosubmit" /></label>
+                        <label>{'To'|i18n('design/standard/extract')} <input type="date" name="Filter[date_to]" value="{$Filters.date_to|wash}" class="xe-autosubmit" /></label>
+                    </div>
+                    <p class="xe-help">{'From is used by "Since" and "Between", To by "Before" and "Between". In the future / in the past are for date attributes such as an event date.'|i18n('design/standard/extract')}
+                    {if $LastExport}{'Your last export of this class: %date.'|i18n('design/standard/extract',, hash( '%date', $LastExport|l10n( 'shortdatetime' ) ))}{else}{'No export of this class yet: "changed since my last export" takes everything.'|i18n('design/standard/extract')}{/if}</p>
+                </div>
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-filter-section">{'Section'|i18n('design/standard/extract')}</label>
+                    <select name="Filter[section]" id="xe-filter-section" class="xe-autosubmit">
+                        <option value="0">{'Any section'|i18n('design/standard/extract')}</option>
+                        {foreach $FilterSections as $section}
+                        <option value="{$section.id}"{if $Filters.section|eq( $section.id )} selected{/if}>{$section.name|wash}</option>
+                        {/foreach}
+                    </select>
+                    <label class="xe-label" for="xe-filter-state" style="margin-top: .8em">{'Object state'|i18n('design/standard/extract')}</label>
+                    <select name="Filter[state]" id="xe-filter-state" class="xe-autosubmit">
+                        <option value="0">{'Any state'|i18n('design/standard/extract')}</option>
+                        {foreach $FilterStates as $state}
+                        <option value="{$state.id}"{if $Filters.state|eq( $state.id )} selected{/if}>{$state.name|wash}</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="xe-field">
+                    <span class="xe-label" id="xe-filter-vis-label">{'Visibility'|i18n('design/standard/extract')}</span>
+                    <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-filter-vis-label">
+                        <label><input type="radio" name="Filter[visibility]" value="any" class="xe-autosubmit"{if $Filters.visibility|eq( 'any' )} checked{/if} /><span>{'All'|i18n('design/standard/extract')}</span></label>
+                        <label><input type="radio" name="Filter[visibility]" value="visible" class="xe-autosubmit"{if $Filters.visibility|eq( 'visible' )} checked{/if} /><span>{'Visible'|i18n('design/standard/extract')}</span></label>
+                        <label><input type="radio" name="Filter[visibility]" value="hidden" class="xe-autosubmit"{if $Filters.visibility|eq( 'hidden' )} checked{/if} /><span>{'Hidden'|i18n('design/standard/extract')}</span></label>
+                    </div>
+                    <label class="xe-label" for="xe-filter-name" style="margin-top: .8em">{'Name contains'|i18n('design/standard/extract')}</label>
+                    <input type="search" name="Filter[name]" id="xe-filter-name" value="{$Filters.name|wash}" class="xe-autosubmit" />
+                </div>
+            </div>
+            <div class="xe-field">
+                <span class="xe-label">{'Condition on an attribute'|i18n('design/standard/extract')}</span>
+                <div class="xe-inline">
+                    <select name="Filter[where_attribute]" class="xe-autosubmit" aria-label="{'Attribute'|i18n('design/standard/extract')|wash}">
+                        <option value="">{'No condition'|i18n('design/standard/extract')}</option>
+                        {foreach $FilterFields as $field}
+                        <option value="{$field.identifier|wash}"{if $Filters.where_attribute|eq( $field.identifier )} selected{/if}>{$field.name|wash} ({$field.identifier|wash})</option>
+                        {/foreach}
+                    </select>
+                    <select name="Filter[where_op]" class="xe-autosubmit" aria-label="{'Operator'|i18n('design/standard/extract')|wash}">
+                        {foreach $FilterOperators as $op => $label}
+                        <option value="{$op|wash}"{if $Filters.where_op|eq( $op )} selected{/if}>{$label|wash}</option>
+                        {/foreach}
+                    </select>
+                    <input type="text" name="Filter[where_value]" value="{$Filters.where_value|wash}" class="xe-autosubmit" aria-label="{'Value'|i18n('design/standard/extract')|wash}" placeholder="{'value'|i18n('design/standard/extract')|wash}" />
+                    <input class="button" type="submit" name="ClearFilters" value="{'Clear filters'|i18n('design/standard/extract')}"{if $FilterCount|eq( 0 )} disabled{/if} />
+                </div>
+                <p class="xe-help">{'For text, number, checkbox (1 or 0), e-mail, date and selection attributes. Dates can be written as 2026-09-29, or 7d, 2w, 3m, 1y for that long ago.'|i18n('design/standard/extract')}</p>
+            </div>
+            <div class="xe-field">
+                <label class="xe-label" for="xe-sort-field">{'Sort the rows by'|i18n('design/standard/extract')}</label>
+                <div class="xe-inline">
+                    <select name="SortField" id="xe-sort-field" class="xe-autosubmit">
+                        {foreach $SortFields as $id => $label}
+                        <option value="{$id|wash}"{if $SortField|eq( $id )} selected{/if}>{$label|wash}</option>
+                        {/foreach}
+                        {if $FilterFields|count}
+                        <optgroup label="{'Class attributes'|i18n('design/standard/extract')|wash}">
+                        {foreach $FilterFields as $field}
+                        <option value="{$field.identifier|wash}"{if $SortField|eq( $field.identifier )} selected{/if}>{$field.name|wash} ({$field.identifier|wash})</option>
+                        {/foreach}
+                        </optgroup>
+                        {/if}
+                    </select>
+                    <div class="xe-segmented" role="radiogroup" aria-label="{'Order'|i18n('design/standard/extract')|wash}">
+                        <label><input type="radio" name="SortOrder" value="asc" class="xe-autosubmit"{if $SortAscending} checked{/if} /><span>{'Ascending'|i18n('design/standard/extract')}</span></label>
+                        <label><input type="radio" name="SortOrder" value="desc" class="xe-autosubmit"{if $SortAscending|not} checked{/if} /><span>{'Descending'|i18n('design/standard/extract')}</span></label>
+                    </div>
+                </div>
+                <p class="xe-help">{'Tree order keeps the order the node gives its children. With several languages, the rows of each language are sorted this way.'|i18n('design/standard/extract')}</p>
+            </div>
+        </section>
+
+        {* 3. How the file is written *}
+        <section class="xe-card" aria-labelledby="xe-card-format">
+            <header class="xe-card-head">
+                <span class="xe-step">3</span>
                 <div>
                     <h2 id="xe-card-format">{'File format'|i18n('design/standard/extract')}</h2>
                     <p>{'How the cells and rows are separated.'|i18n('design/standard/extract')}</p>
@@ -201,7 +306,7 @@
         {* 3. The columns *}
         <section class="xe-card" aria-labelledby="xe-card-columns">
             <header class="xe-card-head">
-                <span class="xe-step">3</span>
+                <span class="xe-step">4</span>
                 <div>
                     <h2 id="xe-card-columns">{'Columns'|i18n('design/standard/extract')}</h2>
                     <p>{'Add the class attributes and special columns the file should have; order and names are set in the list below.'|i18n('design/standard/extract')}</p>

@@ -94,6 +94,20 @@ if ( $http->hasPostVariable( 'LanguageSelection' ) )
 if ( !isset( $state['plain_text'] ) )
     $state['plain_text'] = false;
 
+// Filters that work for every class; applied to every count and to the build
+if ( $http->hasPostVariable( 'ClearFilters' ) )
+    $state['filters'] = array();
+elseif ( $http->hasPostVariable( 'FilterSelection' ) )
+    $state['filters'] = (array)( $http->hasPostVariable( 'Filter' ) ? $http->postVariable( 'Filter' ) : array() );
+$archiveFilters = new XrowExtractFilters( isset( $state['filters'] ) ? (array)$state['filters'] : array() );
+if ( !in_array( $archiveFilters->values['date_field'], array( 'published', 'modified' ), true ) )
+    $archiveFilters->values['date_field'] = 'modified';
+if ( in_array( $archiveFilters->values['date_mode'], array( 'future', 'since_last' ), true ) )
+    $archiveFilters->values['date_mode'] = 'any';
+$archiveFilters->values['where_attribute'] = '';
+$state['filters'] = $archiveFilters->values;
+XrowExtractArchive::$attributeFilter = $archiveFilters->attributeFilter( false );
+
 // What the selection holds: rows per class in the chosen languages
 $resolved = XrowExtractArchive::resolveNodes( $state['nodes'] );
 $roots = XrowExtractArchive::exportRoots( $resolved );
@@ -265,6 +279,12 @@ foreach ( $columnChoices as $id => $choice )
     $choices[] = array( 'id' => $id, 'name' => $choice[0], 'description' => $choice[1] );
 $tpl->setVariable( 'column_choices', $choices );
 $tpl->setVariable( 'output_formats', array_values( XrowExtractWriter::formats() ) );
+$tpl->setVariable( 'filters', $archiveFilters->values );
+$tpl->setVariable( 'filter_count', $archiveFilters->activeCount() );
+$archiveDateModes = XrowExtractFilters::dateModes();
+unset( $archiveDateModes['future'], $archiveDateModes['since_last'] );
+$tpl->setVariable( 'filter_date_modes', $archiveDateModes );
+$tpl->setVariable( 'filter_sections', eZSection::fetchList() );
 $tpl->setVariable( 'TabNotation', '\t' );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
 $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );

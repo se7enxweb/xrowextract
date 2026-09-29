@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][output:][dry-run][list-sets][list-formats][list-classes][user:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][date-field:][since:][before:][date:][section:][visibility:][name:][output:][dry-run][list-sets][list-formats][list-classes][user:]',
     '',
     array(
         'set'             => 'A ready-made node set (default sites: the default site, see export.ini [SiteArchive]); --list-sets shows them',
@@ -42,6 +42,13 @@ $options = $script->getOptions(
         'columns'         => 'standard (default: identity and every attribute), migration, attributes',
         'plain-text'      => 'Add the plain text of every rich text field',
         'files'           => 'The files in the archive: csv (default), json, xml',
+        'date-field'      => 'modified (default) or published, for --since / --before / --date',
+        'since'           => 'Only objects dated on or after this: 2026-09-01, or 7d / 2w / 3m / 1y ago',
+        'before'          => 'Only objects dated on or before this',
+        'date'            => 'today, 7, 30, 90, 365 (last days) or past',
+        'section'         => 'Only objects in this section (id or identifier)',
+        'visibility'      => 'visible or hidden',
+        'name'            => 'Only objects whose name contains this',
         'password-hashes' => 'Add the password hash and hash type to classes with a user account (needs the policy xrowextract/password_hash)',
         'output'          => 'File, or directory to write the archive into (default: the current directory, named <site>_export_<date>.<format>)',
         'dry-run'         => 'Show what would be exported, write nothing',
@@ -102,6 +109,35 @@ foreach ( $resolved as $item )
         $fail( "Node {$item['id']} does not exist or $login may not read it." );
 }
 $roots = XrowExtractArchive::exportRoots( $resolved );
+// Filters that work for every class
+$filterValues = array( 'date_field' => $options['date-field'] === 'published' ? 'published' : 'modified' );
+if ( $options['date-field'] && !in_array( $options['date-field'], array( 'published', 'modified' ), true ) )
+    $fail( '--date-field is modified or published.' );
+foreach ( array( 'since', 'before' ) as $dateOption )
+    if ( $options[$dateOption] && XrowExtractFilters::timestamp( $options[$dateOption] ) === false )
+        $fail( "Cannot read the date in --$dateOption: {$options[$dateOption]}" );
+$filterValues['date_mode'] = $options['since'] && $options['before'] ? 'between' : ( $options['since'] ? 'since' : ( $options['before'] ? 'before' : 'any' ) );
+if ( $options['date'] )
+{
+    if ( !in_array( $options['date'], array( 'today', '7', '30', '90', '365', 'past' ), true ) )
+        $fail( '--date is today, 7, 30, 90, 365 or past.' );
+    $filterValues['date_mode'] = $options['date'];
+}
+$filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['since'] ) ) : '';
+$filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
+if ( $options['section'] )
+{
+    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( (int)$options['section'] ) : eZSection::fetchByIdentifier( $options['section'] );
+    if ( !$section )
+        $fail( "No section {$options['section']} (--section)." );
+    $filterValues['section'] = (int)$section->attribute( 'id' );
+}
+if ( $options['visibility'] && !in_array( $options['visibility'], array( 'visible', 'hidden' ), true ) )
+    $fail( '--visibility is visible or hidden.' );
+$filterValues['visibility'] = $options['visibility'] ? $options['visibility'] : 'any';
+$filterValues['name'] = (string)$options['name'];
+$archiveFilters = new XrowExtractFilters( $filterValues );
+XrowExtractArchive::$attributeFilter = $archiveFilters->attributeFilter( false );
 $contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
 if ( !$options['languages'] || $options['languages'] === 'all' )
     $languages = $contentLanguages;

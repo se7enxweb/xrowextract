@@ -146,7 +146,7 @@
             <header class="xe-card-head">
                 <span class="xe-step">3</span>
                 <div>
-                    <h2 id="xe-card-languages">{'Languages and columns'|i18n('design/standard/extract')}</h2>
+                    <h2 id="xe-card-languages">{'Languages, filters and columns'|i18n('design/standard/extract')}</h2>
                     <p>{'Which translations become rows, and which columns each file has.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
@@ -174,6 +174,40 @@
                     {/foreach}
                 </ul>
                 {if $state.languages|count|eq( 0 )}<p class="xe-note xe-note-bad">{'No language chosen: the archive would be empty.'|i18n('design/standard/extract')}</p>{/if}
+            </div>
+            <input type="hidden" name="FilterSelection" value="1" />
+            <div class="xe-field">
+                <div class="xe-columns-head">
+                    <span class="xe-label">{'Filters'|i18n('design/standard/extract')}</span>
+                    <span class="xe-columns-hint">{'%count active; they apply to every class.'|i18n('design/standard/extract',, hash( '%count', $filter_count ))}</span>
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="ClearFilters" value="{'Clear filters'|i18n('design/standard/extract')}"{if $filter_count|eq( 0 )} disabled{/if} />
+                </div>
+                <div class="xe-inline">
+                    <select name="Filter[date_field]" class="xe-autosubmit" aria-label="{'Date'|i18n('design/standard/extract')|wash}">
+                        <option value="modified"{if $filters.date_field|eq( 'modified' )} selected{/if}>{'Modified'|i18n('design/standard/extract')}</option>
+                        <option value="published"{if $filters.date_field|eq( 'published' )} selected{/if}>{'Published'|i18n('design/standard/extract')}</option>
+                    </select>
+                    <select name="Filter[date_mode]" class="xe-autosubmit" aria-label="{'Date range'|i18n('design/standard/extract')|wash}">
+                        {foreach $filter_date_modes as $mode => $label}
+                        <option value="{$mode|wash}"{if $filters.date_mode|eq( $mode )} selected{/if}>{$label|wash}</option>
+                        {/foreach}
+                    </select>
+                    <label>{'From'|i18n('design/standard/extract')} <input type="date" name="Filter[date_from]" value="{$filters.date_from|wash}" class="xe-autosubmit" /></label>
+                    <label>{'To'|i18n('design/standard/extract')} <input type="date" name="Filter[date_to]" value="{$filters.date_to|wash}" class="xe-autosubmit" /></label>
+                    <select name="Filter[section]" class="xe-autosubmit" aria-label="{'Section'|i18n('design/standard/extract')|wash}">
+                        <option value="0">{'Any section'|i18n('design/standard/extract')}</option>
+                        {foreach $filter_sections as $section}
+                        <option value="{$section.id}"{if $filters.section|eq( $section.id )} selected{/if}>{$section.name|wash}</option>
+                        {/foreach}
+                    </select>
+                    <select name="Filter[visibility]" class="xe-autosubmit" aria-label="{'Visibility'|i18n('design/standard/extract')|wash}">
+                        <option value="any"{if $filters.visibility|eq( 'any' )} selected{/if}>{'Visible and hidden'|i18n('design/standard/extract')}</option>
+                        <option value="visible"{if $filters.visibility|eq( 'visible' )} selected{/if}>{'Visible'|i18n('design/standard/extract')}</option>
+                        <option value="hidden"{if $filters.visibility|eq( 'hidden' )} selected{/if}>{'Hidden'|i18n('design/standard/extract')}</option>
+                    </select>
+                    <input type="search" name="Filter[name]" value="{$filters.name|wash}" class="xe-autosubmit" placeholder="{'Name contains'|i18n('design/standard/extract')|wash}" />
+                </div>
             </div>
             <div class="xe-field">
                 <span class="xe-label" id="xe-a-cols-label">{'Columns'|i18n('design/standard/extract')}</span>

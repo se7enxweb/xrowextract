@@ -269,6 +269,25 @@ if ( $Scope === 'all' )
 }
 $tpl->setVariable( 'Scope', $Scope );
 
+// Filters: from the form (FilterSelection marks it), cleared, or as saved
+if ( $http->hasPostVariable( 'ClearFilters' ) )
+    $Filters = new XrowExtractFilters();
+elseif ( $http->hasPostVariable( 'FilterSelection' ) )
+    $Filters = new XrowExtractFilters( (array)( $http->hasPostVariable( 'Filter' ) ? $http->postVariable( 'Filter' ) : array() ) );
+else
+    $Filters = new XrowExtractFilters( isset( $sessionConfig['Filters'] ) && is_array( $sessionConfig['Filters'] ) ? $sessionConfig['Filters'] : array() );
+$sessionConfig['Filters'] = $Filters->values;
+
+// Sort: the node's own order by default, or a field / attribute, ascending or descending
+$SortField = $http->hasPostVariable( 'SortField' ) ? (string)$http->postVariable( 'SortField' ) : ( isset( $sessionConfig['SortField'] ) ? $sessionConfig['SortField'] : 'tree' );
+if ( !preg_match( '/^[A-Za-z0-9_]+$/', $SortField ) )
+    $SortField = 'tree';
+$SortAscending = $http->hasPostVariable( 'SortOrder' ) ? $http->postVariable( 'SortOrder' ) !== 'desc' : ( isset( $sessionConfig['SortAscending'] ) ? (bool)$sessionConfig['SortAscending'] : true );
+$sessionConfig['SortField'] = $SortField;
+$sessionConfig['SortAscending'] = $SortAscending;
+// The parts that work for every class (dates of the object, section, state, visibility, name)
+$GenericAttributeFilter = $Filters->attributeFilter( false, null );
+
 // No class chosen and none configured: the one with the most objects in this selection
 if ( $pickBestClass )
 {
@@ -279,7 +298,7 @@ if ( $pickBestClass )
         if ( $exportClassFilter && !in_array( $candidate->attribute( 'id' ), $exportClassFilter ) && !in_array( $candidate->attribute( 'identifier' ), $exportClassFilter ) )
             continue;
         $candidateCount = eZContentFunctionCollection::fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array( $candidate->attribute( 'id' ) ),
-                                                                             false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+                                                                             $GenericAttributeFilter, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
         $candidateCount = isset( $candidateCount['result'] ) ? (int)$candidateCount['result'] : 0;
         if ( $candidateCount > $bestCount )
         {
@@ -292,6 +311,10 @@ if ( $pickBestClass )
     $FormatColumns = XrowExtractCatalogue::formatColumns( $Class_id );
 }
 $sessionConfig['Class_id'] = $Class_id;
+// The full filter for this class: also the date attributes and the condition on an attribute
+$filterClass = eZContentClass::fetch( $Class_id );
+$LastExport = (int)eZPreferences::value( XrowExtractFilters::lastExportPreference( $Class_id ) );
+$AttributeFilter = $Filters->attributeFilter( $filterClass ? $filterClass->attribute( 'identifier' ) : false, $LastExport );
 
 // Languages: every content language by default; the form posts the ticked ones (LanguageSelection marks it)
 $ContentLanguages = XrowExtractColumns::contentLanguages();
@@ -540,6 +563,26 @@ $tpl->setVariable( 'ChosenClass', $chosenClass ? array( 'identifier' => $chosenC
                                                         'name' => $chosenClass->attribute( 'name' ),
                                                         'attributes' => count( $chosenClass->dataMap() ) ) : false );
 $tpl->setVariable( 'ExtraAttributes', $ExtraAttributes );
+// The Filters card
+$tpl->setVariable( 'Filters', $Filters->values );
+$tpl->setVariable( 'FilterCount', $Filters->activeCount() );
+$tpl->setVariable( 'FilterDateModes', XrowExtractFilters::dateModes() );
+$tpl->setVariable( 'FilterOperators', XrowExtractFilters::operators() );
+$tpl->setVariable( 'FilterFields', array_values( XrowExtractFilters::classFields( $Class_id ) ) );
+$tpl->setVariable( 'FilterSections', eZSection::fetchList() );
+$filterStates = array();
+foreach ( eZContentObjectStateGroup::fetchByOffset( 50, 0 ) as $stateGroup )
+{
+    if ( $stateGroup->attribute( 'is_internal' ) && $stateGroup->attribute( 'identifier' ) !== 'ez_lock' )
+        continue;
+    foreach ( $stateGroup->attribute( 'states' ) as $state )
+        $filterStates[] = array( 'id' => (int)$state->attribute( 'id' ), 'name' => $stateGroup->attribute( 'current_translation' )->attribute( 'name' ) . ': ' . $state->attribute( 'current_translation' )->attribute( 'name' ) );
+}
+$tpl->setVariable( 'FilterStates', $filterStates );
+$tpl->setVariable( 'LastExport', $LastExport );
+$tpl->setVariable( 'SortField', $SortField );
+$tpl->setVariable( 'SortAscending', $SortAscending );
+$tpl->setVariable( 'SortFields', XrowExtractFilters::sortFields() );
 // The picker: special columns by group, attribute formats, column sets
 $ExtraGroups = array();
 foreach ( XrowExtractCatalogue::groups() as $group => $label )
@@ -560,7 +603,7 @@ $tpl->setVariable( 'Escape', $Escape ? 1 : 0 );
 $fCollection = new eZContentFunctionCollection();
 $list = $fCollection->fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array(
     $Class_id
-), false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+), $AttributeFilter, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
 
 $tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
 
@@ -570,7 +613,7 @@ $LanguageCounts = array();
 foreach ( $ContentLanguages as $locale => $language )
 {
     $languageCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, true, $locale, 'include', array( $Class_id ),
-                                                         false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly,
+                                                         $AttributeFilter, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly,
                                                          XrowExtractTranslationFilter::params( $locale ), false );
     $LanguageCounts[$locale] = isset( $languageCount['result'] ) ? (int)$languageCount['result'] : 0;
     $LanguageChoices[] = array_merge( $language, array( 'count' => $LanguageCounts[$locale],
@@ -602,7 +645,7 @@ foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, tru
     if ( !$hasPreFilledData )
     {
         $classCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array( $class->attribute( 'id' ) ),
-                                                          false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
+                                                          $GenericAttributeFilter, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
         $count = isset( $classCount['result'] ) ? (int)$classCount['result'] : 0;
     }
     $ClassChoices[] = array( 'id' => (int)$class->attribute( 'id' ), 'name' => $class->attribute( 'name' ), 'count' => $count );
@@ -709,6 +752,8 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             $sortBy = $node->sortArray();
             $sortBy = $sortBy[0];
         }
+        if ( $SortField !== 'tree' )
+            $sortBy = XrowExtractFilters::sortParam( $SortField, $SortAscending, $Class_id, ( $sortClass = eZContentClass::fetch( $Class_id ) ) ? $sortClass->attribute( 'identifier' ) : false, $sortBy );
         $exportTotal = $Limit ? min( $Limit, max( 0, $translationRows - $Offset ) ) : max( 0, $translationRows - $Offset );
 
         // The chosen languages one after the other; skip and take count over all of them.
@@ -726,7 +771,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             for ( $batchOffset = $skip; $written < $maxRows; $batchOffset += 100 )
             {
                 $take = min( 100, $maxRows - $written );
-                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, false, XrowExtractTranslationFilter::params( $locale ), 'include', array(
+                $result = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, true, $locale, $batchOffset, $take, $depth, $depthOperator, $Class_id, $AttributeFilter, XrowExtractTranslationFilter::params( $locale ), 'include', array(
                     $Class_id
                 ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
                 $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
@@ -778,6 +823,8 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         header( 'Content-Length: ' . strlen( $data ) );
         header( 'Content-Disposition: attachment; filename="' . $file . '"' );
 
+        // "Changed since my last export" starts from here next time
+        eZPreferences::setValue( XrowExtractFilters::lastExportPreference( $Class_id ), time() );
         while ( @ob_end_clean() );
 
         echo $data;
