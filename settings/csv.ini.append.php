@@ -6,13 +6,15 @@ ExportableDatatypes[]=ezboolean
 ExportableDatatypes[]=eztext
 ExportableDatatypes[]=ezinteger
 ExportableDatatypes[]=ezstring
-#ExportableDatatypes[]=eztime
+ExportableDatatypes[]=eztime
 ExportableDatatypes[]=ezurl
 ExportableDatatypes[]=ezuser
 ExportableDatatypes[]=ezxmltext
-#ExportableDatatypes[]=ezboolean
 ExportableDatatypes[]=ezdate
-#ExportableDatatypes[]=ezdatetime
+ExportableDatatypes[]=ezdatetime
+ExportableDatatypes[]=ezkeyword
+ExportableDatatypes[]=eztags
+ExportableDatatypes[]=ezobjectrelation
 ExportableDatatypes[]=ezemail
 ExportableDatatypes[]=ezfloat
 ExportableDatatypes[]=ezidentifier
@@ -29,6 +31,13 @@ ExportableDatatypes[]=ezobjectrelationlist
 ExportableDatatypes[]=hmregexpline
 ExportableDatatypes[]=ezprice
 StripURLText=true
+# A cell starting with = + - @ (not a number) gets a leading ' so a
+# spreadsheet shows it as text instead of running it as a formula.
+# disabled exports the values exactly as stored.
+NeutralizeFormulas=enabled
+# The password hash of user accounts can be picked as a column only when
+# this is enabled. Nobody needs it in a spreadsheet; keep it disabled.
+AllowPasswordHashExport=disabled
 
 # you can place the handler files in your extension
 # just enter the full path to the handler
@@ -126,5 +135,25 @@ HandlerClass=XrowhmregexplineHandler
 [ezprice]
 HandlerFile=extension/xrowextract/classes/parsers/xrowezpricehandler.php
 HandlerClass=XroweZPriceHandler
+
+[ezdatetime]
+HandlerFile=extension/xrowextract/classes/parsers/xrowezdatetimehandler.php
+HandlerClass=XroweZDateTimeHandler
+
+[eztime]
+HandlerFile=extension/xrowextract/classes/parsers/xroweztimehandler.php
+HandlerClass=XroweZTimeHandler
+
+[ezkeyword]
+HandlerFile=extension/xrowextract/classes/parsers/xrowezkeywordhandler.php
+HandlerClass=XroweZKeywordHandler
+
+[eztags]
+HandlerFile=extension/xrowextract/classes/parsers/xrowezkeywordhandler.php
+HandlerClass=XroweZKeywordHandler
+
+[ezobjectrelation]
+HandlerFile=extension/xrowextract/classes/parsers/xrowezobjectrelationhandler.php
+HandlerClass=XroweZObjectRelationHandler
 
 */ ?>
