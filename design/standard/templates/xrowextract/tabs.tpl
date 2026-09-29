@@ -1,6 +1,7 @@
-{* The four xrowextract pages: one class as a file, the site as an archive, background jobs, and a file read
-   back in. $active: 'csv', 'archive', 'jobs' or 'import'. $RunningJobsCount, when set by the calling view,
-   is the viewer's queued-or-running job count, shown as a badge on the Jobs tab. *}
+{* The five xrowextract pages: one class as a file, the site as an archive, background jobs, a file read
+   back in, and a content package (.ezpkg) in or out. $active: 'csv', 'archive', 'jobs', 'import' or
+   'package'. $RunningJobsCount, when set by the calling view, is the viewer's queued-or-running job
+   count, shown as a badge on the Jobs tab. *}
 <nav class="xe-tabs" aria-label="{'Export'|i18n( 'design/standard/extract' )|wash}">
     <a href={'xrowextract/csv'|ezurl}{if $active|eq( 'csv' )} class="xe-tab-active" aria-current="page"{/if}>
         <strong>{'One class'|i18n( 'design/standard/extract' )}</strong>
@@ -17,5 +18,9 @@
     <a href={'xrowextract/import'|ezurl}{if $active|eq( 'import' )} class="xe-tab-active" aria-current="page"{/if}>
         <strong>{'Import'|i18n( 'design/standard/extract' )}</strong>
         <small>{'Read a CSV or JSON export back in: create or update objects'|i18n( 'design/standard/extract' )}</small>
+    </a>
+    <a href={'xrowextract/package'|ezurl}{if $active|eq( 'package' )} class="xe-tab-active" aria-current="page"{/if}>
+        <strong>{'Package'|i18n( 'design/standard/extract' )}</strong>
+        <small>{'A content package (.ezpkg): inspect, install, or build a sample one'|i18n( 'design/standard/extract' )}</small>
     </a>
 </nav>

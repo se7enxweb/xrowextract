@@ -134,6 +134,12 @@
                 </div>
                 <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.'|i18n('design/standard/extract')}</p>
             </div>
+            {if $ClassID}
+            <div class="xe-field">
+                <a class="button" href={concat( 'xrowextract/package?ClassID=', $ClassID )|ezurl}>{'Content + class package (.ezpkg)'|i18n('design/standard/extract')}</a>
+                <p class="xe-help">{'A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.'|i18n('design/standard/extract')}</p>
+            </div>
+            {/if}
         </section>
 
         {if $HasFile}
