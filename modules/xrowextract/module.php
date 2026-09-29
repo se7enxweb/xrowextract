@@ -33,7 +33,8 @@ $ViewList['job_download'] = array( 'script' => 'job_download.php',
 $ViewList['import'] = array( 'script' => 'import.php',
                              'functions' => array( 'import' ),
                              'default_navigation_part' => 'ezextractnavigationpart',
-                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply' ),
+                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
+                                                      'InstallPackage', 'RunPackageInBackground' ),
                              'params' => array() );
 
 // Content packages (.ezpkg): upload or pick one from the repository, inspect it
