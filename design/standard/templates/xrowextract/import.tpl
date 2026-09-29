@@ -57,10 +57,10 @@
                     <p class="xe-format-when">{'Exact: keeps column ids and the class name - what a template and a sample both build.'|i18n('design/standard/extract')}</p>
                     <p class="xe-format-shape"><code>&lt;export&gt;&lt;object&gt;&lt;field&gt;</code></p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="TrySample" value="xml">{'Try a sample'|i18n('design/standard/extract')}</button>
-                        <button class="button" type="submit" name="DownloadTemplate" value="xml">{'Download a template'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-xml">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="XML" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="TrySample" value="xml" aria-label="{'Try a sample: %format'|i18n('design/standard/extract',, hash( '%format', 'XML' ))|wash}">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="xml" aria-label="{'Download a template: %format'|i18n('design/standard/extract',, hash( '%format', 'XML' ))|wash}">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-xml" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'XML' ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="XML" data-accept=".xml,text/xml,application/xml" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'XML' ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                 </article>
 
@@ -69,10 +69,10 @@
                     <p class="xe-format-when">{'Plain spreadsheet rows; separator and encoding are detected automatically.'|i18n('design/standard/extract')}</p>
                     <p class="xe-format-shape"><code>title,remote-id,class</code></p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample'|i18n('design/standard/extract')}</button>
-                        <button class="button" type="submit" name="DownloadTemplate" value="csv">{'Download a template'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-csv">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="CSV" data-accept=".csv,text/csv">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="TrySample" value="csv" aria-label="{'Try a sample: %format'|i18n('design/standard/extract',, hash( '%format', 'CSV' ))|wash}">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="csv" aria-label="{'Download a template: %format'|i18n('design/standard/extract',, hash( '%format', 'CSV' ))|wash}">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-csv" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'CSV' ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="CSV" data-accept=".csv,text/csv" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'CSV' ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                 </article>
 
@@ -81,10 +81,10 @@
                     <p class="xe-format-when">{'One object per row, the same column names as CSV.'|i18n('design/standard/extract')}</p>
                     <p class="xe-format-shape"><code>[{ldelim}"title": "..."{rdelim}]</code></p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="TrySample" value="json">{'Try a sample'|i18n('design/standard/extract')}</button>
-                        <button class="button" type="submit" name="DownloadTemplate" value="json">{'Download a template'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-json">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="JSON" data-accept=".json,application/json">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="TrySample" value="json" aria-label="{'Try a sample: %format'|i18n('design/standard/extract',, hash( '%format', 'JSON' ))|wash}">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="json" aria-label="{'Download a template: %format'|i18n('design/standard/extract',, hash( '%format', 'JSON' ))|wash}">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-json" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'JSON' ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="JSON" data-accept=".json,application/json" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'JSON' ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                 </article>
 
@@ -93,15 +93,15 @@
                     <p class="xe-format-when">{'Classes and content together, installed through the package system.'|i18n('design/standard/extract')}</p>
                     <p class="xe-format-shape"><code>package.xml + class/object XML</code></p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="TrySample" value="package">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="TrySample" value="package" aria-label="{'Try a sample: %format'|i18n('design/standard/extract',, hash( '%format', 'Content package'|i18n('design/standard/extract') ))|wash}">{'Try a sample'|i18n('design/standard/extract')}</button>
                         <div class="xe-segmented xe-format-variant" role="radiogroup" aria-label="{'Content package: what to include'|i18n('design/standard/extract')|wash}">
                             <label><input type="radio" name="TemplatePackageVariant" value="both" checked /><span>{'Class + content'|i18n('design/standard/extract')}</span></label>
                             <label><input type="radio" name="TemplatePackageVariant" value="class" /><span>{'Class only'|i18n('design/standard/extract')}</span></label>
                             <label><input type="radio" name="TemplatePackageVariant" value="content" /><span>{'Content only'|i18n('design/standard/extract')}</span></label>
                         </div>
-                        <button class="button" type="submit" name="DownloadTemplate" value="package">{'Download a template'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="{'Content package'|i18n('design/standard/extract')|wash}" data-accept=".ezpkg,.tar.gz,.tgz,application/gzip">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="package" aria-label="{'Download a template: %format'|i18n('design/standard/extract',, hash( '%format', 'Content package'|i18n('design/standard/extract') ))|wash}">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'Content package'|i18n('design/standard/extract') ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Content package'|i18n('design/standard/extract')|wash}" data-accept=".ezpkg,.tar.gz,.tgz,application/gzip" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'Content package'|i18n('design/standard/extract') ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                     {if and( $ClassID, $ClassHasExistingContent|not )}
                     <p class="xe-note">{'The class chosen in step 2 has no content yet: "class + content"/"content only" would use temporary hidden scratch content instead.'|i18n('design/standard/extract')}</p>
@@ -114,18 +114,18 @@
                     <h3 id="xe-format-classxml-h">{'Class XML'|i18n('design/standard/extract')}</h3>
                     <p class="xe-format-when">{'One content-class definition, on its own.'|i18n('design/standard/extract')}</p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="DownloadClassXML">{'Download'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="{'Class XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadClassXML" aria-label="{'Download %format'|i18n('design/standard/extract',, hash( '%format', 'Class XML'|i18n('design/standard/extract') ))|wash}">{'Download'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'Class XML'|i18n('design/standard/extract') ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Class XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'Class XML'|i18n('design/standard/extract') ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                 </article>
                 <article class="xe-format-tile xe-format-tile-compact" aria-labelledby="xe-format-objectxml-h">
                     <h3 id="xe-format-objectxml-h">{'Object XML'|i18n('design/standard/extract')}</h3>
                     <p class="xe-format-when">{'Content objects of a package, on their own.'|i18n('design/standard/extract')}</p>
                     <div class="xe-format-actions">
-                        <button class="button" type="submit" name="DownloadObjectXML">{'Download'|i18n('design/standard/extract')}</button>
-                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
-                        <button class="button xe-format-upload-hint" type="button" data-format="{'Object XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadObjectXML" aria-label="{'Download %format'|i18n('design/standard/extract',, hash( '%format', 'Object XML'|i18n('design/standard/extract') ))|wash}">{'Download'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages" aria-label="{'Read the %format reference'|i18n('design/standard/extract',, hash( '%format', 'Object XML'|i18n('design/standard/extract') ))|wash}">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Object XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml" aria-label="{'Upload a %format file'|i18n('design/standard/extract',, hash( '%format', 'Object XML'|i18n('design/standard/extract') ))|wash}">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
                     </div>
                 </article>
             </div>
@@ -152,8 +152,8 @@
             {else}
             <div class="xe-node">
                 <span class="xe-node-text">
-                    <span class="xe-node-name">{$UploadedName|wash}</span>
-                    <span class="xe-node-meta">{if $UploadedSize} {$UploadedSize} · {/if}{if $FileRowCountKnown}{$FileRowCount} {cond( $ImportFormat|eq( 'package' ), 'classes/objects'|i18n('design/standard/extract'), 'rows'|i18n('design/standard/extract') )}{else}{'many rows (counted once queued)'|i18n('design/standard/extract')}{/if}{if $ImportFormat|ne( 'package' )} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')}{/if} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
+                    <span class="xe-node-name">{$UploadedName|wash}{if $IsSample} <span class="xe-format-badge xe-sample-badge">{'sample'|i18n('design/standard/extract')}</span>{/if}</span>
+                    <span class="xe-node-meta">{if $UploadedSize} {$UploadedSize} · {/if}{if $FileRowCountKnown}{$FileRowCount} {cond( $ImportFormat|eq( 'package' ), 'classes/objects'|i18n('design/standard/extract'), 'rows'|i18n('design/standard/extract') )}{else}{'many rows (counted once queued)'|i18n('design/standard/extract')}{/if}{if $ImportFormat|ne( 'package' )} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')}{/if} · {$ImportFormat|wash}</span>
                 </span>
                 <input class="button" type="submit" name="RemoveFile" value="{'Remove'|i18n('design/standard/extract')}" />
             </div>

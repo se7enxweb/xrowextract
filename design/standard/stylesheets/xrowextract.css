@@ -716,11 +716,18 @@ li.xe-badge { margin: 0; }
     min-width: 0; display: flex; flex-direction: column; gap: .4em;
     padding: .7em .8em; border: 1px solid var(--xe-line); border-radius: 8px; background: #fbfcfe;
 }
+/* Which tile the keyboard is in right now, at a glance - box-shadow, not a border-width change, so
+   nothing else on the page reflows when it appears or goes away. */
+.xe-format-tile:focus-within { border-color: var(--xe-accent); box-shadow: 0 0 0 2px var(--xe-accent-bg); }
 .xe-format-tile-compact { padding: .5em .7em; background: #fff; }
 .xe-format-recommended, .xe-format-package { border-color: var(--xe-accent); background: var(--xe-accent-bg); }
 .xe-format-tile h3 { margin: 0; font-size: 1em; display: flex; align-items: center; gap: .4em; flex-wrap: wrap; }
 .xe-format-tile h3 code { font-size: .75em; font-weight: normal; color: var(--xe-muted); }
 .xe-format-badge { padding: .1em .5em; border-radius: 999px; background: var(--xe-accent); color: #fff; font-size: .7em; font-weight: normal; }
+/* The uploaded-file state's own "sample" marker - the warm tone .xe-note already uses for "this
+   writes real content" warnings, not the blue "recommended" uses, so the two badges never read as
+   the same kind of thing at a glance. */
+.xe-sample-badge { background: var(--xe-warn-bg); color: #92400e; border: 1px solid #f2d98a; }
 .xe-format-when { margin: 0; color: var(--xe-muted); font-size: .88em; line-height: 1.35; }
 .xe-format-shape { margin: 0; }
 /* A short shape snippet, but still wrapped rather than clipped if a translation or a narrow tile

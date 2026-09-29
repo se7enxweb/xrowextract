@@ -4,6 +4,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Try a sample: %format</source>
+        <translation>Try a sample: %format</translation>
+    </message>
+    <message>
+        <source>Download a template: %format</source>
+        <translation>Download a template: %format</translation>
+    </message>
+    <message>
+        <source>Read the %format reference</source>
+        <translation>Read the %format reference</translation>
+    </message>
+    <message>
+        <source>Upload a %format file</source>
+        <translation>Upload a %format file</translation>
+    </message>
+    <message>
+        <source>Download %format</source>
+        <translation>Download %format</translation>
+    </message>
+    <message>
         <source>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</source>
         <translation>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</translation>
     </message>
