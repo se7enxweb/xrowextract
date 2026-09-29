@@ -30,6 +30,11 @@ $ViewList['job_status'] = array( 'script' => 'job_status.php',
 $ViewList['job_download'] = array( 'script' => 'job_download.php',
                                    'functions' => array( 'jobs' ),
                                    'params' => array( 'JobID' ) );
+$ViewList['import'] = array( 'script' => 'import.php',
+                             'functions' => array( 'import' ),
+                             'default_navigation_part' => 'ezextractnavigationpart',
+                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply' ),
+                             'params' => array() );
 
 $FunctionList = array();
 $FunctionList['csv'] = array();
@@ -39,5 +44,7 @@ $FunctionList['password_hash'] = array();
 $FunctionList['jobs'] = array();
 // Without it a user only sees, downloads and deletes their own jobs; with it, everyone's
 $FunctionList['all_jobs'] = array();
+// Read a CSV/JSON file back into content objects (xrowextract/import)
+$FunctionList['import'] = array();
 
 ?>

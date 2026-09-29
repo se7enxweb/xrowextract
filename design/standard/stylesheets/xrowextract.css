@@ -536,3 +536,11 @@
 .xe-date-range { margin-top: .5em; }
 .xe-date-range input { width: auto; }
 #xe-filter-name { width: 100%; box-sizing: border-box; }
+/* Import: per-row action badges in the dry run / result table */
+.xe-badge { display: inline-block; padding: .15em .6em; border-radius: 999px; font-size: .85em; font-weight: bold; white-space: nowrap; }
+.xe-badge-create    { background: #ecfdf3; color: #05603a; }
+.xe-badge-update    { background: #eff6ff; color: #1e4ed8; }
+.xe-badge-unchanged { background: #f3f5f8; color: var(--xe-muted); }
+.xe-badge-skip      { background: #f3f5f8; color: var(--xe-muted); }
+.xe-badge-error     { background: var(--xe-bad-bg); color: var(--xe-bad); }
+li.xe-badge { margin: 0; }

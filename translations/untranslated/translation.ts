@@ -1838,6 +1838,200 @@
     <message>
         <source>whole site</source>
         <translation type="unfinished"></translation>
+        <source>A CSV or JSON file written by the export views, any column set.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A row that matches an existing object updates it; otherwise it creates one.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Always create</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Attributes</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row, as XrowExtractWriter writes it.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Changes</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Choose a file</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Class and matching</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Column mapping</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Detected automatically from the header line; change it if the columns above do not line up.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Every file column, mapped automatically; change any of them.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Every row creates a new object, even one with a remote or object id column</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>File column</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Ignore</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import %count changes</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import another file</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import result</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import settings</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Maps to</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Match existing objects by</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>No node %id, or you may not read it.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Object ID</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Parent for new objects</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Preview (dry run — nothing was written)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Read a CSV or JSON export back in: create or update objects</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Remote ID</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Reparse</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The default when the file has a remote-id column</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The ezoe extension is not active on this installation; rich text columns were imported as plain paragraphs, without inline formatting or links.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The file has no columns.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Upload</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Used for rows without a "class" column (a special column, exported as "class"); with one, each row picks its own class.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Used for rows without a language column; a language column creates or updates that translation instead.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Used when a row has no parent-remote-id or main-parent-node-id column.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Which class, which objects to update, and where new ones go.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>create</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>error</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>not supported</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>skip</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>unchanged</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>update</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be stored.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Choose a file first.</source>
+        <translation></translation>
     </message>
 </context>
 <context>
