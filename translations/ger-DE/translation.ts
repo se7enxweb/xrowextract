@@ -2,6 +2,62 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Job started: </source>
+        <translation>Job gestartet: </translation>
+    </message>
+    <message>
+        <source>see it below</source>
+        <translation>siehe unten</translation>
+    </message>
+    <message>
+        <source> — it runs in the background; this page updates on its own while it does.</source>
+        <translation> – er läuft im Hintergrund; diese Seite aktualisiert sich dabei von selbst.</translation>
+    </message>
+    <message>
+        <source>Choose what to export</source>
+        <translation>Wählen, was exportiert wird</translation>
+    </message>
+    <message>
+        <source>Scope (below a node, below a node tree, the whole site), the class, the languages.</source>
+        <translation>Umfang (unterhalb eines Knotens, eines Knotenbaums, ganze Seite), die Klasse, die Sprachen.</translation>
+    </message>
+    <message>
+        <source>Filter and sort</source>
+        <translation>Filtern und sortieren</translation>
+    </message>
+    <message>
+        <source>By date (also changed since your last export), section, state, visibility, name or an attribute; the order of the rows.</source>
+        <translation>Nach Datum (auch seit Ihrem letzten Export geändert), Sektion, Zustand, Sichtbarkeit, Name oder einem Attribut; die Reihenfolge der Zeilen.</translation>
+    </message>
+    <message>
+        <source>CSV, JSON or XML; for CSV the separator, line endings and quoting, with a sample row.</source>
+        <translation>CSV, JSON oder XML; für CSV Trennzeichen, Zeilenenden und Anführungszeichen, mit einer Beispielzeile.</translation>
+    </message>
+    <message>
+        <source>Attributes, attribute formats, special columns and column sets; rename, reorder, remove.</source>
+        <translation>Attribute, Attributformate, Sonderspalten und Spaltensätze; umbenennen, umsortieren, entfernen.</translation>
+    </message>
+    <message>
+        <source>Download, or run in the background</source>
+        <translation>Herunterladen oder im Hintergrund ausführen</translation>
+    </message>
+    <message>
+        <source>Large exports run as a job; the Jobs tab has the file when it is done.</source>
+        <translation>Große Exporte laufen als Job; der Reiter Jobs hat die Datei, wenn sie fertig ist.</translation>
+    </message>
+    <message>
+        <source>Regular updates: filter on &quot;Changed since my last export&quot; to get only what changed since your last download.</source>
+        <translation>Regelmäßige Aktualisierungen: mit „Seit meinem letzten Export geändert“ nur das holen, was sich seit dem letzten Download geändert hat.</translation>
+    </message>
+    <message>
+        <source>&quot;Reset to defaults&quot; starts again from the default node and the class with the most objects.</source>
+        <translation>„Auf Standard zurücksetzen“ beginnt wieder mit dem Standardknoten und der Klasse mit den meisten Objekten.</translation>
+    </message>
+    <message>
+        <source>The Import tab reads such a file back in (the Migration column set keeps what it needs).</source>
+        <translation>Der Reiter Import liest eine solche Datei wieder ein (der Spaltensatz Migration enthält, was dafür nötig ist).</translation>
+    </message>
+    <message>
         <source>Sort the rows by</source>
         <translation>Zeilen sortieren nach</translation>
     </message>
@@ -1840,6 +1896,8 @@
     <message>
         <source>whole site</source>
         <translation>ganze Site</translation>
+    </message>
+    <message>
         <source>A CSV or JSON file written by the export views, any column set.</source>
         <translation>Eine CSV- oder JSON-Datei, wie sie die Export-Ansichten schreiben, jede Spaltenauswahl.</translation>
     </message>

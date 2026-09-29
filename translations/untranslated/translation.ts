@@ -4,6 +4,62 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Job started: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>see it below</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> — it runs in the background; this page updates on its own while it does.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose what to export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scope (below a node, below a node tree, the whole site), the class, the languages.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter and sort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>By date (also changed since your last export), section, state, visibility, name or an attribute; the order of the rows.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CSV, JSON or XML; for CSV the separator, line endings and quoting, with a sample row.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attributes, attribute formats, special columns and column sets; rename, reorder, remove.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download, or run in the background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Large exports run as a job; the Jobs tab has the file when it is done.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Regular updates: filter on &quot;Changed since my last export&quot; to get only what changed since your last download.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&quot;Reset to defaults&quot; starts again from the default node and the class with the most objects.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Import tab reads such a file back in (the Migration column set keeps what it needs).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Sort the rows by</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1838,6 +1894,8 @@
     <message>
         <source>whole site</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>A CSV or JSON file written by the export views, any column set.</source>
         <translation></translation>
     </message>

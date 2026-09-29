@@ -10,16 +10,18 @@
 <p class="xe-side-lead">{'Exports the objects of one class below a node as a CSV file, one row per object and one column per chosen attribute. Spreadsheets, mail tools and other systems read it.'|i18n( 'design/standard/extract' )}</p>
 
 <ol class="xe-side-steps">
-    <li>{'Choose the node and the class'|i18n( 'design/standard/extract' )}
-        <small>{'Depth: the whole subtree or its direct children only.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Choose what to export'|i18n( 'design/standard/extract' )}
+        <small>{'Scope (below a node, below a node tree, the whole site), the class, the languages.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Filter and sort'|i18n( 'design/standard/extract' )}
+        <small>{'By date (also changed since your last export), section, state, visibility, name or an attribute; the order of the rows.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Choose the file format'|i18n( 'design/standard/extract' )}
-        <small>{'Separator, line endings and quoting; the sample row shows the result.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'CSV, JSON or XML; for CSV the separator, line endings and quoting, with a sample row.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Pick the columns'|i18n( 'design/standard/extract' )}
-        <small>{'Class attributes and special columns; rename a column in the list, remove what you do not need.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Attributes, attribute formats, special columns and column sets; rename, reorder, remove.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Preview the rows'|i18n( 'design/standard/extract' )}
         <small>{'The first rows as a spreadsheet shows them, with warnings for shifted columns.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Download'|i18n( 'design/standard/extract' )}
-        <small>{'The file name follows the node name.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Download, or run in the background'|i18n( 'design/standard/extract' )}
+        <small>{'Large exports run as a job; the Jobs tab has the file when it is done.'|i18n( 'design/standard/extract' )}</small></li>
 </ol>
 
 <details open>
@@ -29,6 +31,9 @@
         <li>{'Keep "Quoted": values with commas, quotes or line breaks (rich text) stay in their cell.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Very large selections: export in batches with "Skip" and "Take at most".'|i18n( 'design/standard/extract' )}</li>
         <li>{'Your settings and columns are kept per class for your session.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Regular updates: filter on "Changed since my last export" to get only what changed since your last download.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'"Reset to defaults" starts again from the default node and the class with the most objects.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'The Import tab reads such a file back in (the Migration column set keeps what it needs).'|i18n( 'design/standard/extract' )}</li>
     </ul>
 </details>
 
