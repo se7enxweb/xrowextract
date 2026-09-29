@@ -1068,7 +1068,7 @@
         // Highlight the block the reader was working in - the button's own field group, which is always on
         // screen next to the button - not the whole card: a tall card's outline starts above the window and
         // reads as the section above. The card only gets a quiet edge mark.
-        var group = button ? (button.closest('.xe-field, fieldset, .xe-toolbar') || button.parentNode) : null;
+        var group = button ? (button.closest('.xe-field, fieldset, .xe-toolbar, .xe-format-tile') || button.parentNode) : null;
         var card = (button || section) ? (button || section).closest('section, .xe-card') : null;
         var marks = [];
         if (group && group !== card) {
