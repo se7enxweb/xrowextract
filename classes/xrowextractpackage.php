@@ -115,13 +115,25 @@ class XrowExtractPackage
             if ( $line === '' )
                 continue;
             // "<type+perm> <owner>/<group> <size> <date> <time> <name>[ -> <target>]"
+            // Fail closed: a line this cannot read refuses the archive rather than being skipped
             if ( !preg_match( '/^(.)\S*\s+\S+\s+\S+\s+\S+\s+\S+\s+(.*)$/', $line, $m ) )
-                continue;
+            {
+                $error = 'unreadable archive listing line refused';
+                break;
+            }
             $type = $m[1];
             $name = $m[2];
             if ( $type === 'l' )
             {
                 $error = 'symlink entry refused: ' . preg_replace( '/\s*->.*/', '', $name );
+                break;
+            }
+            // Only plain files and folders: a hard link ("h", "... link to <target>") can point at a file
+            // outside the package, and device, fifo or socket entries have no place in a package at all
+            if ( $type !== '-' && $type !== 'd' )
+            {
+                $error = ( $type === 'h' ? 'hard link' : "special ($type)" ) . ' entry refused: '
+                       . preg_replace( '/\s+link to .*$/', '', $name );
                 break;
             }
             $relative = rtrim( $name, '/' );
