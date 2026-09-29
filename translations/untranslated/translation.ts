@@ -2263,6 +2263,290 @@
         <source>Choose a file first.</source>
         <translation></translation>
     </message>
+    <message>
+        <source>An XML, CSV or JSON file written by the export views, any column set.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Try a sample</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? One click builds a small file from the site’s own content for %class - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. Applying it writes real content.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Try a sample (XML - recommended)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Try a sample (JSON)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Try a sample (CSV)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>sample</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>This is a sample built from the site’s own content, for trying the importer - not a file you uploaded. Applying it writes real content (see step 4).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML (recommended)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>File format reference</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Examples below use real data of %class where the site has some.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Choose a class above for examples built from its own content.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML - the recommended format</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A static example (this class has no content on this site yet to show a real one).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The header row holds the column names (an attribute identifier with "-" for "_", an attribute format as identifier-format, or a special column such as remote-id); the importer maps them by name, or lets you change any mapping by hand.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The separator is detected from the header row (comma, semicolon, tab or pipe, whichever appears most) and can be changed once the file is uploaded.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Standard RFC 4180 quoting: a cell that holds the separator, a quote or a line break is wrapped in double quotes, and a quote inside it is doubled ("" for a literal "); a quoted cell may contain real line breaks.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>UTF-8, with or without a byte order mark (BOM); either is read correctly.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An empty cell is an empty value, not "not present": for an update, an empty cell can clear an attribute.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Every column this importer reads outside the class’s own attributes. A column not listed here, or an attribute the class does not have, is ignored (never guessed at).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Column</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>id</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>What it does</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The default match key: an existing object with this remote id is updated; otherwise it is created with it.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Matches by object id instead, when matching is set to Object ID.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The class for this row, overriding the class chosen above (an identifier or a numeric id); an XML file’s own export class attribute is the default when none is chosen.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The translation this row creates or updates, overriding the language chosen above.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Where a new object is placed, by the parent’s remote id; wins over main-parent-node-id and the chosen parent.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Where a new object is placed, by node id; used when there is no parent-remote-id column.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Sets the object’s published date after writing it (Unix time, or any accepted date form) - for preserving history on a migration.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Sets the object’s last modified date the same way.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The section, by name or numeric id.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The main node’s own remote id, as exported; informational only, not written back.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Attribute and attribute format columns</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An attribute column is named after the attribute identifier, "-" for "_" (a CSV/JSON header only; XML uses the identifier itself as the column id and any display name).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An attribute format column is identifier-format, for example authors-ids, authors-remote-ids or metadata-json (identifier:format as the XML/mapping id). Only the formats named per datatype below are accepted for import; the others (word counts, sizes, URLs of a file...) are export-only.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Every importable datatype: accepted values, with an example</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Datatype</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Accepted as</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Example</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The text itself.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A whole number.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A decimal number.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>1 or 0, yes or no, ja or nein, true or false, on or off.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The address.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A URL, or "URL|link text".</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD, ISO 8601, or a Unix timestamp.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD HH:MM:SS, ISO 8601, or a Unix timestamp.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>An option name, or (the :ids format) its numeric id.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Comma-separated keywords.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Comma-separated tag names, each already existing and unambiguous (a tag path, or an ambiguous or missing name, is refused with a warning).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The HTML the export writes, converted through the ezoe input parser when that extension is active, else as plain paragraphs.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A path already inside var/storage (as the export writes it), or an absolute URL of this site - either way, the file is imported.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Only from an :ids or :remote_ids column (comma-separated); names are ambiguous and refused with a message.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>(as authors-ids)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Only from the :json column - the same fields the export writes as JSON.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>(as metadata-json)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Datatypes this importer cannot write</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Shown in the mapping as not supported, with this reason, and never written - not dropped without a trace.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>This was a sample built from the site’s own content: real content was just written (see below).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>This is a sample built from the site’s own content, to try the importer. Applying it writes real content.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Import %count changes (writes real content)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>This sample really writes to the site: %count objects will be created or updated. Continue?</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Upload the file, or try a sample, or a filled template</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
