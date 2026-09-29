@@ -2601,6 +2601,82 @@
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
         <translation>XML, CSV oder JSON, aus einem Export dieses Werkzeugs (die Spaltenauswahl Migration trägt alles Nötige) oder einer heruntergeladenen Vorlage; XML trägt eigene Spalten-IDs und die Klasse und ist am genauesten.</translation>
     </message>
+    <message>
+        <source>%free free on the server for uploads; no file size limit is enforced beyond that.</source>
+        <translation>%free frei auf dem Server für Uploads; darüber hinaus wird keine Dateigröße begrenzt.</translation>
+    </message>
+    <message>
+        <source>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.</source>
+        <translation>XML: die Form, die XrowExtractWriter schreibt, mit eigenen Spalten-IDs und Klasse - am genauesten, und das, was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen. CSV: Trennzeichen und Kodierung werden automatisch erkannt (UTF-8 mit oder ohne BOM); das Trennzeichen kann nach dem Hochladen noch geändert werden. JSON: ein Array von Objekten, eines je Zeile. Keine Dateigrößenbegrenzung: eine große Datei wird in Teilen hochgeladen, mit einem Fortschrittsbalken, und als Hintergrundauftrag importiert.</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pause</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Fortsetzen</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
+    </message>
+    <message>
+        <source>Download report</source>
+        <translation>Bericht herunterladen</translation>
+    </message>
+    <message>
+        <source>Download error rows</source>
+        <translation>Fehlerzeilen herunterladen</translation>
+    </message>
+    <message>
+        <source>Resume from row</source>
+        <translation>Fortsetzen ab Zeile</translation>
+    </message>
+    <message>
+        <source>Resume as a new job</source>
+        <translation>Als neuen Auftrag fortsetzen</translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
+        <translation>Die hochgeladene Datei wird privat auf dem Server aufbewahrt und nach dem Import oder nach einer festgelegten Anzahl Stunden entfernt.</translation>
+    </message>
+    <message>
+        <source>No file size limit</source>
+        <translation>Keine Begrenzung der Dateigröße</translation>
+    </message>
+    <message>
+        <source>A large file uploads in chunks (a progress bar, pause and resume, and a dropped connection retries and resumes on its own) - independent of the server’s own upload size settings.</source>
+        <translation>Eine große Datei wird in Teilen hochgeladen (ein Fortschrittsbalken, Pause und Fortsetzen, und eine abgebrochene Verbindung wird von selbst wiederholt und fortgesetzt) - unabhängig von den eigenen Upload-Einstellungen des Servers.</translation>
+    </message>
+    <message>
+        <source>XML and CSV are read a row at a time while they import, however large the file; only a very large JSON file is read whole (JSON has no streaming format).</source>
+        <translation>XML und CSV werden beim Import Zeile für Zeile gelesen, unabhängig von der Dateigröße; nur eine sehr große JSON-Datei wird als Ganzes gelesen (JSON hat kein Streaming-Format).</translation>
+    </message>
+    <message>
+        <source>The only real limit is free disk space, checked before the upload starts.</source>
+        <translation>Die einzige tatsächliche Grenze ist freier Speicherplatz, geprüft bevor der Upload beginnt.</translation>
+    </message>
+    <message>
+        <source>Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.</source>
+        <translation>Oberhalb einer Zeilen- oder Größenschwelle laufen sowohl der Probelauf als auch der Import als Hintergrundauftrag (Reiter Aufträge), statt die Seite offen zu halten; ein teilweise fehlgeschlagener Auftrag kann ab der Zeile fortgesetzt werden, bei der er stehen blieb.</translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
+    </message>
+    <message>
+        <source>many rows (counted once queued)</source>
+        <translation>viele Zeilen (gezählt, sobald in die Warteschlange gestellt)</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

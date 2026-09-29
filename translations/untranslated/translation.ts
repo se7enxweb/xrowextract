@@ -2599,6 +2599,82 @@
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
         <translation></translation>
     </message>
+    <message>
+        <source>%free free on the server for uploads; no file size limit is enforced beyond that.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Download report</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Download error rows</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Resume from row</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Resume as a new job</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>No file size limit</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>A large file uploads in chunks (a progress bar, pause and resume, and a dropped connection retries and resumes on its own) - independent of the server’s own upload size settings.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>XML and CSV are read a row at a time while they import, however large the file; only a very large JSON file is read whole (JSON has no streaming format).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>The only real limit is free disk space, checked before the upload starts.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Above a row or size threshold, both the dry run and the import run as a background job (the Jobs tab) instead of holding the page open; a job that partly failed can resume from the row it stopped at.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>many rows (counted once queued)</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
