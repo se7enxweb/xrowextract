@@ -1164,3 +1164,27 @@
         }
     });
 }());
+
+/**
+ * One class choice, not two: the File card's "Class for these actions" select
+ * (#xe-sample-class, drives every format tile) and "Class and matching"'s own Class select
+ * (#xe-class) show the same underlying class list and are kept mirrored here, so picking either
+ * one is reflected in the other without a page reload. import.php's own fallback (either posted
+ * value drives $ClassID, the File-card one taking priority) covers a visitor without JavaScript,
+ * for whom this sync never runs.
+ */
+(function () {
+    'use strict';
+    var top = document.getElementById('xe-sample-class');
+    var step2 = document.getElementById('xe-class');
+    if (!top || !step2) {
+        return;
+    }
+    var mirror = function (from, to) {
+        if (to.value !== from.value && to.querySelector('option[value="' + from.value + '"]')) {
+            to.value = from.value;
+        }
+    };
+    top.addEventListener('change', function () { mirror(top, step2); });
+    step2.addEventListener('change', function () { mirror(step2, top); });
+}());

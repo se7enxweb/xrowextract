@@ -723,11 +723,15 @@ li.xe-badge { margin: 0; }
 .xe-format-badge { padding: .1em .5em; border-radius: 999px; background: var(--xe-accent); color: #fff; font-size: .7em; font-weight: normal; }
 .xe-format-when { margin: 0; color: var(--xe-muted); font-size: .88em; line-height: 1.35; }
 .xe-format-shape { margin: 0; }
+/* A short shape snippet, but still wrapped rather than clipped if a translation or a narrow tile
+   makes it too long - the full shape (with every element/column) is in the reference, one click away. */
 .xe-format-shape code {
     display: block; min-width: 0; padding: .3em .5em; border-radius: 5px; background: var(--xe-head);
-    font-size: .78em; overflow-x: auto; white-space: pre; box-sizing: border-box;
+    font-size: .78em; white-space: normal; word-break: break-word; box-sizing: border-box;
 }
-.xe-format-actions { display: flex; flex-wrap: wrap; gap: .4em; margin-top: auto; padding-top: .3em; }
+/* The actions sit at a consistent border, not just trailing whitespace, whether or not a taller
+   sibling tile (the content-package one, with its extra class/content choice) pushes it down. */
+.xe-format-actions { display: flex; flex-wrap: wrap; gap: .4em; margin-top: auto; padding-top: .5em; border-top: 1px solid var(--xe-line); }
 .xe-format-actions .button, .xe-format-actions a.button { font-size: .85em; padding: .3em .6em; }
 .xe-format-variant { flex-basis: 100%; }
 .xe-format-tile .xe-note { margin: .3em 0 0; }
