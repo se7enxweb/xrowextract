@@ -85,7 +85,9 @@
         var filter = slot.querySelector('.xe-filter input');
         var keepFilter = filter ? filter.value : '';
         form.classList.add('xe-busy');
-        fetch(form.action, { method: 'POST', body: data, credentials: 'same-origin',
+        // Sent urlencoded, as the form itself posts: the form has no file field, and not every
+        // server reads nested names (Attributes[0][id]) from a multipart body
+        fetch(form.action, { method: 'POST', body: new URLSearchParams(data), credentials: 'same-origin',
                              headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(function (response) {
                 return response.text().then(function (text) { return { ok: response.ok, text: text }; });
