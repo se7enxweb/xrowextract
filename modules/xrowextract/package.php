@@ -28,7 +28,9 @@ if ( $http->hasPostVariable( 'UploadPackage' ) )
         if ( $file )
         {
             $newPackageName = '';
-            $imported = eZPackage::import( $file->attribute( 'filename' ), $newPackageName, true, false, false );
+            // 'local' forced, not left to eZPackage::import()'s own vendor-derived default -
+            // see the long comment on the same call in XrowExtractPackage::importUploadedArchive().
+            $imported = eZPackage::import( $file->attribute( 'filename' ), $newPackageName, true, 'local', false );
             if ( $imported instanceof eZPackage )
             {
                 $_SESSION[$SESSION_KEY] = $imported->attribute( 'name' );
@@ -203,6 +205,9 @@ if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
     $templateError = implode( ' ', $build['errors'] );
 }
 $tpl->setVariable( 'TemplateError', $templateError );
+
+$scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/package.tpl' );

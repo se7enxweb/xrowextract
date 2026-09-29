@@ -938,3 +938,139 @@
         });
     });
 }());
+
+/**
+ * Keeping the reader's place across a reload. Many buttons of these views post the form and the page comes
+ * back from the top; with this many sections that loses the reader. When a form is submitted, the pressed
+ * button (name and value) and its section are remembered with their height on screen (sessionStorage, this
+ * tab only). When the same view loads again within ten minutes - after the post, a redirect, or a trip to the
+ * content browser and back - the page scrolls so that button (or, if it is gone, its section) sits where it
+ * was, outlines the section for a moment, and gives the button the keyboard focus again. A submit that
+ * downloads a file instead of reloading is forgotten as soon as the page is used again, so a later visit
+ * starts at the top as usual; so is a link with its own #anchor.
+ */
+(function () {
+    'use strict';
+
+    if (!document.querySelector('.xe-view')) {
+        return;
+    }
+    var KEY = 'xrowextract-place:' + location.pathname.replace(/\/+$/, '');
+    var store = null;
+    try {
+        store = window.sessionStorage;
+    } catch (e) {
+        return;
+    }
+
+    function sectionOf(el) {
+        var section = el && el.closest ? el.closest('section, .xe-card, fieldset') : null;
+        if (!section) {
+            return null;
+        }
+        var id = section.id || section.getAttribute('aria-labelledby') || '';
+        return id ? { el: section, id: id, byLabel: !section.id } : null;
+    }
+
+    function findSection(note) {
+        if (note.byLabel) {
+            var heading = document.getElementById(note.section);
+            return heading ? (heading.closest('section, .xe-card, fieldset') || heading) : null;
+        }
+        return document.getElementById(note.section);
+    }
+
+    function findButton(note) {
+        if (!note.name) {
+            return null;
+        }
+        var candidates = document.querySelectorAll('[name="' + note.name.replace(/(["\\])/g, '\\$1') + '"]');
+        for (var i = 0; i < candidates.length; i++) {
+            var c = candidates[i];
+            if ((c.type === 'submit' || c.tagName === 'BUTTON') && (note.value === null || c.value === note.value)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    document.addEventListener('submit', function (event) {
+        var button = event.submitter || document.activeElement;
+        var section = sectionOf(button && button.form ? button : event.target);
+        if (!section) {
+            try { store.removeItem(KEY); } catch (e) {}
+            return;
+        }
+        var anchor = button && button.getBoundingClientRect ? button : section.el;
+        var note = {
+            section: section.id,
+            byLabel: section.byLabel,
+            name: button && button.name ? button.name : '',
+            value: button && button.name ? button.value : null,
+            top: Math.round(anchor.getBoundingClientRect().top),
+            sectionTop: Math.round(section.el.getBoundingClientRect().top),
+            when: Date.now()
+        };
+        try { store.setItem(KEY, JSON.stringify(note)); } catch (e) {}
+        // Still being used here afterwards (a click, a key, a scroll a moment later): the submit was a
+        // download, not a reload, so the note is stale. A slow post that is still loading keeps it.
+        window.setTimeout(function () {
+            var events = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
+            var forget = function () {
+                try { store.removeItem(KEY); } catch (e) {}
+                events.forEach(function (type) { document.removeEventListener(type, forget, true); });
+            };
+            events.forEach(function (type) { document.addEventListener(type, forget, true); });
+        }, 1500);
+    }, true);
+
+    var note = null;
+    try {
+        note = JSON.parse(store.getItem(KEY) || 'null');
+        store.removeItem(KEY);
+    } catch (e) {
+        note = null;
+    }
+    if (!note || !note.when || Date.now() - note.when > 10 * 60 * 1000 || location.hash) {
+        return;
+    }
+    function restore() {
+        var button = findButton(note);
+        var section = findSection(note);
+        var anchor = button || section;
+        if (!anchor) {
+            return;
+        }
+        var wanted = button ? note.top : note.sectionTop;
+        window.scrollTo(0, Math.max(0, window.pageYOffset + anchor.getBoundingClientRect().top - wanted));
+        // Highlight the block the reader was working in - the button's own field group, which is always on
+        // screen next to the button - not the whole card: a tall card's outline starts above the window and
+        // reads as the section above. The card only gets a quiet edge mark.
+        var group = button ? (button.closest('.xe-field, fieldset, .xe-toolbar') || button.parentNode) : null;
+        var card = (button || section) ? (button || section).closest('section, .xe-card') : null;
+        var marks = [];
+        if (group && group !== card) {
+            marks.push([group, 'xe-returned']);
+        } else if (card) {
+            marks.push([card, 'xe-returned']);
+        }
+        if (card && group && group !== card) {
+            marks.push([card, 'xe-returned-card']);
+        }
+        // Next frame, after the scroll, so the pulse starts where the reader is looking
+        window.requestAnimationFrame(function () {
+            marks.forEach(function (m) { m[0].classList.add(m[1]); });
+            window.setTimeout(function () {
+                marks.forEach(function (m) { m[0].classList.remove(m[1]); });
+            }, 2600);
+        });
+        if (button && button.focus) {
+            try { button.focus({ preventScroll: true }); } catch (e) { button.focus(); }
+        }
+    }
+    if (document.readyState === 'complete') {
+        restore();
+    } else {
+        window.addEventListener('load', restore);
+    }
+}());
