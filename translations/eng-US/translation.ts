@@ -4,6 +4,190 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Content package (.ezpkg)</source>
+        <translation>Content package (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>Content class definition</source>
+        <translation>Content class definition</translation>
+    </message>
+    <message>
+        <source>Content object(s)</source>
+        <translation>Content object(s)</translation>
+    </message>
+    <message>
+        <source>Could not open %name as a package.</source>
+        <translation>Could not open %name as a package.</translation>
+    </message>
+    <message>
+        <source>Could not read %name as a package: %reason</source>
+        <translation>Could not read %name as a package: %reason</translation>
+    </message>
+    <message>
+        <source>Keep both</source>
+        <translation>Keep both</translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to.</source>
+        <translation>Where a design/template/override this package might carry would map to.</translation>
+    </message>
+    <message>
+        <source>Uses the parent chosen in &quot;Class and matching&quot; above for any top-level object the package carries.</source>
+        <translation>Uses the parent chosen in &quot;Class and matching&quot; above for any top-level object the package carries.</translation>
+    </message>
+    <message>
+        <source>Install as a background job</source>
+        <translation>Install as a background job</translation>
+    </message>
+    <message>
+        <source>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
+        <translation>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).</translation>
+    </message>
+    <message>
+        <source>Content packages (.ezpkg)</source>
+        <translation>Content packages (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A gzip-compressed tar archive (.ezpkg or .tar.gz - the same format, only the extension differs) carrying a content class, one or more content objects, or both; or upload just one class-definition or content-object XML file on its own - either way it is inspected and installed through the same code as package/install and the xrowextract/package page.</source>
+        <translation>A gzip-compressed tar archive (.ezpkg or .tar.gz - the same format, only the extension differs) carrying a content class, one or more content objects, or both; or upload just one class-definition or content-object XML file on its own - either way it is inspected and installed through the same code as package/install and the xrowextract/package page.</translation>
+    </message>
+    <message>
+        <source>A standalone content-class or content-object upload is the same one file, wrapped in a transient package with just that one install item - nothing else in this layout exists for it.</source>
+        <translation>A standalone content-class or content-object upload is the same one file, wrapped in a transient package with just that one install item - nothing else in this layout exists for it.</translation>
+    </message>
+    <message>
+        <source>package.xml</source>
+        <translation>package.xml</translation>
+    </message>
+    <message>
+        <source>The id the package is known by in the repository (package/list, xrowextract/package, ext:xrowextract:package). Unique per repository, never shown to a visitor.</source>
+        <translation>The id the package is known by in the repository (package/list, xrowextract/package, ext:xrowextract:package). Unique per repository, never shown to a visitor.</translation>
+    </message>
+    <message>
+        <source>Version and release number; informational, not compared against an installed copy automatically.</source>
+        <translation>Version and release number; informational, not compared against an installed copy automatically.</translation>
+    </message>
+    <message>
+        <source>One or more &lt;change&gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation>One or more &lt;change&gt; entries: person, timestamp, and the change text(s). Purely informational.</translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &lt;requires&gt; of type ezpackage is installed first, automatically, by eZPackage::install(); a &lt;requires&gt; of type ezcontentclass is informational only - it is not fetched, only stated (the installing site must already carry that class, for a content-only package).</source>
+        <translation>provides/requires/obsoletes/conflicts. A &lt;requires&gt; of type ezpackage is installed first, automatically, by eZPackage::install(); a &lt;requires&gt; of type ezcontentclass is informational only - it is not fetched, only stated (the installing site must already carry that class, for a content-only package).</translation>
+    </message>
+    <message>
+        <source>The ordered list of install/uninstall items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from and its sub-directory.</source>
+        <translation>The ordered list of install/uninstall items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from and its sub-directory.</translation>
+    </message>
+    <message>
+        <source>The content-class definition XML (ezcontentclass/*.xml)</source>
+        <translation>The content-class definition XML (ezcontentclass/*.xml)</translation>
+    </message>
+    <message>
+        <source>Root &lt;content-class&gt;: is-container, always-available and the sort field/order it opens with.</source>
+        <translation>Root &lt;content-class&gt;: is-container, always-available and the sort field/order it opens with.</translation>
+    </message>
+    <message>
+        <source>&lt;identifier&gt;, &lt;remote-id&gt;: the class identifier and its remote id - remote id is the install-time match key (falls back to identifier when no class has that remote id yet).</source>
+        <translation>&lt;identifier&gt;, &lt;remote-id&gt;: the class identifier and its remote id - remote id is the install-time match key (falls back to identifier when no class has that remote id yet).</translation>
+    </message>
+    <message>
+        <source>&lt;serialized-name-list&gt;, &lt;serialized-description-list&gt;: PHP-serialized per-language maps (one entry per language the class name/description is translated to), not plain text - never hand-write these; build the class in the class editor or copy them from a real export.</source>
+        <translation>&lt;serialized-name-list&gt;, &lt;serialized-description-list&gt;: PHP-serialized per-language maps (one entry per language the class name/description is translated to), not plain text - never hand-write these; build the class in the class editor or copy them from a real export.</translation>
+    </message>
+    <message>
+        <source>&lt;remote&gt;&lt;groups&gt;: which content-class groups (Content, Users, Media, ...) the class belongs to, each named by its own remote id.</source>
+        <translation>&lt;remote&gt;&lt;groups&gt;: which content-class groups (Content, Users, Media, ...) the class belongs to, each named by its own remote id.</translation>
+    </message>
+    <message>
+        <source>&lt;attributes&gt;&lt;attribute&gt;: one per class attribute - identifier, type (the datatype string, e.g. ezstring), name (per language), is-required/is-searchable/is-translatable/is-information-collector, category, and a &lt;content&gt; block whose shape is entirely datatype-specific (ezinteger carries min/max/default; ezselection carries the option list and multi/single; ezobjectrelation(list) carries the class/group constraint and selection type; ezimage carries the max file size; and so on) - this is exactly what eZDataType::serializeContentClassAttribute() for that datatype writes, and only that datatype’s own fromString()/unserializeContentClassAttribute() can read it back, so hand-writing an attribute’s &lt;content&gt; reliably means copying it from a real export of the same datatype, not composing it from this reference alone.</source>
+        <translation>&lt;attributes&gt;&lt;attribute&gt;: one per class attribute - identifier, type (the datatype string, e.g. ezstring), name (per language), is-required/is-searchable/is-translatable/is-information-collector, category, and a &lt;content&gt; block whose shape is entirely datatype-specific (ezinteger carries min/max/default; ezselection carries the option list and multi/single; ezobjectrelation(list) carries the class/group constraint and selection type; ezimage carries the max file size; and so on) - this is exactly what eZDataType::serializeContentClassAttribute() for that datatype writes, and only that datatype’s own fromString()/unserializeContentClassAttribute() can read it back, so hand-writing an attribute’s &lt;content&gt; reliably means copying it from a real export of the same datatype, not composing it from this reference alone.</translation>
+    </message>
+    <message>
+        <source>The content-object XML (ezcontentobject/*.xml)</source>
+        <translation>The content-object XML (ezcontentobject/*.xml)</translation>
+    </message>
+    <message>
+        <source>Root &lt;object&gt;: name, remote_id (the install-time match key), class_remote_id/class_identifier, always_available, and the timestamps a package install can optionally restore (published/modified).</source>
+        <translation>Root &lt;object&gt;: name, remote_id (the install-time match key), class_remote_id/class_identifier, always_available, and the timestamps a package install can optionally restore (published/modified).</translation>
+    </message>
+    <message>
+        <source>&lt;version-list active_version=&quot;n&quot;&gt;: one &lt;version&gt; per version the object carries (almost always just one, the published version); each has its own status and an ordered &lt;object-translation language=&quot;...&quot;&gt; per language.</source>
+        <translation>&lt;version-list active_version=&quot;n&quot;&gt;: one &lt;version&gt; per version the object carries (almost always just one, the published version); each has its own status and an ordered &lt;object-translation language=&quot;...&quot;&gt; per language.</translation>
+    </message>
+    <message>
+        <source>Inside an &lt;object-translation&gt;, one &lt;attribute identifier=&quot;...&quot; type=&quot;...&quot;&gt; per class attribute, serialized exactly as that datatype’s own serialize() writes it - the shape differs by datatype (see the table below); an attribute the translation does not carry (a non-translatable one, already set on another language) is simply absent.</source>
+        <translation>Inside an &lt;object-translation&gt;, one &lt;attribute identifier=&quot;...&quot; type=&quot;...&quot;&gt; per class attribute, serialized exactly as that datatype’s own serialize() writes it - the shape differs by datatype (see the table below); an attribute the translation does not carry (a non-translatable one, already set on another language) is simply absent.</translation>
+    </message>
+    <message>
+        <source>&lt;node-assignment-list&gt;: one &lt;node-assignment&gt; per location. A node with no parent-node-remote-id attribute is a &quot;top node&quot; - on install it goes under the parent node chosen at install time (or, for xrowextract/package’s own install, the &quot;Parent for new objects&quot; field above); one that does have it is placed under whichever node in the same package (or already on the installing site) carries that remote id.</source>
+        <translation>&lt;node-assignment-list&gt;: one &lt;node-assignment&gt; per location. A node with no parent-node-remote-id attribute is a &quot;top node&quot; - on install it goes under the parent node chosen at install time (or, for xrowextract/package’s own install, the &quot;Parent for new objects&quot; field above); one that does have it is placed under whichever node in the same package (or already on the installing site) carries that remote id.</translation>
+    </message>
+    <message>
+        <source>A relation attribute (ezobjectrelation/ezobjectrelationlist) stores the related object’s remote id, not its numeric id - so it resolves correctly even though ids differ between the exporting and installing site; a relation to an object neither carried by the same package nor already on the installing site is left empty, silently.</source>
+        <translation>A relation attribute (ezobjectrelation/ezobjectrelationlist) stores the related object’s remote id, not its numeric id - so it resolves correctly even though ids differ between the exporting and installing site; a relation to an object neither carried by the same package nor already on the installing site is left empty, silently.</translation>
+    </message>
+    <message>
+        <source>ezimage/ezbinaryfile/ezmedia store the real file under the package’s own simplefiles/, copied back out on install - nothing is fetched from the exporting site at install time.</source>
+        <translation>ezimage/ezbinaryfile/ezmedia store the real file under the package’s own simplefiles/, copied back out on install - nothing is fetched from the exporting site at install time.</translation>
+    </message>
+    <message>
+        <source>A real example, from this extension’s own &quot;Package template&quot; sample builder (xrowextract/package) - one attribute of each datatype family it fills a real value for, and the relation from a second sample object to the first:</source>
+        <translation>A real example, from this extension’s own &quot;Package template&quot; sample builder (xrowextract/package) - one attribute of each datatype family it fills a real value for, and the relation from a second sample object to the first:</translation>
+    </message>
+    <message>
+        <source>Every importable datatype, with an example</source>
+        <translation>Every importable datatype, with an example</translation>
+    </message>
+    <message>
+        <source>Serialized as</source>
+        <translation>Serialized as</translation>
+    </message>
+    <message>
+        <source>A datatype not listed here still exports and round-trips through package/create and package/install normally (this list only names the ones the sample builder fills a value for); it just has no sample generated for it by the Package template builder.</source>
+        <translation>A datatype not listed here still exports and round-trips through package/create and package/install normally (this list only names the ones the sample builder fills a value for); it just has no sample generated for it by the Package template builder.</translation>
+    </message>
+    <message>
+        <source>What happens on install</source>
+        <translation>What happens on install</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a match is skipped, replaced, or kept alongside a new copy (a new identifier), per the class option offered here.</source>
+        <translation>Classes match by remote id, falling back to identifier; a match is skipped, replaced, or kept alongside a new copy (a new identifier), per the class option offered here.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a match is skipped, updated in place (existing content is kept wherever the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation>Objects match by remote id only; a match is skipped, updated in place (existing content is kept wherever the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</translation>
+    </message>
+    <message>
+        <source>An object whose class is on neither this site nor carried by the same package is refused outright (class missing) rather than half-installed - inspect it first and it is called out exactly as that.</source>
+        <translation>An object whose class is on neither this site nor carried by the same package is refused outright (class missing) rather than half-installed - inspect it first and it is called out exactly as that.</translation>
+    </message>
+    <message>
+        <source>A language the object carries but this site does not have yet is added automatically, if it is a valid locale; otherwise that one translation (only that one) is skipped.</source>
+        <translation>A language the object carries but this site does not have yet is added automatically, if it is a valid locale; otherwise that one translation (only that one) is skipped.</translation>
+    </message>
+    <message>
+        <source>A &quot;requires&quot; dependency of type ezpackage is installed first, automatically; of type ezcontentclass it is informational only - a content-only package still fails per-object with class missing if that class is not already there.</source>
+        <translation>A &quot;requires&quot; dependency of type ezpackage is installed first, automatically; of type ezcontentclass it is informational only - a content-only package still fails per-object with class missing if that class is not already there.</translation>
+    </message>
+    <message>
+        <source>Building one by hand or from the command line</source>
+        <translation>Building one by hand or from the command line</translation>
+    </message>
+    <message>
+        <source>A single class or object XML file: export it from package/create (content class / content object export), or take one file out of an existing .ezpkg (tar tzf/tar xzf) - then upload that one file here directly, no archive needed.</source>
+        <translation>A single class or object XML file: export it from package/create (content class / content object export), or take one file out of an existing .ezpkg (tar tzf/tar xzf) - then upload that one file here directly, no archive needed.</translation>
+    </message>
+    <message>
+        <source>A full .ezpkg: package/create’s wizard, or ext:xrowextract:package --export --node=&lt;id&gt; [--subtree] [--class=&lt;id&gt;] --file=&lt;out.ezpkg&gt; for a plain node/subtree, or --template --class=&lt;id&gt; --variant=both --file=&lt;out.ezpkg&gt; for a ready-made sample of a class (see the Package page).</source>
+        <translation>A full .ezpkg: package/create’s wizard, or ext:xrowextract:package --export --node=&lt;id&gt; [--subtree] [--class=&lt;id&gt;] --file=&lt;out.ezpkg&gt; for a plain node/subtree, or --template --class=&lt;id&gt; --variant=both --file=&lt;out.ezpkg&gt; for a ready-made sample of a class (see the Package page).</translation>
+    </message>
+    <message>
+        <source>ext:xrowextract:package --inspect=&lt;name&gt; shows exactly what a package carries and what installing it would do, the same dry run this page runs after an upload.</source>
+        <translation>ext:xrowextract:package --inspect=&lt;name&gt; shows exactly what a package carries and what installing it would do, the same dry run this page runs after an upload.</translation>
+    </message>
+    <message>
         <source>Other classes</source>
         <translation>Other classes</translation>
     </message>

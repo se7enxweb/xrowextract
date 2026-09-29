@@ -34,7 +34,7 @@
             {if $HasFile|not}
             <div class="xe-field">
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
-                <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,text/xml,application/xml,text/csv,application/json,application/gzip" />
+                <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
                 <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
                     <input type="hidden" name="UploadID" value="" />
@@ -249,6 +249,8 @@
         {include uri='design:xrowextract/import_result.tpl'}
         {/if}
 
+        {include uri='design:xrowextract/import_package.tpl'}
+
         {* File format reference: complete, technical, with real examples for the reference class *}
         <section class="xe-card" id="xe-card-reference" aria-labelledby="xe-card-reference-h">
             <header class="xe-card-head">
@@ -388,6 +390,11 @@
                     {/foreach}
                 </ul>
                 <p class="xe-help">{'Shown in the mapping as not supported, with this reason, and never written - not dropped without a trace.'|i18n('design/standard/extract')}</p>
+            </details>
+
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_packages'|ezurl}{if ezpreference( 'admin_xrowextract_ref_packages' )|ne( 'closed' )} open{/if}>
+                <summary>{'Content packages (.ezpkg)'|i18n('design/standard/extract')}</summary>
+                {include uri='design:xrowextract/import_package_reference.tpl'}
             </details>
         </section>
 

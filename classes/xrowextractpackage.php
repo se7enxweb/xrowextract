@@ -27,6 +27,221 @@ class XrowExtractPackage
     const CLASS_REPLACE = 'replace';
     const CLASS_NEW = 'new';
 
+    // ------------------------------------------------------------ upload (xrowextract/import)
+
+    /**
+     * What an uploaded file is, for the Import view to hand off to this class
+     * instead of the row importer: 'package' (.ezpkg or .tar.gz - the same
+     * gzip-compressed tar either way, only the extension differs),
+     * 'contentclass' (a standalone content-class definition XML, the file
+     * eZContentClassPackageHandler writes as one package install item), or
+     * 'contentobject' (a standalone content-object XML, the file
+     * eZContentObjectPackageHandler writes). False for anything else (a row
+     * CSV/XML/JSON file, handled by XrowExtractImport as before).
+     */
+    public static function detectUploadKind( $storedPath, $originalName )
+    {
+        $lowerName = strtolower( (string)$originalName );
+        if ( self::endsWith( $lowerName, '.ezpkg' ) || self::endsWith( $lowerName, '.tar.gz' ) || self::endsWith( $lowerName, '.tgz' ) )
+            return 'package';
+
+        $head = @file_get_contents( $storedPath, false, null, 0, 4 );
+        if ( $head !== false && strlen( $head ) >= 2 && $head[0] === "\x1f" && $head[1] === "\x8b" )
+            return 'package'; // gzip magic bytes, whatever the extension
+
+        if ( self::endsWith( $lowerName, '.xml' ) )
+        {
+            // A peek at the root element, not a full parse: cheap, and safe on a huge file.
+            $sample = @file_get_contents( $storedPath, false, null, 0, 2048 );
+            if ( $sample !== false )
+            {
+                $sample = ltrim( preg_replace( '/^\xEF\xBB\xBF/', '', $sample ) );
+                if ( preg_match( '/^<\?xml[^>]*>\s*/', $sample, $m ) )
+                    $sample = substr( $sample, strlen( $m[0] ) );
+                if ( strpos( $sample, '<content-class' ) === 0 )
+                    return 'contentclass';
+                if ( strpos( $sample, '<content-object' ) === 0 )
+                    return 'contentobject';
+            }
+        }
+        return false;
+    }
+
+    protected static function endsWith( $haystack, $needle )
+    {
+        $len = strlen( $needle );
+        return $len === 0 || substr( $haystack, -$len ) === $needle;
+    }
+
+    /**
+     * Lists every entry a gzip-compressed tar (.ezpkg or .tar.gz) carries,
+     * refusing one with an absolute path, a ".." component or a symlink
+     * anywhere in it, before the archive is handed to eZPackage::import()
+     * (which extracts it for real). Reads through PHP's Phar/PharData
+     * (streaming: entries are listed without loading the archive into
+     * memory), not eZ's own ezcArchive, specifically so this check runs
+     * first and independently of how the kernel itself later extracts it.
+     */
+    public static function scanArchiveEntries( $path )
+    {
+        $real = realpath( $path );
+        if ( $real === false || !is_file( $real ) )
+            return array( 'ok' => false, 'entries' => array(), 'error' => 'no such file' );
+
+        // Listed with the system tar binary (verbose: type letter, owner/group, size, date,
+        // time, name - a symlink's name ends " -> target"), not PHP's own Phar/PharData:
+        // tried first, but PharFileInfo::isLink() turned out not to recognise a tar symlink
+        // entry as one at all in this PHP build (it was silently listed as a plain file),
+        // where GNU tar's own listing reliably shows the leading "l". This also sidesteps
+        // needing the phar:// stream wrapper, which autoload.php unregisters on every
+        // request/command on purpose. No shell is involved (proc_open with an argument
+        // array), so nothing in the archive's own file name ever reaches a shell.
+        $descriptors = array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
+        $process = @proc_open( array( 'tar', '-tvzf', $real ), $descriptors, $pipes, null, null, array( 'bypass_shell' => true ) );
+        if ( !is_resource( $process ) )
+            return array( 'ok' => false, 'entries' => array(), 'error' => 'could not run tar to read the archive' );
+        $out = (string)stream_get_contents( $pipes[1] );
+        $err = (string)stream_get_contents( $pipes[2] );
+        fclose( $pipes[1] );
+        fclose( $pipes[2] );
+        $exitCode = proc_close( $process );
+        if ( $exitCode !== 0 )
+            return array( 'ok' => false, 'entries' => array(), 'error' => 'not a valid .ezpkg/.tar.gz archive' . ( trim( $err ) !== '' ? ': ' . trim( $err ) : '' ) );
+
+        $entries = array();
+        $error = null;
+        foreach ( preg_split( '/\r?\n/', trim( $out ) ) as $line )
+        {
+            if ( $line === '' )
+                continue;
+            // "<type+perm> <owner>/<group> <size> <date> <time> <name>[ -> <target>]"
+            // Fail closed: a line this cannot read refuses the archive rather than being skipped
+            if ( !preg_match( '/^(.)\S*\s+\S+\s+\S+\s+\S+\s+\S+\s+(.*)$/', $line, $m ) )
+            {
+                $error = 'unreadable archive listing line refused';
+                break;
+            }
+            $type = $m[1];
+            $name = $m[2];
+            if ( $type === 'l' )
+            {
+                $error = 'symlink entry refused: ' . preg_replace( '/\s*->.*/', '', $name );
+                break;
+            }
+            // Only plain files and folders: a hard link ("h", "... link to <target>") can point at a file
+            // outside the package, and device, fifo or socket entries have no place in a package at all
+            if ( $type !== '-' && $type !== 'd' )
+            {
+                $error = ( $type === 'h' ? 'hard link' : "special ($type)" ) . ' entry refused: '
+                       . preg_replace( '/\s+link to .*$/', '', $name );
+                break;
+            }
+            $relative = rtrim( $name, '/' );
+            if ( $relative === '' || $relative[0] === '/' || preg_match( '#(^|/)\.\.(/|$)#', $relative ) )
+            {
+                $error = "unsafe entry path refused: $relative";
+                break;
+            }
+            $entries[] = $relative;
+        }
+
+        return array( 'ok' => $error === null, 'entries' => $entries, 'error' => $error );
+    }
+
+    /**
+     * Imports an uploaded .ezpkg/.tar.gz into the local package repository,
+     * after scanArchiveEntries() has refused a path-traversal/symlink
+     * archive. Returns array( 'ok', 'package' => eZPackage|null, 'error' ).
+     */
+    public static function importUploadedArchive( $storedPath )
+    {
+        $scan = self::scanArchiveEntries( $storedPath );
+        if ( !$scan['ok'] )
+            return array( 'ok' => false, 'package' => null, 'error' => $scan['error'] );
+
+        $packageName = '';
+        try
+        {
+            // Repository forced to 'local', not left to eZPackage::import()'s own default:
+            // with none given, it derives the repository from the archive's own <vendor>
+            // (kernel/classes/ezpackage.php, "vendor-dir"), so a package whose builder set a
+            // vendor - every package this extension builds does ('xrowextract') - lands
+            // under var/storage/packages/xrowextract/ instead of .../local/, where
+            // eZPackage::create() (and this class's own uniquePackageName() existence check)
+            // always puts a locally built package. Not wrong on its own, but the mismatch
+            // meant a package built here and later re-uploaded here could never collide with
+            // its own earlier self by name, and a fetch that assumes 'local' (as
+            // uniquePackageName() does) would miss it entirely.
+            //
+            // A well-formed archive with a nonsensical package.xml (missing elements the
+            // kernel's own parser assumes are there, e.g. a bare <package/>) makes
+            // eZPackage::import() throw a PHP 8 TypeError deep inside kernel/classes/
+            // ezpackage.php (getElementsByTagName() on null), not return false - caught
+            // here so a malformed upload is refused cleanly instead of a fatal error page.
+            $imported = eZPackage::import( $storedPath, $packageName, true, 'local', false );
+        }
+        catch ( \Throwable $e )
+        {
+            return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg): ' . $e->getMessage() );
+        }
+        if ( $imported instanceof eZPackage )
+            return array( 'ok' => true, 'package' => $imported, 'error' => null );
+        if ( $imported === eZPackage::STATUS_ALREADY_EXISTS )
+            return array( 'ok' => false, 'package' => null, 'error' => "a package named '$packageName' already exists in the repository" );
+        if ( $imported === eZPackage::STATUS_INVALID_NAME )
+            return array( 'ok' => false, 'package' => null, 'error' => "the package name '$packageName' is invalid" );
+        return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg)' );
+    }
+
+    /**
+     * Builds a transient, local package wrapping one standalone content-class
+     * or content-object XML file (as detectUploadKind() found), so it can be
+     * inspected and installed through the exact same eZPackage/
+     * XrowExtractPackage::inspect()/install() code as a full .ezpkg - "build
+     * a transient package around it", per the class/content XML upload
+     * requirement. Returns array( 'ok', 'package', 'error' ).
+     */
+    public static function wrapStandaloneXML( $storedPath, $kind, $originalName = '' )
+    {
+        if ( !in_array( $kind, array( 'contentclass', 'contentobject' ), true ) )
+            return array( 'ok' => false, 'package' => null, 'error' => 'unknown file kind' );
+
+        $dom = new DOMDocument( '1.0', 'utf-8' );
+        $dom->preserveWhiteSpace = false;
+        libxml_use_internal_errors( true );
+        // Refuse a DOCTYPE outright: never written by this tool's own exports, and the classic
+        // way to smuggle in external entities (matches the row-XML importer's own rule).
+        $loaded = false;
+        $raw = @file_get_contents( $storedPath );
+        if ( $raw !== false && stripos( $raw, '<!doctype' ) === false )
+            $loaded = $dom->loadXML( $raw, LIBXML_NONET );
+        $xmlErrors = libxml_get_errors();
+        libxml_clear_errors();
+        if ( !$loaded || !$dom->documentElement )
+        {
+            $message = $xmlErrors ? trim( $xmlErrors[0]->message ) : 'could not be read as XML';
+            return array( 'ok' => false, 'package' => null, 'error' => $message );
+        }
+
+        $base = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $originalName !== '' ? pathinfo( $originalName, PATHINFO_FILENAME ) : $kind );
+        $packageName = self::uniquePackageName( 'xrowextract_upload_' . $base );
+        $package = eZPackage::create( $packageName, array(
+            'summary' => 'Uploaded on xrowextract/import: a standalone ' . ( $kind === 'contentclass' ? 'content class' : 'content object' ) . ' file.',
+            'vendor'  => 'xrowextract',
+        ) );
+        self::attachAboutDocument( $package, 'Wraps one uploaded ' . ( $kind === 'contentclass' ? 'content-class' : 'content-object' ) . " file (originally $originalName) in a package of its own, for xrowextract/import to inspect and install." );
+
+        $type = $kind === 'contentclass' ? 'ezcontentclass' : 'ezcontentobject';
+        $subdirectory = $type;
+        $filename = 'upload';
+        $package->appendInstall( $type, false, false, true, $filename, $subdirectory, array( 'content' => $dom->documentElement ) );
+        $package->appendInstall( $type, false, false, false, $filename, $subdirectory, array( 'content' => false ) );
+        $package->setAttribute( 'is_active', true );
+        $package->store();
+
+        return array( 'ok' => true, 'package' => $package, 'error' => null );
+    }
+
     // ------------------------------------------------------------ listing
 
     /** Packages in the repository that carry a content class or content object install item. */
@@ -525,6 +740,7 @@ class XrowExtractPackage
         $package->setRelease( '1.0', '1', time(), 'GPL-2.0-or-later', 'stable' );
         $package->appendMaintainer( 'xrowextract Package template', '', 'developer' );
         $package->appendChange( 'xrowextract Package template', '', array( "Generated a '$variant' sample package for class '$classIdentifier'." ) );
+        self::attachAboutDocument( $package, "Sample package for class '$classIdentifier', variant '$variant'. Built by the xrowextract Package template." );
         $package->appendProvides( 'ezcontentclass', $classIdentifier, $class->attribute( 'remote_id' ) );
         if ( $needsContent )
             $package->appendDependency( 'requires', array( 'type' => 'ezcontentclass', 'name' => $classIdentifier, 'value' => $class->attribute( 'remote_id' ) ) );
@@ -671,6 +887,27 @@ class XrowExtractPackage
     }
 
     /** $base, or $base_2, $base_3, ... the first one not already in the local package repository. */
+    /**
+     * A one-line "about" document, purely so the package's <documents> is
+     * never empty. Not decorative: eZPackage::parseDOMTree() (kernel/classes/
+     * ezpackage.php, the code eZPackage::import() re-parses a package.xml
+     * with) does $root->getElementsByTagName('documents')->item(0) and then
+     * calls a method on the result with no null check - and the writer only
+     * emits <documents> at all when there is at least one document
+     * (kernel/classes/ezpackage.php's own domStructure(): if (count(
+     * $documents) > 0)). A package with none, exactly what this class built
+     * before this method existed, is valid XML that the kernel's own writer
+     * produces and its own reader then fatals on reading back - reported,
+     * not fixed here (kernel is out of scope); this is the workaround inside
+     * this extension's own package-building code so a package built by this
+     * extension always survives the eZPackage::import() an upload runs it
+     * through.
+     */
+    public static function attachAboutDocument( eZPackage $package, $text )
+    {
+        $package->appendDocument( 'about.txt', 'text/plain', false, false, false, $text );
+    }
+
     protected static function uniquePackageName( $base )
     {
         $base = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $base );

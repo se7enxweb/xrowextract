@@ -33,7 +33,8 @@ $ViewList['job_download'] = array( 'script' => 'job_download.php',
 $ViewList['import'] = array( 'script' => 'import.php',
                              'functions' => array( 'import' ),
                              'default_navigation_part' => 'ezextractnavigationpart',
-                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply', 'RunInBackground', 'ResumeJobID' ),
+                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
+                                                      'RunInBackground', 'ResumeJobID', 'InstallPackage', 'RunPackageInBackground' ),
                              'params' => array() );
 // The chunked upload endpoint XrowExtractUploadJS talks to: same policy as xrowextract/import
 $ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
