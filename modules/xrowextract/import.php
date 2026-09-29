@@ -15,6 +15,11 @@ $login = eZUser::currentUser()->attribute( 'login' );
 
 XrowExtractImport::cleanupOldUploads();
 XrowExtractUpload::cleanupStale();
+// Defence in depth only, since a "Try a sample" package is never registered in the repository for
+// longer than the single request that needed it (see $PackageIsTransient below) - this sweep is what
+// catches a package this class ever built that somehow still ended up left behind (a killed request
+// that never reached its own cleanup, for instance), not the mechanism this relies on day to day.
+XrowExtractPackage::cleanupOldSamplePackages();
 
 $SESSION_KEY = 'XROWEXTRACT_IMPORT_FILE';
 
@@ -174,11 +179,14 @@ elseif ( $http->hasPostVariable( 'Upload' ) )
     $uploadError = ezpI18n::tr( 'design/standard/extract', 'Choose a file first.' );
 }
 
-// A package (or standalone class/object XML) keeps no loose file on disk once uploaded - it
-// already lives in the package repository (see the Upload block above) - so "there is a file"
-// for this session means either a row file on disk, or a package_name in the session.
-$PackageMode = !empty( $_SESSION[$SESSION_KEY]['package_name'] );
-$hasFile = ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) ) || $PackageMode;
+// A package (or standalone class/object XML) session is either an upload, persisted in the
+// repository under 'package_name' (see the Upload block above), or a "Try a sample" one, which is
+// never registered there at all - its 'path' names a private .ezpkg this session owns, imported into
+// the repository transiently for whichever single request needs it (see $Package below) and removed
+// again before that request ends, unless "Keep in the repository" says otherwise. Either shape sets
+// 'kind', so that alone is enough to know this session is a package one.
+$PackageMode = isset( $_SESSION[$SESSION_KEY]['kind'] ) && in_array( $_SESSION[$SESSION_KEY]['kind'], array( 'package', 'contentclass', 'contentobject' ), true );
+$hasFile = ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) ) || !empty( $_SESSION[$SESSION_KEY]['package_name'] );
 $tpl->setVariable( 'HasFile', $hasFile );
 $tpl->setVariable( 'UploadError', $uploadError );
 $diskFree = XrowExtractUpload::freeDiskSpace();
@@ -189,12 +197,39 @@ $tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5
 
 if ( $http->hasPostVariable( 'RemoveFile' ) && $hasFile )
 {
-    // forgetFile() already covers all three shapes of session: a chunked upload (deletes it via
-    // XrowExtractUpload), a plain row file on disk (unlinks it), and a package (neither 'source'
-    // nor 'path' is set, so it falls through to unsetting the session only - the package itself
-    // is left in the repository, same as the "Forget" action on the Package page).
+    // forgetFile() covers every shape of session: a chunked upload (deletes it via
+    // XrowExtractUpload), a private .ezpkg row/sample file on disk (unlinks it - a "Try a sample"
+    // package's own repository copy is already gone by the time any RemoveFile can be clicked; see
+    // $Package below), and an uploaded/kept package (only 'package_name' is set, no local file - left
+    // in the repository, same as the "Forget" action on the Package page).
     $forgetFile();
     return $module->redirectTo( 'xrowextract/import' );
+}
+
+// The one package a $PackageMode session resolves to, however it is backed: an uploaded/kept one
+// fetched by name from the repository (left as it was, not removed), or a "Try a sample" one
+// imported transiently from its private 'path' - which this request removes again once it is done
+// with it (at the very end of the script, see below), so it is never registered in the repository
+// for longer than this one request takes. Computed once, up front, and reused for the meta line
+// below and for the dry run/install further down - never fetched or imported twice in one request.
+$Package = false;
+$PackageIsTransient = false;
+$PackageImportError = null;
+if ( $PackageMode )
+{
+    if ( !empty( $_SESSION[$SESSION_KEY]['package_name'] ) )
+    {
+        $Package = eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] );
+    }
+    elseif ( !empty( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
+    {
+        $PackageIsTransient = true;
+        $transientImport = XrowExtractPackage::importUploadedArchive( $_SESSION[$SESSION_KEY]['path'] );
+        if ( $transientImport['ok'] )
+            $Package = $transientImport['package'];
+        else
+            $PackageImportError = $transientImport['error'];
+    }
 }
 
 $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'separator' => ',' );
@@ -206,10 +241,9 @@ if ( $hasFile && $PackageMode )
     $tpl->setVariable( 'SampleKinds', isset( $_SESSION[$SESSION_KEY]['kinds'] ) ? $_SESSION[$SESSION_KEY]['kinds'] : array() );
     // "N rows" in the meta line for a package: classes + objects it carries - a cheap parse-only
     // inspect(), the same one Preview will redo once the user clicks it for the full dry run.
-    $earlyPackage = eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] );
-    if ( $earlyPackage instanceof eZPackage )
+    if ( $Package instanceof eZPackage )
     {
-        $earlyInspection = XrowExtractPackage::inspect( $earlyPackage );
+        $earlyInspection = XrowExtractPackage::inspect( $Package );
         $parsed['total_rows'] = count( $earlyInspection['classes'] ) + count( $earlyInspection['objects'] );
     }
 }
@@ -531,9 +565,8 @@ if ( $http->hasPostVariable( 'TrySample' ) )
         else
         {
             $forgetFile();
-            $_SESSION[$SESSION_KEY] = array( 'name' => $sample['package']->attribute( 'name' ) . '.ezpkg', 'format' => 'package', 'kind' => 'package',
-                                             'package_name' => $sample['package']->attribute( 'name' ), 'sample' => true,
-                                             'kinds' => array( 'create', 'update', 'unchanged', 'class_missing' ), 'classID' => $SampleClassID );
+            $_SESSION[$SESSION_KEY] = array( 'path' => $sample['file'], 'name' => basename( $sample['file'] ), 'format' => 'package', 'kind' => 'package',
+                                             'sample' => true, 'kinds' => array( 'create', 'update', 'unchanged', 'class_missing' ), 'classID' => $SampleClassID );
             return $module->redirectTo( 'xrowextract/import' );
         }
     }
@@ -639,16 +672,34 @@ $tpl->setVariable( 'QueueThresholdRows', $QueueThresholdRows );
 // Parent field above for its top-level objects. Existing-object/existing-class handling uses the
 // same safe defaults the Package page starts from (update existing objects by remote id, skip an
 // existing class) - the Package tab is still where those are changed for a one-off install.
-$Package = $PackageMode ? eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] ) : false;
-if ( $Package instanceof eZPackage && $http->hasPostVariable( 'KeepSamplePackage' ) )
+// $Package/$PackageIsTransient were already resolved above, for the meta line.
+$KeepThisPackage = false;
+if ( $Package instanceof eZPackage && $PackageIsTransient && $http->hasPostVariable( 'KeepSamplePackage' ) )
 {
+    // "Keep in the repository": the transient import stays (skipped below, at the end of the
+    // script), and the session graduates from a private-file sample to an ordinary persisted
+    // package - the same shape an upload already uses, reachable from the Package tab from now on.
+    $KeepThisPackage = true;
+    // The package keeps its xrowextract_sample_ name (nothing here renames it), so the marker is
+    // still what tells cleanupOldSamplePackages() - a defence-in-depth sweep, not the primary
+    // mechanism any more - to leave it alone forever, the same as before this request's package
+    // was ever transient.
     XrowExtractPackage::keepSamplePackage( $Package );
-    unset( $_SESSION[$SESSION_KEY]['sample'] );
+    $keptPath = isset( $_SESSION[$SESSION_KEY]['path'] ) ? $_SESSION[$SESSION_KEY]['path'] : null;
+    unset( $_SESSION[$SESSION_KEY]['sample'], $_SESSION[$SESSION_KEY]['path'] );
+    $_SESSION[$SESSION_KEY]['package_name'] = $Package->attribute( 'name' );
+    if ( $keptPath && is_file( $keptPath ) )
+        @unlink( $keptPath );
+    // IsSample (set earlier, for the meta line, before this Keep click was processed) still says
+    // "sample" for this one response otherwise - the repository state is already correct by now,
+    // this only keeps the page's own wording from lagging a request behind it.
+    $tpl->setVariable( 'IsSample', false );
 }
 $tpl->setVariable( 'PackageMode', $PackageMode );
 $tpl->setVariable( 'PackageKind', $PackageMode ? $_SESSION[$SESSION_KEY]['kind'] : false );
-$tpl->setVariable( 'PackageName', $PackageMode ? $_SESSION[$SESSION_KEY]['package_name'] : '' );
+$tpl->setVariable( 'PackageName', $Package instanceof eZPackage ? $Package->attribute( 'name' ) : '' );
 $tpl->setVariable( 'IsPackageSample', $PackageMode && !empty( $_SESSION[$SESSION_KEY]['sample'] ) );
+$tpl->setVariable( 'PackageImportError', $PackageImportError );
 
 // Preview (dry run) and Apply run the same engine; Apply only after a preview was shown for these settings
 $Preview = false;
@@ -758,6 +809,18 @@ elseif ( $hasFile && !$NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $h
         // Done: the file has served its purpose
         $forgetFile();
     }
+}
+
+// A "Try a sample" package (imported transiently, above, for whatever this one request needed it
+// for) is removed from the repository again right here - unless "Keep in the repository" was just
+// pressed. This runs on every request that resolved one, not only Preview/Apply: even the plain
+// page load that only reads the meta line imports and then removes it again. Nothing about a sample
+// is ever registered in the repository for longer than the single request that touched it.
+if ( $PackageIsTransient && !$KeepThisPackage && $Package instanceof eZPackage )
+{
+    $stillThere = eZPackage::fetch( $Package->attribute( 'name' ) );
+    if ( $stillThere instanceof eZPackage )
+        $stillThere->remove();
 }
 
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
