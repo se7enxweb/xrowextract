@@ -1,0 +1,278 @@
+#!/usr/bin/env php
+<?php
+/**
+ * One class as a CSV file, from the command line: everything the
+ * xrowextract/csv view does (node or whole site, depth, main locations,
+ * offset/limit, columns and their names, separator, line endings, quoting,
+ * a preview), with the same code.
+ *
+ * Usage (from the installation root; ./console ext:xrowextract:csv runs it too):
+ *   php extension/xrowextract/bin/php/csv.php --class=ng_article --node=2 --output=articles.csv
+ *   php extension/xrowextract/bin/php/csv.php --class=image --scope=all --separator=';' --line-endings=win32
+ *   php extension/xrowextract/bin/php/csv.php --class=4 --node=5 --columns=first_name,last_name,ezuser.email
+ *   php extension/xrowextract/bin/php/csv.php --class=ng_article --node=2 --preview=10
+ *   php extension/xrowextract/bin/php/csv.php --list-classes --node=2
+ *   php extension/xrowextract/bin/php/csv.php --list-columns --class=ng_article
+ */
+
+require_once dirname( __FILE__ ) . '/../../../../autoload.php';
+
+$cli = eZCLI::instance();
+$script = eZScript::instance( array(
+    'description'    => "Exports one class as a CSV file: below a node or the whole site, with the columns, names and format of your choice.",
+    'use-session'    => false,
+    'use-modules'    => true,
+    'use-extensions' => true,
+) );
+$script->startup();
+$options = $script->getOptions(
+    '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][names:][separator:][line-endings:][unquoted]' .
+    '[output:][preview;][list-classes][list-columns][user:]',
+    '',
+    array(
+        'class'        => 'Class id or identifier (required to export)',
+        'node'         => 'Node id to export below (default: export.ini StartNodeID or the user placement)',
+        'scope'        => 'node (default): below --node; all: every object of the class in the whole site',
+        'depth'        => 'tree (default): the whole subtree; list: direct children only',
+        'main-only'    => 'Only main locations: an object with several locations is one row',
+        'offset'       => 'Skip this many rows (default 0)',
+        'limit'        => 'Take at most this many rows (default 0 = all)',
+        'columns'      => 'Comma list of attribute identifiers and special column ids (default: every attribute of the class)',
+        'add'          => 'Comma list of columns to add after the default or --columns ones (e.g. ezcontentobject.id,ezuser.email)',
+        'names'        => 'Column names in the file: id=name,id=name (default: the identifier)',
+        'separator'    => 'One character, or comma, semicolon, tab, pipe (default comma)',
+        'line-endings' => 'win32/crlf, unix/lf (default), mac/cr',
+        'unquoted'     => 'Do not quote cells (line breaks are removed; a separator in a value shifts the columns)',
+        'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
+        'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
+        'list-classes' => 'List the classes with how many objects each has in the selection',
+        'list-columns' => 'List the attributes of --class with datatype and meta information, and the special columns',
+        'user'         => 'Export with the read access of this login (default: admin)',
+    )
+);
+$script->initialize();
+
+$fail = function ( $message ) use ( $cli, $script )
+{
+    $cli->error( $message );
+    $script->shutdown( 1 );
+};
+
+// Whose read access applies
+$login = $options['user'] ? $options['user'] : 'admin';
+$user = eZUser::fetchByName( $login );
+if ( !$user instanceof eZUser )
+    $fail( "No user with login $login (--user)." );
+$user->loginCurrent();
+
+$exportINI = eZINI::instance( 'export.ini' );
+$siteINI = eZINI::instance();
+
+// Selection
+$scope = $options['scope'] === 'all' ? 'all' : 'node';
+if ( $options['scope'] && !in_array( $options['scope'], array( 'node', 'all' ), true ) )
+    $fail( '--scope is node or all.' );
+$nodeID = $options['node'] ? (int)$options['node']
+        : (int)( $exportINI->variable( 'ExportSettings', 'StartNodeID' ) ?: $siteINI->variable( 'UserSettings', 'DefaultUserPlacement' ) );
+$depth = $options['depth'] === 'list' ? 1 : false;
+$depthOperator = $depth ? 'eq' : false;
+$mainOnly = (bool)$options['main-only'];
+$fetchNode = $nodeID;
+if ( $scope === 'all' )
+{
+    $fetchNode = 1;
+    $depth = false;
+    $depthOperator = false;
+    $mainOnly = true;
+}
+else
+{
+    $node = eZContentObjectTreeNode::fetch( $nodeID );
+    if ( !$node instanceof eZContentObjectTreeNode || !$node->canRead() )
+        $fail( "Node $nodeID does not exist or $login may not read it (--node)." );
+}
+$offset = max( 0, (int)$options['offset'] );
+$limit = max( 0, (int)$options['limit'] );
+
+$countIn = function ( $classID ) use ( $fetchNode, $depth, $depthOperator, $mainOnly )
+{
+    $result = eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, false, false, 'include', array( (int)$classID ),
+                                                                 false, $depth, $depthOperator, true, false, $mainOnly, false, false );
+    return isset( $result['result'] ) ? (int)$result['result'] : 0;
+};
+
+if ( $options['list-classes'] )
+{
+    $cli->output( $scope === 'all' ? 'Classes in the whole site:' : "Classes below node $nodeID:" );
+    foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, true, false, array( 'name' => 'asc' ) ) as $class )
+    {
+        $count = $countIn( $class->attribute( 'id' ) );
+        if ( $count > 0 )
+            $cli->output( sprintf( '  %5d  %-32s %-40s %d objects', $class->attribute( 'id' ), $class->attribute( 'identifier' ), $class->attribute( 'name' ), $count ) );
+    }
+    $script->shutdown( 0 );
+}
+
+// The class
+if ( !$options['class'] )
+    $fail( 'Missing --class (id or identifier). --list-classes shows them.' );
+$class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)$options['class'] ) : eZContentClass::fetchByIdentifier( $options['class'] );
+if ( !$class instanceof eZContentClass )
+    $fail( "No class {$options['class']} (--class)." );
+$classID = (int)$class->attribute( 'id' );
+$meta = XrowExtractColumns::attributeMeta( $classID );
+$extras = XrowExtractColumns::extraAttributes();
+$allowHash = XrowExtractColumns::allowPasswordHash();
+
+if ( $options['list-columns'] )
+{
+    $cli->output( 'Attributes of ' . $class->attribute( 'identifier' ) . ' (' . $class->attribute( 'name' ) . '):' );
+    foreach ( XrowExtractColumns::classColumns( $classID ) as $column )
+    {
+        $m = $meta[$column['id']];
+        $flags = array_filter( array( $m['required'] ? 'required' : '', $m['searchable'] ? 'searchable' : '',
+                                      $m['translatable'] ? '' : 'not translatable', $m['collector'] ? 'information collector' : '' ) );
+        $cli->output( sprintf( '  %-32s %-26s %-22s %s%s', $column['id'], $m['datatype_name'] . ' (' . $m['datatype'] . ')',
+                               $m['exportable'] ? '-> ' . $m['cell'] : 'EMPTY: no export handler', $column['name'], $flags ? '  [' . implode( ', ', $flags ) . ']' : '' ) );
+    }
+    $cli->output( 'Special columns:' );
+    foreach ( $extras as $id => $column )
+        $cli->output( sprintf( '  %-36s %-22s %s', $id, '-> ' . $meta[$id]['cell'], $column['name'] ) );
+    $script->shutdown( 0 );
+}
+
+// Columns: the class attributes, or the given list; then added ones; then names
+$columns = array();
+$byId = array();
+foreach ( XrowExtractColumns::classColumns( $classID ) as $column )
+    $byId[$column['id']] = $column;
+foreach ( $extras as $id => $column )
+    $byId[$id] = $column;
+$wanted = $options['columns'] ? array_filter( array_map( 'trim', explode( ',', $options['columns'] ) ) )
+                               : array_map( function ( $c ) { return $c['id']; }, XrowExtractColumns::classColumns( $classID ) );
+if ( $options['add'] )
+    $wanted = array_merge( $wanted, array_filter( array_map( 'trim', explode( ',', $options['add'] ) ) ) );
+foreach ( $wanted as $id )
+{
+    if ( !isset( $byId[$id] ) )
+        $fail( "Unknown column $id for class " . $class->attribute( 'identifier' ) . '. --list-columns shows them.' );
+    $columns[] = $byId[$id];
+}
+if ( $options['names'] )
+{
+    foreach ( explode( ',', $options['names'] ) as $pair )
+    {
+        list( $id, $name ) = array_pad( array_map( 'trim', explode( '=', $pair, 2 ) ), 2, '' );
+        foreach ( $columns as $i => $column )
+        {
+            if ( $column['id'] === $id && $name !== '' )
+                $columns[$i]['exportname'] = $name;
+        }
+    }
+}
+if ( !$columns )
+    $fail( 'No columns.' );
+
+// Format
+$separators = array( 'comma' => ',', 'semicolon' => ';', 'tab' => "\t", '\t' => "\t", 'pipe' => '|' );
+$separator = $options['separator'] === null || $options['separator'] === false ? ',' : (string)$options['separator'];
+$separator = isset( $separators[$separator] ) ? $separators[$separator] : $separator;
+if ( strlen( $separator ) !== 1 || strpbrk( $separator, "\"\r\n" ) !== false )
+    $fail( '--separator is one character (not a quote or line break), or comma, semicolon, tab, pipe.' );
+$lines = array( 'win32' => "\r\n", 'crlf' => "\r\n", 'windows' => "\r\n", 'unix' => "\n", 'lf' => "\n", 'mac' => "\r", 'cr' => "\r" );
+$lineKey = $options['line-endings'] ? strtolower( $options['line-endings'] ) : 'unix';
+if ( !isset( $lines[$lineKey] ) )
+    $fail( '--line-endings is win32 (crlf), unix (lf) or mac (cr).' );
+$newLine = $lines[$lineKey];
+$parser = new ParserInterface( $separator, !$options['unquoted'] );
+
+// Rows, in batches with the object cache cleared
+$previewRows = $options['preview'] !== null && $options['preview'] !== false ? max( 1, (int)( $options['preview'] === true ? 10 : $options['preview'] ) ) : 0;
+$sortBy = array( 'name', true );
+if ( $scope === 'node' )
+{
+    $sort = $node->sortArray();
+    $sortBy = $sort[0];
+}
+$total = $countIn( $classID );
+$wantRows = max( 0, $total - $offset );
+if ( $limit )
+    $wantRows = min( $wantRows, $limit );
+if ( $previewRows )
+    $wantRows = min( $wantRows, $previewRows );
+
+$file = $options['output'];
+if ( !$previewRows && !$file )
+    $file = $scope === 'all' ? XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_all_export.csv' )
+                              : XrowExtractColumns::fileName( $node->attribute( 'name' ) );
+$fh = null;
+if ( !$previewRows )
+{
+    $fh = $file === '-' ? fopen( 'php://stdout', 'w' ) : @fopen( $file, 'w' );
+    if ( !$fh )
+        $fail( "Cannot write $file (--output)." );
+}
+$started = microtime( true );
+$header = implode( $separator, XrowExtractColumns::headerCells( $columns, $parser ) );
+$buffer = $previewRows ? $header . "\n" : null;
+if ( $fh )
+    fwrite( $fh, $header . $newLine );
+$written = 0;
+for ( $batchOffset = $offset; $written < $wantRows; $batchOffset += 100 )
+{
+    $take = min( 100, $wantRows - $written );
+    $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, $sortBy, false, false, $batchOffset, $take, $depth, $depthOperator,
+                                                            $classID, false, false, 'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+    $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
+    if ( !$batch )
+        break;
+    foreach ( $batch as $treeNode )
+    {
+        $obj = $treeNode->attribute( 'object' );
+        if ( !$obj instanceof eZContentObject || !$obj->canRead() )
+            continue;
+        $line = implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $allowHash ) );
+        if ( $fh )
+            fwrite( $fh, $line . $newLine );
+        else
+            $buffer .= $line . "\n";
+        $written++;
+    }
+    eZContentObject::clearCache();
+    if ( count( $batch ) < $take )
+        break;
+}
+
+if ( $previewRows )
+{
+    // A table in the terminal: the file read back as a spreadsheet would
+    $in = fopen( 'php://temp', 'r+' );
+    fwrite( $in, $buffer );
+    rewind( $in );
+    $table = array();
+    while ( ( $row = fgetcsv( $in, 0, $separator, '"', '' ) ) !== false )
+        $table[] = array_map( function ( $v ) { return mb_substr( preg_replace( '/\s+/', ' ', (string)$v ), 0, 24 ); }, $row );
+    fclose( $in );
+    $widths = array();
+    foreach ( $table as $row )
+        foreach ( $row as $i => $v )
+            $widths[$i] = max( isset( $widths[$i] ) ? $widths[$i] : 0, mb_strlen( $v ) );
+    foreach ( $table as $r => $row )
+    {
+        $cells = array();
+        foreach ( $row as $i => $v )
+            $cells[] = $v . str_repeat( ' ', $widths[$i] - mb_strlen( $v ) );
+        $cli->output( ( $r ? sprintf( '%4d  ', $offset + $r ) : '   #  ' ) . implode( ' | ', $cells ) );
+    }
+    $cli->output( sprintf( '%d of %d rows, %d columns, %.1f s', $written, max( 0, $total - $offset ), count( $columns ), microtime( true ) - $started ) );
+    $script->shutdown( 0 );
+}
+
+if ( $file !== '-' )
+{
+    fclose( $fh );
+    $cli->output( sprintf( 'Wrote %s: %d rows, %d columns, %.1f KB, %.1f s (%s, class %s, read access of %s)', $file, $written, count( $columns ),
+                           filesize( $file ) / 1024, microtime( true ) - $started,
+                           $scope === 'all' ? 'whole site' : "below node $nodeID", $class->attribute( 'identifier' ), $login ) );
+}
+$script->shutdown( 0 );
