@@ -23,7 +23,7 @@
                 <span class="xe-step">1</span>
                 <div>
                     <h2 id="xe-card-upload-h">{'File'|i18n('design/standard/extract')}</h2>
-                    <p>{'An XML, CSV or JSON file written by the export views, any column set.'|i18n('design/standard/extract')}</p>
+                    <p>{'An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
 
@@ -35,6 +35,17 @@
             <div class="xe-field">
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
                 <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
+                {* Every kind of file this page takes, at a glance; the package chip opens its reference section *}
+                <ul class="xe-filetypes" aria-label="{'Files you can import'|i18n('design/standard/extract')|wash}">
+                    <li class="xe-filetype xe-filetype-main"><strong>XML</strong> <small>{'recommended'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><strong>CSV</strong></li>
+                    <li class="xe-filetype"><strong>JSON</strong></li>
+                    <li class="xe-filetype xe-filetype-package"><a href="#xe-ref-packages"><strong>{'Content package'|i18n('design/standard/extract')}</strong> <code>.ezpkg</code> <code>.tar.gz</code></a>
+                        <small>{'classes and content together, installed through the package system'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><strong>{'Class XML'|i18n('design/standard/extract')}</strong> <small>{'one class definition'|i18n('design/standard/extract')}</small></li>
+                    <li class="xe-filetype"><strong>{'Object XML'|i18n('design/standard/extract')}</strong> <small>{'content objects of a package'|i18n('design/standard/extract')}</small></li>
+                </ul>
+                <p class="xe-help">{'A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.'|i18n('design/standard/extract')} <a href={'xrowextract/package'|ezurl}>{'Package tab'|i18n('design/standard/extract')}</a></p>
                 <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
                     <input type="hidden" name="UploadID" value="" />
@@ -392,7 +403,7 @@
                 <p class="xe-help">{'Shown in the mapping as not supported, with this reason, and never written - not dropped without a trace.'|i18n('design/standard/extract')}</p>
             </details>
 
-            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_packages'|ezurl}{if ezpreference( 'admin_xrowextract_ref_packages' )|ne( 'closed' )} open{/if}>
+            <details id="xe-ref-packages" class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_packages'|ezurl}{if ezpreference( 'admin_xrowextract_ref_packages' )|ne( 'closed' )} open{/if}>
                 <summary>{'Content packages (.ezpkg)'|i18n('design/standard/extract')}</summary>
                 {include uri='design:xrowextract/import_package_reference.tpl'}
             </details>

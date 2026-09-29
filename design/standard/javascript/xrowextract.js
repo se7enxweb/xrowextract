@@ -937,6 +937,28 @@
             fetch(url + '/' + (details.open ? 'open' : 'closed'), { credentials: 'same-origin', redirect: 'manual' }).catch(function () {});
         });
     });
+
+    // A link to a closed section (e.g. the "Content package" chip, or #xe-ref-packages in the address) opens
+    // it first, so the jump lands on its contents and not on a folded heading
+    function openTarget(hash) {
+        var target = hash && hash.length > 1 ? document.getElementById(hash.slice(1)) : null;
+        if (target && target.tagName === 'DETAILS' && !target.open) {
+            target.open = true;
+        }
+        return target;
+    }
+    document.addEventListener('click', function (event) {
+        var link = event.target.closest ? event.target.closest('a[href^="#"]') : null;
+        var target = link ? openTarget(link.getAttribute('href')) : null;
+        if (target) {
+            event.preventDefault();
+            target.scrollIntoView({ block: 'start' });
+            if (history.replaceState) {
+                history.replaceState(null, '', link.getAttribute('href'));
+            }
+        }
+    });
+    openTarget(location.hash);
 }());
 
 /**

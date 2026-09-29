@@ -7,9 +7,9 @@
 {* DESIGN: Content START *}<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-bl"><div class="box-br"><div class="box-content">
 
 <div class="xe-side">
-<p class="xe-side-lead">{'Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.'|i18n( 'design/standard/extract' )}</p>
+<p class="xe-side-lead">{'Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. It also installs content packages (.ezpkg): their classes and content, or a single class or object XML. Nothing is written before you have seen the dry run.'|i18n( 'design/standard/extract' )}</p>
 
-<p class="xe-side-lead"><a href="#xe-card-upload">{'Try a sample'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-card-reference">{'File format reference'|i18n( 'design/standard/extract' )}</a></p>
+<p class="xe-side-lead"><a href="#xe-card-upload">{'Try a sample'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-card-reference">{'File format reference'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-ref-packages">{'Content packages (.ezpkg)'|i18n( 'design/standard/extract' )}</a></p>
 
 <ol class="xe-side-steps">
     <li>{'Choose the class, matching, language and parent'|i18n( 'design/standard/extract' )}

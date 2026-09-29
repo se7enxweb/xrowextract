@@ -684,6 +684,17 @@ li.xe-badge { margin: 0; }
 #xe-card-reference summary { cursor: pointer; font-weight: bold; }
 #xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }
 
+/* Import: the kinds of file the page takes, as chips under the file field */
+.xe-filetypes { display: flex; flex-wrap: wrap; gap: .4em; margin: .6em 0 .2em; padding: 0; list-style: none; }
+.xe-filetype { margin: 0; padding: .3em .7em; border: 1px solid var(--xe-line); border-radius: 999px; background: #fff; font-size: .9em; }
+.xe-filetype small { color: var(--xe-muted); }
+.xe-filetype code { font-size: .85em; }
+.xe-filetype-main { border-color: #b7dfc6; background: #f0faf3; }
+.xe-filetype-package { border-color: #bfd3fb; background: #eff6ff; border-radius: 8px; }
+.xe-filetype-package a { text-decoration: none; color: inherit; }
+.xe-filetype-package a strong { color: var(--xe-accent); text-decoration: underline; }
+.xe-filetype-package small { display: block; }
+
 /* Import: chunked upload progress in the File card */
 .xe-chunked-upload { display: none; margin: .6em 0; }
 .xe-chunked-upload.xe-uploading, .xe-chunked-upload.xe-upload-error, .xe-chunked-upload.xe-upload-done { display: block; }

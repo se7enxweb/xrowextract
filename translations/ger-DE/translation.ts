@@ -2,6 +2,58 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.</source>
+        <translation>Ein XML-, CSV- oder JSON-Export (beliebiger Spaltensatz), ein Inhaltspaket (.ezpkg) mit Klassen und Inhalten oder eine einzelne Klassen- oder Objekt-XML.</translation>
+    </message>
+    <message>
+        <source>Read an XML, CSV or JSON export or a content package (.ezpkg) back in: create or update objects</source>
+        <translation>Einen XML-, CSV- oder JSON-Export oder ein Inhaltspaket (.ezpkg) einlesen: Objekte anlegen oder aktualisieren</translation>
+    </message>
+    <message>
+        <source>Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. It also installs content packages (.ezpkg): their classes and content, or a single class or object XML. Nothing is written before you have seen the dry run.</source>
+        <translation>Liest eine XML-, CSV- oder JSON-Datei in eine Klasse ein: Zeilen aktualisieren die passenden Objekte und legen die übrigen an. Außerdem installiert es Inhaltspakete (.ezpkg): ihre Klassen und Inhalte oder eine einzelne Klassen- oder Objekt-XML. Nichts wird geschrieben, bevor Sie den Probelauf gesehen haben.</translation>
+    </message>
+    <message>
+        <source>Files you can import</source>
+        <translation>Importierbare Dateien</translation>
+    </message>
+    <message>
+        <source>recommended</source>
+        <translation>empfohlen</translation>
+    </message>
+    <message>
+        <source>Content package</source>
+        <translation>Inhaltspaket</translation>
+    </message>
+    <message>
+        <source>classes and content together, installed through the package system</source>
+        <translation>Klassen und Inhalte zusammen, installiert über das Paketsystem</translation>
+    </message>
+    <message>
+        <source>Class XML</source>
+        <translation>Klassen-XML</translation>
+    </message>
+    <message>
+        <source>one class definition</source>
+        <translation>eine Klassendefinition</translation>
+    </message>
+    <message>
+        <source>Object XML</source>
+        <translation>Objekt-XML</translation>
+    </message>
+    <message>
+        <source>content objects of a package</source>
+        <translation>Inhaltsobjekte eines Pakets</translation>
+    </message>
+    <message>
+        <source>A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.</source>
+        <translation>Ein Paket wird an seinem Inhalt erkannt, nicht am Dateinamen: Es erhält einen Probelauf für jede enthaltene Klasse und jedes Objekt (anlegen, aktualisieren, unverändert, Klasse fehlt) und danach die Installationsoptionen. Pakete, die schon im Paketverzeichnis liegen, stehen im Reiter Paket.</translation>
+    </message>
+    <message>
+        <source>Package tab</source>
+        <translation>Reiter Paket</translation>
+    </message>
+    <message>
         <source>Content package (.ezpkg)</source>
         <translation>Inhaltspaket (.ezpkg)</translation>
     </message>
