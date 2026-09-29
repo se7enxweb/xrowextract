@@ -1780,8 +1780,14 @@ class XrowExtractPackage
         return !$list || in_array( $classIdentifier, $list, true );
     }
 
+    /**
+     * The bundled sample file as a resolved path: the importer refuses any path containing "..", so
+     * "classes/../share/..." made every image and file sample fail ("not an importable path").
+     */
     protected static function sampleAssetPath( $name )
     {
-        return dirname( __FILE__ ) . '/../share/sample/' . $name;
+        $path = dirname( dirname( __FILE__ ) ) . '/share/sample/' . $name;
+        $real = realpath( $path );
+        return $real !== false ? $real : $path;
     }
 }
