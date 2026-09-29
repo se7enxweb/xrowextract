@@ -349,6 +349,18 @@ class XrowExtractPackage
      */
     public static function inspect( eZPackage $package, $parentNodeID = false )
     {
+        // eZContentObject::fetch()/fetchDataMap() keep their results in
+        // $GLOBALS['eZContentObjectContentObjectCache']/[...DataMapCache], populated once and
+        // never refreshed on their own (kernel/classes/ezcontentobject.php). On a short-lived
+        // FPM/CLI request that is invisible; on a long-running Velocity worker, an object
+        // touched by an earlier, unrelated request in the same process (another dry run, a real
+        // apply, an admin edit served by the same worker) can still be sitting in there, so
+        // objectFieldChanges()'s "old" (live) value can be one that no longer matches the
+        // database - the exact way a genuine old -> new difference silently disappears.
+        // Cleared here, once per dry run, so every match against "what already exists on this
+        // site" (this method's own contract, see the class comment above) reads the database,
+        // not a previous request's leftovers.
+        eZContentObject::clearCache();
         $classes = array();
         $objects = array();
         $errors = array();
@@ -1092,7 +1104,21 @@ class XrowExtractPackage
         if ( !$languages )
             $languages = array( 'eng-US' );
 
+        // eZPackage::packageHandler() reuses the SAME eZContentObjectPackageHandler instance for
+        // every 'ezcontentobject' call in the process (kernel/classes/ezpackage.php's own
+        // $GLOBALS['eZPackageHandlers'] registry) and its reset() is an inherited no-op
+        // (kernel/classes/ezpackagehandler.php) - on a single short-lived FPM/CLI request this never
+        // shows, but on a long-running Velocity worker every one of its public arrays
+        // (NodeIDArray/ObjectArray/...) still carries whatever an earlier, unrelated call in the
+        // same worker (a previous sample, a template build, an "Export as package" job) added, and
+        // generatePackage() only ever array_unique()s NodeIDArray, never clears it. Cleared by hand
+        // here so this call only ever exports the nodes it was just given.
         $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+        $objectHandler->NodeIDArray = array();
+        $objectHandler->RootNodeIDArray = array();
+        $objectHandler->NodeObjectArray = array();
+        $objectHandler->ObjectArray = array();
+        $objectHandler->RootNodeObjectArray = array();
         foreach ( $nodeIDs as $nodeID )
             $objectHandler->addNode( $nodeID, false );
         // language_array is the *allow-list* eZContentObjectVersion::serialize() checks each of an
@@ -1446,7 +1472,14 @@ class XrowExtractPackage
 
         if ( $needsContent )
         {
+            // Same reused-handler reset as exportExistingObjectsIntoPackage() above - see the long
+            // comment there (eZPackage::packageHandler()'s reset() is an inherited no-op).
             $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+            $objectHandler->NodeIDArray = array();
+            $objectHandler->RootNodeIDArray = array();
+            $objectHandler->NodeObjectArray = array();
+            $objectHandler->ObjectArray = array();
+            $objectHandler->RootNodeObjectArray = array();
             foreach ( $createdNodeIDs as $nodeID )
                 $objectHandler->addNode( $nodeID, false );
             $objectHandler->generatePackage( $package, array(
