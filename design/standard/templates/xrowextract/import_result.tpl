@@ -47,7 +47,7 @@
     {if $IsSample}
     <p class="xe-note">{if $Applied}{'This was a sample built from the site’s own content: real content was just written (see below).'|i18n('design/standard/extract')}{else}{'This is a sample built from the site’s own content, to try the importer. Applying it writes real content.'|i18n('design/standard/extract')}{/if}</p>
     {/if}
-    {if $Result.ezoe|eq( false )}
+    {if and( $Result.ezoe|eq( false ), $PackageMode|not )}
     <p class="xe-note">{'The ezoe extension is not active on this installation; rich text columns were imported as plain paragraphs, without inline formatting or links.'|i18n('design/standard/extract')}</p>
     {/if}
 
@@ -113,7 +113,7 @@
         <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes (writes real content)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}"
                onclick="return confirm('{'This sample really writes to the site: %count objects will be created or updated. Continue?'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))|wash}');" />
         {elseif $PackageMode}
-        <input class="defaultbutton" type="submit" name="Apply" value="{'Install %count changes (in the background)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}"
+        <input class="defaultbutton" type="submit" name="Apply" value="{if $ApplyCount|eq( 1 )}{'Install 1 change (in the background)'|i18n('design/standard/extract')}{else}{'Install %count changes (in the background)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}{/if}"
                onclick="return confirm('{'Install the package now? It runs as a background job; its progress and log are on the Jobs page.'|i18n('design/standard/extract')|wash}');" />
         {else}
         <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}" />

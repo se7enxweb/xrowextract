@@ -2,6 +2,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Install 1 change (in the background)</source>
+        <translation>1 Änderung installieren (im Hintergrund)</translation>
+    </message>
+    <message>
         <source>Review and install the package</source>
         <translation>Paket prüfen und installieren</translation>
     </message>
