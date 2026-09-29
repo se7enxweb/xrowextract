@@ -90,6 +90,40 @@ foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, tru
 }
 $tpl->setVariable( 'ClassChoices', $ClassChoices );
 
+// The same classes by class group, for "Try a sample"'s own choice: any class of the system, also one without objects
+$countsByClassID = array();
+foreach ( $ClassChoices as $choice )
+    $countsByClassID[$choice['id']] = $choice;
+$SampleClassGroups = array();
+$groupedClassIDs = array();
+foreach ( eZContentClassGroup::fetchList( false, true ) as $group )
+{
+    $members = array();
+    foreach ( eZContentClassClassGroup::fetchClassList( eZContentClass::VERSION_STATUS_DEFINED, (int)$group->attribute( 'id' ), true ) as $class )
+    {
+        $id = (int)$class->attribute( 'id' );
+        if ( isset( $countsByClassID[$id] ) )
+        {
+            $members[] = $countsByClassID[$id];
+            $groupedClassIDs[$id] = true;
+        }
+    }
+    if ( $members )
+    {
+        usort( $members, function ( $a, $b ) { return strcasecmp( $a['name'], $b['name'] ); } );
+        $SampleClassGroups[] = array( 'name' => $group->attribute( 'name' ), 'classes' => $members );
+    }
+}
+$ungrouped = array();
+foreach ( $ClassChoices as $choice )
+{
+    if ( !isset( $groupedClassIDs[$choice['id']] ) )
+        $ungrouped[] = $choice;
+}
+if ( $ungrouped )
+    $SampleClassGroups[] = array( 'name' => ezpI18n::tr( 'design/standard/extract', 'Other classes' ), 'classes' => $ungrouped );
+$tpl->setVariable( 'SampleClassGroups', $SampleClassGroups );
+
 // The class with the most objects, for "Try a sample" and the file format reference when none is chosen
 $MostPopulousClassID = 0;
 $mostPopulousCount = -1;
@@ -228,6 +262,9 @@ if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $template
 if ( $http->hasPostVariable( 'TrySample' ) )
 {
     $sampleFormatIn = (string)$http->postVariable( 'TrySample' );
+    // The sample box's own class choice: any class of the system
+    if ( $http->hasPostVariable( 'SampleClassID' ) && isset( $countsByClassID[(int)$http->postVariable( 'SampleClassID' )] ) )
+        $SampleClassID = (int)$http->postVariable( 'SampleClassID' );
     $sampleFormat = in_array( $sampleFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $sampleFormatIn : 'xml';
     if ( !$SampleClassID )
     {
@@ -361,6 +398,9 @@ if ( $hasFile && $parsed['rows'] && ( $http->hasPostVariable( 'Preview' ) || $ht
         unset( $_SESSION[$SESSION_KEY] );
     }
 }
+
+$scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/import.tpl' );

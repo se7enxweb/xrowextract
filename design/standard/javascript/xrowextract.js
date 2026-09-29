@@ -919,3 +919,21 @@
         });
     });
 }());
+
+/**
+ * Sections that remember whether they are open (<details class="xe-remember" data-preference-url=...>):
+ * opening or closing one stores 1 or 0 in the user's eZ preference, so the next page load shows it the same way.
+ */
+(function () {
+    'use strict';
+
+    if (!window.fetch) {
+        return;
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('details.xe-remember[data-preference-url]'), function (details) {
+        details.addEventListener('toggle', function () {
+            var url = details.getAttribute('data-preference-url');
+            fetch(url + '/' + (details.open ? '1' : '0'), { credentials: 'same-origin', redirect: 'manual' }).catch(function () {});
+        });
+    });
+}());

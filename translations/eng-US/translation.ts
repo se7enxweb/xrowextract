@@ -4,6 +4,22 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Other classes</source>
+        <translation>Other classes</translation>
+    </message>
+    <message>
+        <source>Class for the sample</source>
+        <translation>Class for the sample</translation>
+    </message>
+    <message>
+        <source>no objects yet</source>
+        <translation>no objects yet</translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</source>
+        <translation>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</translation>
+    </message>
+    <message>
         <source>%count rows</source>
         <translation>%count rows</translation>
     </message>

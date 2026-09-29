@@ -2,6 +2,22 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Other classes</source>
+        <translation>Weitere Klassen</translation>
+    </message>
+    <message>
+        <source>Class for the sample</source>
+        <translation>Klasse für das Beispiel</translation>
+    </message>
+    <message>
+        <source>no objects yet</source>
+        <translation>noch keine Objekte</translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.</source>
+        <translation>Noch nichts zu importieren? Eine beliebige Klasse wählen, und ein Klick erzeugt eine kleine Datei aus den eigenen Inhalten der Website für diese Klasse - eine geänderte Zeile, eine unveränderte Zeile, ein neues Objekt und (wenn die Klasse ein Datumsattribut hat) eine Zeile mit absichtlichem Fehler - und lädt sie unten, bereit für die Vorschau. Eine Klasse ohne Objekte erhält nur das neue Objekt. Das Anwenden schreibt echte Inhalte.</translation>
+    </message>
+    <message>
         <source>%count rows</source>
         <translation>%count Zeilen</translation>
     </message>

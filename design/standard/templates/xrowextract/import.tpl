@@ -38,10 +38,20 @@
                 <input class="defaultbutton" type="submit" name="Upload" value="{'Upload'|i18n('design/standard/extract')}" />
             </div>
 
-            {if $ReferenceClass}
+            {if $SampleClassGroups|count}
             <div class="xe-field xe-sample-try">
                 <span class="xe-label">{'Try a sample'|i18n('design/standard/extract')}</span>
-                <p class="xe-help">{'Nothing to import yet? One click builds a small file from the site’s own content for %class - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. Applying it writes real content.'|i18n('design/standard/extract',, hash( '%class', $ReferenceClass.name ))}</p>
+                <p class="xe-help">{'Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.'|i18n('design/standard/extract')}</p>
+                <label class="xe-label xe-label-small" for="xe-sample-class">{'Class for the sample'|i18n('design/standard/extract')}</label>
+                <select name="SampleClassID" id="xe-sample-class" class="xe-sample-class">
+                    {foreach $SampleClassGroups as $group}
+                    <optgroup label="{$group.name|wash}">
+                        {foreach $group.classes as $class}
+                        <option value="{$class.id}"{if $class.id|eq( $SampleClassID )} selected="selected"{/if}>{$class.name|wash} ({$class.identifier|wash}) · {if $class.count|eq( 0 )}{'no objects yet'|i18n('design/standard/extract')}{else}{$class.count} {'objects'|i18n('design/standard/extract')}{/if}</option>
+                        {/foreach}
+                    </optgroup>
+                    {/foreach}
+                </select>
                 <div class="xe-inline xe-sample-buttons">
                     <button class="defaultbutton" type="submit" name="TrySample" value="xml">{'Try a sample (XML - recommended)'|i18n('design/standard/extract')}</button>
                     <button class="button" type="submit" name="TrySample" value="json">{'Try a sample (JSON)'|i18n('design/standard/extract')}</button>
@@ -230,7 +240,7 @@
                 </div>
             </header>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_xml'|ezurl}{if ezpreference( 'admin_xrowextract_ref_xml' )|eq( '1' )} open{/if}>
                 <summary>{'XML - the recommended format'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root <export>, its class and when it was written; a <columns> block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one <object> per row, one <field name="..."> per column, matched to the <columns> block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).'|i18n('design/standard/extract')}</p>
                 {if $ReferenceExamples.xml.rowCount|gt( 0 )}
@@ -257,7 +267,7 @@
                 {/if}
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_csv'|ezurl}{if ezpreference( 'admin_xrowextract_ref_csv' )|ne( '0' )} open{/if}>
                 <summary>{'CSV'|i18n('design/standard/extract')}</summary>
                 <ul>
                     <li>{'The header row holds the column names (an attribute identifier with "-" for "_", an attribute format as identifier-format, or a special column such as remote-id); the importer maps them by name, or lets you change any mapping by hand.'|i18n('design/standard/extract')}</li>
@@ -279,7 +289,7 @@
                 {/if}
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_json'|ezurl}{if ezpreference( 'admin_xrowextract_ref_json' )|ne( '0' )} open{/if}>
                 <summary>{'JSON'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.'|i18n('design/standard/extract')}</p>
                 {if $ReferenceExamples.json.rowCount|gt( 0 )}
@@ -296,7 +306,7 @@
                 {/if}
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_special'|ezurl}{if ezpreference( 'admin_xrowextract_ref_special' )|ne( '0' )} open{/if}>
                 <summary>{'Special columns'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'Every column this importer reads outside the class’s own attributes. A column not listed here, or an attribute the class does not have, is ignored (never guessed at).'|i18n('design/standard/extract')}</p>
                 <div class="xe-scroll" tabindex="0">
@@ -318,7 +328,7 @@
                 </div>
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_attributes'|ezurl}{if ezpreference( 'admin_xrowextract_ref_attributes' )|ne( '0' )} open{/if}>
                 <summary>{'Attribute and attribute format columns'|i18n('design/standard/extract')}</summary>
                 <ul>
                     <li>{'An attribute column is named after the attribute identifier, "-" for "_" (a CSV/JSON header only; XML uses the identifier itself as the column id and any display name).'|i18n('design/standard/extract')}</li>
@@ -326,7 +336,7 @@
                 </ul>
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_datatypes'|ezurl}{if ezpreference( 'admin_xrowextract_ref_datatypes' )|ne( '0' )} open{/if}>
                 <summary>{'Every importable datatype: accepted values, with an example'|i18n('design/standard/extract')}</summary>
                 <div class="xe-scroll" tabindex="0">
                     <table class="xe-table">
@@ -352,7 +362,7 @@
                 </div>
             </details>
 
-            <details open>
+            <details class="xe-remember" data-preference-url={'/user/preferences/set_and_exit/admin_xrowextract_ref_unsupported'|ezurl}{if ezpreference( 'admin_xrowextract_ref_unsupported' )|ne( '0' )} open{/if}>
                 <summary>{'Datatypes this importer cannot write'|i18n('design/standard/extract')}</summary>
                 <ul class="xe-typelist">
                     {foreach $ReferenceUnimportable as $datatype}
@@ -375,3 +385,4 @@
     </div>
 </div>
 </form>
+<script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>

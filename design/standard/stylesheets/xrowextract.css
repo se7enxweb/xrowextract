@@ -615,6 +615,11 @@ li.xe-badge { margin: 0; }
 
 /* Import: "Try a sample" and the file format reference */
 .xe-sample-try { padding: .6em .8em; border-radius: 6px; background: #f3f5f8; }
+.xe-sample-try .xe-label-small { display: block; margin: .5em 0 .2em; font-size: .85em; }
+.xe-sample-class { max-width: 100%; margin-bottom: .5em; }
+/* A reference section that remembers whether it is open: the summary reads as a clickable heading */
+#xe-card-reference details.xe-remember > summary { padding: .2em 0; }
+#xe-card-reference details.xe-remember:not([open]) > summary::after { content: " ▸"; color: var(--xe-muted); font-weight: normal; }
 .xe-sample-buttons { flex-wrap: wrap; }
 .xe-example {
     margin: .6em 0; padding: .8em 1em; border-radius: 6px; background: var(--xe-head);
