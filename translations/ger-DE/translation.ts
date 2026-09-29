@@ -1445,6 +1445,202 @@
         <source>Special Attributes</source>
         <translation>Spezielle Attribute</translation>
     </message>
+    <message>
+        <source>A CSV or JSON file written by the export views, any column set.</source>
+        <translation>Eine CSV- oder JSON-Datei, wie sie die Export-Ansichten schreiben, jede Spaltenauswahl.</translation>
+    </message>
+    <message>
+        <source>A row that matches an existing object updates it; otherwise it creates one.</source>
+        <translation>Eine Zeile, die zu einem vorhandenen Objekt passt, aktualisiert es; sonst wird eines angelegt.</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>Aktion</translation>
+    </message>
+    <message>
+        <source>Always create</source>
+        <translation>Immer neu anlegen</translation>
+    </message>
+    <message>
+        <source>Attributes</source>
+        <translation>Attribute</translation>
+    </message>
+    <message>
+        <source>CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row, as XrowExtractWriter writes it.</source>
+        <translation>CSV: Trennzeichen und Kodierung werden automatisch erkannt (UTF-8 mit oder ohne BOM); das Trennzeichen kann nach dem Hochladen noch geändert werden. JSON: ein Array von Objekten, eines je Zeile, wie XrowExtractWriter es schreibt.</translation>
+    </message>
+    <message>
+        <source>Changes</source>
+        <translation>Änderungen</translation>
+    </message>
+    <message>
+        <source>Choose a file</source>
+        <translation>Datei wählen</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Wählen...</translation>
+    </message>
+    <message>
+        <source>Class and matching</source>
+        <translation>Klasse und Zuordnung</translation>
+    </message>
+    <message>
+        <source>Column mapping</source>
+        <translation>Spaltenzuordnung</translation>
+    </message>
+    <message>
+        <source>Detected automatically from the header line; change it if the columns above do not line up.</source>
+        <translation>Automatisch aus der Kopfzeile erkannt; ändern, falls die Spalten oben nicht passen.</translation>
+    </message>
+    <message>
+        <source>Every file column, mapped automatically; change any of them.</source>
+        <translation>Jede Spalte der Datei, automatisch zugeordnet; jede davon kann geändert werden.</translation>
+    </message>
+    <message>
+        <source>Every row creates a new object, even one with a remote or object id column</source>
+        <translation>Jede Zeile legt ein neues Objekt an, auch mit einer Remote- oder Objekt-ID-Spalte</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation>Datei</translation>
+    </message>
+    <message>
+        <source>File column</source>
+        <translation>Spalte der Datei</translation>
+    </message>
+    <message>
+        <source>Ignore</source>
+        <translation>Ignorieren</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Import</translation>
+    </message>
+    <message>
+        <source>Import %count changes</source>
+        <translation>%count Änderungen importieren</translation>
+    </message>
+    <message>
+        <source>Import another file</source>
+        <translation>Weitere Datei importieren</translation>
+    </message>
+    <message>
+        <source>Import result</source>
+        <translation>Ergebnis des Imports</translation>
+    </message>
+    <message>
+        <source>Import settings</source>
+        <translation>Import-Einstellungen</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Sprache</translation>
+    </message>
+    <message>
+        <source>Maps to</source>
+        <translation>Zugeordnet zu</translation>
+    </message>
+    <message>
+        <source>Match existing objects by</source>
+        <translation>Vorhandene Objekte zuordnen über</translation>
+    </message>
+    <message>
+        <source>No node %id, or you may not read it.</source>
+        <translation>Kein Knoten %id, oder keine Leserechte dafür.</translation>
+    </message>
+    <message>
+        <source>Object ID</source>
+        <translation>Objekt-ID</translation>
+    </message>
+    <message>
+        <source>Parent for new objects</source>
+        <translation>Elternknoten für neue Objekte</translation>
+    </message>
+    <message>
+        <source>Preview (dry run — nothing was written)</source>
+        <translation>Vorschau (Probelauf — es wurde nichts geschrieben)</translation>
+    </message>
+    <message>
+        <source>Read a CSV or JSON export back in: create or update objects</source>
+        <translation>Einen CSV- oder JSON-Export wieder einlesen: Objekte anlegen oder aktualisieren</translation>
+    </message>
+    <message>
+        <source>Remote ID</source>
+        <translation>Remote-ID</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Entfernen</translation>
+    </message>
+    <message>
+        <source>Reparse</source>
+        <translation>Neu einlesen</translation>
+    </message>
+    <message>
+        <source>The default when the file has a remote-id column</source>
+        <translation>Voreinstellung, wenn die Datei eine Remote-ID-Spalte hat</translation>
+    </message>
+    <message>
+        <source>The ezoe extension is not active on this installation; rich text columns were imported as plain paragraphs, without inline formatting or links.</source>
+        <translation>Die Erweiterung ezoe ist auf dieser Installation nicht aktiv; Rich-Text-Spalten wurden als einfache Absätze importiert, ohne Textauszeichnung oder Links.</translation>
+    </message>
+    <message>
+        <source>The file has no columns.</source>
+        <translation>Die Datei hat keine Spalten.</translation>
+    </message>
+    <message>
+        <source>Upload</source>
+        <translation>Hochladen</translation>
+    </message>
+    <message>
+        <source>Used for rows without a "class" column (a special column, exported as "class"); with one, each row picks its own class.</source>
+        <translation>Wird für Zeilen ohne Spalte „class“ verwendet (eine Sonderspalte, als „class“ exportiert); mit einer solchen Spalte wählt jede Zeile ihre eigene Klasse.</translation>
+    </message>
+    <message>
+        <source>Used for rows without a language column; a language column creates or updates that translation instead.</source>
+        <translation>Wird für Zeilen ohne Sprachspalte verwendet; eine Sprachspalte legt stattdessen diese Übersetzung an oder aktualisiert sie.</translation>
+    </message>
+    <message>
+        <source>Used when a row has no parent-remote-id or main-parent-node-id column.</source>
+        <translation>Wird verwendet, wenn eine Zeile keine Spalte parent-remote-id oder main-parent-node-id hat.</translation>
+    </message>
+    <message>
+        <source>Which class, which objects to update, and where new ones go.</source>
+        <translation>Welche Klasse, welche Objekte aktualisiert werden, und wohin neue kommen.</translation>
+    </message>
+    <message>
+        <source>create</source>
+        <translation>anlegen</translation>
+    </message>
+    <message>
+        <source>error</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <source>not supported</source>
+        <translation>nicht unterstützt</translation>
+    </message>
+    <message>
+        <source>skip</source>
+        <translation>übersprungen</translation>
+    </message>
+    <message>
+        <source>unchanged</source>
+        <translation>unverändert</translation>
+    </message>
+    <message>
+        <source>update</source>
+        <translation>aktualisieren</translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be stored.</source>
+        <translation>Die hochgeladene Datei konnte nicht gespeichert werden.</translation>
+    </message>
+    <message>
+        <source>Choose a file first.</source>
+        <translation>Zuerst eine Datei wählen.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
