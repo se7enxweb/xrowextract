@@ -26,6 +26,55 @@ $startedJobID = $http->hasSessionVariable( 'eZExtractJobStarted' ) ? $http->sess
 if ( $startedJobID )
     $http->removeSessionVariable( 'eZExtractJobStarted' );
 
+// Who started a job: the login stored with it, resolved once per login to the
+// user's name, initials, a colour that stays the same for that login, and the
+// user's node in the admin (none when the account no longer exists)
+$owners = array();
+$ownerInfo = function ( $ownerLogin ) use ( &$owners )
+{
+    if ( isset( $owners[$ownerLogin] ) )
+        return $owners[$ownerLogin];
+    $name = $ownerLogin;
+    $nodeID = false;
+    $user = $ownerLogin !== '' ? eZUser::fetchByName( $ownerLogin ) : null;
+    if ( $user instanceof eZUser )
+    {
+        $object = $user->attribute( 'contentobject' );
+        if ( $object instanceof eZContentObject )
+        {
+            if ( trim( (string)$object->attribute( 'name' ) ) !== '' )
+                $name = $object->attribute( 'name' );
+            $nodeID = (int)$object->attribute( 'main_node_id' ) ?: false;
+        }
+    }
+    $initials = '';
+    foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) as $part )
+    {
+        $initials .= mb_strtoupper( mb_substr( $part, 0, 1 ) );
+        if ( mb_strlen( $initials ) >= 2 )
+            break;
+    }
+    return $owners[$ownerLogin] = array(
+        'login' => $ownerLogin,
+        'name' => $name,
+        'initials' => $initials !== '' ? $initials : '?',
+        'hue' => hexdec( substr( md5( $ownerLogin ), 0, 4 ) ) % 360,
+        'node_id' => $nodeID,
+    );
+};
+
+// A duration as "8 s", "3 min 12 s" or "2 h 5 min" (the Jobs page's script formats live updates the same way)
+$duration = function ( $seconds )
+{
+    if ( $seconds === null )
+        return '';
+    if ( $seconds < 60 )
+        return $seconds . ' s';
+    if ( $seconds < 3600 )
+        return floor( $seconds / 60 ) . ' min' . ( $seconds % 60 ? ' ' . ( $seconds % 60 ) . ' s' : '' );
+    return floor( $seconds / 3600 ) . ' h' . ( floor( $seconds % 3600 / 60 ) ? ' ' . floor( $seconds % 3600 / 60 ) . ' min' : '' );
+};
+
 $rows = array();
 foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
 {
@@ -40,7 +89,10 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'format' => $job['format'],
         'state' => $job['state'],
         'owner' => $job['owner'],
+        'owner_user' => $ownerInfo( (string)$job['owner'] ),
         'mine' => $job['owner'] === $login,
+        'wait_text' => $job['started'] ? $duration( max( 0, $job['started'] - $job['created'] ) ) : '',
+        'run_text' => $job['started'] && $job['ended'] ? $duration( max( 0, $job['ended'] - $job['started'] ) ) : '',
         'created' => $job['created'],
         'started' => $job['started'],
         'ended' => $job['ended'],

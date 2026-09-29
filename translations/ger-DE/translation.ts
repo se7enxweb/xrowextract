@@ -2,6 +2,46 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Started by %name (%login)</source>
+        <translation>Gestartet von %name (%login)</translation>
+    </message>
+    <message>
+        <source>Started by %login (account no longer exists)</source>
+        <translation>Gestartet von %login (Konto existiert nicht mehr)</translation>
+    </message>
+    <message>
+        <source>you</source>
+        <translation>Sie</translation>
+    </message>
+    <message>
+        <source>Queued</source>
+        <translation>Eingereiht</translation>
+    </message>
+    <message>
+        <source>Started</source>
+        <translation>Gestartet</translation>
+    </message>
+    <message>
+        <source>Ended</source>
+        <translation>Beendet</translation>
+    </message>
+    <message>
+        <source>Failed</source>
+        <translation>Fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>waiting …</source>
+        <translation>wartet …</translation>
+    </message>
+    <message>
+        <source>after %time in the queue</source>
+        <translation>nach %time in der Warteschlange</translation>
+    </message>
+    <message>
+        <source>took %time</source>
+        <translation>Dauer %time</translation>
+    </message>
+    <message>
         <source>Start from a template</source>
         <translation>Mit einer Vorlage beginnen</translation>
     </message>

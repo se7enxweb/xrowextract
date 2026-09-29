@@ -4,6 +4,46 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Started by %name (%login)</source>
+        <translation>Started by %name (%login)</translation>
+    </message>
+    <message>
+        <source>Started by %login (account no longer exists)</source>
+        <translation>Started by %login (account no longer exists)</translation>
+    </message>
+    <message>
+        <source>you</source>
+        <translation>you</translation>
+    </message>
+    <message>
+        <source>Queued</source>
+        <translation>Queued</translation>
+    </message>
+    <message>
+        <source>Started</source>
+        <translation>Started</translation>
+    </message>
+    <message>
+        <source>Ended</source>
+        <translation>Ended</translation>
+    </message>
+    <message>
+        <source>Failed</source>
+        <translation>Failed</translation>
+    </message>
+    <message>
+        <source>waiting …</source>
+        <translation>waiting …</translation>
+    </message>
+    <message>
+        <source>after %time in the queue</source>
+        <translation>after %time in the queue</translation>
+    </message>
+    <message>
+        <source>took %time</source>
+        <translation>took %time</translation>
+    </message>
+    <message>
         <source>Start from a template</source>
         <translation>Start from a template</translation>
     </message>
