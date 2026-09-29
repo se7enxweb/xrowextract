@@ -687,9 +687,7 @@ a.xe-user:hover, a.xe-user:focus-visible { background: hsl(var(--xe-user-hue), 7
 .xe-badge-error     { background: var(--xe-bad-bg); color: var(--xe-bad); }
 li.xe-badge { margin: 0; }
 
-/* Import: "Try a sample" and the file format reference */
-.xe-sample-try { padding: .6em .8em; border-radius: 6px; background: #f3f5f8; }
-.xe-sample-try .xe-label-small { display: block; margin: .5em 0 .2em; font-size: .85em; }
+/* Import: the file format reference */
 .xe-sample-class { max-width: 100%; margin-bottom: .5em; }
 /* A reference section that remembers whether it is open: the summary reads as a clickable heading */
 #xe-card-reference details.xe-remember > summary { padding: .2em 0; }
@@ -708,17 +706,31 @@ li.xe-badge { margin: 0; }
 #xe-card-reference summary { cursor: pointer; font-weight: bold; }
 #xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }
 
-/* Import: the kinds of file the page takes, as chips under the file field */
-.xe-filetypes { display: flex; flex-wrap: wrap; gap: .4em; margin: .6em 0 .2em; padding: 0; list-style: none; }
-.xe-filetype { margin: 0; padding: .3em .7em; border: 1px solid var(--xe-line); border-radius: 999px; background: #fff; font-size: .9em; }
-.xe-filetype small { color: var(--xe-muted); }
-.xe-filetype code { font-size: .85em; }
-.xe-filetype-main { border-color: #b7dfc6; background: #f0faf3; }
-.xe-filetype-package { border-color: #bfd3fb; background: #eff6ff; border-radius: 8px; }
-.xe-filetype a { text-decoration: none; color: inherit; }
-.xe-filetype a strong { color: var(--xe-accent); text-decoration: underline; }
-.xe-filetype a:hover strong, .xe-filetype a:focus-visible strong { text-decoration-thickness: 2px; }
-.xe-filetype-package small { display: block; }
+/* Import: the format chooser (File card, pass 1 of the redesign) - one tile per format, each with
+   the same actions ("just like json, csv, xml"). minmax(0, 1fr) so a long <code> shape line never
+   widens a tile past the grid column (the same overflow guard .xe-grid itself uses). */
+.xe-format-class { max-width: 22em; margin-bottom: 1em; }
+.xe-format-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15em, 1fr)); gap: .8em; margin: 0 0 1em; }
+.xe-format-grid-compact { grid-template-columns: repeat(auto-fit, minmax(13em, 1fr)); }
+.xe-format-tile {
+    min-width: 0; display: flex; flex-direction: column; gap: .4em;
+    padding: .7em .8em; border: 1px solid var(--xe-line); border-radius: 8px; background: #fbfcfe;
+}
+.xe-format-tile-compact { padding: .5em .7em; background: #fff; }
+.xe-format-recommended, .xe-format-package { border-color: var(--xe-accent); background: var(--xe-accent-bg); }
+.xe-format-tile h3 { margin: 0; font-size: 1em; display: flex; align-items: center; gap: .4em; flex-wrap: wrap; }
+.xe-format-tile h3 code { font-size: .75em; font-weight: normal; color: var(--xe-muted); }
+.xe-format-badge { padding: .1em .5em; border-radius: 999px; background: var(--xe-accent); color: #fff; font-size: .7em; font-weight: normal; }
+.xe-format-when { margin: 0; color: var(--xe-muted); font-size: .88em; line-height: 1.35; }
+.xe-format-shape { margin: 0; }
+.xe-format-shape code {
+    display: block; min-width: 0; padding: .3em .5em; border-radius: 5px; background: var(--xe-head);
+    font-size: .78em; overflow-x: auto; white-space: pre; box-sizing: border-box;
+}
+.xe-format-actions { display: flex; flex-wrap: wrap; gap: .4em; margin-top: auto; padding-top: .3em; }
+.xe-format-actions .button, .xe-format-actions a.button { font-size: .85em; padding: .3em .6em; }
+.xe-format-variant { flex-basis: 100%; }
+.xe-format-tile .xe-note { margin: .3em 0 0; }
 
 /* Import: chunked upload progress in the File card */
 .xe-chunked-upload { display: none; margin: .6em 0; }
