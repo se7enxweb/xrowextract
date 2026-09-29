@@ -4,6 +4,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Cancel this job?</source>
+        <translation>Cancel this job?</translation>
+    </message>
+    <message>
+        <source>Cancel this job? What it has installed so far stays on the site.</source>
+        <translation>Cancel this job? What it has installed so far stays on the site.</translation>
+    </message>
+    <message>
+        <source>The job was cancelled.</source>
+        <translation>The job was cancelled.</translation>
+    </message>
+    <message>
+        <source>The job was marked cancelled, but its process could not be stopped from here.</source>
+        <translation>The job was marked cancelled, but its process could not be stopped from here.</translation>
+    </message>
+    <message>
+        <source>The job is not queued or running.</source>
+        <translation>The job is not queued or running.</translation>
+    </message>
+    <message>
         <source>Log</source>
         <translation>Log</translation>
     </message>

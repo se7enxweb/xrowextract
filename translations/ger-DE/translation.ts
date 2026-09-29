@@ -2,6 +2,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Cancel this job?</source>
+        <translation>Diesen Auftrag abbrechen?</translation>
+    </message>
+    <message>
+        <source>Cancel this job? What it has installed so far stays on the site.</source>
+        <translation>Diesen Auftrag abbrechen? Was er bisher installiert hat, bleibt auf der Website.</translation>
+    </message>
+    <message>
+        <source>The job was cancelled.</source>
+        <translation>Der Auftrag wurde abgebrochen.</translation>
+    </message>
+    <message>
+        <source>The job was marked cancelled, but its process could not be stopped from here.</source>
+        <translation>Der Auftrag wurde als abgebrochen markiert, sein Prozess konnte von hier aus aber nicht beendet werden.</translation>
+    </message>
+    <message>
+        <source>The job is not queued or running.</source>
+        <translation>Der Auftrag wartet nicht und läuft nicht.</translation>
+    </message>
+    <message>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>

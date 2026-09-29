@@ -185,6 +185,14 @@ else
     $lines = array_values( array_filter( array_map( 'trim', explode( "\n", $log ) ), function ( $line ) { return $line !== ''; } ) );
     $job['error'] = $lines ? end( $lines ) : ( 'The export failed (exit code ' . $exitCode . ').' );
 }
+// Cancelled from the Jobs page while it ran (XrowExtractJob::cancel()): keep that state and its message,
+// do not replace it with the failure the stopped script leaves behind
+$current = XrowExtractJob::load( $id );
+if ( $current && !empty( $current['cancelled'] ) )
+{
+    $cli->output( sprintf( 'Job %s: cancelled', $id ) );
+    $script->shutdown( 1 );
+}
 XrowExtractJob::save( $id, $job );
 
 $cli->output( sprintf( 'Job %s: %s%s', $id, $job['state'], $job['state'] === 'failed' ? ' (' . $job['error'] . ')' : '' ) );

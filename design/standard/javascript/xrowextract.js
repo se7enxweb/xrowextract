@@ -918,6 +918,10 @@
         }
         if (data.state !== 'queued' && data.state !== 'running') {
             row.removeAttribute('data-poll');
+            var cancelForm = row.querySelector('[data-role="cancel-form"]');
+            if (cancelForm) {
+                cancelForm.parentNode.removeChild(cancelForm);
+            }
             var wrap = row.querySelector('[data-role="progress-wrap"]');
             if (wrap && data.state !== 'running') {
                 wrap.hidden = true;

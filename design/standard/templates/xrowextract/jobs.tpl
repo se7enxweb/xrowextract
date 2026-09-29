@@ -15,6 +15,7 @@
 
     {include uri='design:xrowextract/tabs.tpl' active='jobs'}
 
+    {if $job_notice}<p class="xe-note" role="status">{$job_notice|wash}</p>{/if}
     {if $started_job_id}
     <p class="xe-note" role="status">{'Job started: '|i18n('design/standard/extract')}<a href="#job-{$started_job_id|wash}">{'see it below'|i18n('design/standard/extract')}</a>{' — it runs in the background; this page updates on its own while it does.'|i18n('design/standard/extract')}</p>
     {/if}
@@ -134,6 +135,12 @@
                             <input type="hidden" name="ResumeJobID" value="{$job.id|wash}" />
                             <label>{'Resume from row'|i18n('design/standard/extract')} <input type="number" name="ResumeFromRow" min="1" value="1" class="xe-resume-row" /></label>
                             <button type="submit" class="button">{'Resume as a new job'|i18n('design/standard/extract')}</button>
+                        </form>
+                        {/if}
+                        {if and( $job.active, or( $job.mine, $all_jobs ) )}
+                        <form method="post" action={'xrowextract/jobs'|ezurl} class="xe-job-delete-form xe-job-cancel-form" data-role="cancel-form">
+                            <input type="hidden" name="CancelJobID" value="{$job.id|wash}" />
+                            <button type="submit" class="button xe-icon-text" data-confirm="{if $job.type|eq( 'package' )}{'Cancel this job? What it has installed so far stays on the site.'|i18n('design/standard/extract')|wash}{else}{'Cancel this job?'|i18n('design/standard/extract')|wash}{/if}">{'Cancel'|i18n('design/standard/extract')}</button>
                         </form>
                         {/if}
                         {if or( $job.mine, $all_jobs )}
