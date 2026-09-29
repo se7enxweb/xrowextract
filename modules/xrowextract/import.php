@@ -65,17 +65,21 @@ $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'sep
 if ( $hasFile )
 {
     $format = $http->hasPostVariable( 'ImportFormat' ) ? (string)$http->postVariable( 'ImportFormat' ) : $_SESSION[$SESSION_KEY]['format'];
+    $format = in_array( $format, array( 'csv', 'json', 'xml' ), true ) ? $format : 'csv';
     $separators = array( 'comma' => ',', 'semicolon' => ';', 'tab' => "\t", 'pipe' => '|' );
     $separatorKey = $http->hasPostVariable( 'ImportSeparator' ) ? (string)$http->postVariable( 'ImportSeparator' ) : array_search( $_SESSION[$SESSION_KEY]['separator'], $separators, true );
     $separator = isset( $separators[$separatorKey] ) ? $separators[$separatorKey] : ',';
-    $parsed = XrowExtractImport::parseFile( $_SESSION[$SESSION_KEY]['path'], $format === 'json' ? 'json' : 'csv', $separator );
+    $parsed = XrowExtractImport::parseFile( $_SESSION[$SESSION_KEY]['path'], $format, $separator );
     $tpl->setVariable( 'ImportFormat', $format );
     $tpl->setVariable( 'ImportSeparatorKey', $separatorKey ?: 'comma' );
     $tpl->setVariable( 'UploadedName', $_SESSION[$SESSION_KEY]['name'] );
+    $tpl->setVariable( 'IsSample', !empty( $_SESSION[$SESSION_KEY]['sample'] ) );
+    $tpl->setVariable( 'SampleKinds', isset( $_SESSION[$SESSION_KEY]['kinds'] ) ? $_SESSION[$SESSION_KEY]['kinds'] : array() );
 }
 $tpl->setVariable( 'ParseError', isset( $parsed['error'] ) ? $parsed['error'] : false );
 $tpl->setVariable( 'FileHeader', $parsed['header'] );
 $tpl->setVariable( 'FileRowCount', count( $parsed['rows'] ) );
+$xmlColumnIDs = isset( $parsed['columnIDs'] ) ? $parsed['columnIDs'] : null;
 
 // Class: a chosen fallback (a "class" column in the file still wins per row at run time)
 $ClassChoices = array();
@@ -86,8 +90,34 @@ foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, tru
 }
 $tpl->setVariable( 'ClassChoices', $ClassChoices );
 
+// The class with the most objects, for "Try a sample" and the file format reference when none is chosen
+$MostPopulousClassID = 0;
+$mostPopulousCount = -1;
+foreach ( $ClassChoices as $choice )
+{
+    if ( $choice['count'] > $mostPopulousCount )
+    {
+        $mostPopulousCount = $choice['count'];
+        $MostPopulousClassID = $choice['id'];
+    }
+}
+
 $ClassID = $http->hasPostVariable( 'ClassID' ) ? (int)$http->postVariable( 'ClassID' ) : 0;
+if ( !$ClassID && !empty( $_SESSION[$SESSION_KEY]['classID'] ) )
+{
+    // Right after "Try a sample"'s own redirect, no ClassID is posted yet; the class it was built for
+    $ClassID = (int)$_SESSION[$SESSION_KEY]['classID'];
+}
+if ( !$ClassID && !empty( $parsed['class'] ) )
+{
+    // An XML file names its own class (the <export class="..."> attribute); use it as the default
+    $fromFile = eZContentClass::fetchByIdentifier( $parsed['class'] );
+    if ( $fromFile instanceof eZContentClass )
+        $ClassID = (int)$fromFile->attribute( 'id' );
+}
 $tpl->setVariable( 'ClassID', $ClassID );
+$SampleClassID = $ClassID ?: $MostPopulousClassID;
+$tpl->setVariable( 'SampleClassID', $SampleClassID );
 
 // Matching, language, parent
 $MatchMode = $http->hasPostVariable( 'MatchMode' ) && in_array( $http->postVariable( 'MatchMode' ), array( 'remote_id', 'object_id', 'none' ), true )
@@ -126,7 +156,7 @@ $tpl->setVariable( 'ParentNode', ( $parentNode instanceof eZContentObjectTreeNod
 $Mapping = array();
 if ( $parsed['header'] )
 {
-    $suggested = XrowExtractImport::suggestMapping( $parsed['header'], $ClassID );
+    $suggested = XrowExtractImport::suggestMapping( $parsed['header'], $ClassID, $xmlColumnIDs );
     $keepPosted = $http->hasPostVariable( 'Mapping' ) && $http->hasPostVariable( 'MappingClassID' )
                 && (int)$http->postVariable( 'MappingClassID' ) === $ClassID;
     $postedMapping = $keepPosted ? (array)$http->postVariable( 'Mapping' ) : null;
@@ -180,7 +210,8 @@ if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $template
 {
     $templateColumns = XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $ClassID ), $ClassID,
                                                              XrowExtractColumns::extraAttributes( false ) );
-    $templateFormat = $http->hasPostVariable( 'TemplateFormat' ) && $http->postVariable( 'TemplateFormat' ) === 'json' ? 'json' : 'csv';
+    $templateFormatIn = $http->hasPostVariable( 'TemplateFormat' ) ? (string)$http->postVariable( 'TemplateFormat' ) : 'xml';
+    $templateFormat = in_array( $templateFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $templateFormatIn : 'xml';
     $templateWriter = new XrowExtractWriter( $templateFormat, $templateColumns, ',', true, "\r\n", array( 'class' => $templateClass->attribute( 'identifier' ) ) );
     $templateData = $templateWriter->begin() . $templateWriter->end();
     header( 'Cache-Control: private, no-store, max-age=0' );
@@ -192,6 +223,81 @@ if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $template
     echo $templateData;
     eZExecution::cleanExit();
 }
+
+// Try a sample: a file built from the site's own content, loaded exactly as if it had been uploaded
+if ( $http->hasPostVariable( 'TrySample' ) )
+{
+    $sampleFormatIn = (string)$http->postVariable( 'TrySample' );
+    $sampleFormat = in_array( $sampleFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $sampleFormatIn : 'xml';
+    if ( !$SampleClassID )
+    {
+        $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'There is no class to sample from (the site has no classes with content, or none you may read).' ) );
+    }
+    else
+    {
+        $sample = XrowExtractImport::buildSample( $SampleClassID, $ParentNodeID, $Language, $sampleFormat );
+        if ( empty( $sample['ok'] ) )
+        {
+            $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'The sample could not be built: %reason', null, array( '%reason' => isset( $sample['error'] ) ? $sample['error'] : '?' ) ) );
+        }
+        else
+        {
+            $sampleName = XrowExtractColumns::fileName( $sample['classIdentifier'], '_sample.' . $sample['format'], 'sample' );
+            $stored = XrowExtractImport::storeGenerated( $sample['text'], $sampleName );
+            if ( $stored === false )
+            {
+                $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'The sample could not be stored.' ) );
+            }
+            else
+            {
+                if ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
+                    @unlink( $_SESSION[$SESSION_KEY]['path'] );
+                $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $sampleName, 'format' => $sample['format'], 'separator' => ',',
+                                                 'sample' => true, 'kinds' => $sample['kinds'], 'classID' => $SampleClassID );
+                return $module->redirectTo( 'xrowextract/import' );
+            }
+        }
+    }
+}
+
+// The file format reference: a small card of real examples for $SampleClassID (or a static fallback),
+// and a downloadable example file in every format
+$ReferenceClass = $SampleClassID ? eZContentClass::fetch( $SampleClassID ) : null;
+if ( $http->hasPostVariable( 'DownloadExample' ) && $ReferenceClass instanceof eZContentClass )
+{
+    $exampleFormatIn = (string)$http->postVariable( 'DownloadExample' );
+    $exampleFormat = in_array( $exampleFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $exampleFormatIn : 'xml';
+    $example = XrowExtractImport::referenceExampleRows( $SampleClassID, $exampleFormat, 2 );
+    if ( !empty( $example['ok'] ) && $example['rowCount'] > 0 )
+    {
+        header( 'Cache-Control: private, no-store, max-age=0' );
+        header( 'X-Content-Type-Options: nosniff' );
+        $exampleWriter = new XrowExtractWriter( $exampleFormat, array(), ',', true );
+        header( 'Content-Type: ' . $exampleWriter->contentType( 'utf-8' ) );
+        header( 'Content-Length: ' . strlen( $example['text'] ) );
+        header( 'Content-Disposition: attachment; filename="' . $example['filename'] . '"' );
+        while ( @ob_end_clean() );
+        echo $example['text'];
+        eZExecution::cleanExit();
+    }
+}
+$tpl->setVariable( 'ReferenceClass', $ReferenceClass ? array( 'id' => $SampleClassID, 'identifier' => $ReferenceClass->attribute( 'identifier' ), 'name' => $ReferenceClass->attribute( 'name' ) ) : false );
+$ReferenceExamples = array();
+if ( $ReferenceClass instanceof eZContentClass )
+{
+    foreach ( array( 'xml', 'json', 'csv' ) as $refFormat )
+        $ReferenceExamples[$refFormat] = XrowExtractImport::referenceExampleRows( $SampleClassID, $refFormat, 2 );
+}
+$tpl->setVariable( 'ReferenceExamples', $ReferenceExamples );
+$tpl->setVariable( 'DatatypeExamples', $ReferenceClass instanceof eZContentClass ? XrowExtractImport::datatypeExamples( $SampleClassID ) : array() );
+$referenceSpecialColumns = array();
+foreach ( XrowExtractColumns::extraAttributes( false ) as $id => $column )
+    $referenceSpecialColumns[] = array( 'id' => $id, 'exportname' => str_replace( '_', '-', $column['exportname'] ), 'name' => $column['name'] );
+$tpl->setVariable( 'ReferenceSpecialColumns', $referenceSpecialColumns );
+$referenceUnimportable = array();
+foreach ( array( 'ezenhancedobjectrelation', 'ezenhancedselection', 'ezenum', 'ezcountry', 'ezmatrix', 'ezprice', 'ezuser', 'eztime', 'hmregexpline' ) as $datatype )
+    $referenceUnimportable[] = array( 'id' => $datatype, 'name' => XrowExtractColumns::datatypeName( $datatype ), 'reason' => XrowExtractImport::unsupportedReason( $datatype ) );
+$tpl->setVariable( 'ReferenceUnimportable', $referenceUnimportable );
 
 if ( $http->hasPostVariable( 'BrowseParent' ) )
 {

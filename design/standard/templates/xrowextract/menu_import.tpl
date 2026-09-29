@@ -7,13 +7,15 @@
 {* DESIGN: Content START *}<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-bl"><div class="box-br"><div class="box-content">
 
 <div class="xe-side">
-<p class="xe-side-lead">{'Reads a CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.'|i18n( 'design/standard/extract' )}</p>
+<p class="xe-side-lead">{'Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.'|i18n( 'design/standard/extract' )}</p>
+
+<p class="xe-side-lead"><a href="#xe-card-upload">{'Try a sample'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-card-reference">{'File format reference'|i18n( 'design/standard/extract' )}</a></p>
 
 <ol class="xe-side-steps">
     <li>{'Choose the class, matching, language and parent'|i18n( 'design/standard/extract' )}
         <small>{'Before or after the upload; a class, language or parent column in the file wins for its rows.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Upload the file'|i18n( 'design/standard/extract' )}
-        <small>{'An export of this tool (the Migration column set carries everything needed), or a filled template.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Upload the file, or try a sample, or a filled template'|i18n( 'design/standard/extract' )}
+        <small>{'XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Check the column mapping'|i18n( 'design/standard/extract' )}
         <small>{'Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Read the dry run'|i18n( 'design/standard/extract' )}

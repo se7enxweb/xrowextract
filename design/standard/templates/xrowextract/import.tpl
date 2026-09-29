@@ -23,7 +23,7 @@
                 <span class="xe-step">1</span>
                 <div>
                     <h2 id="xe-card-upload">{'File'|i18n('design/standard/extract')}</h2>
-                    <p>{'A CSV or JSON file written by the export views, any column set.'|i18n('design/standard/extract')}</p>
+                    <p>{'An XML, CSV or JSON file written by the export views, any column set.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
 
@@ -33,18 +33,33 @@
             {if $HasFile|not}
             <div class="xe-field">
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
-                <input type="file" name="ImportFile" id="xe-file" accept=".csv,.json,text/csv,application/json" />
-                <p class="xe-help">{'CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row, as XrowExtractWriter writes it.'|i18n('design/standard/extract')}</p>
+                <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,text/xml,application/xml,text/csv,application/json" />
+                <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row.'|i18n('design/standard/extract')}</p>
                 <input class="defaultbutton" type="submit" name="Upload" value="{'Upload'|i18n('design/standard/extract')}" />
             </div>
+
+            {if $ReferenceClass}
+            <div class="xe-field xe-sample-try">
+                <span class="xe-label">{'Try a sample'|i18n('design/standard/extract')}</span>
+                <p class="xe-help">{'Nothing to import yet? One click builds a small file from the site’s own content for %class - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. Applying it writes real content.'|i18n('design/standard/extract',, hash( '%class', $ReferenceClass.name ))}</p>
+                <div class="xe-inline xe-sample-buttons">
+                    <button class="defaultbutton" type="submit" name="TrySample" value="xml">{'Try a sample (XML - recommended)'|i18n('design/standard/extract')}</button>
+                    <button class="button" type="submit" name="TrySample" value="json">{'Try a sample (JSON)'|i18n('design/standard/extract')}</button>
+                    <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample (CSV)'|i18n('design/standard/extract')}</button>
+                </div>
+            </div>
+            {/if}
             {else}
             <div class="xe-node">
                 <span class="xe-node-text">
                     <span class="xe-node-name">{$UploadedName|wash}</span>
-                    <span class="xe-node-meta">{$FileRowCount} {'rows'|i18n('design/standard/extract')} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')} · {$ImportFormat|wash}</span>
+                    <span class="xe-node-meta">{$FileRowCount} {'rows'|i18n('design/standard/extract')} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
                 </span>
                 <input class="button" type="submit" name="RemoveFile" value="{'Remove'|i18n('design/standard/extract')}" />
             </div>
+            {if $IsSample}
+            <p class="xe-note">{'This is a sample built from the site’s own content, for trying the importer - not a file you uploaded. Applying it writes real content (see step 4).'|i18n('design/standard/extract')}</p>
+            {/if}
             {if $ImportFormat|eq( 'csv' )}
             <div class="xe-field">
                 <span class="xe-label">{'Separator'|i18n('design/standard/extract')}</span>
@@ -127,12 +142,13 @@
                 <span class="xe-label">{'Start from a template'|i18n('design/standard/extract')}</span>
                 <div class="xe-inline">
                     <select name="TemplateFormat" aria-label="{'File type'|i18n('design/standard/extract')|wash}">
-                        <option value="csv">CSV</option>
+                        <option value="xml" selected>{'XML (recommended)'|i18n('design/standard/extract')}</option>
                         <option value="json">JSON</option>
+                        <option value="csv">CSV</option>
                     </select>
                     <input class="button" type="submit" name="DownloadTemplate" value="{'Download a template for this class'|i18n('design/standard/extract')}" />
                 </div>
-                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand.'|i18n('design/standard/extract')}</p>
             </div>
             {if $ClassID}
             <div class="xe-field">
@@ -210,6 +226,148 @@
         {if $Preview|or( $Applied )}
         {include uri='design:xrowextract/import_result.tpl'}
         {/if}
+
+        {* File format reference: complete, technical, with real examples for the reference class *}
+        <section class="xe-card" id="xe-card-reference" aria-labelledby="xe-card-reference-h">
+            <header class="xe-card-head">
+                <div>
+                    <h2 id="xe-card-reference-h">{'File format reference'|i18n('design/standard/extract')}</h2>
+                    <p>{if $ReferenceClass}{'Examples below use real data of %class where the site has some.'|i18n('design/standard/extract',, hash( '%class', $ReferenceClass.name ))}{else}{'Choose a class above for examples built from its own content.'|i18n('design/standard/extract')}{/if}</p>
+                </div>
+            </header>
+
+            <details open>
+                <summary>{'XML - the recommended format'|i18n('design/standard/extract')}</summary>
+                <p class="xe-help">{'What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root <export>, its class and when it was written; a <columns> block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one <object> per row, one <field name="..."> per column, matched to the <columns> block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).'|i18n('design/standard/extract')}</p>
+                {if $ReferenceExamples.xml.rowCount|gt( 0 )}
+                <pre class="xe-example">{$ReferenceExamples.xml.text|wash}</pre>
+                <div class="xe-toolbar">
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="DownloadExample" value="xml" formnovalidate="formnovalidate" />
+                </div>
+                {else}
+                <pre class="xe-example">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;export class="ng_article" created="2026-09-29T12:00:00+00:00"&gt;
+  &lt;columns&gt;
+    &lt;column name="title" id="title"&gt;Title&lt;/column&gt;
+    &lt;column name="remote-id" id="ezcontentobject.remote_id"&gt;Remote ID&lt;/column&gt;
+    &lt;column name="authors-ids" id="authors:ids"&gt;Author: object ids&lt;/column&gt;
+  &lt;/columns&gt;
+  &lt;object&gt;
+    &lt;field name="title"&gt;Sample article&lt;/field&gt;
+    &lt;field name="remote-id"&gt;xrowextract-sample-1&lt;/field&gt;
+    &lt;field name="authors-ids"&gt;42&lt;/field&gt;
+  &lt;/object&gt;
+&lt;/export&gt;</pre>
+                <p class="xe-help">{'A static example (this class has no content on this site yet to show a real one).'|i18n('design/standard/extract')}</p>
+                {/if}
+            </details>
+
+            <details open>
+                <summary>{'CSV'|i18n('design/standard/extract')}</summary>
+                <ul>
+                    <li>{'The header row holds the column names (an attribute identifier with "-" for "_", an attribute format as identifier-format, or a special column such as remote-id); the importer maps them by name, or lets you change any mapping by hand.'|i18n('design/standard/extract')}</li>
+                    <li>{'The separator is detected from the header row (comma, semicolon, tab or pipe, whichever appears most) and can be changed once the file is uploaded.'|i18n('design/standard/extract')}</li>
+                    <li>{'Standard RFC 4180 quoting: a cell that holds the separator, a quote or a line break is wrapped in double quotes, and a quote inside it is doubled ("" for a literal "); a quoted cell may contain real line breaks.'|i18n('design/standard/extract')}</li>
+                    <li>{'UTF-8, with or without a byte order mark (BOM); either is read correctly.'|i18n('design/standard/extract')}</li>
+                    <li>{'An empty cell is an empty value, not "not present": for an update, an empty cell can clear an attribute.'|i18n('design/standard/extract')}</li>
+                </ul>
+                {if $ReferenceExamples.csv.rowCount|gt( 0 )}
+                <pre class="xe-example">{$ReferenceExamples.csv.text|wash}</pre>
+                <div class="xe-toolbar">
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="DownloadExample" value="csv" formnovalidate="formnovalidate" />
+                </div>
+                {else}
+                <pre class="xe-example">"title","remote-id","authors-ids","class","language"
+"Sample article","xrowextract-sample-1","42","ng_article","eng-US"</pre>
+                <p class="xe-help">{'A static example (this class has no content on this site yet to show a real one).'|i18n('design/standard/extract')}</p>
+                {/if}
+            </details>
+
+            <details open>
+                <summary>{'JSON'|i18n('design/standard/extract')}</summary>
+                <p class="xe-help">{'An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.'|i18n('design/standard/extract')}</p>
+                {if $ReferenceExamples.json.rowCount|gt( 0 )}
+                <pre class="xe-example">{$ReferenceExamples.json.text|wash}</pre>
+                <div class="xe-toolbar">
+                    <span class="xe-spacer"></span>
+                    <input class="button" type="submit" name="DownloadExample" value="json" formnovalidate="formnovalidate" />
+                </div>
+                {else}
+                <pre class="xe-example">[
+  {ldelim}"title": "Sample article", "remote-id": "xrowextract-sample-1", "authors-ids": "42", "class": "ng_article", "language": "eng-US"{rdelim}
+]</pre>
+                <p class="xe-help">{'A static example (this class has no content on this site yet to show a real one).'|i18n('design/standard/extract')}</p>
+                {/if}
+            </details>
+
+            <details open>
+                <summary>{'Special columns'|i18n('design/standard/extract')}</summary>
+                <p class="xe-help">{'Every column this importer reads outside the class’s own attributes. A column not listed here, or an attribute the class does not have, is ignored (never guessed at).'|i18n('design/standard/extract')}</p>
+                <div class="xe-scroll" tabindex="0">
+                    <table class="xe-table">
+                        <thead><tr><th>{'Column'|i18n('design/standard/extract')}</th><th>{'id'|i18n('design/standard/extract')}</th><th>{'What it does'|i18n('design/standard/extract')}</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>remote-id</code></td><td><code>ezcontentobject.remote_id</code></td><td>{'The default match key: an existing object with this remote id is updated; otherwise it is created with it.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>object-id</code></td><td><code>ezcontentobject.id</code></td><td>{'Matches by object id instead, when matching is set to Object ID.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>class</code></td><td><code>ezcontentobject.class_identifier</code></td><td>{'The class for this row, overriding the class chosen above (an identifier or a numeric id); an XML file’s own export class attribute is the default when none is chosen.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>language</code></td><td><code>ezcontentobject.language</code></td><td>{'The translation this row creates or updates, overriding the language chosen above.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>parent-remote-id</code></td><td><code>node.parent_remote_id</code></td><td>{'Where a new object is placed, by the parent’s remote id; wins over main-parent-node-id and the chosen parent.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>main-parent-node-id</code></td><td><code>ezcontentobject.main_parent_node_id</code></td><td>{'Where a new object is placed, by node id; used when there is no parent-remote-id column.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>published-timestamp</code> / <code>published</code></td><td><code>ezcontentobject.published_timestamp</code></td><td>{'Sets the object’s published date after writing it (Unix time, or any accepted date form) - for preserving history on a migration.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>modified-timestamp</code> / <code>modified</code></td><td><code>ezcontentobject.modified_timestamp</code></td><td>{'Sets the object’s last modified date the same way.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>section</code></td><td><code>ezcontentobject.section</code></td><td>{'The section, by name or numeric id.'|i18n('design/standard/extract')}</td></tr>
+                            <tr><td><code>node-remote-id</code></td><td><code>node.remote_id</code></td><td>{'The main node’s own remote id, as exported; informational only, not written back.'|i18n('design/standard/extract')}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details open>
+                <summary>{'Attribute and attribute format columns'|i18n('design/standard/extract')}</summary>
+                <ul>
+                    <li>{'An attribute column is named after the attribute identifier, "-" for "_" (a CSV/JSON header only; XML uses the identifier itself as the column id and any display name).'|i18n('design/standard/extract')}</li>
+                    <li>{'An attribute format column is identifier-format, for example authors-ids, authors-remote-ids or metadata-json (identifier:format as the XML/mapping id). Only the formats named per datatype below are accepted for import; the others (word counts, sizes, URLs of a file...) are export-only.'|i18n('design/standard/extract')}</li>
+                </ul>
+            </details>
+
+            <details open>
+                <summary>{'Every importable datatype: accepted values, with an example'|i18n('design/standard/extract')}</summary>
+                <div class="xe-scroll" tabindex="0">
+                    <table class="xe-table">
+                        <thead><tr><th>{'Datatype'|i18n('design/standard/extract')}</th><th>{'Accepted as'|i18n('design/standard/extract')}</th><th>{'Example'|i18n('design/standard/extract')}</th></tr></thead>
+                        <tbody>
+                        <tr><td>ezstring, eztext</td><td>{'The text itself.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezstring.value ), $DatatypeExamples.ezstring.value, cond( is_set( $DatatypeExamples.eztext.value ), $DatatypeExamples.eztext.value, 'Sample text' ) )|wash}</td></tr>
+                        <tr><td>ezinteger</td><td>{'A whole number.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezinteger.value ), $DatatypeExamples.ezinteger.value, '42' )|wash}</td></tr>
+                        <tr><td>ezfloat</td><td>{'A decimal number.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezfloat.value ), $DatatypeExamples.ezfloat.value, '3.5' )|wash}</td></tr>
+                        <tr><td>ezboolean</td><td>{'1 or 0, yes or no, ja or nein, true or false, on or off.'|i18n('design/standard/extract')}</td><td>1</td></tr>
+                        <tr><td>ezemail</td><td>{'The address.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezemail.value ), $DatatypeExamples.ezemail.value, 'name@example.com' )|wash}</td></tr>
+                        <tr><td>ezurl</td><td>{'A URL, or "URL|link text".'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezurl.value ), $DatatypeExamples.ezurl.value, 'https://example.com|Example' )|wash}</td></tr>
+                        <tr><td>ezdate</td><td>{'YYYY-MM-DD, ISO 8601, or a Unix timestamp.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezdate.value ), $DatatypeExamples.ezdate.value, '2026-09-29' )|wash}</td></tr>
+                        <tr><td>ezdatetime</td><td>{'YYYY-MM-DD HH:MM:SS, ISO 8601, or a Unix timestamp.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezdatetime.value ), $DatatypeExamples.ezdatetime.value, '2026-09-29 12:00:00' )|wash}</td></tr>
+                        <tr><td>ezselection</td><td>{'An option name, or (the :ids format) its numeric id.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezselection.value ), $DatatypeExamples.ezselection.value, 'Published' )|wash}</td></tr>
+                        <tr><td>ezkeyword</td><td>{'Comma-separated keywords.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezkeyword.value ), $DatatypeExamples.ezkeyword.value, 'summer, sale' )|wash}</td></tr>
+                        <tr><td>eztags</td><td>{'Comma-separated tag names, each already existing and unambiguous (a tag path, or an ambiguous or missing name, is refused with a warning).'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.eztags.value ), $DatatypeExamples.eztags.value, 'Sports, Running' )|wash}</td></tr>
+                        <tr><td>ezxmltext</td><td>{'The HTML the export writes, converted through the ezoe input parser when that extension is active, else as plain paragraphs.'|i18n('design/standard/extract')}</td><td>&lt;p&gt;{cond( is_set( $DatatypeExamples.ezxmltext.value ), $DatatypeExamples.ezxmltext.value, 'Hello, world.' )|wash}&lt;/p&gt;</td></tr>
+                        <tr><td>ezimage, ezbinaryfile, ezmedia</td><td>{'A path already inside var/storage (as the export writes it), or an absolute URL of this site - either way, the file is imported.'|i18n('design/standard/extract')}</td><td>{cond( is_set( $DatatypeExamples.ezimage.value ), $DatatypeExamples.ezimage.value, 'var/storage/images/sample/1-1-eng-US/sample.jpg' )|wash}</td></tr>
+                        <tr><td>ezobjectrelation, ezobjectrelationlist</td><td>{'Only from an :ids or :remote_ids column (comma-separated); names are ambiguous and refused with a message.'|i18n('design/standard/extract')}</td><td>42,57 {'(as authors-ids)'|i18n('design/standard/extract')}</td></tr>
+                        <tr><td>xrowmetadata</td><td>{'Only from the :json column - the same fields the export writes as JSON.'|i18n('design/standard/extract')}</td><td>{ldelim}"title":"...","keywords":["a","b"]{rdelim} {'(as metadata-json)'|i18n('design/standard/extract')}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            <details open>
+                <summary>{'Datatypes this importer cannot write'|i18n('design/standard/extract')}</summary>
+                <ul class="xe-typelist">
+                    {foreach $ReferenceUnimportable as $datatype}
+                    <li><strong>{$datatype.name|wash}</strong> <code>{$datatype.id|wash}</code><small>{$datatype.reason|wash}</small></li>
+                    {/foreach}
+                </ul>
+                <p class="xe-help">{'Shown in the mapping as not supported, with this reason, and never written - not dropped without a trace.'|i18n('design/standard/extract')}</p>
+            </details>
+        </section>
 
     </div>
     </div>

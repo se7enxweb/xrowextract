@@ -17,7 +17,7 @@
     </a>
     <a href={'xrowextract/import'|ezurl}{if $active|eq( 'import' )} class="xe-tab-active" aria-current="page"{/if}>
         <strong>{'Import'|i18n( 'design/standard/extract' )}</strong>
-        <small>{'Read a CSV or JSON export back in: create or update objects'|i18n( 'design/standard/extract' )}</small>
+        <small>{'Read an XML, CSV or JSON export back in: create or update objects'|i18n( 'design/standard/extract' )}</small>
     </a>
     <a href={'xrowextract/package'|ezurl}{if $active|eq( 'package' )} class="xe-tab-active" aria-current="page"{/if}>
         <strong>{'Package'|i18n( 'design/standard/extract' )}</strong>

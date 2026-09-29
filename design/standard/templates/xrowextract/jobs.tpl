@@ -26,8 +26,16 @@
                     <h2 id="xe-card-jobs">{if $all_jobs}{'All jobs'|i18n('design/standard/extract')}{else}{'Your jobs'|i18n('design/standard/extract')}{/if}</h2>
                     <p>{'Exports started with "Run in the background", kept for %days days after they finish.'|i18n('design/standard/extract',, hash( '%days', $retention_days ))}</p>
                 </div>
-                <span class="xe-count"><strong>{$jobs|count}</strong> {'jobs'|i18n('design/standard/extract')}</span>
             </header>
+
+            {* Totals by state; the Jobs script recounts them from the rows as the poll moves jobs on *}
+            <dl class="xe-job-stats" data-role="job-stats">
+                <div class="xe-stat xe-stat-total"><dt>{'Total jobs'|i18n('design/standard/extract')}</dt><dd data-count="total">{$job_counts.total}</dd></div>
+                <div class="xe-stat xe-stat-done"><dt>{'Completed'|i18n('design/standard/extract')}</dt><dd data-count="done">{$job_counts.done}</dd></div>
+                <div class="xe-stat xe-stat-running{if $job_counts.running|eq( 0 )} xe-stat-zero{/if}"><dt>{'Running'|i18n('design/standard/extract')}</dt><dd data-count="running">{$job_counts.running}</dd></div>
+                <div class="xe-stat xe-stat-queued{if $job_counts.queued|eq( 0 )} xe-stat-zero{/if}"><dt>{'Queued'|i18n('design/standard/extract')}</dt><dd data-count="queued">{$job_counts.queued}</dd></div>
+                <div class="xe-stat xe-stat-failed{if $job_counts.failed|eq( 0 )} xe-stat-zero{/if}"><dt>{'Failed'|i18n('design/standard/extract')}</dt><dd data-count="failed">{$job_counts.failed}</dd></div>
+            </dl>
 
             {if $jobs|count|eq( 0 )}
             <p class="xe-columns-empty">{'No jobs yet. Start one from the "Run in the background" button on the class or site archive page.'|i18n('design/standard/extract')}</p>
@@ -39,12 +47,18 @@
                         <span class="xe-job-type" title="{if $job.type|eq( 'archive' )}{'Site archive'|i18n('design/standard/extract')|wash}{else}{'One class'|i18n('design/standard/extract')|wash}{/if}">{if $job.type|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
                         <span class="xe-colinfo">
                             <strong>{$job.what|wash}</strong>
-                            <small>
-                                <code>{$job.format|wash}</code>
-                                {if $all_jobs} · {$job.owner|wash}{/if}
-                                · {$job.created|l10n( shortdatetime )}
-                            </small>
+                            <small><code>{$job.format|wash}</code></small>
                         </span>
+                        {def $owner = $job.owner_user}
+                        {if $owner.node_id}
+                        <a class="xe-user" style="--xe-user-hue: {$owner.hue}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Started by %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">
+                        {else}
+                        <span class="xe-user xe-user-gone" style="--xe-user-hue: {$owner.hue}" title="{'Started by %login (account no longer exists)'|i18n('design/standard/extract',, hash( '%login', $owner.login ))|wash}">
+                        {/if}
+                            <span class="xe-user-avatar" aria-hidden="true">{$owner.initials|wash}</span>
+                            <span class="xe-user-name">{$owner.name|wash}{if $job.mine} <small>({'you'|i18n('design/standard/extract')})</small>{/if}</span>
+                        {if $owner.node_id}</a>{else}</span>{/if}
+                        {undef $owner}
                         <span class="xe-job-state xe-badge xe-state-{$job.state|wash}" data-role="state">
                             {if $job.state|eq( 'queued' )}{'queued'|i18n('design/standard/extract')}
                             {elseif $job.state|eq( 'running' )}{'running'|i18n('design/standard/extract')}
@@ -58,11 +72,26 @@
                         <span class="xe-job-progress-text" data-role="progress-text">{if $job.progress}{$job.progress.done} / {$job.progress.total} · {$job.progress.phase|wash}{else}{'Starting …'|i18n('design/standard/extract')}{/if}</span>
                     </div>
 
-                    <div class="xe-job-meta">
+                    <ol class="xe-job-times" data-created="{$job.created}">
+                        <li class="xe-time-done">
+                            <span class="xe-time-label">{'Queued'|i18n('design/standard/extract')}</span>
+                            <time datetime="{$job.created|datetime( 'custom', '%Y-%m-%dT%H:%i:%s' )}">{$job.created|l10n( shortdatetime )}</time>
+                        </li>
+                        <li class="{if $job.started}xe-time-done{else}xe-time-pending{/if}" data-role="started-step">
+                            <span class="xe-time-label">{'Started'|i18n('design/standard/extract')}</span>
+                            <time data-role="started"{if $job.started} datetime="{$job.started|datetime( 'custom', '%Y-%m-%dT%H:%i:%s' )}"{/if}>{if $job.started}{$job.started|l10n( shortdatetime )}{else}{'waiting …'|i18n('design/standard/extract')}{/if}</time>
+                            <small data-role="wait">{if $job.wait_text}{'after %time in the queue'|i18n('design/standard/extract',, hash( '%time', $job.wait_text ))}{/if}</small>
+                        </li>
+                        <li class="{if $job.ended}xe-time-done{if $job.state|eq( 'failed' )} xe-time-bad{/if}{else}xe-time-pending{/if}" data-role="ended-step">
+                            <span class="xe-time-label" data-role="ended-label">{if $job.state|eq( 'failed' )}{'Failed'|i18n('design/standard/extract')}{else}{'Ended'|i18n('design/standard/extract')}{/if}</span>
+                            <time data-role="ended"{if $job.ended} datetime="{$job.ended|datetime( 'custom', '%Y-%m-%dT%H:%i:%s' )}"{/if}>{if $job.ended}{$job.ended|l10n( shortdatetime )}{else}—{/if}</time>
+                            <small data-role="took">{if $job.run_text}{'took %time'|i18n('design/standard/extract',, hash( '%time', $job.run_text ))}{/if}</small>
+                        </li>
+                    </ol>
+
+                    <div class="xe-job-meta" data-label-failed="{'Failed'|i18n('design/standard/extract')|wash}" data-label-took="{'took %time'|i18n('design/standard/extract')|wash}" data-label-wait="{'after %time in the queue'|i18n('design/standard/extract')|wash}">
                         <span data-role="rows">{if $job.rows|ne( null )}<strong>{$job.rows}</strong> {'rows'|i18n('design/standard/extract')}{/if}</span>
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
-                        {if $job.started}<span>{'started'|i18n('design/standard/extract')} {$job.started|l10n( shortdatetime )}</span>{/if}
-                        {if $job.ended}<span>{'ended'|i18n('design/standard/extract')} {$job.ended|l10n( shortdatetime )}</span>{/if}
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
 
