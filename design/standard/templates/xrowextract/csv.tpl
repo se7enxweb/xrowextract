@@ -246,10 +246,13 @@
                 <input class="button" type="submit" name="ResetAttributes" value="{'Reset to all class attributes'|i18n('design/standard/extract')}" title="{'Every attribute of the class, in class order, with its identifier as name'|i18n('design/standard/extract')|wash}" />
                 <input class="button xe-remove-all" type="submit" name="RemoveAllAttributes" value="{'Remove all'|i18n('design/standard/extract')}"{if $Attributes|count|eq( 0 )} disabled{/if} />
             </div>
+            {if $ColumnNotice}
+            <p class="xe-note xe-column-notice{if $ColumnNotice.count|eq( 0 )} xe-column-notice-none{/if}" role="status">{if $ColumnNotice.count|gt( 0 )}{'Added %count columns at the end of the list: %names'|i18n('design/standard/extract',, hash( '%count', $ColumnNotice.count, '%names', $ColumnNotice.names ))|wash}{else}{'Nothing added: these columns are already in the list.'|i18n('design/standard/extract')}{/if}</p>
+            {/if}
             <p class="xe-columns-empty"{if $Attributes|count|gt( 0 )} hidden{/if}>{'No columns yet. Add a column above, or reset to all class attributes.'|i18n('design/standard/extract')}</p>
             <ol class="xe-columns" data-up="{'Move up'|i18n('design/standard/extract')|wash}" data-down="{'Move down'|i18n('design/standard/extract')|wash}">
                 {foreach $Attributes as $index => $item}
-                <li class="xe-column">
+                <li class="xe-column{if $AddedColumnIDs|contains( $item.id )} xe-added{/if}">
                     <span class="xe-handle" title="{'Drag to move'|i18n('design/standard/extract')|wash}" aria-hidden="true">⠿</span>
                     <span class="xe-colpos">{$index|sum( 1 )}</span>
                     <span class="xe-colinfo">

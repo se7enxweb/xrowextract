@@ -473,3 +473,8 @@
 .xe-languages { margin-top: 1em; }
 .xe-language-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(17em, 1fr)); gap: .4em; margin: .3em 0 0; padding: 0; list-style: none; }
 .xe-language-list li { margin: 0; }
+
+/* Columns an add action just brought in */
+.xe-column.xe-added { background: #ecfdf3; box-shadow: inset 3px 0 0 #12b76a; }
+.xe-column-notice { margin: .6em 0; background: #ecfdf3; color: #05603a; }
+.xe-column-notice-none { background: #f3f5f8; color: var(--xe-muted); }

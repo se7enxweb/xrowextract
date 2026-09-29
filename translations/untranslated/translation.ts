@@ -4,6 +4,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Added %count columns at the end of the list: %names</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nothing added: these columns are already in the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Filter the columns: name, identifier, datatype, format</source>
         <translation type="unfinished"></translation>
     </message>

@@ -294,6 +294,14 @@ else
         }
 }
 
+// The columns before any add action, to tell what an add brought in
+$columnIDsBeforeAdd = array();
+foreach ( (array)$Attributes as $item )
+{
+    if ( is_array( $item ) && isset( $item['id'] ) )
+        $columnIDsBeforeAdd[$item['id']] = true;
+}
+
 // Add attribute action that modify previous array
 if ( $http->hasPostVariable( 'AddAttribute' ) )
 {
@@ -441,6 +449,25 @@ foreach ( (array)$Attributes as $item )
 $Attributes = $AttributesClean;
 
 $sessionConfig['Attributes'][$Class_id] = $Attributes;
+
+// What an add action brought in, for the notice and the marked rows
+$AddedColumnIDs = array();
+$addedNames = array();
+$addAction = $http->hasPostVariable( 'AddAttribute' ) || $http->hasPostVariable( 'AddAllAttributes' ) || $http->hasPostVariable( 'AddColumnSet' );
+if ( $addAction )
+{
+    foreach ( $Attributes as $item )
+    {
+        if ( !isset( $columnIDsBeforeAdd[$item['id']] ) )
+        {
+            $AddedColumnIDs[] = $item['id'];
+            $addedNames[] = $item['name'];
+        }
+    }
+}
+$tpl->setVariable( 'AddedColumnIDs', $AddedColumnIDs );
+$tpl->setVariable( 'ColumnNotice', $addAction ? array( 'count' => count( $AddedColumnIDs ),
+                                                       'names' => implode( ', ', array_slice( $addedNames, 0, 12 ) ) . ( count( $addedNames ) > 12 ? ' …' : '' ) ) : false );
 $http->setSessionVariable( 'eZExtractConfig', $sessionConfig );
 // Put above vars in tpl
 $tpl->setVariable( 'Type', $type );

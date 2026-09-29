@@ -694,3 +694,20 @@
         }
     });
 }());
+
+/*
+ * After an add (a set, a column, all attributes) the page comes back at the top; bring the notice and the
+ * new rows into view instead, so the result is seen at once.
+ */
+(function () {
+    'use strict';
+    var notice = document.querySelector('.xe-column-notice');
+    if (!notice) {
+        return;
+    }
+    var added = document.querySelectorAll('.xe-columns .xe-added');
+    var target = added.length ? added[0] : notice;
+    window.requestAnimationFrame(function () {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+}());

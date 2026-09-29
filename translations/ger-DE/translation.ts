@@ -2,6 +2,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Added %count columns at the end of the list: %names</source>
+        <translation>%count Spalten am Ende der Liste hinzugefügt: %names</translation>
+    </message>
+    <message>
+        <source>Nothing added: these columns are already in the list.</source>
+        <translation>Nichts hinzugefügt: diese Spalten sind schon in der Liste.</translation>
+    </message>
+    <message>
         <source>Filter the columns: name, identifier, datatype, format</source>
         <translation>Spalten filtern: Name, Bezeichner, Datentyp, Format</translation>
     </message>
