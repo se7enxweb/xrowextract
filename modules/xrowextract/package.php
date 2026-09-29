@@ -25,29 +25,24 @@ if ( $http->hasPostVariable( 'UploadPackage' ) )
     if ( eZHTTPFile::canFetch( 'PackageBinaryFile' ) )
     {
         $file = eZHTTPFile::fetch( 'PackageBinaryFile' );
-        if ( $file )
+        // The upload is first copied into the private upload folder under a name with its own
+        // extension, then goes through the same path as the import page: the archive safety scan
+        // (no symlinks, hard links, special entries or paths leaving the folder) before anything is
+        // unpacked, and every kernel/archive exception turned into a message. Passing the web
+        // server's raw temporary file straight to eZPackage::import() skipped the scan, and on
+        // Velocity the archive reader could not open that temporary file: an uncaught
+        // ezcBaseFilePermissionException, a 500.
+        $stored = $file ? XrowExtractImport::storeUpload( $file->attribute( 'filename' ), $file->attribute( 'original_filename' ) ) : false;
+        if ( $stored )
         {
-            $newPackageName = '';
-            // 'local' forced, not left to eZPackage::import()'s own vendor-derived default -
-            // see the long comment on the same call in XrowExtractPackage::importUploadedArchive().
-            $imported = eZPackage::import( $file->attribute( 'filename' ), $newPackageName, true, 'local', false );
-            if ( $imported instanceof eZPackage )
+            $result = XrowExtractPackage::importUploadedArchive( $stored );
+            @unlink( $stored );
+            if ( $result['ok'] )
             {
-                $_SESSION[$SESSION_KEY] = $imported->attribute( 'name' );
+                $_SESSION[$SESSION_KEY] = $result['package']->attribute( 'name' );
                 return $module->redirectTo( 'xrowextract/package' );
             }
-            elseif ( $imported === eZPackage::STATUS_ALREADY_EXISTS )
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'A package named %packagename already exists in the repository.', false, array( '%packagename' => $newPackageName ) );
-            }
-            elseif ( $imported === eZPackage::STATUS_INVALID_NAME )
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The package name %packagename is invalid.', false, array( '%packagename' => $newPackageName ) );
-            }
-            else
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file is not a valid Exponential package (.ezpkg).' );
-            }
+            $uploadError = ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', false, array( '%reason' => $result['error'] ) );
         }
         else
         {

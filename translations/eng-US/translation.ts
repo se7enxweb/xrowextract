@@ -4,6 +4,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>The package could not be read: %reason</source>
+        <translation>The package could not be read: %reason</translation>
+    </message>
+    <message>
         <source>Export as package</source>
         <translation>Export as package</translation>
     </message>
