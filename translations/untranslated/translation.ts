@@ -4,6 +4,58 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Read an XML, CSV or JSON export or a content package (.ezpkg) back in: create or update objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. It also installs content packages (.ezpkg): their classes and content, or a single class or object XML. Nothing is written before you have seen the dry run.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Files you can import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>recommended</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>classes and content together, installed through the package system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class XML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>one class definition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Object XML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>content objects of a package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Package tab</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Content package (.ezpkg)</source>
         <translation type="unfinished"></translation>
     </message>
