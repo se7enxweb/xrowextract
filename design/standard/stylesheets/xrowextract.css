@@ -447,3 +447,12 @@
 .xe-class-item .xe-colinfo strong, .xe-class-item .xe-colinfo small,
 .xe-picker-item .xe-colinfo strong, .xe-picker-item .xe-colinfo small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .xe-class-item .xe-colinfo, .xe-picker-item .xe-colinfo { min-width: 0; }
+
+/* Datatype and meta information beside columns */
+.xe-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .25em .45em; }
+.xe-type { padding: 0 .45em; border-radius: 4px; background: var(--xe-accent-bg); color: var(--xe-accent); font-size: .9em; }
+.xe-flag { padding: 0 .4em; border: 1px solid var(--xe-line); border-radius: 4px; color: var(--xe-muted); font-size: .85em; }
+.xe-cell { color: var(--xe-muted); font-size: .88em; font-style: italic; }
+.xe-badge-warn { background: #fdecea; color: #b42318; }
+.xe-coltype { display: block; color: var(--xe-accent); font-weight: normal; font-size: .8em; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 721px) { .xe-column { grid-template-columns: auto 2.2em minmax(12em, 1fr) minmax(8em, 13em) auto; } }

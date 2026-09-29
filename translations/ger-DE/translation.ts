@@ -2,6 +2,162 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%count attributes</source>
+        <translation>%count Attribute</translation>
+    </message>
+    <message>
+        <source>Required</source>
+        <translation>Pflichtfeld</translation>
+    </message>
+    <message>
+        <source>required</source>
+        <translation>Pflicht</translation>
+    </message>
+    <message>
+        <source>Not translatable</source>
+        <translation>Nicht übersetzbar</translation>
+    </message>
+    <message>
+        <source>not translatable</source>
+        <translation>nicht übersetzbar</translation>
+    </message>
+    <message>
+        <source>searchable</source>
+        <translation>durchsuchbar</translation>
+    </message>
+    <message>
+        <source>information collector</source>
+        <translation>Informationssammler</translation>
+    </message>
+    <message>
+        <source>What the cell holds</source>
+        <translation>Was die Zelle enthält</translation>
+    </message>
+    <message>
+        <source>not an attribute of this class: empty</source>
+        <translation>kein Attribut dieser Klasse: leer</translation>
+    </message>
+    <message>
+        <source>text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>identifier</source>
+        <translation>Bezeichner</translation>
+    </message>
+    <message>
+        <source>HTML</source>
+        <translation>HTML</translation>
+    </message>
+    <message>
+        <source>number</source>
+        <translation>Zahl</translation>
+    </message>
+    <message>
+        <source>price incl. VAT</source>
+        <translation>Preis inkl. MwSt.</translation>
+    </message>
+    <message>
+        <source>1 or 0</source>
+        <translation>1 oder 0</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD</source>
+        <translation>JJJJ-MM-TT</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD HH:MM:SS</source>
+        <translation>JJJJ-MM-TT HH:MM:SS</translation>
+    </message>
+    <message>
+        <source>HH:MM</source>
+        <translation>HH:MM</translation>
+    </message>
+    <message>
+        <source>e-mail address</source>
+        <translation>E-Mail-Adresse</translation>
+    </message>
+    <message>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <source>login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <source>image path</source>
+        <translation>Bildpfad</translation>
+    </message>
+    <message>
+        <source>file path</source>
+        <translation>Dateipfad</translation>
+    </message>
+    <message>
+        <source>cells | and rows &amp;</source>
+        <translation>Zellen | und Zeilen &amp;</translation>
+    </message>
+    <message>
+        <source>chosen option</source>
+        <translation>gewählte Option</translation>
+    </message>
+    <message>
+        <source>chosen options</source>
+        <translation>gewählte Optionen</translation>
+    </message>
+    <message>
+        <source>country</source>
+        <translation>Land</translation>
+    </message>
+    <message>
+        <source>value</source>
+        <translation>Wert</translation>
+    </message>
+    <message>
+        <source>keywords</source>
+        <translation>Schlagwörter</translation>
+    </message>
+    <message>
+        <source>tags</source>
+        <translation>Tags</translation>
+    </message>
+    <message>
+        <source>related object name</source>
+        <translation>Name des verknüpften Objekts</translation>
+    </message>
+    <message>
+        <source>related object names</source>
+        <translation>Namen der verknüpften Objekte</translation>
+    </message>
+    <message>
+        <source>section name</source>
+        <translation>Name der Sektion</translation>
+    </message>
+    <message>
+        <source>owner name</source>
+        <translation>Name des Eigentümers</translation>
+    </message>
+    <message>
+        <source>password hash</source>
+        <translation>Passwort-Hash</translation>
+    </message>
+    <message>
+        <source>enabled or disabled</source>
+        <translation>aktiviert oder deaktiviert</translation>
+    </message>
+    <message>
+        <source>URL path</source>
+        <translation>URL-Pfad</translation>
+    </message>
+    <message>
+        <source>node name</source>
+        <translation>Knotenname</translation>
+    </message>
+    <message>
+        <source>node names</source>
+        <translation>Knotennamen</translation>
+    </message>
+    <message>
         <source>Writing the archive …</source>
         <translation>Das Archiv wird geschrieben …</translation>
     </message>

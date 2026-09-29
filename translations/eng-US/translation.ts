@@ -4,6 +4,162 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%count attributes</source>
+        <translation>%count attributes</translation>
+    </message>
+    <message>
+        <source>Required</source>
+        <translation>Required</translation>
+    </message>
+    <message>
+        <source>required</source>
+        <translation>required</translation>
+    </message>
+    <message>
+        <source>Not translatable</source>
+        <translation>Not translatable</translation>
+    </message>
+    <message>
+        <source>not translatable</source>
+        <translation>not translatable</translation>
+    </message>
+    <message>
+        <source>searchable</source>
+        <translation>searchable</translation>
+    </message>
+    <message>
+        <source>information collector</source>
+        <translation>information collector</translation>
+    </message>
+    <message>
+        <source>What the cell holds</source>
+        <translation>What the cell holds</translation>
+    </message>
+    <message>
+        <source>not an attribute of this class: empty</source>
+        <translation>not an attribute of this class: empty</translation>
+    </message>
+    <message>
+        <source>text</source>
+        <translation>text</translation>
+    </message>
+    <message>
+        <source>identifier</source>
+        <translation>identifier</translation>
+    </message>
+    <message>
+        <source>HTML</source>
+        <translation>HTML</translation>
+    </message>
+    <message>
+        <source>number</source>
+        <translation>number</translation>
+    </message>
+    <message>
+        <source>price incl. VAT</source>
+        <translation>price incl. VAT</translation>
+    </message>
+    <message>
+        <source>1 or 0</source>
+        <translation>1 or 0</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD</source>
+        <translation>YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD HH:MM:SS</source>
+        <translation>YYYY-MM-DD HH:MM:SS</translation>
+    </message>
+    <message>
+        <source>HH:MM</source>
+        <translation>HH:MM</translation>
+    </message>
+    <message>
+        <source>e-mail address</source>
+        <translation>e-mail address</translation>
+    </message>
+    <message>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <source>login</source>
+        <translation>login</translation>
+    </message>
+    <message>
+        <source>image path</source>
+        <translation>image path</translation>
+    </message>
+    <message>
+        <source>file path</source>
+        <translation>file path</translation>
+    </message>
+    <message>
+        <source>cells | and rows &amp;</source>
+        <translation>cells | and rows &amp;</translation>
+    </message>
+    <message>
+        <source>chosen option</source>
+        <translation>chosen option</translation>
+    </message>
+    <message>
+        <source>chosen options</source>
+        <translation>chosen options</translation>
+    </message>
+    <message>
+        <source>country</source>
+        <translation>country</translation>
+    </message>
+    <message>
+        <source>value</source>
+        <translation>value</translation>
+    </message>
+    <message>
+        <source>keywords</source>
+        <translation>keywords</translation>
+    </message>
+    <message>
+        <source>tags</source>
+        <translation>tags</translation>
+    </message>
+    <message>
+        <source>related object name</source>
+        <translation>related object name</translation>
+    </message>
+    <message>
+        <source>related object names</source>
+        <translation>related object names</translation>
+    </message>
+    <message>
+        <source>section name</source>
+        <translation>section name</translation>
+    </message>
+    <message>
+        <source>owner name</source>
+        <translation>owner name</translation>
+    </message>
+    <message>
+        <source>password hash</source>
+        <translation>password hash</translation>
+    </message>
+    <message>
+        <source>enabled or disabled</source>
+        <translation>enabled or disabled</translation>
+    </message>
+    <message>
+        <source>URL path</source>
+        <translation>URL path</translation>
+    </message>
+    <message>
+        <source>node name</source>
+        <translation>node name</translation>
+    </message>
+    <message>
+        <source>node names</source>
+        <translation>node names</translation>
+    </message>
+    <message>
         <source>Writing the archive …</source>
         <translation>Writing the archive …</translation>
     </message>

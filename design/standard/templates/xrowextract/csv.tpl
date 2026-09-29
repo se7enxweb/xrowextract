@@ -82,6 +82,7 @@
                         <input class="button xe-update" name="Update" type="submit" value="{'Update'|i18n('design/standard/extract')}" title="{'Load the columns of this class'|i18n('design/standard/extract')|wash}" />
                     </div>
                     <p class="xe-help">{'%count objects of this class in the selection. The list shows the number for every class.'|i18n('design/standard/extract',, hash( '%count', $max_count ))}</p>
+                    {if $ChosenClass}<p class="xe-help xe-meta"><code>{$ChosenClass.identifier|wash}</code> · {'%count attributes'|i18n('design/standard/extract',, hash( '%count', $ChosenClass.attributes ))}</p>{/if}
                 </div>
 
                 {if $has_prefilledata|not}
@@ -171,7 +172,7 @@
                     <select name="AddAttributeID" id="xe-add">
                         <optgroup label="{'Class attributes'|i18n('design/standard/extract')|wash}">
                         {foreach $class_attributes as $attribute}
-                            <option value="{$attribute.id|wash}">{$attribute.name|wash} ({$attribute.identifier|wash}){if $ExportableDatatypes|contains( $attribute.data_type_string )|not} – {'empty: no export handler for %type'|i18n('design/standard/extract',, hash( '%type', $attribute.data_type_string ))|wash}{/if}</option>
+                            <option value="{$attribute.id|wash}">{$attribute.name|wash} ({$attribute.identifier|wash}) · {if is_set( $AttributeMeta[$attribute.identifier] )}{$AttributeMeta[$attribute.identifier].datatype_name|wash}{else}{$attribute.data_type_string|wash}{/if}{if $ExportableDatatypes|contains( $attribute.data_type_string )|not} – {'empty: no export handler for %type'|i18n('design/standard/extract',, hash( '%type', $attribute.data_type_string ))|wash}{/if}</option>
                         {/foreach}
                         </optgroup>
                         <optgroup label="{'Special columns'|i18n('design/standard/extract')|wash}">
@@ -200,7 +201,19 @@
                     <span class="xe-colpos">{$index|sum( 1 )}</span>
                     <span class="xe-colinfo">
                         <strong>{$item.name|wash}</strong>
-                        <small>{if $item.id|contains( '.' )}<span class="xe-badge">{'Special column'|i18n('design/standard/extract')}</span>{else}<code>{$item.id|wash}</code>{/if}</small>
+                        {if is_set( $AttributeMeta[$item.id] )}{def $meta = $AttributeMeta[$item.id]}
+                        <small class="xe-meta">
+                            {if $meta.special}<span class="xe-badge">{'Special column'|i18n('design/standard/extract')}</span>{else}<code>{$item.id|wash}</code>
+                            <span class="xe-type" title="{$meta.datatype|wash}">{$meta.datatype_name|wash}</span>{/if}
+                            {if $meta.required}<span class="xe-flag" title="{'Required'|i18n('design/standard/extract')|wash}">{'required'|i18n('design/standard/extract')}</span>{/if}
+                            {if $meta.translatable|not}{if $meta.special|not}<span class="xe-flag" title="{'Not translatable'|i18n('design/standard/extract')|wash}">{'not translatable'|i18n('design/standard/extract')}</span>{/if}{/if}
+                            {if $meta.searchable}<span class="xe-flag">{'searchable'|i18n('design/standard/extract')}</span>{/if}
+                            {if $meta.collector}<span class="xe-flag">{'information collector'|i18n('design/standard/extract')}</span>{/if}
+                            {if $meta.exportable}<span class="xe-cell" title="{'What the cell holds'|i18n('design/standard/extract')|wash}">→ {$meta.cell|wash}</span>{else}<span class="xe-badge xe-badge-warn">{'empty: no export handler for %type'|i18n('design/standard/extract',, hash( '%type', $meta.datatype ))|wash}</span>{/if}
+                        </small>
+                        {undef $meta}{else}
+                        <small class="xe-meta"><code>{$item.id|wash}</code> <span class="xe-badge xe-badge-warn">{'not an attribute of this class: empty'|i18n('design/standard/extract')}</span></small>
+                        {/if}
                     </span>
                     <input name="Attributes[{$index}][id]" type="hidden" value="{$item.id|wash}" />
                     <input name="Attributes[{$index}][name]" type="hidden" value="{$item.name|wash}" />

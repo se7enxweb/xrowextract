@@ -363,6 +363,12 @@ $tpl->setVariable( 'Type', $type );
 $tpl->setVariable( 'Subtree', $Subtree );
 $tpl->setVariable( 'Class_id', $Class_id );
 $tpl->setVariable( 'Attributes', $Attributes );
+// What the view shows beside each column: datatype, flags, what the cell holds
+$tpl->setVariable( 'AttributeMeta', XrowExtractColumns::attributeMeta( $Class_id ) );
+$chosenClass = eZContentClass::fetch( $Class_id );
+$tpl->setVariable( 'ChosenClass', $chosenClass ? array( 'identifier' => $chosenClass->attribute( 'identifier' ),
+                                                        'name' => $chosenClass->attribute( 'name' ),
+                                                        'attributes' => count( $chosenClass->dataMap() ) ) : false );
 $tpl->setVariable( 'ExtraAttributes', $ExtraAttributes );
 $tpl->setVariable( 'Mainnodeonly', $Mainnodeonly );
 $tpl->setVariable( 'has_prefilledata', $hasPreFilledData );

@@ -66,6 +66,77 @@ class XrowExtractColumns
         return $columns;
     }
 
+    /** What a cell holds for a datatype, as the export handlers write it; false when no handler exports it. */
+    public static function cellDescription( $datatype )
+    {
+        $exportable = (array)eZINI::instance( 'csv.ini' )->variable( 'General', 'ExportableDatatypes' );
+        if ( !in_array( $datatype, $exportable, true ) )
+            return false;
+        $cells = array(
+            'ezstring' => 'text', 'eztext' => 'text', 'hmregexpline' => 'text', 'ezidentifier' => 'identifier',
+            'ezxmltext' => 'HTML', 'ezinteger' => 'number', 'ezfloat' => 'number', 'ezprice' => 'price incl. VAT',
+            'ezboolean' => '1 or 0', 'ezdate' => 'YYYY-MM-DD', 'ezdatetime' => 'YYYY-MM-DD HH:MM:SS', 'eztime' => 'HH:MM',
+            'ezemail' => 'e-mail address', 'ezurl' => 'URL', 'ezuser' => 'login',
+            'ezimage' => 'image path', 'ezbinaryfile' => 'file path', 'ezmedia' => 'file path', 'ezmatrix' => 'cells | and rows &',
+            'ezselection' => 'chosen option', 'ezenhancedselection' => 'chosen options', 'ezcountry' => 'country',
+            'ezenum' => 'value', 'ezkeyword' => 'keywords', 'eztags' => 'tags',
+            'ezobjectrelation' => 'related object name', 'ezobjectrelationlist' => 'related object names',
+            'ezenhancedobjectrelation' => 'related object names',
+        );
+        return ezpI18n::tr( 'design/standard/extract', isset( $cells[$datatype] ) ? $cells[$datatype] : 'value' );
+    }
+
+    /** The translated name of a datatype, or its identifier when it is not installed. */
+    public static function datatypeName( $datatype )
+    {
+        $type = eZDataType::create( $datatype );
+        return ( $type && isset( $type->Name ) && $type->Name !== '' ) ? $type->Name : $datatype;
+    }
+
+    /**
+     * Meta information for every column id of a class (its attributes, keyed by identifier) and for the
+     * special columns (keyed by their id): what the view shows beside a column.
+     */
+    public static function attributeMeta( $classID )
+    {
+        $meta = array();
+        foreach ( eZContentClassAttribute::fetchListByClassID( (int)$classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
+        {
+            $datatype = $attribute->attribute( 'data_type_string' );
+            $cell = self::cellDescription( $datatype );
+            $meta[$attribute->attribute( 'identifier' )] = array(
+                'special' => false,
+                'datatype' => $datatype,
+                'datatype_name' => self::datatypeName( $datatype ),
+                'required' => (bool)$attribute->attribute( 'is_required' ),
+                'translatable' => (bool)$attribute->attribute( 'can_translate' ),
+                'searchable' => (bool)$attribute->attribute( 'is_searchable' ),
+                'collector' => (bool)$attribute->attribute( 'is_information_collector' ),
+                'exportable' => $cell !== false,
+                'cell' => $cell === false ? '' : $cell,
+                'position' => (int)$attribute->attribute( 'placement' ),
+            );
+        }
+        $extraCells = array(
+            'ezcontentobject.id' => 'number', 'ezcontentobject.remote_id' => 'identifier', 'ezcontentobject.name' => 'text',
+            'ezcontentobject.class_identifier' => 'identifier', 'ezcontentobject.section' => 'section name', 'ezcontentobject.owner' => 'owner name',
+            'ezuser.login' => 'login', 'ezuser.email' => 'e-mail address', 'ezuser.password_hash' => 'password hash', 'ezuser.is_enabled' => 'enabled or disabled',
+            'ezcontentobject.published' => 'YYYY-MM-DD', 'ezcontentobject.modified' => 'YYYY-MM-DD',
+            'ezcontentobject.url_alias' => 'URL path', 'ezcontentobject.full_url_alias' => 'URL',
+            'ezcontentobject.main_parent_name' => 'node name', 'ezcontentobject.main_node_id' => 'number',
+            'ezcontentobject.main_parent_node_id' => 'number', 'ezcontentobject.parent_nodes' => 'node names',
+        );
+        foreach ( self::extraAttributes() as $id => $column )
+        {
+            $meta[$id] = array(
+                'special' => true, 'datatype' => strtok( $id, '.' ), 'datatype_name' => ezpI18n::tr( 'design/standard/extract', 'Special column' ),
+                'required' => false, 'translatable' => false, 'searchable' => false, 'collector' => false, 'exportable' => true,
+                'cell' => ezpI18n::tr( 'design/standard/extract', isset( $extraCells[$id] ) ? $extraCells[$id] : 'value' ), 'position' => 0,
+            );
+        }
+        return $meta;
+    }
+
     public static function allowPasswordHash()
     {
         $csvINI = eZINI::instance( 'csv.ini' );

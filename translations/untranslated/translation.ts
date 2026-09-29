@@ -4,6 +4,162 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%count attributes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Required</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>required</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not translatable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not translatable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>searchable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>information collector</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What the cell holds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not an attribute of this class: empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>identifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HTML</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>price incl. VAT</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1 or 0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD HH:MM:SS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HH:MM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>e-mail address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>login</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>image path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>cells | and rows &amp;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>chosen option</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>chosen options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>country</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>keywords</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>related object name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>related object names</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>section name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>owner name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>password hash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>enabled or disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>URL path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>node name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>node names</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Writing the archive …</source>
         <translation type="unfinished"></translation>
     </message>
