@@ -241,8 +241,9 @@ if ( $options['export'] )
         $classIdentifier = $class->attribute( 'identifier' );
     }
 
-    $packageName = $options['name'] ? $options['name']
-                 : ( 'xrowextract_export_' . preg_replace( '/[^A-Za-z0-9_]+/', '_', $firstNode->attribute( 'name' ) ) . '_' . $firstNode->attribute( 'node_id' ) );
+    // Only names the kernel will import again (lowercase identifier form): see validPackageName()
+    $packageName = XrowExtractPackage::validPackageName( $options['name'] ? $options['name']
+                 : ( 'xrowextract_export_' . $firstNode->attribute( 'name' ) . '_' . $firstNode->attribute( 'node_id' ) ) );
     $summaryWhat = count( $nodeIDs ) > 1 ? ( count( $nodeIDs ) . ' selected nodes' ) : ( 'below node ' . $nodeIDs[0] . ' (' . $firstNode->attribute( 'name' ) . ')' );
     $package = eZPackage::create( $packageName, array( 'summary' => 'Exported ' . $summaryWhat, 'vendor' => 'xrowextract' ) );
     XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, ' . $summaryWhat . '.' );

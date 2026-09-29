@@ -183,7 +183,9 @@ class XrowExtractPackage
             // eZPackage::import() throw a PHP 8 TypeError deep inside kernel/classes/
             // ezpackage.php (getElementsByTagName() on null), not return false - caught
             // here so a malformed upload is refused cleanly instead of a fatal error page.
-            $imported = eZPackage::import( $storedPath, $packageName, true, 'local', false );
+            $imported = self::withNativeFileStreams( function () use ( $storedPath, &$packageName ) {
+                return eZPackage::import( $storedPath, $packageName, true, 'local', false );
+            } );
         }
         catch ( \Throwable $e )
         {
@@ -1047,10 +1049,13 @@ class XrowExtractPackage
     public static function exportToPrivateFile( eZPackage $package, $baseName )
     {
         $dir = XrowExtractImport::uploadDir();
+        $dir = realpath( $dir ) ?: $dir; // compress.zlib:// needs an absolute path
         $safeBase = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $baseName );
         $name = 'pkg_' . $safeBase . '_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
         $target = $dir . '/' . $name;
-        $written = $package->exportToArchive( $target );
+        $written = self::withNativeFileStreams( function () use ( $package, $target ) {
+            return $package->exportToArchive( $target );
+        } );
         if ( !$written || !is_file( $target ) )
             return false;
         @chmod( $target, 0600 );
@@ -1640,9 +1645,48 @@ class XrowExtractPackage
         $package->appendDocument( 'about.txt', 'text/plain', false, false, false, $text );
     }
 
+    /**
+     * A package name the kernel accepts: eZPackage::import() refuses (STATUS_INVALID_NAME) any name that
+     * is not already its own "identifier" transformation (lowercase, digits, underscores), so a name built
+     * from a node or class name such as "xrowextract_export_Websites_2" could be written but not imported.
+     */
+    public static function validPackageName( $name )
+    {
+        eZPackage::isValidName( (string)$name, $transformed );
+        $transformed = trim( (string)$transformed, '_' );
+        return $transformed !== '' ? $transformed : 'package';
+    }
+
+    /**
+     * Runs a kernel package archive operation (eZPackage::import(), exportToArchive()) with PHP's own file
+     * stream wrapper in place. The kernel opens archives as "compress.zlib://<path>", and PHP's zlib stream
+     * needs a real file descriptor underneath; under Velocity the "file" wrapper is replaced by a userland
+     * one for the length of a request, which cannot provide one, so every package upload and download failed
+     * there ("can not be opened for reading"). Outside Velocity this is a plain call.
+     */
+    public static function withNativeFileStreams( callable $operation )
+    {
+        $wrapperClass = 'Q_WebServer_CompatFileWrapper';
+        $restored = false;
+        if ( class_exists( $wrapperClass, false ) )
+            $restored = @stream_wrapper_restore( 'file' );
+        try
+        {
+            return $operation();
+        }
+        finally
+        {
+            if ( $restored )
+            {
+                @stream_wrapper_unregister( 'file' );
+                @stream_wrapper_register( 'file', $wrapperClass );
+            }
+        }
+    }
+
     protected static function uniquePackageName( $base )
     {
-        $base = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $base );
+        $base = self::validPackageName( $base );
         $name = $base;
         $suffix = 1;
         while ( eZPackage::fetch( $name, false, 'local', false ) )

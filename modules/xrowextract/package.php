@@ -193,7 +193,10 @@ $templateError = '';
 $templateBuilt = false;
 if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
 {
-    $build = XrowExtractPackage::buildTemplatePackage( $TemplateClassID, $TemplateVariant );
+    // The same builder as the Import page: from the class's own existing objects (read-only), falling back to
+    // temporary sample objects only for a class with none (the old builder always created them, and a made-up
+    // tag or a relation to a sample that had failed then stopped every build)
+    $build = XrowExtractPackage::buildContentPackage( $TemplateClassID, $TemplateVariant );
     if ( $build['ok'] )
     {
         $_SESSION[$SESSION_KEY] = $build['package']->attribute( 'name' );
