@@ -793,6 +793,31 @@
         }
     }
 
+    // The Total / Completed / Running / Queued / Failed tiles, recounted from the rows' states
+    function applyCounts() {
+        var stats = document.querySelector('[data-role="job-stats"]');
+        if (!stats) {
+            return;
+        }
+        var counts = { total: 0, done: 0, running: 0, queued: 0, failed: 0 };
+        Array.prototype.forEach.call(list.querySelectorAll('.xe-job'), function (row) {
+            counts.total++;
+            var state = row.getAttribute('data-state');
+            if (counts.hasOwnProperty(state)) {
+                counts[state]++;
+            }
+        });
+        Object.keys(counts).forEach(function (key) {
+            var el = stats.querySelector('[data-count="' + key + '"]');
+            if (el) {
+                el.textContent = counts[key];
+                if (key !== 'total' && key !== 'done') {
+                    el.parentNode.classList.toggle('xe-stat-zero', counts[key] === 0);
+                }
+            }
+        });
+    }
+
     function applyState(row, data) {
         row.className = row.className.replace(/\bxe-job-\S+/, 'xe-job-' + data.state);
         row.setAttribute('data-state', data.state);
@@ -844,6 +869,7 @@
                 wrap.hidden = true;
             }
         }
+        applyCounts();
     }
 
     function poll() {

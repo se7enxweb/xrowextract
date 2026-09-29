@@ -516,6 +516,21 @@
 .xe-progress { flex: 1 1 auto; height: .5em; border-radius: 999px; background: var(--xe-head); overflow: hidden; }
 .xe-progress-bar { height: 100%; background: var(--xe-accent); border-radius: 999px; transition: width .3s ease; }
 .xe-job-progress-text { flex: 0 0 auto; color: var(--xe-muted); font-size: .85em; white-space: nowrap; }
+/* Jobs by state: Total, Completed, Running, Queued, Failed */
+.xe-job-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5em, 1fr)); gap: .6em; margin: 0 0 1em; }
+.xe-stat { margin: 0; padding: .6em .8em; border: 1px solid var(--xe-line); border-left-width: 4px; border-radius: 6px; background: #fff; }
+.xe-stat dt { margin: 0; color: var(--xe-muted); font-size: .78em; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; }
+.xe-stat dd { margin: .1em 0 0; font-size: 1.7em; font-weight: bold; line-height: 1.15; color: var(--xe-text); font-variant-numeric: tabular-nums; }
+.xe-stat-total   { border-left-color: var(--xe-accent); }
+.xe-stat-done    { border-left-color: #12b76a; background: #f0faf3; }
+.xe-stat-done dd { color: #05603a; }
+.xe-stat-running { border-left-color: #2563eb; background: #eff6ff; }
+.xe-stat-queued  { border-left-color: #f79009; background: #fff7e0; }
+.xe-stat-failed  { border-left-color: var(--xe-bad); background: var(--xe-bad-bg); }
+.xe-stat-failed dd { color: var(--xe-bad); }
+.xe-stat-zero { background: #fff; border-left-color: var(--xe-line); }
+.xe-stat-zero dd { color: var(--xe-muted); }
+
 /* Who started the job: a bubble in a colour that stays the same for each user, linked to the user's node */
 .xe-user {
     --xe-user-hue: 210;

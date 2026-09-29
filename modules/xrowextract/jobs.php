@@ -106,7 +106,15 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
     );
 }
 
+$counts = array( 'total' => count( $rows ), 'done' => 0, 'running' => 0, 'queued' => 0, 'failed' => 0 );
+foreach ( $rows as $row )
+{
+    if ( isset( $counts[$row['state']] ) )
+        $counts[$row['state']]++;
+}
+
 $tpl->setVariable( 'jobs', $rows );
+$tpl->setVariable( 'job_counts', $counts );
 $tpl->setVariable( 'all_jobs', $allJobs );
 $tpl->setVariable( 'started_job_id', $startedJobID );
 $tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( $login, $allJobs ) );

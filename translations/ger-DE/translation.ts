@@ -2,6 +2,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Total jobs</source>
+        <translation>Aufträge gesamt</translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation>Abgeschlossen</translation>
+    </message>
+    <message>
+        <source>Running</source>
+        <translation>Laufend</translation>
+    </message>
+    <message>
         <source>Started by %name (%login)</source>
         <translation>Gestartet von %name (%login)</translation>
     </message>

@@ -26,8 +26,16 @@
                     <h2 id="xe-card-jobs">{if $all_jobs}{'All jobs'|i18n('design/standard/extract')}{else}{'Your jobs'|i18n('design/standard/extract')}{/if}</h2>
                     <p>{'Exports started with "Run in the background", kept for %days days after they finish.'|i18n('design/standard/extract',, hash( '%days', $retention_days ))}</p>
                 </div>
-                <span class="xe-count"><strong>{$jobs|count}</strong> {'jobs'|i18n('design/standard/extract')}</span>
             </header>
+
+            {* Totals by state; the Jobs script recounts them from the rows as the poll moves jobs on *}
+            <dl class="xe-job-stats" data-role="job-stats">
+                <div class="xe-stat xe-stat-total"><dt>{'Total jobs'|i18n('design/standard/extract')}</dt><dd data-count="total">{$job_counts.total}</dd></div>
+                <div class="xe-stat xe-stat-done"><dt>{'Completed'|i18n('design/standard/extract')}</dt><dd data-count="done">{$job_counts.done}</dd></div>
+                <div class="xe-stat xe-stat-running{if $job_counts.running|eq( 0 )} xe-stat-zero{/if}"><dt>{'Running'|i18n('design/standard/extract')}</dt><dd data-count="running">{$job_counts.running}</dd></div>
+                <div class="xe-stat xe-stat-queued{if $job_counts.queued|eq( 0 )} xe-stat-zero{/if}"><dt>{'Queued'|i18n('design/standard/extract')}</dt><dd data-count="queued">{$job_counts.queued}</dd></div>
+                <div class="xe-stat xe-stat-failed{if $job_counts.failed|eq( 0 )} xe-stat-zero{/if}"><dt>{'Failed'|i18n('design/standard/extract')}</dt><dd data-count="failed">{$job_counts.failed}</dd></div>
+            </dl>
 
             {if $jobs|count|eq( 0 )}
             <p class="xe-columns-empty">{'No jobs yet. Start one from the "Run in the background" button on the class or site archive page.'|i18n('design/standard/extract')}</p>

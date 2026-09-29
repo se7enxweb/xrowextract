@@ -4,6 +4,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Total jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Running</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Started by %name (%login)</source>
         <translation type="unfinished"></translation>
     </message>

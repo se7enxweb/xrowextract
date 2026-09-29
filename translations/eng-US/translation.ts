@@ -4,6 +4,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Total jobs</source>
+        <translation>Total jobs</translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation>Completed</translation>
+    </message>
+    <message>
+        <source>Running</source>
+        <translation>Running</translation>
+    </message>
+    <message>
         <source>Started by %name (%login)</source>
         <translation>Started by %name (%login)</translation>
     </message>
