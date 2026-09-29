@@ -11,6 +11,7 @@
     <li>{'Setup format options'|i18n('design/standard/extract')}</li>
     <li>{'Select concerned class'|i18n('design/standard/extract')}</li>
     <li>{'Add/Remove attributes'|i18n('design/standard/extract')}</li>
+    <li>{'Preview the rows'|i18n('design/standard/extract')}</li>
     <li>{'Click the download button'|i18n('design/standard/extract')}</li>
 </ol>
 

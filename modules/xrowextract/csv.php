@@ -78,6 +78,74 @@ function xrowExtractExtraValue( $key, eZContentObject $obj, $allowPasswordHash )
     return '';
 }
 
+/**
+ * Read an export back the way a spreadsheet does (same separator and
+ * quoting) for the preview table: header, rows with a flag per cell, and
+ * what the preview shows about the whole file.
+ */
+function xrowExtractPreview( $data, $separator, $escape, $offset, $total, $file, $seconds )
+{
+    $fh = fopen( 'php://temp', 'r+' );
+    fwrite( $fh, $data );
+    rewind( $fh );
+    $header = fgetcsv( $fh, 0, $separator, '"', '' );
+    $header = is_array( $header ) ? array_map( 'strval', $header ) : array();
+    $columns = count( $header );
+    $filled = array_fill( 0, $columns, 0 );
+    $rows = array();
+    $number = $offset;
+    $mismatch = 0;
+    $formulas = 0;
+    while ( ( $values = fgetcsv( $fh, 0, $separator, '"', '' ) ) !== false )
+    {
+        if ( $values === array( null ) )
+            continue;
+        $cells = array();
+        foreach ( $values as $i => $value )
+        {
+            $value = (string)$value;
+            $formula = strlen( $value ) > 1 && $value[0] === "'" && XrowBaseHandler::looksLikeFormula( substr( $value, 1 ) );
+            $formulas += $formula ? 1 : 0;
+            if ( $value !== '' && isset( $filled[$i] ) )
+                $filled[$i]++;
+            $cells[] = array( 'text' => $value, 'empty' => $value === '', 'formula' => $formula,
+                              'long' => mb_strlen( $value ) > 60 || strpos( $value, "\n" ) !== false );
+        }
+        $isMismatch = count( $cells ) !== $columns;
+        $mismatch += $isMismatch ? 1 : 0;
+        $rows[] = array( 'number' => ++$number, 'cells' => $cells, 'count' => count( $cells ), 'mismatch' => $isMismatch );
+    }
+    fclose( $fh );
+
+    $shown = count( $rows );
+    $headerCells = array();
+    foreach ( $header as $i => $name )
+    {
+        // Spreadsheet column letters: A ... Z, AA ...
+        $letters = '';
+        for ( $n = $i + 1; $n > 0; $n = intdiv( $n - 1, 26 ) )
+            $letters = chr( 65 + ( $n - 1 ) % 26 ) . $letters;
+        $headerCells[] = array( 'name' => $name, 'letters' => $letters,
+                                'fill' => $shown ? (int)round( 100 * $filled[$i] / $shown ) : 0 );
+    }
+    $total = max( (int)$total, $shown );
+    $bytes = strlen( $data );
+    return array(
+        'header' => $headerCells,
+        'columns' => $columns,
+        'rows' => $rows,
+        'shown' => $shown,
+        'total' => $total,
+        'mismatch' => $mismatch,
+        'formulas' => $formulas,
+        'file' => $file,
+        'milliseconds' => (int)round( $seconds * 1000 ),
+        'estimated_kb' => $shown ? (int)ceil( $bytes / $shown * $total / 1024 ) : (int)ceil( $bytes / 1024 ),
+        'separator' => $separator === "\t" ? 'Tab' : $separator,
+        'escape' => $escape ? 1 : 0,
+    );
+}
+
 /** A download file name from a node name: letters, digits, dot, dash and underscore only. */
 function xrowExtractFileName( $name )
 {
@@ -194,11 +262,11 @@ $sessionConfig = $http->sessionVariable( 'eZExtractConfig' );
 if ( !is_array( $sessionConfig ) )
     $sessionConfig = array();
 
-// Set col & row separator: one or a few characters, never a quote or a line break
+// Set col & row separator: one character (\t is a tab), never a quote or a line break
 $Separator = $http->hasPostVariable( 'Separator' ) ? (string)$http->postVariable( 'Separator' ) : ',';
 if ( $Separator === '\t' )
     $Separator = "\t";
-if ( $Separator === '' || strlen( $Separator ) > 4 || strpbrk( $Separator, "\"\r\n" ) !== false )
+if ( strlen( $Separator ) !== 1 || strpbrk( $Separator, "\"\r\n" ) !== false )
     $Separator = ',';
 
 $LineSeparatorArray = array(
@@ -390,11 +458,25 @@ $list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', a
 
 $tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
 
-// Handle download action
-if ( $http->hasPostVariable( 'Download' ) )
+// Download and preview build the file the same way; the preview reads it back as a spreadsheet would
+$isPreview = !$http->hasPostVariable( 'Download' ) && $http->hasPostVariable( 'Preview' );
+$previewRowChoices = array( 10, 25, 50, 100 );
+$PreviewRows = (int)eZPreferences::value( 'admin_xrowextract_preview_rows' );
+if ( $http->hasPostVariable( 'PreviewRows' ) && in_array( (int)$http->postVariable( 'PreviewRows' ), $previewRowChoices, true ) )
 {
+    $PreviewRows = (int)$http->postVariable( 'PreviewRows' );
+    eZPreferences::setValue( 'admin_xrowextract_preview_rows', $PreviewRows );
+}
+if ( !in_array( $PreviewRows, $previewRowChoices, true ) )
+    $PreviewRows = 25;
+$tpl->setVariable( 'PreviewRows', $PreviewRows );
+$tpl->setVariable( 'PreviewRowChoices', $previewRowChoices );
+
+if ( $http->hasPostVariable( 'Download' ) || $isPreview )
+{
+    $started = microtime( true );
     $parser = new ParserInterface( $Separator, $Escape );
-    $newLine = $LineSeparatorArray[$LineSeparator]['value'];
+    $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];
 
     $cells = array();
     foreach ( $Attributes as $item )
@@ -403,10 +485,14 @@ if ( $http->hasPostVariable( 'Download' ) )
     }
     $data = implode( $Separator, $cells ) . $newLine;
     $file = 'export.csv';
+    $exportTotal = 0;
 
     if ( $hasPreFilledData )
     {
         $list = $preFilledIDs;
+        $exportTotal = count( $list );
+        if ( $isPreview )
+            $list = array_slice( $list, 0, $PreviewRows );
     }
     else
     {
@@ -420,8 +506,15 @@ if ( $http->hasPostVariable( 'Download' ) )
         $sortBy = $node->sortArray();
         $sortBy = $sortBy[0];
 
+        $fetchLimit = $Limit ? $Limit : false;
+        $exportTotal = max( 0, ( isset( $list['result'] ) ? (int)$list['result'] : 0 ) - $Offset );
+        if ( $Limit )
+            $exportTotal = min( $exportTotal, $Limit );
+        if ( $isPreview )
+            $fetchLimit = $Limit ? min( $Limit, $PreviewRows ) : $PreviewRows;
+
         // Limitation false: the user's content/read policies apply
-        $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $Limit ? $Limit : false, $depth, $depthOperator, $Class_id, false, false, 'include', array(
+        $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $fetchLimit, $depth, $depthOperator, $Class_id, false, false, 'include', array(
             $Class_id
         ), false, (bool)$Mainnodeonly, true, false, true, false, true );
 
@@ -458,18 +551,37 @@ if ( $http->hasPostVariable( 'Download' ) )
         eZContentObject::clearCache( array( $obj->attribute( 'id' ) ) );
     }
 
-    $httpCharset = eZTextCodec::httpCharset();
-    header( 'Cache-Control: private, no-store, max-age=0' );
-    header( 'Pragma: no-cache' );
-    header( 'X-Content-Type-Options: nosniff' );
-    header( 'Content-Type: text/csv; charset=' . $httpCharset );
-    header( 'Content-Length: ' . strlen( $data ) );
-    header( 'Content-Disposition: attachment; filename="' . $file . '"' );
+    if ( $isPreview )
+    {
+        $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, $file, microtime( true ) - $started ) );
+        if ( $http->hasPostVariable( 'PreviewOnly' ) )
+        {
+            // The preview panel alone, for the view's script
+            header( 'Cache-Control: private, no-store, max-age=0' );
+            header( 'Content-Type: text/html; charset=' . eZTextCodec::httpCharset() );
+            header( 'X-Content-Type-Options: nosniff' );
+            $tpl->setVariable( 'Attributes', $Attributes );
+            $html = $tpl->fetch( 'design:xrowextract/csv_preview.tpl' );
+            while ( @ob_end_clean() );
+            echo $html;
+            eZExecution::cleanExit();
+        }
+    }
+    else
+    {
+        $httpCharset = eZTextCodec::httpCharset();
+        header( 'Cache-Control: private, no-store, max-age=0' );
+        header( 'Pragma: no-cache' );
+        header( 'X-Content-Type-Options: nosniff' );
+        header( 'Content-Type: text/csv; charset=' . $httpCharset );
+        header( 'Content-Length: ' . strlen( $data ) );
+        header( 'Content-Disposition: attachment; filename="' . $file . '"' );
 
-    while ( @ob_end_clean() );
+        while ( @ob_end_clean() );
 
-    echo $data;
-    eZExecution::cleanExit();
+        echo $data;
+        eZExecution::cleanExit();
+    }
 }
 
 if ( $http->hasPostVariable( 'BrowseSubtree' ) )

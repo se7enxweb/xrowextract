@@ -1,3 +1,4 @@
+{ezcss_require( 'xrowextract.css' )}
 <form name="eZExtract" method="post" action={'xrowextract/csv'|ezurl}>
 
 {def $types = array()}
@@ -71,7 +72,7 @@
                     <label>{'Column separator'|i18n('design/standard/extract')}</label>
                     <input name="Separator" type="text" id="Separator" value="{$Separator|wash}" />
                     <p>
-                        {"Info: Excel likes a semicolon as separator."|i18n('design/standard/extract')}
+                        {"Info: Excel likes a semicolon as separator."|i18n('design/standard/extract')} {'Type \t for a tab.'|i18n('design/standard/extract')}
                     </p>
                 </div>
                 <div class="element">
@@ -164,15 +165,19 @@
         {/if}
     </div>
 
+    <div id="xe-preview-slot" class="xe-preview-slot">{if is_set( $preview )}{include uri='design:xrowextract/csv_preview.tpl'}{/if}</div>
+
     {* DESIGN: Content END *}</div></div></div>
 
     <div class="controlbar">
     {* DESIGN: Control bar START *}<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-tc"><div class="box-bl"><div class="box-br">
         <div class="block">
-            <input class="button" name="Download" type="submit" value="{'Download'|i18n('design/standard/extract')}" />
+            <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
+            <input class="defaultbutton" name="Download" type="submit" value="{'Download'|i18n('design/standard/extract')}" />
         </div>
     {* DESIGN: Control bar END *}</div></div></div></div></div></div>
     </div>
 </div>
 
 </form>
+<script src={'javascript/xrowextract.js'|ezdesign}></script>

@@ -2,6 +2,118 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>%cells cells, the header has %columns</source>
+        <translation>%cells Zellen, die Kopfzeile hat %columns</translation>
+    </message>
+    <message>
+        <source>%count cells start like a spreadsheet formula; they are exported with a leading apostrophe so they open as text.</source>
+        <translation>%count Zellen beginnen wie eine Tabellenformel; sie werden mit einem vorangestellten Apostroph exportiert und öffnen sich als Text.</translation>
+    </message>
+    <message>
+        <source>%count rows do not have as many cells as the header. A spreadsheet would shift their columns: a value probably contains the separator. Switch &quot;Escape&quot; to &quot;Yes&quot; or choose another separator.</source>
+        <translation>%count Zeilen haben nicht so viele Zellen wie die Kopfzeile. Eine Tabellenkalkulation würde ihre Spalten verschieben: Ein Wert enthält vermutlich das Trennzeichen. Stellen Sie „Escape“ auf „Ja“ oder wählen Sie ein anderes Trennzeichen.</translation>
+    </message>
+    <message>
+        <source>%percent % of the rows shown have a value</source>
+        <translation>%percent % der angezeigten Zeilen haben einen Wert</translation>
+    </message>
+    <message>
+        <source>%shown of %all rows match</source>
+        <translation>%shown von %all Zeilen passen</translation>
+    </message>
+    <message>
+        <source>Click a cell to see all of it, a column letter to sort the preview. The download holds every row, in export order.</source>
+        <translation>Klicken Sie auf eine Zelle, um sie ganz zu sehen, auf einen Spaltenbuchstaben, um die Vorschau zu sortieren. Der Download enthält alle Zeilen in Exportreihenfolge.</translation>
+    </message>
+    <message>
+        <source>Close preview</source>
+        <translation>Vorschau schließen</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Kopiert</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopieren</translation>
+    </message>
+    <message>
+        <source>Copy the rows shown, tab separated, to paste into a spreadsheet</source>
+        <translation>Die angezeigten Zeilen tabulatorgetrennt kopieren, zum Einfügen in eine Tabellenkalkulation</translation>
+    </message>
+    <message>
+        <source>Estimated from the rows shown</source>
+        <translation>Geschätzt anhand der angezeigten Zeilen</translation>
+    </message>
+    <message>
+        <source>File name of the download</source>
+        <translation>Dateiname des Downloads</translation>
+    </message>
+    <message>
+        <source>Filter rows</source>
+        <translation>Zeilen filtern</translation>
+    </message>
+    <message>
+        <source>No objects match this selection. Check the node, the class and the depth.</source>
+        <translation>Keine Objekte passen zu dieser Auswahl. Prüfen Sie Knoten, Klasse und Tiefe.</translation>
+    </message>
+    <message>
+        <source>Preview</source>
+        <translation>Vorschau</translation>
+    </message>
+    <message>
+        <source>Preview the rows</source>
+        <translation>Die Zeilen in der Vorschau prüfen</translation>
+    </message>
+    <message>
+        <source>Quoted cells</source>
+        <translation>Zellen in Anführungszeichen</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <source>Rows</source>
+        <translation>Zeilen</translation>
+    </message>
+    <message>
+        <source>See the rows as a spreadsheet will show them, before downloading</source>
+        <translation>Die Zeilen vor dem Download so sehen, wie eine Tabellenkalkulation sie zeigt</translation>
+    </message>
+    <message>
+        <source>Separator</source>
+        <translation>Trennzeichen</translation>
+    </message>
+    <message>
+        <source>Sort the preview by this column</source>
+        <translation>Die Vorschau nach dieser Spalte sortieren</translation>
+    </message>
+    <message>
+        <source>Type \t for a tab.</source>
+        <translation>Geben Sie \t für einen Tabulator ein.</translation>
+    </message>
+    <message>
+        <source>Unquoted cells</source>
+        <translation>Zellen ohne Anführungszeichen</translation>
+    </message>
+    <message>
+        <source>Wrap cells</source>
+        <translation>Zellen umbrechen</translation>
+    </message>
+    <message>
+        <source>columns</source>
+        <translation>Spalten</translation>
+    </message>
+    <message>
+        <source>of</source>
+        <translation>von</translation>
+    </message>
+    <message>
+        <source>rows</source>
+        <translation>Zeilen</translation>
+    </message>
+    <message>
         <source>Choose node to export</source>
         <translation>Node für Export wählen</translation>
     </message>
