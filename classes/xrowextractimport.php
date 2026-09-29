@@ -233,8 +233,6 @@ class XrowExtractImport
     public static function parseXML( $text )
     {
         $text = self::stripBOM( (string)$text );
-        if ( strlen( $text ) > 20 * 1024 * 1024 )
-            return array( 'header' => array(), 'rows' => array(), 'error' => 'The file is larger than 20 MB.' );
         if ( preg_match( '/<!DOCTYPE/i', $text ) )
             return array( 'header' => array(), 'rows' => array(),
                           'error' => 'This file declares a DOCTYPE. That is refused: XrowExtractWriter never writes one, and a DOCTYPE can smuggle in external entities.' );
@@ -291,18 +289,319 @@ class XrowExtractImport
         return array( 'header' => $header, 'rows' => $rows, 'columnIDs' => $columnIDs, 'class' => $classIdentifier );
     }
 
-    /** Parses an uploaded file, format and separator auto-detected unless given. */
-    public static function parseFile( $path, $format = null, $separator = null )
+    /** The first $bytes bytes of a file, UTF-8 - enough to sniff its format/separator without reading it whole. */
+    public static function sniff( $path, $bytes = 65536 )
     {
-        $text = (string)file_get_contents( $path );
-        $text = XrowBaseHandler::utf8( $text );
-        $format = $format ?: self::detectFormat( $text );
+        $fh = @fopen( $path, 'rb' );
+        if ( !$fh )
+            return '';
+        $chunk = fread( $fh, $bytes );
+        fclose( $fh );
+        return XrowBaseHandler::utf8( (string)$chunk );
+    }
+
+    /** How many rows a JSON file is read in one go for, above which memory use grows with the file (see streamJSON()). */
+    public static function jsonOneShotThresholdBytes()
+    {
+        $ini = eZINI::instance( 'csv.ini' );
+        if ( $ini->hasVariable( 'Uploads', 'JsonOneShotThresholdMB' ) )
+        {
+            $mb = (int)$ini->variable( 'Uploads', 'JsonOneShotThresholdMB' );
+            if ( $mb > 0 )
+                return $mb * 1024 * 1024;
+        }
+        return 20 * 1024 * 1024;
+    }
+
+    /**
+     * Streams every row of a file without loading it into memory (CSV via fgetcsv() on the open stream,
+     * XML via XMLReader element by element). This is not "no limit at all": JSON above
+     * jsonOneShotThresholdBytes() is still decoded in one go (json_decode() has no public streaming
+     * API and a hand-rolled incremental JSON parser was judged too risky to get right in the time this
+     * had - CSV and XML never have this limitation, and a large JSON file logs a clear memory estimate
+     * when it takes this path). Throws RuntimeException with a human message on a DOCTYPE or malformed
+     * input, exactly the errors parseFile() used to return - the caller decides how to show them.
+     */
+    public static function streamRows( $path, $format, $separator )
+    {
         if ( $format === 'xml' )
-            return array_merge( self::parseXML( $text ), array( 'format' => 'xml', 'separator' => ',' ) );
+            return self::streamXML( $path );
         if ( $format === 'json' )
-            return array_merge( self::parseJSON( $text ), array( 'format' => 'json', 'separator' => ',' ) );
-        $separator = $separator ?: self::detectSeparator( $text );
-        return array_merge( self::parseCSV( $text, $separator ), array( 'format' => 'csv', 'separator' => $separator ) );
+            return self::streamJSON( $path );
+        return self::streamCSV( $path, $separator );
+    }
+
+    protected static function streamCSV( $path, $separator )
+    {
+        $fh = fopen( $path, 'rb' );
+        if ( !$fh )
+            throw new RuntimeException( "Cannot read $path." );
+        $bom = fread( $fh, 3 );
+        if ( $bom !== "\xEF\xBB\xBF" )
+            rewind( $fh );
+        $header = fgetcsv( $fh, 0, $separator, '"', '' );
+        $header = is_array( $header ) ? array_map( function ( $h ) { return trim( (string)$h ); }, $header ) : array();
+        while ( ( $values = fgetcsv( $fh, 0, $separator, '"', '' ) ) !== false )
+        {
+            if ( $values === array( null ) )
+                continue;
+            $row = array();
+            foreach ( $header as $i => $name )
+                $row[$name] = isset( $values[$i] ) ? XrowBaseHandler::utf8( (string)$values[$i] ) : '';
+            yield $row;
+        }
+        fclose( $fh );
+    }
+
+    /** A DOCTYPE anywhere in an XML file, checked by streaming (XMLReader::DOC_TYPE), not just near the top. */
+    protected static function checkXMLReaderForDoctype( XMLReader $reader )
+    {
+        if ( $reader->nodeType === XMLReader::DOC_TYPE )
+        {
+            $reader->close();
+            throw new RuntimeException( 'This file declares a DOCTYPE. That is refused: XrowExtractWriter never writes one, and a DOCTYPE can smuggle in external entities.' );
+        }
+    }
+
+    protected static function streamXML( $path )
+    {
+        // Fast, cheap defense in depth: a DOCTYPE is required by the XML spec to precede the document
+        // element, so it is always within the first few KB - reject it before XMLReader even opens the
+        // file. The authoritative check (XMLReader::DOC_TYPE, below) covers the rest of the document too.
+        if ( preg_match( '/<!DOCTYPE/i', self::sniff( $path, 65536 ) ) )
+            throw new RuntimeException( 'This file declares a DOCTYPE. That is refused: XrowExtractWriter never writes one, and a DOCTYPE can smuggle in external entities.' );
+
+        $reader = new XMLReader();
+        $ok = @$reader->open( $path, null, LIBXML_NONET );
+        if ( !$ok )
+            throw new RuntimeException( 'Malformed XML: could not open the file.' );
+
+        $header = array();
+        $inColumns = false;
+        while ( true )
+        {
+            $advanced = @$reader->read();
+            if ( !$advanced )
+                break;
+            self::checkXMLReaderForDoctype( $reader );
+            if ( $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'columns' )
+            {
+                $inColumns = true;
+            }
+            elseif ( $reader->nodeType === XMLReader::END_ELEMENT && $reader->name === 'columns' )
+            {
+                $inColumns = false;
+            }
+            elseif ( $inColumns && $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'column' )
+            {
+                $key = $reader->getAttribute( 'name' );
+                if ( $key !== null && $key !== '' && !in_array( $key, $header, true ) )
+                    $header[] = $key;
+            }
+            elseif ( $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'object' )
+            {
+                $objectXml = $reader->readOuterXML();
+                $objectDoc = new DOMDocument();
+                $useErrors = libxml_use_internal_errors( true );
+                $objectOk = @$objectDoc->loadXML( $objectXml, LIBXML_NONET | LIBXML_NOBLANKS );
+                libxml_clear_errors();
+                libxml_use_internal_errors( $useErrors );
+                $row = array();
+                if ( $objectOk && $objectDoc->documentElement )
+                {
+                    foreach ( $objectDoc->documentElement->childNodes as $fieldNode )
+                    {
+                        if ( $fieldNode->nodeType !== XML_ELEMENT_NODE || $fieldNode->nodeName !== 'field' )
+                            continue;
+                        $key = $fieldNode->getAttribute( 'name' );
+                        if ( $key === '' )
+                            continue;
+                        if ( !in_array( $key, $header, true ) )
+                            $header[] = $key;
+                        $row[$key] = $fieldNode->textContent;
+                    }
+                }
+                yield $row;
+            }
+        }
+        $reader->close();
+    }
+
+    /**
+     * JSON is decoded in one go when the file is at or below jsonOneShotThresholdBytes() (the common
+     * case: JSON exports of this size are already fine in memory); above it, it is *still* decoded in
+     * one go (see streamRows()'s note) but a clear memory estimate is written to the debug log first,
+     * so a slow or memory-heavy run has an explanation on record instead of looking unexplained.
+     */
+    protected static function streamJSON( $path )
+    {
+        $size = @filesize( $path );
+        if ( $size !== false && $size > self::jsonOneShotThresholdBytes() )
+        {
+            eZDebug::writeNotice( sprintf(
+                'Reading a %s JSON import file in one go (no streaming JSON parser): ~%s of memory expected at peak. CSV and XML import files of any size do not have this limitation.',
+                XrowExtractUpload::humanSize( $size ), XrowExtractUpload::humanSize( $size * 4 )
+            ), 'XrowExtractImport' );
+        }
+        $data = json_decode( self::stripBOM( (string)file_get_contents( $path ) ), true );
+        if ( !is_array( $data ) )
+            throw new RuntimeException( 'Not a JSON array of objects.' );
+        foreach ( $data as $item )
+        {
+            if ( !is_array( $item ) )
+                continue;
+            $row = array();
+            foreach ( $item as $k => $v )
+                $row[$k] = is_scalar( $v ) || $v === null ? (string)$v : json_encode( $v, JSON_UNESCAPED_UNICODE );
+            yield $row;
+        }
+    }
+
+    /** The header, and (xml) columnIDs/class, without materialising every row - a cheap first look at a file. */
+    public static function fileHeader( $path, $format, $separator )
+    {
+        if ( $format === 'xml' )
+        {
+            if ( preg_match( '/<!DOCTYPE/i', self::sniff( $path, 65536 ) ) )
+                throw new RuntimeException( 'This file declares a DOCTYPE. That is refused: XrowExtractWriter never writes one, and a DOCTYPE can smuggle in external entities.' );
+            $useErrors = libxml_use_internal_errors( true );
+            libxml_clear_errors();
+            $reader = new XMLReader();
+            if ( !@$reader->open( $path, null, LIBXML_NONET ) )
+            {
+                libxml_use_internal_errors( $useErrors );
+                throw new RuntimeException( 'Malformed XML: could not open the file.' );
+            }
+            $header = array();
+            $columnIDs = array();
+            $class = null;
+            $inColumns = false;
+            $doneColumns = false;
+            $sawColumnsEnd = false;
+            while ( !$doneColumns && @$reader->read() )
+            {
+                self::checkXMLReaderForDoctype( $reader );
+                if ( $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'export' && $class === null )
+                    $class = $reader->getAttribute( 'class' );
+                elseif ( $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'columns' )
+                    $inColumns = true;
+                elseif ( $reader->nodeType === XMLReader::END_ELEMENT && $reader->name === 'columns' )
+                {
+                    $doneColumns = true;
+                    $sawColumnsEnd = true;
+                }
+                elseif ( $inColumns && $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'column' )
+                {
+                    $key = $reader->getAttribute( 'name' );
+                    $id = $reader->getAttribute( 'id' );
+                    if ( $key !== null && $key !== '' )
+                    {
+                        $header[] = $key;
+                        $columnIDs[$key] = ( $id !== null && $id !== '' ) ? $id : $key;
+                    }
+                }
+                elseif ( $reader->nodeType === XMLReader::ELEMENT && $reader->name === 'object' )
+                {
+                    // An <object> reached while still "inside" <columns> (its closing tag was never
+                    // seen) is not a file this importer, or XrowExtractWriter, would ever produce -
+                    // malformed structure, not just a missing header.
+                    if ( $inColumns )
+                    {
+                        $reader->close();
+                        libxml_use_internal_errors( $useErrors );
+                        throw new RuntimeException( 'Malformed XML: <columns> is never closed before the first <object>.' );
+                    }
+                    break; // no <columns> block at all (an odd but not malformed file): stream the fields instead
+                }
+            }
+            $readErrors = libxml_get_errors();
+            libxml_clear_errors();
+            libxml_use_internal_errors( $useErrors );
+            if ( $readErrors )
+            {
+                $reader->close();
+                throw new RuntimeException( 'Malformed XML: ' . trim( $readErrors[0]->message ) );
+            }
+            $reader->close();
+            if ( $header )
+                return array( 'header' => $header, 'columnIDs' => $columnIDs, 'class' => $class );
+            // No <columns> header found before the first <object>: collect field names from a stream pass
+            foreach ( self::streamXML( $path ) as $row )
+            {
+                foreach ( array_keys( $row ) as $key )
+                {
+                    if ( !in_array( $key, $header, true ) )
+                        $header[] = $key;
+                }
+            }
+            return array( 'header' => $header, 'columnIDs' => array(), 'class' => $class );
+        }
+        if ( $format === 'json' )
+        {
+            $header = array();
+            foreach ( self::streamJSON( $path ) as $row )
+            {
+                foreach ( array_keys( $row ) as $key )
+                {
+                    if ( !in_array( $key, $header, true ) )
+                        $header[] = $key;
+                }
+                break; // the writer gives every object the same keys; one is enough
+            }
+            return array( 'header' => $header, 'columnIDs' => array(), 'class' => null );
+        }
+        $fh = fopen( $path, 'rb' );
+        if ( !$fh )
+            throw new RuntimeException( "Cannot read $path." );
+        $bom = fread( $fh, 3 );
+        if ( $bom !== "\xEF\xBB\xBF" )
+            rewind( $fh );
+        $header = fgetcsv( $fh, 0, $separator, '"', '' );
+        fclose( $fh );
+        $header = is_array( $header ) ? array_map( function ( $h ) { return trim( (string)$h ); }, $header ) : array();
+        return array( 'header' => $header, 'columnIDs' => array(), 'class' => null );
+    }
+
+    /** An exact row count, streamed (constant memory regardless of file size - JSON's one-shot exception aside). */
+    public static function countRows( $path, $format, $separator )
+    {
+        $n = 0;
+        foreach ( self::streamRows( $path, $format, $separator ) as $row )
+            $n++;
+        return $n;
+    }
+
+    /**
+     * Parses an uploaded file for the mapping/preview screen: the header, up to $previewLimit rows (a
+     * large file is never read past that many, so building the preview is always fast), and the exact
+     * total row count (one full streaming pass - still constant memory for CSV/XML). Format and
+     * separator are auto-detected unless given.
+     */
+    public static function parseFile( $path, $format = null, $separator = null, $previewLimit = 200 )
+    {
+        $format = $format ?: self::detectFormat( self::sniff( $path ) );
+        $separator = ( $format === 'csv' ) ? ( $separator ?: self::detectSeparator( self::sniff( $path ) ) ) : ',';
+        try
+        {
+            $info = self::fileHeader( $path, $format, $separator );
+            $rows = array();
+            $total = 0;
+            foreach ( self::streamRows( $path, $format, $separator ) as $row )
+            {
+                if ( $total < $previewLimit )
+                    $rows[] = $row;
+                $total++;
+            }
+            return array(
+                'header' => $info['header'], 'rows' => $rows, 'total_rows' => $total,
+                'columnIDs' => $info['columnIDs'], 'class' => $info['class'],
+                'format' => $format, 'separator' => $separator,
+            );
+        }
+        catch ( RuntimeException $e )
+        {
+            return array( 'header' => array(), 'rows' => array(), 'total_rows' => 0, 'format' => $format, 'separator' => $separator, 'error' => $e->getMessage() );
+        }
     }
 
     // ------------------------------------------------------------- mapping
@@ -751,9 +1050,42 @@ class XrowExtractImport
         // ezselection's ids vs names, ezxmltext's exact serialisation, ezimage's "|alt").
         $exportParser = new ParserInterface( ',', true, true );
 
+        // Resume: rows before skipRows are not looked at at all (cheap for a generator - it just
+        // parses and discards them, no attribute conversion or database work happens for them).
+        // Progress: onProgress( doneCount, totalRows|null, counts ) every progressEvery rows, for a
+        // background job to write progress.json from without run() knowing anything about jobs.
+        $skip = (int)( isset( $options['skipRows'] ) ? $options['skipRows'] : 0 );
+        $totalRows = isset( $options['totalRows'] ) ? (int)$options['totalRows'] : null;
+        $onProgress = isset( $options['onProgress'] ) && is_callable( $options['onProgress'] ) ? $options['onProgress'] : null;
+        $progressEvery = max( 1, (int)( isset( $options['progressEvery'] ) ? $options['progressEvery'] : 25 ) );
+        // A huge streamed run must never hold every row's result in memory just to return it at the
+        // end; collectRows=false (a background job) calls onRow() for each and keeps only the counts.
+        $collectRows = !array_key_exists( 'collectRows', $options ) || $options['collectRows'];
+        $onRow = isset( $options['onRow'] ) && is_callable( $options['onRow'] ) ? $options['onRow'] : null;
+        // Every one of this row's exit points (an early error, "unchanged", or falling through to the
+        // very end after an apply) calls this instead of appending to $result directly, so collectRows
+        // and onRow are honoured everywhere alike, not only on the row's one "happy path".
+        $finishRow = function ( $rowResult, $row ) use ( &$result, $collectRows, $onRow )
+        {
+            if ( $collectRows )
+                $result[] = $rowResult;
+            if ( $onRow )
+                call_user_func( $onRow, $rowResult, $row );
+        };
+
         $number = (int)( isset( $options['startNumber'] ) ? $options['startNumber'] : 1 );
+        $index = 0;
         foreach ( $rows as $row )
         {
+            $index++;
+            if ( $index <= $skip )
+            {
+                $number++;
+                continue;
+            }
+            if ( $onProgress && ( $index - $skip ) % $progressEvery === 0 )
+                call_user_func( $onProgress, $index, $totalRows, $counts );
+
             $rowResult = array( 'number' => $number++, 'action' => 'skip', 'reason' => '', 'object_id' => null, 'node_id' => null, 'changes' => array() );
 
             // Which class, from a "class" column if mapped, else the fallback
@@ -772,7 +1104,7 @@ class XrowExtractImport
                 {
                     $rowResult['action'] = 'error';
                     $rowResult['reason'] = "unknown class \"$classIdentifier\"";
-                    $result[] = $rowResult;
+                    $finishRow( $rowResult, $row );
                     $counts['error']++;
                     continue;
                 }
@@ -782,7 +1114,7 @@ class XrowExtractImport
             {
                 $rowResult['action'] = 'error';
                 $rowResult['reason'] = 'no class (choose one, or map a "class" column)';
-                $result[] = $rowResult;
+                $finishRow( $rowResult, $row );
                 $counts['error']++;
                 continue;
             }
@@ -793,7 +1125,7 @@ class XrowExtractImport
             {
                 $rowResult['action'] = 'error';
                 $rowResult['reason'] = "class $classID does not exist";
-                $result[] = $rowResult;
+                $finishRow( $rowResult, $row );
                 $counts['error']++;
                 continue;
             }
@@ -838,7 +1170,7 @@ class XrowExtractImport
             {
                 $rowResult['action'] = 'error';
                 $rowResult['reason'] = $unknownColumn;
-                $result[] = $rowResult;
+                $finishRow( $rowResult, $row );
                 $counts['error']++;
                 continue;
             }
@@ -911,7 +1243,7 @@ class XrowExtractImport
             {
                 $rowResult['action'] = 'error';
                 $rowResult['reason'] = $rowError;
-                $result[] = $rowResult;
+                $finishRow( $rowResult, $row );
                 $counts['error']++;
                 continue;
             }
@@ -944,7 +1276,7 @@ class XrowExtractImport
                 {
                     $rowResult['action'] = 'error';
                     $rowResult['reason'] = "section: $sectionWarning";
-                    $result[] = $rowResult;
+                    $finishRow( $rowResult, $row );
                     $counts['error']++;
                     continue;
                 }
@@ -962,7 +1294,7 @@ class XrowExtractImport
             if ( $isUpdate && !$changes )
             {
                 $rowResult['action'] = 'unchanged';
-                $result[] = $rowResult;
+                $finishRow( $rowResult, $row );
                 $counts['unchanged']++;
                 continue;
             }
@@ -1059,8 +1391,10 @@ class XrowExtractImport
                     $counts['error']++;
                 }
             }
-            $result[] = $rowResult;
+            $finishRow( $rowResult, $row );
         }
+        if ( $onProgress )
+            call_user_func( $onProgress, $index, $totalRows, $counts );
 
         return array( 'rows' => $result, 'counts' => $counts, 'ezoe' => $usedEzoe );
     }
