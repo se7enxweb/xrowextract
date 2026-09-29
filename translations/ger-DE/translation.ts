@@ -2,8 +2,12 @@
 <context>
     <name>design/standard/extract</name>
     <message>
-        <source>Edit</source>
-        <translation>Bearbeiten</translation>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.</source>
+        <translation>Es wird unter seinem eigenen Namen ins lokale Paket-Repository aufgenommen und dann unten zur Prüfung geöffnet - noch wird nichts installiert. Keine Größenbegrenzung: große Dateien werden in Teilen hochgeladen.</translation>
+    </message>
+    <message>
+        <source>%free free on the server for uploads.</source>
+        <translation>%free frei auf dem Server für Uploads.</translation>
     </message>
     <message>
         <source>Manifest only</source>
@@ -524,6 +528,10 @@
     <message>
         <source>Run changes only</source>
         <translation>Nur Änderungen ausführen</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Bearbeiten</translation>
     </message>
     <message>
         <source>Disable</source>
@@ -1272,6 +1280,182 @@
     <message>
         <source>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</source>
         <translation>Das Entfernen ist endgültig (kein Papierkorb) und nimmt den ganzen temporären Ordner - mit allem darin - in einem Aufruf mit; nichts bleibt im Suchindex oder in der URL-Alias-Tabelle.</translation>
+    </message>
+    <message>
+        <source>What was installed</source>
+        <translation>Was installiert wurde</translation>
+    </message>
+    <message>
+        <source>created</source>
+        <translation>angelegt</translation>
+    </message>
+    <message>
+        <source>already there</source>
+        <translation>schon vorhanden</translation>
+    </message>
+    <message>
+        <source>left as they were</source>
+        <translation>unverändert belassen</translation>
+    </message>
+    <message>
+        <source>added again as copies</source>
+        <translation>als Kopien erneut angelegt</translation>
+    </message>
+    <message>
+        <source>updated</source>
+        <translation>aktualisiert</translation>
+    </message>
+    <message>
+        <source>not installed (class missing)</source>
+        <translation>nicht installiert (Klasse fehlt)</translation>
+    </message>
+    <message>
+        <source>objects in the package</source>
+        <translation>Objekte im Paket</translation>
+    </message>
+    <message>
+        <source>Install 1 change (in the background)</source>
+        <translation>1 Änderung installieren (im Hintergrund)</translation>
+    </message>
+    <message>
+        <source>Review and install the package</source>
+        <translation>Paket prüfen und installieren</translation>
+    </message>
+    <message>
+        <source>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</source>
+        <translation>Sehen, was das Paket auf dieser Website anlegen, aktualisieren oder unverändert lassen würde, wählen, wohin es kommt, und es dann installieren.</translation>
+    </message>
+    <message>
+        <source>%classes classes, %objects objects</source>
+        <translation>%classes Klassen, %objects Objekte</translation>
+    </message>
+    <message>
+        <source>Classes:</source>
+        <translation>Klassen:</translation>
+    </message>
+    <message>
+        <source>Parent for the package’s objects</source>
+        <translation>Übergeordneter Knoten für die Objekte des Pakets</translation>
+    </message>
+    <message>
+        <source>The package’s top-level objects are placed here; the objects below them keep their own structure.</source>
+        <translation>Die obersten Objekte des Pakets kommen hierhin; die Objekte darunter behalten ihre eigene Struktur.</translation>
+    </message>
+    <message>
+        <source>An object that already exists</source>
+        <translation>Ein Objekt, das es schon gibt</translation>
+    </message>
+    <message>
+        <source>Update it</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <source>Leave it</source>
+        <translation>Belassen</translation>
+    </message>
+    <message>
+        <source>Add a copy</source>
+        <translation>Als Kopie hinzufügen</translation>
+    </message>
+    <message>
+        <source>Matched by remote id.</source>
+        <translation>Erkannt über die Remote-ID.</translation>
+    </message>
+    <message>
+        <source>A class that already exists</source>
+        <translation>Eine Klasse, die es schon gibt</translation>
+    </message>
+    <message>
+        <source>Keep the site’s</source>
+        <translation>Die der Website behalten</translation>
+    </message>
+    <message>
+        <source>Replace it</source>
+        <translation>Ersetzen</translation>
+    </message>
+    <message>
+        <source>Add as new</source>
+        <translation>Als neue hinzufügen</translation>
+    </message>
+    <message>
+        <source>Matched by remote id, else by identifier.</source>
+        <translation>Erkannt über die Remote-ID, sonst über den Bezeichner.</translation>
+    </message>
+    <message>
+        <source>A large package: the dry run compares every class and object with the site, which can take a minute. Nothing is written.</source>
+        <translation>Ein großes Paket: Der Probelauf vergleicht jede Klasse und jedes Objekt mit der Website, das kann eine Minute dauern. Es wird nichts geschrieben.</translation>
+    </message>
+    <message>
+        <source>Review again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <source>Review the package (dry run)</source>
+        <translation>Paket prüfen (Probelauf)</translation>
+    </message>
+    <message>
+        <source>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</source>
+        <translation>Als Nächstes: das Paket prüfen. Der Probelauf listet jede Klasse und jedes Objekt mit dem, was die Installation tun würde; die Installation selbst läuft dann im Hintergrund, mit Fortschritt und Protokoll auf der Seite Aufträge.</translation>
+    </message>
+    <message>
+        <source>Install %count changes (in the background)</source>
+        <translation>%count Änderungen installieren (im Hintergrund)</translation>
+    </message>
+    <message>
+        <source>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</source>
+        <translation>Das Paket jetzt installieren? Es läuft als Hintergrundauftrag; Fortschritt und Protokoll stehen auf der Seite Aufträge.</translation>
+    </message>
+    <message>
+        <source>objects installed</source>
+        <translation>Objekte installiert</translation>
+    </message>
+    <message>
+        <source>report</source>
+        <translation>Bericht</translation>
+    </message>
+    <message>
+        <source>(the last 8 MB)</source>
+        <translation>(die letzten 8 MB)</translation>
+    </message>
+    <message>
+        <source>Cancel this job?</source>
+        <translation>Diesen Auftrag abbrechen?</translation>
+    </message>
+    <message>
+        <source>Cancel this job? What it has installed so far stays on the site.</source>
+        <translation>Diesen Auftrag abbrechen? Was er bisher installiert hat, bleibt auf der Website.</translation>
+    </message>
+    <message>
+        <source>The job was cancelled.</source>
+        <translation>Der Auftrag wurde abgebrochen.</translation>
+    </message>
+    <message>
+        <source>The job was marked cancelled, but its process could not be stopped from here.</source>
+        <translation>Der Auftrag wurde als abgebrochen markiert, sein Prozess konnte von hier aus aber nicht beendet werden.</translation>
+    </message>
+    <message>
+        <source>The job is not queued or running.</source>
+        <translation>Der Auftrag wartet nicht und läuft nicht.</translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation>Protokoll</translation>
+    </message>
+    <message>
+        <source>(the last 64 KB)</source>
+        <translation>(die letzten 64 KB)</translation>
+    </message>
+    <message>
+        <source>Latest objects written</source>
+        <translation>Zuletzt geschriebene Objekte</translation>
+    </message>
+    <message>
+        <source>Install package %name below %parent</source>
+        <translation>Paket %name unter %parent installieren</translation>
+    </message>
+    <message>
+        <source>The package could not be read: %reason</source>
+        <translation>Das Paket konnte nicht gelesen werden: %reason</translation>
     </message>
     <message>
         <source>Export as package</source>

@@ -12,6 +12,18 @@ $tpl = eZTemplate::factory();
 $login = eZUser::currentUser()->attribute( 'login' );
 $allJobs = XrowExtractJob::allowAllJobs();
 
+if ( $http->hasPostVariable( 'CancelJobID' ) )
+{
+    $id = (string)$http->postVariable( 'CancelJobID' );
+    $job = XrowExtractJob::isValidID( $id ) ? XrowExtractJob::load( $id ) : null;
+    if ( $job && ( $job['owner'] === $login || $allJobs ) )
+    {
+        list( $cancelled, $message ) = XrowExtractJob::cancel( $id, $login );
+        $http->setSessionVariable( 'eZExtractJobNotice', ezpI18n::tr( 'design/standard/extract', $message ) );
+    }
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+
 if ( $http->hasPostVariable( 'DeleteJobID' ) )
 {
     $id = (string)$http->postVariable( 'DeleteJobID' );
@@ -79,6 +91,27 @@ $rows = array();
 foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
 {
     $progress = XrowExtractJob::readProgress( XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::PROGRESS_FILE );
+    // A package install: the classes and objects it has written so far, counted in the database
+    $install = null;
+    $watchFile = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+    if ( $job['type'] === 'package' && is_file( $watchFile ) )
+    {
+        $install = XrowExtractPackage::installProgress( $watchFile );
+        if ( $install && $job['state'] === 'running' )
+            $progress = array( 'done' => $install['done'], 'total' => $install['total'],
+                               'phase' => sprintf( '%d/%d classes, %d/%d objects', $install['classes_done'], $install['classes_total'], $install['objects_done'], $install['objects_total'] ) );
+    }
+    // The whole job log as a person reads it (XrowExtractJob::cleanLogFile(): steps, warnings, errors, and a
+    // progress timeline of one line per phase and 10 %), read line by line; the page's poll appends to it from
+    // this offset and timeline state while the job runs
+    $logPath = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::LOG_FILE;
+    $cleaned = XrowExtractJob::cleanLogFile( $logPath );
+    $logText = $cleaned['text'];
+    $logSize = $cleaned['size'];
+    $logFrom = $logSize > 8388608 ? 1 : 0;
+    // The job's own progress bar in its log is the most exact progress while it runs
+    if ( $job['state'] === 'running' && ( $fromLog = XrowExtractJob::logProgress( $logPath ) ) )
+        $progress = $fromLog;
     $percent = 0;
     if ( is_array( $progress ) && !empty( $progress['total'] ) )
         $percent = max( 0, min( 100, (int)round( 100 * $progress['done'] / $progress['total'] ) ) );
@@ -86,7 +119,16 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'id' => $job['id'],
         'type' => $job['type'],
         'what' => $job['what'],
-        'format' => $job['format'],
+        // A package job's file is the .ezpkg (export) or a JSON install report: name what the job is
+        'format' => $job['type'] === 'package'
+                    ? ( is_file( $watchFile ) || strpos( (string)$job['output_file'], 'install' ) !== false ? 'ezpkg · install' : 'ezpkg · export' )
+                    : $job['format'],
+        'install' => $install,
+        'log_text' => $logText,
+        'log_offset' => $logSize,
+        'log_cut' => $logFrom > 0,
+        'log_phase' => $cleaned['state']['phase'],
+        'log_step' => (int)$cleaned['state']['step'],
         'state' => $job['state'],
         'owner' => $job['owner'],
         'owner_user' => $ownerInfo( (string)$job['owner'] ),
@@ -114,7 +156,61 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'run_mode' => isset( $job['run_mode'] ) ? (string)$job['run_mode'] : '',
         'delivery' => isset( $job['delivery'] ) && is_array( $job['delivery'] ) ? $job['delivery'] : array(),
         'delivery_state' => isset( $job['delivery_state'] ) ? (string)$job['delivery_state'] : '',
+        // 'package' jobs only (bin/php/job.php): the dry run counts are already in 'counts' above;
+        // these are install()'s own per-item results, for a link straight to what a package job
+        // installed - a class's edit view, an object's node.
+        'package_name' => isset( $job['package_name'] ) ? $job['package_name'] : null,
+        'created_classes' => isset( $job['created_classes'] ) ? $job['created_classes'] : array(),
+        'created_objects' => isset( $job['created_objects'] ) ? $job['created_objects'] : array(),
+        'install_errors' => isset( $job['install_errors'] ) ? $job['install_errors'] : array(),
     );
+    // A package install: what it installed, as counts, instead of "rows". A job that finished before its
+    // runner recorded them (older jobs) gets them from its own install-report.json.
+    $last = count( $rows ) - 1;
+    if ( $job['type'] === 'package' && in_array( $job['state'], array( 'done', 'failed' ), true ) )
+    {
+        if ( !$rows[$last]['created_classes'] && !$rows[$last]['created_objects'] && $job['output_file']
+             && is_file( $reportPath = XrowExtractJob::path( $job['id'] ) . '/' . $job['output_file'] ) )
+        {
+            $report = json_decode( (string)@file_get_contents( $reportPath ), true );
+            if ( is_array( $report ) && isset( $report['report'] ) )
+            {
+                $rows[$last]['created_classes'] = isset( $report['report']['created_classes'] ) ? (array)$report['report']['created_classes'] : array();
+                $rows[$last]['created_objects'] = isset( $report['report']['created_objects'] ) ? (array)$report['report']['created_objects'] : array();
+                $rows[$last]['install_errors'] = isset( $report['report']['errors'] ) ? (array)$report['report']['errors'] : array();
+                if ( !$rows[$last]['counts'] && isset( $report['counts'] ) )
+                    $rows[$last]['counts'] = $report['counts'];
+            }
+        }
+        $rows[$last]['installed_classes'] = count( $rows[$last]['created_classes'] );
+        $rows[$last]['installed_objects'] = count( $rows[$last]['created_objects'] );
+        $installedTotal = $rows[$last]['installed_classes'] + $rows[$last]['installed_objects'];
+        // With the dry run's counts: how many were new and how many already existed, and what the job did with
+        // those (its --object-mode/--class-mode) - a re-import with "skip" created nothing and left the rest alone
+        $pc = $rows[$last]['counts'];
+        if ( is_array( $pc ) && isset( $pc['objects_create'] ) )
+        {
+            $mode = function ( $name, $default ) use ( $job )
+            {
+                foreach ( (array)$job['args'] as $arg )
+                    if ( strpos( $arg, '--' . $name . '=' ) === 0 )
+                        return substr( $arg, strlen( $name ) + 3 );
+                return $default;
+            };
+            $rows[$last]['install_summary'] = array(
+                'created' => (int)$pc['classes_create'] + (int)$pc['objects_create'],
+                'existing' => (int)$pc['classes_update'] + (int)$pc['objects_update'] + (int)$pc['objects_unchanged'],
+                'class_missing' => (int)$pc['objects_class_missing'],
+                'object_mode' => $mode( 'object-mode', 'update' ),
+                'class_mode' => $mode( 'class-mode', 'skip' ),
+            );
+        }
+        if ( $job['state'] === 'done' && $installedTotal )
+        {
+            $rows[$last]['progress'] = array( 'done' => $installedTotal, 'total' => $installedTotal, 'phase' => 'done' );
+            $rows[$last]['progress_percent'] = 100;
+        }
+    }
 }
 
 $counts = array( 'total' => count( $rows ), 'done' => 0, 'running' => 0, 'queued' => 0, 'failed' => 0 );
@@ -134,6 +230,11 @@ $tpl->setVariable( 'jobs', $rows );
 $tpl->setVariable( 'job_counts', $counts );
 $tpl->setVariable( 'all_jobs', $allJobs );
 $tpl->setVariable( 'started_job_id', $startedJobID );
+$jobNotice = $http->hasSessionVariable( 'eZExtractJobNotice' ) ? $http->sessionVariable( 'eZExtractJobNotice' ) : false;
+if ( $jobNotice )
+    $http->removeSessionVariable( 'eZExtractJobNotice' );
+$tpl->setVariable( 'job_notice', $jobNotice );
+
 $tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( $login, $allJobs ) );
 $tpl->setVariable( 'retention_days', XrowExtractJob::retentionDays() );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';

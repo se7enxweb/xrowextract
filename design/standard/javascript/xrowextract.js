@@ -761,11 +761,12 @@
             return;
         }
         var created = parseInt(times.getAttribute('data-created'), 10);
-        var stamp = function (el, value) {
+        // The server's own date format (job_status sends it), so a time filled in live reads like the others
+        var stamp = function (el, value, text) {
             if (el && !el.hasAttribute('datetime')) {
                 var date = new Date(value * 1000);
                 el.setAttribute('datetime', date.toISOString());
-                el.textContent = date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+                el.textContent = text || date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
             }
         };
         if (data.started) {
@@ -773,7 +774,7 @@
             if (startedStep) {
                 startedStep.className = 'xe-time-done';
             }
-            stamp(row.querySelector('[data-role="started"]'), data.started);
+            stamp(row.querySelector('[data-role="started"]'), data.started, data.started_text);
             if (created) {
                 setText(row, 'wait', meta.getAttribute('data-label-wait').replace('%time', duration(data.started - created)));
             }
@@ -786,7 +787,7 @@
             if (data.state === 'failed') {
                 setText(row, 'ended-label', meta.getAttribute('data-label-failed'));
             }
-            stamp(row.querySelector('[data-role="ended"]'), data.ended);
+            stamp(row.querySelector('[data-role="ended"]'), data.ended, data.ended_text);
             if (data.started) {
                 setText(row, 'took', meta.getAttribute('data-label-took').replace('%time', duration(data.ended - data.started)));
             }
@@ -818,7 +819,68 @@
         });
     }
 
+    // The job's log: append what the poll brought since the last offset; follow the end while the reader
+    // is at the bottom, leave the scroll alone when they scrolled up to read something
+    function applyLog(row, data) {
+        var log = data.log;
+        if (!log) {
+            return;
+        }
+        var el = row.querySelector('[data-role="log"]');
+        if (!el && log.text) {
+            var details = document.createElement('details');
+            details.className = 'xe-job-log';
+            details.open = true;
+            details.innerHTML = '<summary></summary><pre class="xe-job-log-text" data-role="log" data-offset="0" tabindex="0"></pre>';
+            details.querySelector('summary').textContent = list.getAttribute('data-log-label') || 'Log';
+            var anchor = row.querySelector('.xe-job-buttons');
+            row.insertBefore(details, anchor);
+            el = details.querySelector('[data-role="log"]');
+        }
+        if (!el) {
+            return;
+        }
+        // Always move on past what was read, also when all of it was progress bar lines left out, or the
+        // page would ask for the same piece again and never reach the new lines
+        el.setAttribute('data-offset', String(log.offset));
+        el.setAttribute('data-phase', log.phase || '');
+        el.setAttribute('data-step', String(log.step));
+        if (!log.text) {
+            return;
+        }
+        var atEnd = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+        el.appendChild(document.createTextNode(log.text));
+        if (atEnd) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }
+
+    // A package install: classes/objects written so far (counted in the database) and the latest objects
+    function applyInstall(row, data) {
+        var install = data.install;
+        var box = row.querySelector('[data-role="install"]');
+        if (!install || !box) {
+            return;
+        }
+        setText(box, 'install-classes', String(install.classes_done));
+        setText(box, 'install-objects', String(install.objects_done));
+        var recent = box.querySelector('[data-role="install-recent"]');
+        if (recent && install.recent) {
+            recent.textContent = '';
+            install.recent.forEach(function (item) {
+                var li = document.createElement('li');
+                li.textContent = item.name + ' ';
+                var small = document.createElement('small');
+                small.textContent = new Date(item.at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                li.appendChild(small);
+                recent.appendChild(li);
+            });
+        }
+    }
+
     function applyState(row, data) {
+        applyLog(row, data);
+        applyInstall(row, data);
         row.className = row.className.replace(/\bxe-job-\S+/, 'xe-job-' + data.state);
         row.setAttribute('data-state', data.state);
         var badge = row.querySelector('[data-role="state"]');
@@ -862,8 +924,17 @@
                 buttons.insertBefore(link, buttons.firstChild);
             }
         }
+        // A finished job goes on being asked for until its whole log is on the page
+        var logBehind = data.log && data.log.size > data.log.offset;
+        if (data.state !== 'queued' && data.state !== 'running' && logBehind) {
+            return;
+        }
         if (data.state !== 'queued' && data.state !== 'running') {
             row.removeAttribute('data-poll');
+            var cancelForm = row.querySelector('[data-role="cancel-form"]');
+            if (cancelForm) {
+                cancelForm.parentNode.removeChild(cancelForm);
+            }
             var wrap = row.querySelector('[data-role="progress-wrap"]');
             if (wrap && data.state !== 'running') {
                 wrap.hidden = true;
@@ -880,7 +951,9 @@
         }
         rows.forEach(function (row) {
             var id = row.getAttribute('data-job-id');
-            fetch(pollBase + '/' + id, { credentials: 'same-origin' })
+            var logEl = row.querySelector('[data-role="log"]');
+            var logOffset = logEl ? (parseInt(logEl.getAttribute('data-offset'), 10) || 0) : 0;
+            fetch(pollBase + '/' + id + '?log_offset=' + logOffset + '&log_phase=' + encodeURIComponent(logEl ? (logEl.getAttribute('data-phase') || '') : '') + '&log_step=' + (logEl ? (logEl.getAttribute('data-step') || '-1') : '-1'), { credentials: 'same-origin' })
                 .then(function (response) { return response.ok ? response.json() : null; })
                 .then(function (data) { if (data && !data.error) { applyState(row, data); } })
                 .catch(function () {});

@@ -280,6 +280,34 @@ if ( $PackageMode )
     }
 }
 
+// A loaded package's review step: what it carries (read from its own XML, quick), how existing objects and
+// classes are to be treated, and whether its dry run is small enough to show at once without being asked
+$PkgObjectMode = $http->hasPostVariable( 'PkgObjectMode' ) && in_array( $http->postVariable( 'PkgObjectMode' ), array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true )
+               ? $http->postVariable( 'PkgObjectMode' ) : XrowExtractPackage::OBJECT_UPDATE;
+$PkgClassMode = $http->hasPostVariable( 'PkgClassMode' ) && in_array( $http->postVariable( 'PkgClassMode' ), array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true )
+              ? $http->postVariable( 'PkgClassMode' ) : XrowExtractPackage::CLASS_SKIP;
+$tpl->setVariable( 'PkgObjectMode', $PkgObjectMode );
+$tpl->setVariable( 'PkgClassMode', $PkgClassMode );
+$PackageSummary = false;
+$PackageAutoReview = false;
+if ( $PackageMode && $Package instanceof eZPackage )
+{
+    $contents = XrowExtractPackage::packageContents( $Package );
+    $PackageSummary = array(
+        'name' => $Package->attribute( 'name' ),
+        'summary' => (string)$Package->attribute( 'summary' ),
+        'classes' => count( $contents['classes'] ),
+        'objects' => count( $contents['objects'] ),
+        'class_identifiers' => array_slice( array_map( function ( $c ) { return $c['identifier']; }, $contents['classes'] ), 0, 12 ),
+    );
+    // Up to 500 classes and objects the dry run takes a few seconds and is shown straight away; a larger
+    // package waits for "Review the package" (it compares every item with the site)
+    $PackageAutoReview = ( $PackageSummary['classes'] + $PackageSummary['objects'] ) <= 500;
+}
+$tpl->setVariable( 'PackageSummary', $PackageSummary );
+$tpl->setVariable( 'PackageAutoReview', $PackageAutoReview );
+$tpl->setVariable( 'PackageImportError', $PackageImportError );
+
 $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'separator' => ',' );
 if ( $hasFile && $PackageMode )
 {
@@ -781,18 +809,60 @@ $publishResult = function ( array $result, $apply ) use ( $tpl, $ContentLanguage
     $tpl->setVariable( 'ApplyCount', $result['counts']['create'] + $result['counts']['update'] );
 };
 
-if ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
+if ( $hasFile && $PackageMode && $http->hasPostVariable( 'Apply' ) && $Package instanceof eZPackage && XrowExtractJob::available() )
+{
+    // Installing can take minutes (every class and object through the kernel's package handlers),
+    // exactly as for the Package tab's own "Install this package" (modules/xrowextract/package.php),
+    // so it runs the same way: a background job (bin/php/package.php --install, job type "package")
+    // and the page goes straight to the Jobs view instead of holding the request.
+    //
+    // A package here can be transient ($PackageIsTransient: a "Try a sample"/"Start from a template"
+    // one, imported into the repository a few lines up only for this one request's own use, and
+    // normally removed again at the very end of this script). The job needs it to still be there
+    // when it runs, maybe minutes from now, so that end-of-script removal must not happen - returning
+    // here, before that code, is what skips it (the row-import queue branch above relies on the same
+    // thing). --remove-after tells the job itself to remove it once installing is done, so the
+    // repository still ends up exactly as clean as an immediate, in-request install would have left
+    // it. An already-registered package (uploaded, or explicitly kept) is not touched either way.
+    $installArgs = array(
+        '--install=' . $Package->attribute( 'name' ),
+        '--parent=' . (int)$ParentNodeID,
+        '--site-access=' . eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
+        '--object-mode=' . $PkgObjectMode,
+        '--class-mode=' . $PkgClassMode,
+    );
+    if ( $PackageIsTransient )
+        $installArgs[] = '--remove-after';
+    $installJobID = XrowExtractJob::create( array(
+        'type' => 'package', 'owner' => $login,
+        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name', false, array( '%name' => $Package->attribute( 'name' ) ) ),
+        'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,
+    ) );
+    if ( !XrowExtractJob::start( $installJobID ) )
+    {
+        XrowExtractJob::update( $installJobID, array(
+            'state' => 'failed', 'ended' => time(),
+            'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+        ) );
+    }
+    $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' )
+                                       || ( $PackageAutoReview && !$http->hasPostVariable( 'BrowseParent' ) ) ) )
 {
     // A content package's dry run/apply: the same Preview/Apply buttons and the same row-shaped
     // display as XML/CSV/JSON ("just like json, csv, xml"), through inspectionToResultRows(). Apply
     // installs it for real (XrowExtractPackage::install(), the site's default siteaccess, updating an
     // existing object by remote id and skipping an existing class - the Package tab's own install
-    // form is still where those two are changed for a one-off).
+    // form is still where those two are changed for a one-off). Reached either when no background
+    // jobs are available on this installation, or for Preview, which is always quick enough to run
+    // in the request.
     $apply = $http->hasPostVariable( 'Apply' );
     if ( $apply && $Package instanceof eZPackage )
     {
         $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
-                                                       XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::CLASS_SKIP );
+                                                       $PkgObjectMode, $PkgClassMode );
         if ( $installReport['ok'] )
             eZContentObject::clearCache();
         $tpl->setVariable( 'PackageInstallErrors', $installReport['errors'] );

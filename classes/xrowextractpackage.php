@@ -151,13 +151,26 @@ class XrowExtractPackage
     /**
      * Imports an uploaded .ezpkg/.tar.gz into the local package repository,
      * after scanArchiveEntries() has refused a path-traversal/symlink
-     * archive. Returns array( 'ok', 'package' => eZPackage|null, 'error' ).
+     * archive. Returns array( 'ok', 'package' => eZPackage|null, 'error',
+     * 'renamed' => bool, 'renamed_from', 'renamed_to' ) - the last three
+     * from renamedArchiveCopyIfNeeded() (see there): an older or hand-built
+     * .ezpkg whose own package.xml name is not a valid kernel identifier
+     * (capitals, spaces...) is imported anyway, under a corrected name, with
+     * enough returned for the caller to say so, instead of being refused.
      */
     public static function importUploadedArchive( $storedPath )
     {
+        // An absolute path: the kernel opens the archive as "compress.zlib://<path>", and a relative
+        // one (var/site/cache/...) cannot be opened that way ("can not be opened for reading")
+        $real = realpath( (string)$storedPath );
+        if ( $real !== false )
+            $storedPath = $real;
         $scan = self::scanArchiveEntries( $storedPath );
         if ( !$scan['ok'] )
-            return array( 'ok' => false, 'package' => null, 'error' => $scan['error'] );
+            return array( 'ok' => false, 'package' => null, 'error' => $scan['error'], 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+
+        $renameInfo = self::renamedArchiveCopyIfNeeded( $storedPath );
+        $importPath = $renameInfo['path'];
 
         $packageName = '';
         try
@@ -178,19 +191,139 @@ class XrowExtractPackage
             // eZPackage::import() throw a PHP 8 TypeError deep inside kernel/classes/
             // ezpackage.php (getElementsByTagName() on null), not return false - caught
             // here so a malformed upload is refused cleanly instead of a fatal error page.
-            $imported = eZPackage::import( $storedPath, $packageName, true, 'local', false );
+            $imported = self::withNativeFileStreams( function () use ( $importPath, &$packageName ) {
+                return eZPackage::import( $importPath, $packageName, true, 'local', false );
+            } );
         }
         catch ( \Throwable $e )
         {
-            return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg): ' . $e->getMessage() );
+            if ( $renameInfo['renamed'] )
+                @unlink( $importPath );
+            return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg): ' . $e->getMessage(), 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
         }
+        if ( $renameInfo['renamed'] )
+            @unlink( $importPath ); // the corrected copy has done its job either way, imported or not
         if ( $imported instanceof eZPackage )
-            return array( 'ok' => true, 'package' => $imported, 'error' => null );
+            return array( 'ok' => true, 'package' => $imported, 'error' => null, 'renamed' => $renameInfo['renamed'], 'renamed_from' => $renameInfo['from'], 'renamed_to' => $renameInfo['to'] );
         if ( $imported === eZPackage::STATUS_ALREADY_EXISTS )
-            return array( 'ok' => false, 'package' => null, 'error' => "a package named '$packageName' already exists in the repository" );
+            return array( 'ok' => false, 'package' => null, 'error' => "a package named '$packageName' already exists in the repository", 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
         if ( $imported === eZPackage::STATUS_INVALID_NAME )
-            return array( 'ok' => false, 'package' => null, 'error' => "the package name '$packageName' is invalid" );
-        return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg)' );
+            return array( 'ok' => false, 'package' => null, 'error' => "the package name '$packageName' is invalid", 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+        return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg)', 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+    }
+
+    /**
+     * If the uploaded archive's own package name (its package.xml <name>) is not a valid kernel
+     * identifier - eZPackage::isValidName() refuses capitals, spaces and punctuation, true of some
+     * hand-built or older .ezpkg files - returns a private corrected copy of the archive with only
+     * that <name> rewritten to validPackageName()'s transform, every other byte untouched, so
+     * eZPackage::import() (which otherwise answers STATUS_INVALID_NAME and refuses the whole
+     * upload) accepts it. Mirrors exactly what eZPackage::exportToArchive() itself does to build an
+     * archive (ezcArchive, TAR_USTAR, through the compress.zlib:// wrapper) - no re-implementation
+     * of archive writing.
+     *
+     * Returns array( 'path' => original or corrected path, 'renamed' => bool, 'from' => the name
+     * found in package.xml (or null if it could not be read at all), 'to' => the corrected name, or
+     * null ). A 'path' equal to $storedPath (renamed false) is the normal, unmodified case; the
+     * caller only has to @unlink() the result when 'renamed' is true.
+     */
+    protected static function renamedArchiveCopyIfNeeded( $storedPath )
+    {
+        $result = array( 'path' => $storedPath, 'renamed' => false, 'from' => null, 'to' => null );
+        try
+        {
+            $archive = ezcArchive::open( "compress.zlib://$storedPath", ezcArchive::TAR_GNU, new ezcArchiveOptions( array( 'readOnly' => true ) ) );
+        }
+        catch ( \Throwable $e )
+        {
+            return $result; // not a readable archive at all; eZPackage::import() will say so itself
+        }
+
+        $peekDir = eZPackage::temporaryImportPath() . '/rename-peek-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 );
+        eZDir::mkdir( $peekDir, false, true );
+        foreach ( $archive as $entry )
+        {
+            if ( $entry->getPath() === eZPackage::definitionFilename() )
+            {
+                $archive->extractCurrent( $peekDir );
+                break;
+            }
+        }
+        $name = self::readPackageNameFromXML( $peekDir . '/' . eZPackage::definitionFilename() );
+        eZDir::recursiveDelete( $peekDir );
+
+        if ( $name === null || eZPackage::isValidName( $name ) )
+        {
+            $result['from'] = $name;
+            return $result;
+        }
+        $result['from'] = $name;
+        $newName = self::validPackageName( $name );
+
+        $extractDir = eZPackage::temporaryImportPath() . '/rename-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 );
+        eZDir::mkdir( $extractDir, false, true );
+        try
+        {
+            $archive->extract( $extractDir );
+            $defPath = $extractDir . '/' . eZPackage::definitionFilename();
+            $dom = new DOMDocument();
+            if ( !is_file( $defPath ) || !@$dom->load( $defPath ) )
+            {
+                eZDir::recursiveDelete( $extractDir );
+                return $result;
+            }
+            $nameNode = $dom->getElementsByTagName( 'name' )->item( 0 );
+            if ( !$nameNode )
+            {
+                eZDir::recursiveDelete( $extractDir );
+                return $result;
+            }
+            while ( $nameNode->firstChild )
+                $nameNode->removeChild( $nameNode->firstChild );
+            $nameNode->appendChild( $dom->createTextNode( $newName ) );
+            $dom->save( $defPath );
+
+            $tempArchiveFile = eZPackage::temporaryExportPath() . '/rename-archive-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 ) . '.tmp';
+            eZDir::mkdir( dirname( $tempArchiveFile ), false, true );
+            $writer = ezcArchive::open( $tempArchiveFile, ezcArchive::TAR_USTAR );
+            $writer->truncate();
+            $fileList = array();
+            eZDir::recursiveList( $extractDir, $extractDir, $fileList );
+            $prefix = $extractDir . '/';
+            foreach ( $fileList as $fileInfo )
+            {
+                $entryPath = $fileInfo['type'] === 'dir' ? $fileInfo['path'] . '/' . $fileInfo['name'] . '/' : $fileInfo['path'] . '/' . $fileInfo['name'];
+                $writer->append( array( $entryPath ), $prefix );
+            }
+            $writer->close();
+
+            $correctedPath = XrowExtractImport::uploadDir() . '/renamed_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
+            copy( $tempArchiveFile, "compress.zlib://$correctedPath" );
+            @unlink( $tempArchiveFile );
+            eZDir::recursiveDelete( $extractDir );
+
+            $result['path'] = $correctedPath;
+            $result['renamed'] = true;
+            $result['to'] = $newName;
+            return $result;
+        }
+        catch ( \Throwable $e )
+        {
+            eZDir::recursiveDelete( $extractDir );
+            return array( 'path' => $storedPath, 'renamed' => false, 'from' => $name, 'to' => null ); // fall through; import() will refuse it as before
+        }
+    }
+
+    /** The <name> package.xml's root element carries, or null if the file cannot be read as one. */
+    protected static function readPackageNameFromXML( $path )
+    {
+        if ( !is_file( $path ) )
+            return null;
+        $dom = new DOMDocument();
+        if ( !@$dom->load( $path ) )
+            return null;
+        $nameNode = $dom->getElementsByTagName( 'name' )->item( 0 );
+        return $nameNode ? trim( $nameNode->textContent ) : null;
     }
 
     /**
@@ -349,6 +482,18 @@ class XrowExtractPackage
      */
     public static function inspect( eZPackage $package, $parentNodeID = false )
     {
+        // eZContentObject::fetch()/fetchDataMap() keep their results in
+        // $GLOBALS['eZContentObjectContentObjectCache']/[...DataMapCache], populated once and
+        // never refreshed on their own (kernel/classes/ezcontentobject.php). On a short-lived
+        // FPM/CLI request that is invisible; on a long-running Velocity worker, an object
+        // touched by an earlier, unrelated request in the same process (another dry run, a real
+        // apply, an admin edit served by the same worker) can still be sitting in there, so
+        // objectFieldChanges()'s "old" (live) value can be one that no longer matches the
+        // database - the exact way a genuine old -> new difference silently disappears.
+        // Cleared here, once per dry run, so every match against "what already exists on this
+        // site" (this method's own contract, see the class comment above) reads the database,
+        // not a previous request's leftovers.
+        eZContentObject::clearCache();
         $classes = array();
         $objects = array();
         $errors = array();
@@ -843,6 +988,72 @@ class XrowExtractPackage
     // ------------------------------------------------------------ install
 
     /**
+     * The remote ids of every class and object a package carries (from its own XML, cheaply: no
+     * inspection against the site), plus their names: what an install is about to write. Used by a
+     * background install to record what to count its progress against (see installProgress()).
+     */
+    public static function packageContents( eZPackage $package )
+    {
+        $contents = array( 'classes' => array(), 'objects' => array() );
+        foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
+        {
+            $row = self::inspectClassItem( $package, $item );
+            if ( $row && $row['remote_id'] )
+                $contents['classes'][] = array( 'remote_id' => $row['remote_id'], 'identifier' => $row['identifier'] );
+        }
+        foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
+            foreach ( self::objectDOMNodes( $package, $item ) as $node )
+                if ( $node->getAttribute( 'remote_id' ) )
+                    $contents['objects'][] = $node->getAttribute( 'remote_id' );
+        return $contents;
+    }
+
+    /**
+     * How far a running install is, read from the database: of the classes and objects the package
+     * carries (a watch file written by bin/php/package.php --install: remote ids + the start time), how
+     * many exist now and were written since the start, and the names of the latest ones. The kernel's
+     * package installer reports nothing while it works, so this is what the Jobs page shows as the
+     * job's real progress.
+     * @return array|null array( done, total, classes_done, objects_done, recent => list of names ) or null
+     */
+    public static function installProgress( $watchFile )
+    {
+        $watch = is_file( $watchFile ) ? json_decode( (string)@file_get_contents( $watchFile ), true ) : null;
+        if ( !is_array( $watch ) || empty( $watch['started'] ) )
+            return null;
+        $db = eZDB::instance();
+        $since = (int)$watch['started'];
+        $count = function ( $table, array $remoteIDs ) use ( $db, $since )
+        {
+            $done = 0;
+            foreach ( array_chunk( $remoteIDs, 500 ) as $chunk )
+            {
+                $in = implode( ', ', array_map( function ( $id ) use ( $db ) { return "'" . $db->escapeString( (string)$id ) . "'"; }, $chunk ) );
+                $rows = $db->arrayQuery( "SELECT count(*) AS n FROM $table WHERE remote_id IN ( $in ) AND modified >= $since" );
+                $done += (int)$rows[0]['n'];
+            }
+            return $done;
+        };
+        $classIDs = array();
+        foreach ( (array)$watch['classes'] as $class )
+            $classIDs[] = $class['remote_id'];
+        $objectIDs = (array)$watch['objects'];
+        $classesDone = $classIDs ? $count( 'ezcontentclass', $classIDs ) : 0;
+        $objectsDone = $objectIDs ? $count( 'ezcontentobject', $objectIDs ) : 0;
+        $recent = array();
+        if ( $objectIDs )
+        {
+            $in = implode( ', ', array_map( function ( $id ) use ( $db ) { return "'" . $db->escapeString( (string)$id ) . "'"; }, array_slice( $objectIDs, 0, 2000 ) ) );
+            foreach ( (array)$db->arrayQuery( "SELECT id, name, modified FROM ezcontentobject WHERE remote_id IN ( $in ) AND modified >= $since ORDER BY modified DESC, id DESC", array( 'limit' => 6 ) ) as $row )
+                $recent[] = array( 'id' => (int)$row['id'], 'name' => (string)$row['name'], 'at' => (int)$row['modified'] );
+        }
+        $total = count( $classIDs ) + count( $objectIDs );
+        return array( 'done' => min( $total, $classesDone + $objectsDone ), 'total' => $total,
+                      'classes_done' => $classesDone, 'classes_total' => count( $classIDs ),
+                      'objects_done' => $objectsDone, 'objects_total' => count( $objectIDs ), 'recent' => $recent );
+    }
+
+    /**
      * Installs a package through eZPackage::install(), the same convenience
      * method kernel/package/install.php's per-item loop is built on. All
      * "top" nodes the package carries (a content package's own root objects)
@@ -1030,10 +1241,13 @@ class XrowExtractPackage
     public static function exportToPrivateFile( eZPackage $package, $baseName )
     {
         $dir = XrowExtractImport::uploadDir();
+        $dir = realpath( $dir ) ?: $dir; // compress.zlib:// needs an absolute path
         $safeBase = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $baseName );
         $name = 'pkg_' . $safeBase . '_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
         $target = $dir . '/' . $name;
-        $written = $package->exportToArchive( $target );
+        $written = self::withNativeFileStreams( function () use ( $package, $target ) {
+            return $package->exportToArchive( $target );
+        } );
         if ( !$written || !is_file( $target ) )
             return false;
         @chmod( $target, 0600 );
@@ -1092,7 +1306,21 @@ class XrowExtractPackage
         if ( !$languages )
             $languages = array( 'eng-US' );
 
+        // eZPackage::packageHandler() reuses the SAME eZContentObjectPackageHandler instance for
+        // every 'ezcontentobject' call in the process (kernel/classes/ezpackage.php's own
+        // $GLOBALS['eZPackageHandlers'] registry) and its reset() is an inherited no-op
+        // (kernel/classes/ezpackagehandler.php) - on a single short-lived FPM/CLI request this never
+        // shows, but on a long-running Velocity worker every one of its public arrays
+        // (NodeIDArray/ObjectArray/...) still carries whatever an earlier, unrelated call in the
+        // same worker (a previous sample, a template build, an "Export as package" job) added, and
+        // generatePackage() only ever array_unique()s NodeIDArray, never clears it. Cleared by hand
+        // here so this call only ever exports the nodes it was just given.
         $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+        $objectHandler->NodeIDArray = array();
+        $objectHandler->RootNodeIDArray = array();
+        $objectHandler->NodeObjectArray = array();
+        $objectHandler->ObjectArray = array();
+        $objectHandler->RootNodeObjectArray = array();
         foreach ( $nodeIDs as $nodeID )
             $objectHandler->addNode( $nodeID, false );
         // language_array is the *allow-list* eZContentObjectVersion::serialize() checks each of an
@@ -1446,7 +1674,14 @@ class XrowExtractPackage
 
         if ( $needsContent )
         {
+            // Same reused-handler reset as exportExistingObjectsIntoPackage() above - see the long
+            // comment there (eZPackage::packageHandler()'s reset() is an inherited no-op).
             $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+            $objectHandler->NodeIDArray = array();
+            $objectHandler->RootNodeIDArray = array();
+            $objectHandler->NodeObjectArray = array();
+            $objectHandler->ObjectArray = array();
+            $objectHandler->RootNodeObjectArray = array();
             foreach ( $createdNodeIDs as $nodeID )
                 $objectHandler->addNode( $nodeID, false );
             $objectHandler->generatePackage( $package, array(
@@ -1602,9 +1837,35 @@ class XrowExtractPackage
         $package->appendDocument( 'about.txt', 'text/plain', false, false, false, $text );
     }
 
+    /**
+     * A package name the kernel accepts: eZPackage::import() refuses (STATUS_INVALID_NAME) any name that
+     * is not already its own "identifier" transformation (lowercase, digits, underscores), so a name built
+     * from a node or class name such as "xrowextract_export_Websites_2" could be written but not imported.
+     */
+    public static function validPackageName( $name )
+    {
+        eZPackage::isValidName( (string)$name, $transformed );
+        $transformed = trim( (string)$transformed, '_' );
+        return $transformed !== '' ? $transformed : 'package';
+    }
+
+    /**
+     * Runs a kernel package archive operation (eZPackage::import(), exportToArchive()) with every remembered
+     * file status forgotten first. Under Velocity the file layer remembers which files exist for the length of
+     * a request; a file written by a function that bypasses it (move_uploaded_file() in storeUpload()) is then
+     * "not there" to the archive reader, which opens it as compress.zlib://<path>: "can not be opened for
+     * reading". clearstatcache() makes that layer forget at once (and is a plain stat cache reset elsewhere).
+     * Swapping the file stream wrapper out instead was tried and must not be: it kills the Velocity worker.
+     */
+    public static function withNativeFileStreams( callable $operation )
+    {
+        clearstatcache( true );
+        return $operation();
+    }
+
     protected static function uniquePackageName( $base )
     {
-        $base = preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $base );
+        $base = self::validPackageName( $base );
         $name = $base;
         $suffix = 1;
         while ( eZPackage::fetch( $name, false, 'local', false ) )
@@ -1780,8 +2041,14 @@ class XrowExtractPackage
         return !$list || in_array( $classIdentifier, $list, true );
     }
 
+    /**
+     * The bundled sample file as a resolved path: the importer refuses any path containing "..", so
+     * "classes/../share/..." made every image and file sample fail ("not an importable path").
+     */
     protected static function sampleAssetPath( $name )
     {
-        return dirname( __FILE__ ) . '/../share/sample/' . $name;
+        $path = dirname( dirname( __FILE__ ) ) . '/share/sample/' . $name;
+        $real = realpath( $path );
+        return $real !== false ? $real : $path;
     }
 }

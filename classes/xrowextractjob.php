@@ -19,6 +19,8 @@ class XrowExtractJob
     const JOB_FILE = 'job.json';
     const LOG_FILE = 'job.log';
     const PROGRESS_FILE = 'progress.json';
+    /** A package install's watch list (remote ids + start time), counted by XrowExtractPackage::installProgress() */
+    const INSTALL_WATCH_FILE = 'install-watch.json';
 
     /** The folder all jobs live in, created (and handed to the var directory's owner) if missing. */
     public static function baseDir()
@@ -165,6 +167,54 @@ class XrowExtractJob
         return $count;
     }
 
+    /**
+     * Cancels a queued or running job: stops the job's runner (bin/php/job.php) and every process below it
+     * (the export/import/install script, and anything that started, e.g. tar), and records it as failed with
+     * "Cancelled by <login>". Whatever the job already wrote stays (an install's objects are not rolled back).
+     * A process started by another system user (a job started from :8080 runs as root, from :443 as the
+     * web user) may not be stoppable from here; that is reported, and the job is still marked cancelled so
+     * its runner does not overwrite the state when it ends.
+     * @return array( ok, message )
+     */
+    public static function cancel( $id, $login )
+    {
+        $job = self::load( $id );
+        if ( !$job || !in_array( $job['state'], array( 'queued', 'running' ), true ) )
+            return array( false, 'The job is not queued or running.' );
+        $pid = isset( $job['pid'] ) ? (int)$job['pid'] : 0;
+        $notStopped = array();
+        if ( $pid > 1 )
+        {
+            // The whole tree first, while the runner still holds it together, then stop it from the top down
+            $tree = array( $pid );
+            for ( $i = 0; $i < count( $tree ) && $i < 64; $i++ )
+            {
+                $children = array();
+                @exec( 'pgrep -P ' . (int)$tree[$i], $children );
+                foreach ( $children as $child )
+                    if ( ctype_digit( trim( $child ) ) )
+                        $tree[] = (int)trim( $child );
+            }
+            foreach ( $tree as $process )
+            {
+                $stopped = function_exists( 'posix_kill' ) ? @posix_kill( $process, 15 ) : false;
+                if ( !$stopped )
+                {
+                    $output = array();
+                    @exec( 'kill -TERM ' . (int)$process . ' 2>&1', $output, $code );
+                    $stopped = $code === 0;
+                }
+                if ( !$stopped && file_exists( '/proc/' . (int)$process ) )
+                    $notStopped[] = $process;
+            }
+        }
+        self::update( $id, array(
+            'state' => 'failed', 'ended' => time(), 'cancelled' => true,
+            'error' => 'Cancelled by ' . $login . ( $notStopped ? ' (process ' . implode( ', ', $notStopped ) . ' could not be stopped from this server user; it may finish on its own)' : '' ),
+        ) );
+        return array( !$notStopped, $notStopped ? 'The job was marked cancelled, but its process could not be stopped from here.' : 'The job was cancelled.' );
+    }
+
     /** Removes a job's folder (its files, then itself). */
     public static function delete( $id )
     {
@@ -284,6 +334,123 @@ class XrowExtractJob
         $raw = @file_get_contents( $path );
         $data = $raw !== false && $raw !== '' ? json_decode( $raw, true ) : null;
         return is_array( $data ) ? $data : null;
+    }
+
+    /**
+     * A job log as a person reads it: terminal colour codes removed (eZCLI writes them, the kernel's
+     * progress bars included) and carriage-return redraws flattened. A progress bar redraws itself after
+     * every item ("Installing content objects | 12.6% (548/4339) | elapsed ... | end @ 16:15"), thousands of
+     * near-identical lines that would bury the steps, warnings and errors; of those only a short timeline is
+     * kept: the first line of each phase, then one line each time the phase passes another 10 %.
+     * $state carries the phase and 10 % step already written between calls (the Jobs page appends a running
+     * log in pieces), so the timeline does not start over with every piece.
+     */
+    public static function cleanLog( $text, array &$state = null )
+    {
+        if ( !is_array( $state ) )
+            $state = array( 'phase' => '', 'step' => -1 );
+        $text = preg_replace( '/\x1b\[[0-9;?]*[A-Za-z]/', '', (string)$text );
+        $text = preg_replace( '/(?<![\x1b])\[[0-9;]{1,12}m/', '', $text ); // codes whose ESC byte got lost
+        $text = str_replace( "\r\n", "\n", $text );
+        $lines = array();
+        foreach ( preg_split( '/[\n\r]/', $text ) as $line )
+        {
+            $progress = self::parseProgressLine( $line );
+            if ( $progress )
+            {
+                $phase = $progress['phase'] !== '' ? $progress['phase'] : 'Working';
+                $step = (int)floor( $progress['percent'] / 10 );
+                if ( $phase === $state['phase'] && $step <= $state['step'] )
+                    continue;
+                $state = array( 'phase' => $phase, 'step' => $step );
+                $lines[] = sprintf( '%s · %s%% (%d/%d)%s%s', $phase, rtrim( rtrim( number_format( $progress['percent'], 1 ), '0' ), '.' ),
+                                    $progress['done'], $progress['total'],
+                                    $progress['elapsed'] !== '' ? ' · elapsed ' . $progress['elapsed'] : '',
+                                    $progress['end_at'] !== '' ? ' · expected end ' . $progress['end_at'] : '' );
+                continue;
+            }
+            // Blank lines: never two in a row, and none at all around the progress timeline (they are the
+            // gaps the bar's redraws leave, not paragraphs)
+            if ( trim( $line ) === '' && ( !$lines || trim( end( $lines ) ) === '' || $state['step'] >= 0 ) )
+                continue;
+            $lines[] = rtrim( $line );
+        }
+        return implode( "\n", $lines );
+    }
+
+    /**
+     * A whole job log, cleaned (cleanLog()), read line by line so a long log costs no memory: the text, the
+     * timeline state reached at its end (for the page to continue from) and the byte size read.
+     * Beyond $maxBytes (default 8 MB) only the last $maxBytes are read, after a marker line.
+     */
+    public static function cleanLogFile( $path, $maxBytes = 8388608 )
+    {
+        $state = null;
+        $size = is_file( $path ) ? (int)@filesize( $path ) : 0;
+        $out = '';
+        $fp = $size ? @fopen( $path, 'rb' ) : false;
+        if ( $fp )
+        {
+            if ( $size > $maxBytes )
+            {
+                fseek( $fp, $size - $maxBytes );
+                fgets( $fp ); // the line the cut runs through
+                $out .= "…\n";
+            }
+            $batch = '';
+            while ( ( $line = fgets( $fp ) ) !== false )
+            {
+                $batch .= $line;
+                if ( strlen( $batch ) > 262144 )
+                {
+                    $out .= self::cleanLog( $batch, $state ) . "\n";
+                    $batch = '';
+                }
+            }
+            if ( $batch !== '' )
+                $out .= self::cleanLog( $batch, $state );
+            fclose( $fp );
+        }
+        return array( 'text' => trim( $out, "\n" ), 'state' => $state ? $state : array( 'phase' => '', 'step' => -1 ), 'size' => $size );
+    }
+
+    /** One eZCLI progress bar line, as array( phase, percent, done, total, elapsed, end_at ), or null. */
+    public static function parseProgressLine( $line )
+    {
+        $line = preg_replace( '/\x1b?\[[0-9;?]*m/', '', (string)$line );
+        if ( !preg_match( '/^\s*(?:(.*?)\s*\|\s*)?([\d.]+)%\s*\((\d+)\/(\d+)\)(?:.*?elapsed\s*([\d:]+))?(?:.*?end\s*@\s*([\d:]+))?/', $line, $m ) )
+            return null;
+        return array( 'phase' => trim( (string)$m[1] ), 'percent' => (float)$m[2], 'done' => (int)$m[3], 'total' => (int)$m[4],
+                      'elapsed' => isset( $m[5] ) ? $m[5] : '', 'end_at' => isset( $m[6] ) ? $m[6] : '' );
+    }
+
+    /**
+     * The latest progress a job's own output reported (the kernel's installers draw eZCLI progress bars:
+     * "Installing content objects | 40% (1736/4339) | elapsed 00:10:13 | end @ 16:16"), read from the end of
+     * its log: the exact count, a percentage, the time spent and the expected end. Null when there is none.
+     */
+    public static function logProgress( $logPath )
+    {
+        if ( !is_file( $logPath ) )
+            return null;
+        $size = (int)@filesize( $logPath );
+        $tail = (string)@file_get_contents( $logPath, false, null, max( 0, $size - 16384 ) );
+        $found = null;
+        foreach ( preg_split( '/[\n\r]/', $tail ) as $line )
+        {
+            $parsed = self::parseProgressLine( $line );
+            if ( $parsed )
+                $found = $parsed;
+        }
+        if ( !$found )
+            return null;
+        $phase = $found['phase'] !== '' ? $found['phase'] : 'working';
+        $details = array( $phase, rtrim( rtrim( number_format( $found['percent'], 1 ), '0' ), '.' ) . '%' );
+        if ( $found['elapsed'] !== '' )
+            $details[] = 'elapsed ' . $found['elapsed'];
+        if ( $found['end_at'] !== '' )
+            $details[] = 'expected end ' . $found['end_at'];
+        return array( 'done' => $found['done'], 'total' => $found['total'], 'phase' => implode( ' · ', $details ) );
     }
 
     /** bin/php/csv.php, archive.php or package.php, the scripts a job runs. */

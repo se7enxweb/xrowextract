@@ -15,6 +15,7 @@
 
     {include uri='design:xrowextract/tabs.tpl' active='jobs'}
 
+    {if $job_notice}<p class="xe-note" role="status">{$job_notice|wash}</p>{/if}
     {if $started_job_id}
     <p class="xe-note" role="status">{'Job started: '|i18n('design/standard/extract')}<a href="#job-{$started_job_id|wash}">{'see it below'|i18n('design/standard/extract')}</a>{' — it runs in the background; this page updates on its own while it does.'|i18n('design/standard/extract')}</p>
     {/if}
@@ -44,7 +45,7 @@
             {if $jobs|count|eq( 0 )}
             <p class="xe-columns-empty">{'No jobs yet. Start one from the "Run in the background" button on the class or site archive page.'|i18n('design/standard/extract')}</p>
             {else}
-            <ul class="xe-jobs" data-poll-base={'xrowextract/job_status'|ezurl} data-download-base={'xrowextract/job_download'|ezurl} data-download-label="{'Download'|i18n('design/standard/extract')|wash}">
+            <ul class="xe-jobs" data-log-label="{'Log'|i18n('design/standard/extract')|wash}" data-poll-base={'xrowextract/job_status'|ezurl} data-download-base={'xrowextract/job_download'|ezurl} data-download-label="{'Download'|i18n('design/standard/extract')|wash}">
                 {foreach $jobs as $job}
                 <li id="job-{$job.id|wash}" class="xe-job xe-job-{$job.state}" data-job-id="{$job.id|wash}" data-state="{$job.state|wash}"{if $job.active} data-poll="1"{/if}>
                     <div class="xe-job-main">
@@ -95,8 +96,21 @@
                     </ol>
 
                     <div class="xe-job-meta" data-label-failed="{'Failed'|i18n('design/standard/extract')|wash}" data-label-took="{'took %time'|i18n('design/standard/extract')|wash}" data-label-wait="{'after %time in the queue'|i18n('design/standard/extract')|wash}">
+                        {if and( $job.type|eq( 'package' ), is_set( $job.install_summary ) )}
+                        {def $is = $job.install_summary}
+                        <span data-role="rows"><strong>{$is.created}</strong> {'created'|i18n('design/standard/extract')},
+                            <strong>{$is.existing}</strong> {'already there'|i18n('design/standard/extract')}
+                            ({if $is.object_mode|eq( 'skip' )}{'left as they were'|i18n('design/standard/extract')}{elseif $is.object_mode|eq( 'new' )}{'added again as copies'|i18n('design/standard/extract')}{else}{'updated'|i18n('design/standard/extract')}{/if}){if $is.class_missing|gt( 0 )},
+                            <strong>{$is.class_missing}</strong> {'not installed (class missing)'|i18n('design/standard/extract')}{/if}
+                            · {$job.installed_classes} {'classes'|i18n('design/standard/extract')}, {$job.installed_objects} {'objects in the package'|i18n('design/standard/extract')}</span>
+                        {undef $is}
+                        {elseif and( $job.type|eq( 'package' ), is_set( $job.installed_objects ) )}
+                        <span data-role="rows"><strong>{$job.installed_classes}</strong> {'classes'|i18n('design/standard/extract')}, <strong>{$job.installed_objects}</strong> {'objects installed'|i18n('design/standard/extract')}</span>
+                        <span data-role="size">{if $job.size_kb|ne( null )}{'report'|i18n('design/standard/extract')} {$job.size_kb} KB{/if}</span>
+                        {else}
                         <span data-role="rows">{if $job.rows|ne( null )}<strong>{$job.rows}</strong> {'rows'|i18n('design/standard/extract')}{/if}</span>
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
+                        {/if}
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
                     {if or( $job.warnings, $job.delivery )}
@@ -106,12 +120,67 @@
                         {if $job.delivery}<ul class="xe-delivery-list">{foreach $job.delivery as $delivery}<li class="{if $delivery.ok}xe-delivery-ok{else}xe-delivery-bad{/if}"><strong>{$delivery.destination|wash}</strong>: {$delivery.message|wash}</li>{/foreach}</ul>{/if}
                     </details>
                     {/if}
+                    {* A package install: what it has written so far, counted in the database, and the latest objects *}
+                    {if $job.install}
+                    <div class="xe-job-install" data-role="install">
+                        <ul class="xe-stats xe-job-counts">
+                            <li class="xe-badge xe-badge-create"><strong data-role="install-classes">{$job.install.classes_done}</strong> / {$job.install.classes_total} {'classes'|i18n('design/standard/extract')}</li>
+                            <li class="xe-badge xe-badge-update"><strong data-role="install-objects">{$job.install.objects_done}</strong> / {$job.install.objects_total} {'objects'|i18n('design/standard/extract')}</li>
+                        </ul>
+                        <ol class="xe-job-recent" data-role="install-recent" aria-label="{'Latest objects written'|i18n('design/standard/extract')|wash}">
+                            {foreach $job.install.recent as $recent}<li><a href={concat( 'content/view/full/', $recent.id )|ezurl}>{$recent.name|wash}</a> <small>{$recent.at|l10n( shorttime )}</small></li>{/foreach}
+                        </ol>
+                    </div>
+                    {/if}
+                    {* The job's own log: live while it runs (the poll appends from data-offset), kept afterwards *}
+                    {if or( $job.log_text|ne( '' ), $job.active )}
+                    <details class="xe-job-log"{if $job.active} open{/if}>
+                        <summary>{'Log'|i18n('design/standard/extract')}{if $job.log_cut} <small>{'(the last 8 MB)'|i18n('design/standard/extract')}</small>{/if}</summary>
+                        <pre class="xe-job-log-text" data-role="log" data-offset="{$job.log_offset}" data-phase="{$job.log_phase|wash}" data-step="{$job.log_step}" tabindex="0">{$job.log_text|wash}</pre>
+                    </details>
+                    {/if}
                     {if $job.type|eq( 'import' )|and( $job.counts )}
                     <ul class="xe-stats xe-job-counts">
                         <li class="xe-badge xe-badge-create"><strong>{$job.counts.create}</strong> {'create'|i18n('design/standard/extract')}</li>
                         <li class="xe-badge xe-badge-update"><strong>{$job.counts.update}</strong> {'update'|i18n('design/standard/extract')}</li>
                         <li class="xe-badge xe-badge-unchanged"><strong>{$job.counts.unchanged}</strong> {'unchanged'|i18n('design/standard/extract')}</li>
                         <li class="xe-badge xe-badge-error"><strong>{$job.counts.error}</strong> {'error'|i18n('design/standard/extract')}</li>
+                    </ul>
+                    {/if}
+                    {if $job.type|eq( 'package' )|and( $job.counts )}
+                    <ul class="xe-stats xe-job-counts">
+                        <li class="xe-badge xe-badge-create"><strong>{$job.counts.classes_create}</strong> {'classes: create'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-update"><strong>{$job.counts.classes_update}</strong> {'classes: update'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-create"><strong>{$job.counts.objects_create}</strong> {'objects: create'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-update"><strong>{$job.counts.objects_update}</strong> {'objects: update'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-unchanged"><strong>{$job.counts.objects_unchanged}</strong> {'objects: unchanged'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-error"><strong>{$job.counts.objects_class_missing}</strong> {'objects: class missing'|i18n('design/standard/extract')}</li>
+                    </ul>
+                    {/if}
+                    {if $job.type|eq( 'package' )|and( or( $job.created_classes|count, $job.created_objects|count ) )}
+                    <details class="xe-job-package-detail">
+                        <summary>{'What was installed'|i18n('design/standard/extract')}</summary>
+                        {if $job.created_classes|count}
+                        <ul class="xe-job-package-list">
+                            {foreach $job.created_classes as $createdClass}
+                            <li><code>{$createdClass.identifier|wash}</code> — {$createdClass.name|wash} (<a href={concat( 'class/view/', $createdClass.id )|ezurl} target="_blank" rel="noopener">#{$createdClass.id}</a>)</li>
+                            {/foreach}
+                        </ul>
+                        {/if}
+                        {if $job.created_objects|count}
+                        <ul class="xe-job-package-list">
+                            {foreach $job.created_objects as $createdObject}
+                            <li>{$createdObject.name|wash} — {if $createdObject.node_id}<a href={concat( 'content/view/full/', $createdObject.node_id )|ezurl} target="_blank" rel="noopener">{'open'|i18n('design/standard/extract')}</a>{else}#{$createdObject.id}{/if}</li>
+                            {/foreach}
+                        </ul>
+                        {/if}
+                    </details>
+                    {/if}
+                    {if $job.install_errors|count}
+                    <ul class="xe-stats xe-note xe-note-bad">
+                        {foreach $job.install_errors as $installError}
+                        <li>{$installError|wash}</li>
+                        {/foreach}
                     </ul>
                     {/if}
 
@@ -130,6 +199,12 @@
                             <input type="hidden" name="ResumeJobID" value="{$job.id|wash}" />
                             <label>{'Resume from row'|i18n('design/standard/extract')} <input type="number" name="ResumeFromRow" min="1" value="1" class="xe-resume-row" /></label>
                             <button type="submit" class="button">{'Resume as a new job'|i18n('design/standard/extract')}</button>
+                        </form>
+                        {/if}
+                        {if and( $job.active, or( $job.mine, $all_jobs ) )}
+                        <form method="post" action={'xrowextract/jobs'|ezurl} class="xe-job-delete-form xe-job-cancel-form" data-role="cancel-form">
+                            <input type="hidden" name="CancelJobID" value="{$job.id|wash}" />
+                            <button type="submit" class="button xe-icon-text" data-confirm="{if $job.type|eq( 'package' )}{'Cancel this job? What it has installed so far stays on the site.'|i18n('design/standard/extract')|wash}{else}{'Cancel this job?'|i18n('design/standard/extract')|wash}{/if}">{'Cancel'|i18n('design/standard/extract')}</button>
                         </form>
                         {/if}
                         {if or( $job.mine, $all_jobs )}

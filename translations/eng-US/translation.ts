@@ -4,8 +4,12 @@
 <context>
     <name>design/standard/extract</name>
     <message>
-        <source>Edit</source>
-        <translation>Edit</translation>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.</source>
+        <translation>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.</translation>
+    </message>
+    <message>
+        <source>%free free on the server for uploads.</source>
+        <translation>%free free on the server for uploads.</translation>
     </message>
     <message>
         <source>Manifest only</source>
@@ -526,6 +530,10 @@
     <message>
         <source>Run changes only</source>
         <translation>Run changes only</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Edit</translation>
     </message>
     <message>
         <source>Disable</source>
@@ -1274,6 +1282,182 @@
     <message>
         <source>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</source>
         <translation>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</translation>
+    </message>
+    <message>
+        <source>What was installed</source>
+        <translation>What was installed</translation>
+    </message>
+    <message>
+        <source>created</source>
+        <translation>created</translation>
+    </message>
+    <message>
+        <source>already there</source>
+        <translation>already there</translation>
+    </message>
+    <message>
+        <source>left as they were</source>
+        <translation>left as they were</translation>
+    </message>
+    <message>
+        <source>added again as copies</source>
+        <translation>added again as copies</translation>
+    </message>
+    <message>
+        <source>updated</source>
+        <translation>updated</translation>
+    </message>
+    <message>
+        <source>not installed (class missing)</source>
+        <translation>not installed (class missing)</translation>
+    </message>
+    <message>
+        <source>objects in the package</source>
+        <translation>objects in the package</translation>
+    </message>
+    <message>
+        <source>Install 1 change (in the background)</source>
+        <translation>Install 1 change (in the background)</translation>
+    </message>
+    <message>
+        <source>Review and install the package</source>
+        <translation>Review and install the package</translation>
+    </message>
+    <message>
+        <source>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</source>
+        <translation>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</translation>
+    </message>
+    <message>
+        <source>%classes classes, %objects objects</source>
+        <translation>%classes classes, %objects objects</translation>
+    </message>
+    <message>
+        <source>Classes:</source>
+        <translation>Classes:</translation>
+    </message>
+    <message>
+        <source>Parent for the package’s objects</source>
+        <translation>Parent for the package’s objects</translation>
+    </message>
+    <message>
+        <source>The package’s top-level objects are placed here; the objects below them keep their own structure.</source>
+        <translation>The package’s top-level objects are placed here; the objects below them keep their own structure.</translation>
+    </message>
+    <message>
+        <source>An object that already exists</source>
+        <translation>An object that already exists</translation>
+    </message>
+    <message>
+        <source>Update it</source>
+        <translation>Update it</translation>
+    </message>
+    <message>
+        <source>Leave it</source>
+        <translation>Leave it</translation>
+    </message>
+    <message>
+        <source>Add a copy</source>
+        <translation>Add a copy</translation>
+    </message>
+    <message>
+        <source>Matched by remote id.</source>
+        <translation>Matched by remote id.</translation>
+    </message>
+    <message>
+        <source>A class that already exists</source>
+        <translation>A class that already exists</translation>
+    </message>
+    <message>
+        <source>Keep the site’s</source>
+        <translation>Keep the site’s</translation>
+    </message>
+    <message>
+        <source>Replace it</source>
+        <translation>Replace it</translation>
+    </message>
+    <message>
+        <source>Add as new</source>
+        <translation>Add as new</translation>
+    </message>
+    <message>
+        <source>Matched by remote id, else by identifier.</source>
+        <translation>Matched by remote id, else by identifier.</translation>
+    </message>
+    <message>
+        <source>A large package: the dry run compares every class and object with the site, which can take a minute. Nothing is written.</source>
+        <translation>A large package: the dry run compares every class and object with the site, which can take a minute. Nothing is written.</translation>
+    </message>
+    <message>
+        <source>Review again</source>
+        <translation>Review again</translation>
+    </message>
+    <message>
+        <source>Review the package (dry run)</source>
+        <translation>Review the package (dry run)</translation>
+    </message>
+    <message>
+        <source>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</source>
+        <translation>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</translation>
+    </message>
+    <message>
+        <source>Install %count changes (in the background)</source>
+        <translation>Install %count changes (in the background)</translation>
+    </message>
+    <message>
+        <source>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</source>
+        <translation>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</translation>
+    </message>
+    <message>
+        <source>objects installed</source>
+        <translation>objects installed</translation>
+    </message>
+    <message>
+        <source>report</source>
+        <translation>report</translation>
+    </message>
+    <message>
+        <source>(the last 8 MB)</source>
+        <translation>(the last 8 MB)</translation>
+    </message>
+    <message>
+        <source>Cancel this job?</source>
+        <translation>Cancel this job?</translation>
+    </message>
+    <message>
+        <source>Cancel this job? What it has installed so far stays on the site.</source>
+        <translation>Cancel this job? What it has installed so far stays on the site.</translation>
+    </message>
+    <message>
+        <source>The job was cancelled.</source>
+        <translation>The job was cancelled.</translation>
+    </message>
+    <message>
+        <source>The job was marked cancelled, but its process could not be stopped from here.</source>
+        <translation>The job was marked cancelled, but its process could not be stopped from here.</translation>
+    </message>
+    <message>
+        <source>The job is not queued or running.</source>
+        <translation>The job is not queued or running.</translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation>Log</translation>
+    </message>
+    <message>
+        <source>(the last 64 KB)</source>
+        <translation>(the last 64 KB)</translation>
+    </message>
+    <message>
+        <source>Latest objects written</source>
+        <translation>Latest objects written</translation>
+    </message>
+    <message>
+        <source>Install package %name below %parent</source>
+        <translation>Install package %name below %parent</translation>
+    </message>
+    <message>
+        <source>The package could not be read: %reason</source>
+        <translation>The package could not be read: %reason</translation>
     </message>
     <message>
         <source>Export as package</source>

@@ -116,6 +116,9 @@ class XrowExtractImport
         if ( !@move_uploaded_file( $sourcePath, $target ) && !@copy( $sourcePath, $target ) )
             return false;
         @chmod( $target, 0600 );
+        // move_uploaded_file() bypasses Velocity's file layer, which would otherwise go on believing the new
+        // file is not there for the rest of the request (see XrowExtractPackage::withNativeFileStreams())
+        clearstatcache( true );
         return $target;
     }
 
@@ -135,8 +138,11 @@ class XrowExtractImport
     /** Streams a built eZPackage as a .ezpkg download and exits; the temporary archive file is removed again straight after. */
     public static function streamPackageDownload( eZPackage $package, $downloadName )
     {
-        $archivePath = self::uploadDir() . '/pkgdl_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
-        $package->exportToArchive( $archivePath );
+        $dir = realpath( self::uploadDir() ) ?: self::uploadDir(); // compress.zlib:// needs an absolute path
+        $archivePath = $dir . '/pkgdl_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
+        XrowExtractPackage::withNativeFileStreams( function () use ( $package, $archivePath ) {
+            return $package->exportToArchive( $archivePath );
+        } );
         $data = (string)@file_get_contents( $archivePath );
         @unlink( $archivePath );
         header( 'Cache-Control: private, no-store, max-age=0' );

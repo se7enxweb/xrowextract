@@ -22,6 +22,55 @@ if ( !$job || !XrowExtractJob::canSee( $job, $login, $allJobs ) )
 }
 
 $progress = XrowExtractJob::readProgress( XrowExtractJob::path( $id ) . '/' . XrowExtractJob::PROGRESS_FILE );
+
+// A package install: its real progress, counted in the database against what the package carries
+// (the kernel's installer reports nothing while it works), plus the latest objects it wrote
+$installProgress = null;
+$watchFile = XrowExtractJob::path( $id ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+if ( $job['type'] === 'package' && is_file( $watchFile ) && in_array( $job['state'], array( 'running', 'done', 'failed' ), true ) )
+{
+    $installProgress = XrowExtractPackage::installProgress( $watchFile );
+    if ( $installProgress && $job['state'] === 'running' )
+    {
+        $progress = array( 'done' => $installProgress['done'], 'total' => $installProgress['total'],
+                           'phase' => sprintf( '%d/%d classes, %d/%d objects', $installProgress['classes_done'], $installProgress['classes_total'],
+                                               $installProgress['objects_done'], $installProgress['objects_total'] ) );
+    }
+}
+
+// The job's log from a byte offset on (the page asks for what it has not shown yet), at most 64 KB a time
+$logPath = XrowExtractJob::path( $id ) . '/' . XrowExtractJob::LOG_FILE;
+$logOffset = isset( $_GET['log_offset'] ) && ctype_digit( (string)$_GET['log_offset'] ) ? (int)$_GET['log_offset'] : 0;
+$logSize = is_file( $logPath ) ? (int)@filesize( $logPath ) : 0;
+$logText = '';
+if ( $logSize > $logOffset )
+{
+    $fp = @fopen( $logPath, 'rb' );
+    if ( $fp )
+    {
+        fseek( $fp, $logOffset );
+        $logText = (string)fread( $fp, min( 262144, $logSize - $logOffset ) );
+        fclose( $fp );
+        // Only whole lines (up to the last line break), so a line is never cleaned in two halves; the
+        // rest comes with the next poll
+        $lastBreak = max( (int)strrpos( $logText, "\n" ), (int)strrpos( $logText, "\r" ) );
+        if ( $lastBreak > 0 && $job['state'] === 'running' )
+            $logText = substr( $logText, 0, $lastBreak + 1 );
+    }
+}
+$logRead = strlen( $logText );
+// The log's progress timeline continues where the page left off (the phase and 10 % step it has shown)
+$logState = array(
+    'phase' => isset( $_GET['log_phase'] ) ? mb_substr( (string)$_GET['log_phase'], 0, 120 ) : '',
+    'step' => isset( $_GET['log_step'] ) && preg_match( '/^-?\d{1,3}$/', (string)$_GET['log_step'] ) ? (int)$_GET['log_step'] : -1,
+);
+$logClean = XrowExtractJob::cleanLog( $logText, $logState );
+
+// The job's own progress bar (the kernel's installers print one: "40% (1736/4339) ... end @ 16:16") is the
+// most exact source while it runs; the database count and the progress file come after it
+if ( $job['state'] === 'running' && ( $fromLog = XrowExtractJob::logProgress( $logPath ) ) )
+    $progress = $fromLog;
+
 echo json_encode( array(
     'id' => $job['id'],
     'state' => $job['state'],
@@ -30,7 +79,12 @@ echo json_encode( array(
     'error' => $job['error'],
     'started' => $job['started'],
     'ended' => $job['ended'],
+    'started_text' => $job['started'] ? eZLocale::instance()->formatShortDateTime( (int)$job['started'] ) : '',
+    'ended_text' => $job['ended'] ? eZLocale::instance()->formatShortDateTime( (int)$job['ended'] ) : '',
     'has_file' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $id ) . '/' . $job['output_file'] ),
     'progress' => $progress,
-) );
+    'install' => $installProgress,
+    'log' => array( 'text' => $logClean !== '' ? $logClean . "\n" : '', 'offset' => $logOffset + $logRead, 'size' => $logSize,
+                    'phase' => $logState['phase'], 'step' => $logState['step'] ),
+), JSON_INVALID_UTF8_SUBSTITUTE );
 eZExecution::cleanExit();

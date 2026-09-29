@@ -16,42 +16,93 @@ $http = eZHTTPTool::instance();
 $tpl = eZTemplate::factory();
 
 $SESSION_KEY = 'XROWEXTRACT_PACKAGE_NAME';
+$RENAME_NOTICE_KEY = 'XROWEXTRACT_PACKAGE_RENAME_NOTICE';
 
 // ---------------------------------------------------------------- upload
+//
+// Two ways in, same as the import page: a chunked upload (design/standard/javascript/
+// xrowextract-upload.js) adopted by its UploadID - the default for anything above a small size,
+// since one huge multipart POST is exactly what a slow-arriving body needs on Velocity, where the
+// read loop that is still waiting for the rest of a large body is a live worker a size/idle check
+// elsewhere can race - and the plain whole-file POST any browser (or a script) still falls back to
+// without JavaScript. Either way the stored file goes through the same archive safety scan and
+// import as before.
+
+// A closure kept in a local variable, not a named function: this script runs again for every
+// request a long-running Velocity worker serves in the same process, and a bare `function
+// xrowExtractPackageFinishUpload(){}` declared at the top level here would fatal ("cannot
+// redeclare") on the second one. $forgetFile above (xrowextract/import.php) sets the pattern.
+$finishUpload = function ( $stored, $ownedByUpload, $uploadID ) use ( $module, $SESSION_KEY, $RENAME_NOTICE_KEY )
+{
+    $result = XrowExtractPackage::importUploadedArchive( $stored );
+    if ( $ownedByUpload )
+        XrowExtractUpload::delete( $uploadID );
+    else
+        @unlink( $stored );
+    if ( $result['ok'] )
+    {
+        $_SESSION[$SESSION_KEY] = $result['package']->attribute( 'name' );
+        if ( $result['renamed'] )
+        {
+            $_SESSION[$RENAME_NOTICE_KEY] = ezpI18n::tr( 'design/standard/extract',
+                'The package’s own name ("%from") is not a valid identifier; it was imported as "%to".', false,
+                array( '%from' => $result['renamed_from'], '%to' => $result['renamed_to'] ) );
+        }
+        return $module->redirectTo( 'xrowextract/package' );
+    }
+    return ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', false, array( '%reason' => $result['error'] ) );
+};
 
 $uploadError = '';
-if ( $http->hasPostVariable( 'UploadPackage' ) )
+if ( $http->hasPostVariable( 'UploadPackage' ) && $http->hasPostVariable( 'UploadID' ) && (string)$http->postVariable( 'UploadID' ) !== '' )
+{
+    $uploadID = (string)$http->postVariable( 'UploadID' );
+    $stored = XrowExtractUpload::path( $uploadID );
+    if ( $stored === false )
+    {
+        $uploadError = ezpI18n::tr( 'design/standard/extract', 'The upload could not be found; it may have expired. Choose the file again.' );
+    }
+    else
+    {
+        $outcome = $finishUpload( $stored, true, $uploadID );
+        if ( is_string( $outcome ) )
+            $uploadError = $outcome;
+        else
+            return $outcome;
+    }
+}
+elseif ( $http->hasPostVariable( 'UploadPackage' ) )
 {
     if ( eZHTTPFile::canFetch( 'PackageBinaryFile' ) )
     {
         $file = eZHTTPFile::fetch( 'PackageBinaryFile' );
-        if ( $file )
+        list( $hasRoom, $roomMessage ) = $file ? XrowExtractUpload::hasRoomFor( (int)$file->attribute( 'filesize' ) ) : array( true, '' );
+        if ( !$hasRoom )
         {
-            $newPackageName = '';
-            // 'local' forced, not left to eZPackage::import()'s own vendor-derived default -
-            // see the long comment on the same call in XrowExtractPackage::importUploadedArchive().
-            $imported = eZPackage::import( $file->attribute( 'filename' ), $newPackageName, true, 'local', false );
-            if ( $imported instanceof eZPackage )
-            {
-                $_SESSION[$SESSION_KEY] = $imported->attribute( 'name' );
-                return $module->redirectTo( 'xrowextract/package' );
-            }
-            elseif ( $imported === eZPackage::STATUS_ALREADY_EXISTS )
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'A package named %packagename already exists in the repository.', false, array( '%packagename' => $newPackageName ) );
-            }
-            elseif ( $imported === eZPackage::STATUS_INVALID_NAME )
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The package name %packagename is invalid.', false, array( '%packagename' => $newPackageName ) );
-            }
-            else
-            {
-                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file is not a valid Exponential package (.ezpkg).' );
-            }
+            $uploadError = $roomMessage;
         }
         else
         {
-            $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be read.' );
+            // The upload is first copied into the private upload folder under a name with its own
+            // extension, then goes through the same path as the import page: the archive safety scan
+            // (no symlinks, hard links, special entries or paths leaving the folder) before anything is
+            // unpacked, and every kernel/archive exception turned into a message. Passing the web
+            // server's raw temporary file straight to eZPackage::import() skipped the scan, and on
+            // Velocity the archive reader could not open that temporary file: an uncaught
+            // ezcBaseFilePermissionException, a 500.
+            $stored = $file ? XrowExtractImport::storeUpload( $file->attribute( 'filename' ), $file->attribute( 'original_filename' ) ) : false;
+            if ( $stored )
+            {
+                $outcome = $finishUpload( $stored, false, null );
+                if ( is_string( $outcome ) )
+                    $uploadError = $outcome;
+                else
+                    return $outcome;
+            }
+            else
+            {
+                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be read.' );
+            }
         }
     }
     else
@@ -60,6 +111,13 @@ if ( $http->hasPostVariable( 'UploadPackage' ) )
     }
 }
 $tpl->setVariable( 'UploadError', $uploadError );
+$renameNotice = isset( $_SESSION[$RENAME_NOTICE_KEY] ) ? (string)$_SESSION[$RENAME_NOTICE_KEY] : '';
+unset( $_SESSION[$RENAME_NOTICE_KEY] );
+$tpl->setVariable( 'RenameNotice', $renameNotice );
+$diskFree = XrowExtractUpload::freeDiskSpace();
+$tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? XrowExtractUpload::humanSize( $diskFree ) : false );
+$uploadJsFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-upload.js';
+$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ), 0, 12 ) : '0' );
 
 // ---------------------------------------------------------------- pick the current package
 
@@ -143,8 +201,40 @@ if ( $http->hasPostVariable( 'ImportParentNodeSelected' ) )
 // ---------------------------------------------------------------- install
 
 $installReport = false;
-if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
+if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage && XrowExtractJob::available() )
 {
+    // Installing can take minutes (every class and object through the kernel's package handlers), so it
+    // runs as a background job (bin/php/package.php --install, job type "package") and the page goes
+    // straight to the Jobs view, which follows its progress and keeps its report - the request is not held
+    // for the length of the install.
+    $installArgs = array(
+        '--install=' . $package->attribute( 'name' ),
+        '--parent=' . (int)$ParentNodeID,
+        '--site-access=' . $SiteAccess,
+        '--object-mode=' . $ObjectMode,
+        '--class-mode=' . $ClassMode,
+    );
+    $parentForName = eZContentObjectTreeNode::fetch( (int)$ParentNodeID );
+    $installJobID = XrowExtractJob::create( array(
+        'type' => 'package', 'owner' => eZUser::currentUser()->attribute( 'login' ),
+        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name below %parent', false,
+                               array( '%name' => $package->attribute( 'name' ),
+                                      '%parent' => $parentForName instanceof eZContentObjectTreeNode ? $parentForName->attribute( 'name' ) : ( 'node ' . (int)$ParentNodeID ) ) ),
+        'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,
+    ) );
+    if ( !XrowExtractJob::start( $installJobID ) )
+    {
+        XrowExtractJob::update( $installJobID, array(
+            'state' => 'failed', 'ended' => time(),
+            'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+        ) );
+    }
+    $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
+{
+    // No background jobs on this installation (XrowExtractJob::available() is false): install in the request
     $installReport = XrowExtractPackage::install( $package, $ParentNodeID, $SiteAccess, $ObjectMode, $ClassMode );
     if ( $installReport['ok'] )
     {
@@ -198,7 +288,10 @@ $templateError = '';
 $templateBuilt = false;
 if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
 {
-    $build = XrowExtractPackage::buildTemplatePackage( $TemplateClassID, $TemplateVariant );
+    // The same builder as the Import page: from the class's own existing objects (read-only), falling back to
+    // temporary sample objects only for a class with none (the old builder always created them, and a made-up
+    // tag or a relation to a sample that had failed then stopped every build)
+    $build = XrowExtractPackage::buildContentPackage( $TemplateClassID, $TemplateVariant );
     if ( $build['ok'] )
     {
         $_SESSION[$SESSION_KEY] = $build['package']->attribute( 'name' );

@@ -34,7 +34,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:]' .
+    '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:][remove-after]' .
     '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]',
     '',
     array(
@@ -49,6 +49,7 @@ $options = $script->getOptions(
         'site-access'  => '--install: site access to map templates/overrides to (default: SiteSettings.DefaultAccess)',
         'object-mode'  => '--install: skip, update (default) or new, for an object that already exists (matched by remote id)',
         'class-mode'   => '--install: skip (default), replace or new, for a class that already exists (matched by remote id/identifier)',
+        'remove-after' => '--install: remove the package from the repository once installed (whether or not the install itself was clean) - for a job installing a transient package (a "Try a sample"/"Start from a template" one the web view registered just for this job\'s run), so the repository ends up as if the whole thing had run in the request',
         'node'         => '--export: the node id to export',
         'nodes'        => '--export: several node ids, comma-separated (the whole One class/Site archive selection); an alternative to --node',
         'subtree'      => '--export: the whole subtree below --node/--nodes, not only that node',
@@ -176,21 +177,80 @@ if ( $options['install'] )
         $fail( '--class-mode is skip, replace or new.' );
     $siteAccess = $options['site-access'] ? $options['site-access'] : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
 
-    if ( $options['progress-file'] )
-        XrowExtractJob::writeProgress( (string)$options['progress-file'], 1, 2, 'installing' );
+    // What this install is about to write: the Jobs page counts these in the database while the
+    // kernel works (it reports nothing itself), so the job's progress is real, item by item
+    $contents = XrowExtractPackage::packageContents( $package );
+    $total = count( $contents['classes'] ) + count( $contents['objects'] );
+    $cli->output( sprintf( '[%s] Installing %s below node %d (siteaccess %s): %d class(es), %d object(s); existing objects: %s, existing classes: %s',
+                           date( 'H:i:s' ), $package->attribute( 'name' ), $parentNodeID, $siteAccess,
+                           count( $contents['classes'] ), count( $contents['objects'] ), $objectMode, $classMode ) );
+    // The dry run's own classification (create/update/unchanged/class missing), taken just before
+    // installing: XrowExtractPackage::install()'s report only ever lists what it touched as
+    // "created" (it looks every item up again afterwards, by remote id - it has no notion of
+    // whether that item was new or already there), so this is the only place counts split that way
+    // come from. bin/php/job.php reads it straight from the report for the Jobs page.
+    $cli->output( sprintf( '[%s] Checking which classes and objects already exist ...', date( 'H:i:s' ) ) );
+    $preInstallCounts = XrowExtractPackage::inspect( $package )['counts'];
+    $cli->output( sprintf( '[%s] To install: classes %d new, %d existing  |  objects %d new, %d existing, %d unchanged, %d with a missing class',
+                           date( 'H:i:s' ), $preInstallCounts['classes_create'], $preInstallCounts['classes_update'],
+                           $preInstallCounts['objects_create'], $preInstallCounts['objects_update'], $preInstallCounts['objects_unchanged'], $preInstallCounts['objects_class_missing'] ) );
 
+    if ( $options['progress-file'] )
+    {
+        $watchFile = dirname( (string)$options['progress-file'] ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+        // One second back, so an object written in the very second the watch starts still counts
+        file_put_contents( $watchFile, json_encode( array( 'started' => time() - 1, 'classes' => $contents['classes'], 'objects' => $contents['objects'] ) ) );
+        XrowExtractJob::fixOwnership( $watchFile );
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, max( 1, $total ), 'installing' );
+    }
+
+    $installStarted = microtime( true );
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
+    // What happened, in the terms of the dry run just before and the chosen handling of existing items
+    // (install()'s own list names every item the package carries, whether it was written or left alone)
+    $c = $preInstallCounts;
+    $objectsExisting = $c['objects_update'] + $c['objects_unchanged'];
+    $existingObjectsDid = array( 'skip' => 'left as they were', 'update' => 'updated', 'new' => 'added again as new copies' );
+    $existingClassesDid = array( 'skip' => 'left as they were', 'replace' => 'replaced', 'new' => 'added again as new classes' );
+    $cli->output( sprintf( '[%s] Done after %.1f s. Classes: %d created, %d already there - %s. Objects: %d created, %d already there - %s%s. %d error(s).',
+                           date( 'H:i:s' ), microtime( true ) - $installStarted,
+                           $c['classes_create'], $c['classes_update'], $existingClassesDid[$classMode],
+                           $c['objects_create'], $objectsExisting, $existingObjectsDid[$objectMode],
+                           $c['objects_class_missing'] ? sprintf( ', %d not installed (class missing)', $c['objects_class_missing'] ) : '',
+                           count( $report['errors'] ) ) );
     foreach ( $report['errors'] as $error )
         $cli->error( '  ' . $error );
+    // The first 50 of each by name; the whole list is in the job's report
+    $listed = 0;
     foreach ( $report['created_classes'] as $row )
-        $cli->output( sprintf( '  class   %-30s #%d', $row['identifier'], $row['id'] ) );
+        if ( $listed++ < 50 )
+            $cli->output( sprintf( '  class   %-30s #%d', $row['identifier'], $row['id'] ) );
+    $listed = 0;
     foreach ( $report['created_objects'] as $row )
-        $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
+        if ( $listed++ < 50 )
+            $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
+    if ( count( $report['created_objects'] ) > 50 )
+        $cli->output( sprintf( '  ... and %d more object(s): see the job\'s report', count( $report['created_objects'] ) - 50 ) );
     $cli->output( $report['ok'] ? 'PASS installed' : 'FAIL install did not finish cleanly' );
     if ( $options['output'] )
-        file_put_contents( (string)$options['output'], json_encode( array( 'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    {
+        file_put_contents( (string)$options['output'], json_encode( array(
+            'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report,
+            'package_name' => $package->attribute( 'name' ), 'counts' => $preInstallCounts,
+        ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    }
     if ( $options['progress-file'] )
-        XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 2, 'done' );
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], max( 1, $total ), max( 1, $total ), 'done' );
+    if ( $options['remove-after'] )
+    {
+        // Whether or not the install itself was clean: a job installing a transient package (a "Try
+        // a sample"/"Start from a template" one the web view registered in the repository just for
+        // this job's run) is the only caller that ever passes this, and that package has no business
+        // staying in the repository either way - see modules/xrowextract/import.php.
+        $stillThere = eZPackage::fetch( $package->attribute( 'name' ) );
+        if ( $stillThere instanceof eZPackage )
+            $stillThere->remove();
+    }
     $script->shutdown( $report['ok'] ? 0 : 1 );
 }
 
@@ -241,12 +301,28 @@ if ( $options['export'] )
         $classIdentifier = $class->attribute( 'identifier' );
     }
 
-    $packageName = $options['name'] ? $options['name']
-                 : ( 'xrowextract_export_' . preg_replace( '/[^A-Za-z0-9_]+/', '_', $firstNode->attribute( 'name' ) ) . '_' . $firstNode->attribute( 'node_id' ) );
+    // Only names the kernel will import again (lowercase identifier form): see validPackageName()
+    $packageName = XrowExtractPackage::validPackageName( $options['name'] ? $options['name']
+                 : ( 'xrowextract_export_' . $firstNode->attribute( 'name' ) . '_' . $firstNode->attribute( 'node_id' ) ) );
     $summaryWhat = count( $nodeIDs ) > 1 ? ( count( $nodeIDs ) . ' selected nodes' ) : ( 'below node ' . $nodeIDs[0] . ' (' . $firstNode->attribute( 'name' ) . ')' );
     $package = eZPackage::create( $packageName, array( 'summary' => 'Exported ' . $summaryWhat, 'vendor' => 'xrowextract' ) );
     XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, ' . $summaryWhat . '.' );
+    // eZPackage::packageHandler() reuses the SAME eZContentObjectPackageHandler instance for
+    // every 'ezcontentobject' call in the process ($GLOBALS['eZPackageHandlers'], kernel/
+    // classes/ezpackage.php) and its reset() is an inherited no-op (kernel/classes/
+    // ezpackagehandler.php); on a long-running Velocity worker its public arrays would still
+    // carry node/object ids an earlier, unrelated --export run added, and generatePackage()
+    // only ever array_unique()s NodeIDArray, never clears it. This CLI command is normally
+    // one-shot (a fresh process per run), but the background job path
+    // (XrowExtractJob::writeProgress() above) can run it inside a longer-lived worker too, so
+    // it is reset here the same way classes/xrowextractpackage.php resets it for the sample/
+    // template builders.
     $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+    $objectHandler->NodeIDArray = array();
+    $objectHandler->RootNodeIDArray = array();
+    $objectHandler->NodeObjectArray = array();
+    $objectHandler->ObjectArray = array();
+    $objectHandler->RootNodeObjectArray = array();
 
     if ( $classID && $options['subtree'] )
     {

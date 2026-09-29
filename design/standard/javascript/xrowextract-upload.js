@@ -1,17 +1,20 @@
 /*
- * xrowextract: chunked upload for the import view's "File" card. Splits the
- * chosen file into chunks (Blob.slice) and posts each to
- * xrowextract/upload_chunk with fetch(), so a file of any size uploads
- * independent of PHP's upload_max_filesize/post_max_size - only real free
- * disk space limits it. A progress bar shows bytes sent; Pause stops
- * between chunks, Resume continues; a failed chunk (a dropped connection)
- * is retried a few times, then re-synced against the server's own count of
- * bytes received before trying again, so a resend can never duplicate or
- * corrupt what already arrived.
+ * xrowextract: chunked upload, shared by the import view's "File" card and the Package tab's
+ * upload form. Each .xe-chunked-upload widget names the one <input type=file> it belongs to
+ * (data-file-field: "ImportFile" or "PackageBinaryFile") so one script instance tracks either
+ * form without hard-coding either one. Splits the chosen file into chunks (Blob.slice) and posts
+ * each to xrowextract/upload_chunk with fetch(), so a file of any size uploads independent of
+ * PHP's upload_max_filesize/post_max_size - only real free disk space limits it, and (on
+ * Velocity) a huge single-request body never has to be read whole before the application sees
+ * it, which is what a slow-arriving multi-megabyte multipart POST is for a worker's own read
+ * loop to stay "busy" in for far longer than a chunk ever does. A progress bar shows bytes sent;
+ * Pause stops between chunks, Resume continues; a failed chunk (a dropped connection) is retried
+ * a few times, then re-synced against the server's own count of bytes received before trying
+ * again, so a resend can never duplicate or corrupt what already arrived.
  *
- * Progressive enhancement: without this script (or old browsers lacking
- * fetch/Blob.slice), the plain <input type="file"> still submits the whole
- * file in the one request the "Upload" button already posts, unchanged.
+ * Progressive enhancement: without this script (or old browsers lacking fetch/Blob.slice), the
+ * plain <input type="file"> still submits the whole file in the one request the form's own
+ * submit button already posts, unchanged.
  *
  * Delegated at the document level, and every element looked up fresh from
  * the event target rather than cached at load time: the admin shell's own
@@ -63,6 +66,11 @@
             resumeButton: widget.querySelector('.xe-upload-resume'),
             cancelButton: widget.querySelector('.xe-upload-cancel'),
             uploadUrl: widget.getAttribute('data-upload-url'),
+            // Which <input type=file> this widget belongs to: the import view's own ("ImportFile",
+            // the default, for a widget predating this attribute) or the Package tab's
+            // ("PackageBinaryFile") - one widget, one form, so this is enough to scope every lookup
+            // below to the right field without hard-coding a single field/form name.
+            fileField: widget.getAttribute('data-file-field') || 'ImportFile',
         };
     }
 
@@ -88,7 +96,9 @@
     }
 
     function submitButtonFor(form) {
-        return form.querySelector('input[name=Upload]');
+        // Both forms this script runs in (the import view's "Upload", the Package tab's
+        // "UploadPackage") mark their real submit button this way; neither form has a second one.
+        return form.querySelector('input.defaultbutton[type=submit]') || form.querySelector('input[name=Upload]');
     }
 
     function fail(message) {
@@ -169,7 +179,7 @@
         // a multipart body carrying the entire original file, defeating the chunking above and
         // exceeding post_max_size exactly as an unchunked upload would (PHP then drops the whole
         // $_POST body, including UploadID, with no error - the adopt request just goes nowhere).
-        var fileInput = state.form.querySelector('input[name=ImportFile]');
+        var fileInput = state.form.querySelector('input[name="' + state.parts.fileField + '"]');
         if (fileInput) fileInput.value = '';
         var submit = submitButtonFor(state.form);
         if (submit) {
@@ -204,10 +214,13 @@
 
     document.addEventListener('change', function (event) {
         var input = event.target;
-        if (!input || input.name !== 'ImportFile' || !input.files || !input.files[0]) return;
+        if (!input || input.type !== 'file' || !input.files || !input.files[0]) return;
         var form = input.form;
         var widget = form ? form.querySelector('.xe-chunked-upload') : null;
-        if (!form || !widget) return;
+        // The widget names the one field it belongs to (data-file-field, default "ImportFile"):
+        // a form can hold more than one plain file input (or none of interest to this script), and
+        // only a change on that specific one starts a chunked upload.
+        if (!form || !widget || input.name !== widgetParts(widget).fileField) return;
         start(input.files[0], widget, form);
     });
 
@@ -232,7 +245,7 @@
             state.parts.widget.classList.remove('xe-uploading', 'xe-upload-error', 'xe-upload-done');
             setStatus('');
             var form = state.form;
-            var fileInput = form.querySelector('input[name=ImportFile]');
+            var fileInput = form.querySelector('input[name="' + state.parts.fileField + '"]');
             if (fileInput) fileInput.value = '';
             var submit = submitButtonFor(form);
             if (submit) submit.disabled = false;
@@ -245,7 +258,9 @@
     // itself once the adopt fields are filled in (dataset.xeChunkedDone marks that click as allowed).
     document.addEventListener('submit', function (event) {
         var form = event.target;
-        if (form.name !== 'eZImport' || !state || state.form !== form) return;
+        // Any form this script is tracking a chunked upload for, not just the import view's
+        // "eZImport": the Package tab's "eZPackageUpload" needs the exact same guard.
+        if (!state || state.form !== form) return;
         if (state.uploadId && !state.parts.uploadIdInput.value && form.dataset.xeChunkedDone !== '1') {
             event.preventDefault();
         }
