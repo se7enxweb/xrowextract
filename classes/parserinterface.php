@@ -12,6 +12,7 @@ class ParserInterface
     public $exportableDatatypes;
     public $separationChar = ",";
     public $escape = true;
+    public $neutralizeFormulas = true;
 
     public function __construct( $separationChar = null, $escape = null )
     {
@@ -21,6 +22,8 @@ class ParserInterface
            $this->separationChar = $separationChar;
         $ini = eZINI::instance( "csv.ini" );
         $this->exportableDatatypes = $ini->variable( "General", "ExportableDatatypes" );
+        $this->neutralizeFormulas = !( $ini->hasVariable( 'General', 'NeutralizeFormulas' )
+                                       && $ini->variable( 'General', 'NeutralizeFormulas' ) === 'disabled' );
         foreach ($this->exportableDatatypes as $typename)
         {
             if ( file_exists( $ini->variable( $typename, 'HandlerFile' ) ) )
@@ -36,6 +39,10 @@ class ParserInterface
                  {
                      $handler->escape = $this->escape;
                  }
+                 if( property_exists( $handler, 'neutralizeFormulas' ) )
+                 {
+                     $handler->neutralizeFormulas = $this->neutralizeFormulas;
+                 }
                  $this->handlerMap[$typename] = array( "handler" => $handler,
                                                        "exportable" => true );
             }
@@ -49,29 +56,34 @@ class ParserInterface
         return $this->exportableDatatypes;
     }
 
-    /*
-        Export an attribute to a string
-    */
+    /**
+     * One attribute as one CSV cell (escaped by its handler), without a separator.
+     * A datatype with no handler gives an empty cell, so every row keeps the
+     * header's columns.
+     */
+    public function exportValue( $attribute )
+    {
+        $handler = isset( $this->handlerMap[$attribute->DataTypeString]['handler'] )
+                 ? $this->handlerMap[$attribute->DataTypeString]['handler'] : null;
+        if ( is_object( $handler ) )
+        {
+            return (string)$handler->exportAttribute( $attribute );
+        }
+        return $this->escape( '' );
+    }
+
+    /** Kept for callers of the old API: the cell followed by the separator. */
     public function exportAttribute( &$attribute )
     {
-        if( isset( $this->handlerMap[$attribute->DataTypeString]['handler'] ) )
-        {
-            $handler = $this->handlerMap[$attribute->DataTypeString]['handler'];
-        }
-
-        if( isset($handler) && is_object( $handler ) )
-        {
-            return $handler->exportAttribute( $attribute ).$this->separationChar;
-        }
-        else
-            return $this->separationChar;
+        return $this->exportValue( $attribute ) . $this->separationChar;
     }
 
     public function escape( $text )
     {
-        $handler = new BaseHandler();
+        $handler = new XrowBaseHandler();
         $handler->separationChar = $this->separationChar;
         $handler->escape = $this->escape;
+        $handler->neutralizeFormulas = $this->neutralizeFormulas;
         return $handler->escape( $text );
     }
 }

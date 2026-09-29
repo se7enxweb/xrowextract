@@ -44,6 +44,14 @@
         <translation>Yes</translation>
     </message>
     <message>
+        <source>enabled</source>
+        <translation>enabled</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>disabled</translation>
+    </message>
+    <message>
         <source>Mainnode only</source>
         <translation>Mainnode only</translation>
     </message>

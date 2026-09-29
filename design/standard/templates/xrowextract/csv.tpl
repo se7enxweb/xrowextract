@@ -26,7 +26,7 @@
                     <label for="BrowseSubtree">{'Node'|i18n('design/standard/extract')}</label>
                     {node_view_gui view=line content_node=$subtree_node}
                     <input class="button" type="submit" name="BrowseSubtree" value="{'Change'|i18n('design/standard/extract')}" />
-                    <input name="Subtree" type="hidden" id="Subtree" value="{$Subtree}" />
+                    <input name="Subtree" type="hidden" id="Subtree" value="{$Subtree|wash}" />
                 </div>
                 <div class="element">
                     {set $types=array( hash( 'id', 'tree', 'name', 'Tree (full subtree)'|i18n( 'design/standard/extract' ) ), hash( 'id', 'list', 'name', 'List (only children)'|i18n( 'design/standard/extract' ) ) )}
@@ -34,7 +34,7 @@
                     <select name="type">
 
                     {section loop=$types}
-                        <option value="{$:item.id}" {section show=$:item.id|eq($Type)} selected{/section}>{$:item.name|wash}</option>
+                        <option value="{$:item.id|wash}" {section show=$:item.id|eq($Type)} selected{/section}>{$:item.name|wash}</option>
                         {/section}
                     </select>
                 </div>
@@ -43,7 +43,7 @@
                 <label>{'Mainnode only'|i18n('design/standard/extract')}</label>
                     <select name="mainnodeonly">
                     {section loop=$types}
-                        <option value="{$:item.id}" {section show=$:item.id|eq($Mainnodeonly)} selected{/section}>{$:item.name|wash}</option>
+                        <option value="{$:item.id|wash}" {section show=$:item.id|eq($Mainnodeonly)} selected{/section}>{$:item.name|wash}</option>
                         {/section}
                     </select>
                 </div>
@@ -51,11 +51,11 @@
             <div class="block">
                 <div class="element">
                     <label>{'Limit ( max %max_count )'|i18n( 'design/standard/extract',, hash( '%max_count', $max_count ) )}</label>
-                    <input name="Limit" type="text" id="Limit" value="{$Limit}" />
+                    <input name="Limit" type="text" id="Limit" value="{$Limit|wash}" />
                 </div>
                 <div class="element">
                     <label>{'Offset'|i18n('design/standard/extract')}</label>
-                    <input name="Offset" type="text" id="Offset" value="{$Offset}" />
+                    <input name="Offset" type="text" id="Offset" value="{$Offset|wash}" />
                 </div>
             </div>
         {else}
@@ -69,7 +69,7 @@
             <div class="block">
                 <div class="element">
                     <label>{'Column separator'|i18n('design/standard/extract')}</label>
-                    <input name="Separator" type="text" id="Separator" value="{$Separator}" />
+                    <input name="Separator" type="text" id="Separator" value="{$Separator|wash}" />
                     <p>
                         {"Info: Excel likes a semicolon as separator."|i18n('design/standard/extract')}
                     </p>
@@ -78,7 +78,7 @@
                     <label>{'Row separator'|i18n('design/standard/extract')}</label>
                     <select name="LineSeparator">
                         {section loop=$LineSeparatorArray}
-                        <option value="{$:item.id}" {section show=$:item.id|eq($LineSeparator)} selected{/section}>{$:item.name|wash}</option>
+                        <option value="{$:item.id|wash}" {section show=$:item.id|eq($LineSeparator)} selected{/section}>{$:item.name|wash}</option>
                         {/section}
                     </select>
                 </div>
@@ -87,7 +87,7 @@
                 <label>{'Escape'|i18n('design/standard/extract')}</label>
                     <select name="Escape">
                     {section loop=$types}
-                        <option value="{$:item.id}" {section show=$:item.id|eq( $Escape )} selected{/section}>{$:item.name}</option>
+                        <option value="{$:item.id|wash}" {section show=$:item.id|eq( $Escape )} selected{/section}>{$:item.name|wash}</option>
                         {/section}
                     </select>
                     <p>{'"No" is not %rfc conform, <br> removal of CR and LF from field value'|i18n( 'design/standard/extract',, hash( '%rfc', '<a href="http://tools.ietf.org/html/rfc4180">RFC</a>' ) )}</p>
@@ -116,11 +116,11 @@
                 <div class="element">
                     <select name="AddAttributeID">
                         {section loop=fetch('class', 'attribute_list', hash('class_id', $Class_id)) }
-                        <option value="{$:item.id}" {section show=$:item.id|eq(0)} selected{/section}>{$:item.name}</option>
+                        <option value="{$:item.id|wash}" {section show=$:item.id|eq(0)} selected{/section}>{$:item.name|wash}</option>
                         {/section}
                         <option disabled>--- {'Special Attributes'|i18n( 'design/standard/extract' )} ---</option>
                         {section loop=$ExtraAttributes}
-                        <option value="{$:item.id}">{$:item.name|wash}</option>
+                        <option value="{$:item.id|wash}">{$:item.name|wash}</option>
                         {/section}
                     </select>
                 </div>
@@ -145,9 +145,9 @@
                     <tr>
                         <th scope="row">{1|sum($:index)}</th>
                         <td>
-                            <input name="Attributes[{$:index}][id]" type="hidden" value="{$:item.id}" />
+                            <input name="Attributes[{$:index}][id]" type="hidden" value="{$:item.id|wash}" />
                             <input name="Attributes[{$:index}][name]" type="hidden" value="{$:item.name|wash}" />
-                            {$:item.name}
+                            {$:item.name|wash}
                         </td>
                         <td><input name="Attributes[{$:index}][exportname]" type="text" value="{$:item.exportname|wash}" /></td>
                         <td><input type="checkbox" name="RemoveIDArray[]" value="{$:index}" /></td>

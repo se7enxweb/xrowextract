@@ -7,29 +7,54 @@ class XrowBaseHandler
     {
     }
 
-    //escape the string to use it in a CSV file type
+    /**
+     * A value as one CSV cell.
+     *
+     * With escaping on, the cell is enclosed in quotes and quotes in it are
+     * doubled; that is what the old checks (strpos() >= 0, true for every
+     * value) did for every cell. With escaping off, line breaks are taken out
+     * so the value stays one cell. When $neutralizeFormulas is on, a cell a
+     * spreadsheet would treat as a formula gets a leading apostrophe, unless
+     * it is a plain number.
+     */
     public function escape( $stringtoescape )
     {
-        //ASCII/CRLF=0x0D 0x0A   13 10
-        if ( $this->escape and ( strpos( $stringtoescape, $this->encloseChar ) >=0 or
-             strpos( $stringtoescape, $this->separationChar ) >=0 or
-             strpos( $stringtoescape, chr(13)) >=0 or // CR
-             strpos( $stringtoescape, chr(10)) >=0 )    // LF
-           )
+        $stringtoescape = (string)$stringtoescape;
+        if ( $this->neutralizeFormulas && self::looksLikeFormula( $stringtoescape ) )
         {
-           $stringtoescape = str_replace( $this->encloseChar, $this->encloseChar . $this->encloseChar, $stringtoescape );
-           return $this->encloseChar . $stringtoescape . $this->encloseChar;
+            $stringtoescape = "'" . $stringtoescape;
         }
-        else
+        if ( $this->escape )
         {
-            $stringtoescape = str_replace( chr(13), '', $stringtoescape );
-            $stringtoescape = str_replace( chr(10), '', $stringtoescape );
-            return $stringtoescape;
+            return $this->encloseChar . str_replace( $this->encloseChar, $this->encloseChar . $this->encloseChar, $stringtoescape ) . $this->encloseChar;
         }
+        return str_replace( array( chr( 13 ), chr( 10 ) ), '', $stringtoescape );
+    }
+
+    /**
+     * Text as UTF-8. mb_detect_encoding() returns false for input it cannot
+     * place, which mb_convert_encoding() refuses on PHP 8; such text is kept.
+     */
+    public static function utf8( $text )
+    {
+        $text = (string)$text;
+        if ( $text === '' || mb_check_encoding( $text, 'UTF-8' ) )
+        {
+            return $text;
+        }
+        $from = mb_detect_encoding( $text, array( 'UTF-8', 'ISO-8859-1', 'Windows-1252' ), true );
+        return $from ? mb_convert_encoding( $text, 'UTF-8', $from ) : $text;
+    }
+
+    /** Starts with a character spreadsheets read as the start of a formula, and is not a number. */
+    public static function looksLikeFormula( $value )
+    {
+        return $value !== '' && strpos( "=+-@\t\r", $value[0] ) !== false && !is_numeric( $value );
     }
 
     public $encloseChar  = '"';
     public $separationChar = ",";
     public $escape = false;
+    public $neutralizeFormulas = true;
 }
 ?>

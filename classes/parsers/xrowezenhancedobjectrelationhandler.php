@@ -4,26 +4,23 @@ class XroweZenhancedobjectrelationHandler extends XrowBaseHandler
 {
     public function exportAttribute(&$attribute)
     {
-        //var_export($attribute->content());
-        $content=$attribute->content();
-        $id_list=$content['id_list'];
+        $content = $attribute->content();
+        $id_list = isset( $content['id_list'] ) ? (array)$content['id_list'] : array();
 
+        // OutputRelatedObjectNames=false exports the ids; the setting is a string, so "false" must be compared
         $ini = eZINI::instance( "csv.ini" );
-        if ($ini->variable( "ezenhancedobjectrelation", "OutputRelatedObjectNames" ))
+        if ( $ini->variable( "ezenhancedobjectrelation", "OutputRelatedObjectNames" ) !== 'false' )
         {
-            $names=array();
-            foreach ($id_list as $id)
+            $names = array();
+            foreach ( $id_list as $id )
             {
-                $object=eZContentObject::fetch($id);
-                if (is_object($object))
-                    $names[]=$object->name();
+                $object = eZContentObject::fetch( (int)$id );
+                if ( is_object( $object ) )
+                    $names[] = $object->name();
             }
-            return $this->escape( join(" ", $names) );
+            return $this->escape( self::utf8( join( " ", $names ) ) );
         }
-        else
-        {
-            return $this->escape( join(" ", $id_list ) );
-        }
+        return $this->escape( join( " ", $id_list ) );
     }
 }
 

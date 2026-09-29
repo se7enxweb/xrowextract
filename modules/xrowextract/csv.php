@@ -1,140 +1,165 @@
 <?php
 
-
-if ( !function_exists( 'applyOutputFilter' ) ) {
-function applyOutputFilter( $tmp, $filtername )
+if ( !function_exists( 'xrowExtractNodeName' ) ) {
+/** The name of a node the current user may read, else ''. */
+function xrowExtractNodeName( $nodeID )
 {
-    switch ( $filtername )
+    $node = $nodeID ? eZContentObjectTreeNode::fetch( (int)$nodeID ) : null;
+    return ( $node instanceof eZContentObjectTreeNode && $node->canRead() ) ? $node->attribute( 'name' ) : '';
+}
+
+/**
+ * The value of a special (non class attribute) column for one object. Only
+ * the columns in $ExtraAttributes exist; each is computed here, nothing from
+ * the request decides which class or method is called.
+ */
+function xrowExtractExtraValue( $key, eZContentObject $obj, $allowPasswordHash )
+{
+    if ( strpos( $key, 'ezuser.' ) === 0 )
     {
-        case "date":
-            $tmp = strftime( "%Y-%m-%d", $tmp );
-            break;
-        case "parent_name":
-            $node = eZContentObjectTreeNode::fetch( $tmp );
-            if ( $node )
-                $tmp = $node->attribute( 'name' );
-            break;
-        case "parent_nodes":
-            $names = array();
-            foreach ( $tmp as $node_id )
-            {
-                $node = eZContentObjectTreeNode::fetch( $node_id );
-                if ( $node )
-                    $names[] = $node->attribute( 'name' );
-            }
-            $tmp = join( " ", $names );
-            break;
-        case "url_alias":
-            $node = eZContentObjectTreeNode::fetch( $tmp->attribute( 'main_node_id' ) );
-            if ( $node )
-                $tmp = $node->attribute( 'url_alias' );
-            break;
-        case "full_url_alias":
-            $node = eZContentObjectTreeNode::fetch( $tmp->attribute( 'main_node_id' ) );
-            if ( $node )
-                $tmp = "http://" . eZINI::instance()->variable( 'SiteSettings', 'SiteURL' ) . '/' . $node->attribute( 'url_alias' );
-            break;
-        case "state":
-            if($tmp){
-                $tmp="aktiviert";
-            }else{
-                $tmp="deaktiviert";
-            }
-            break;
-        default:
-            break;
+        $user = eZUser::fetch( $obj->attribute( 'id' ) );
+        if ( !$user instanceof eZUser )
+        {
+            return '';
+        }
+        switch ( $key )
+        {
+            case 'ezuser.login':         return $user->attribute( 'login' );
+            case 'ezuser.email':         return $user->attribute( 'email' );
+            case 'ezuser.password_hash': return $allowPasswordHash ? $user->attribute( 'password_hash' ) : '';
+            case 'ezuser.is_enabled':
+                return $user->attribute( 'is_enabled' ) ? ezpI18n::tr( 'design/standard/extract', 'enabled' )
+                                                        : ezpI18n::tr( 'design/standard/extract', 'disabled' );
+        }
+        return '';
     }
 
-    return $tmp;
+    $mainNode = $obj->attribute( 'main_node' );
+    switch ( $key )
+    {
+        case 'ezcontentobject.published':
+        case 'ezcontentobject.modified':
+            $time = (int)$obj->attribute( substr( $key, 16 ) );
+            return $time > 0 ? date( 'Y-m-d', $time ) : '';
+        case 'ezcontentobject.url_alias':
+            return $mainNode ? $mainNode->attribute( 'url_alias' ) : '';
+        case 'ezcontentobject.full_url_alias':
+            if ( !$mainNode )
+            {
+                return '';
+            }
+            // The public site's address (DefaultAccess), not the admin one this view runs in
+            $siteINI = eZINI::instance();
+            $defaultAccess = $siteINI->variable( 'SiteSettings', 'DefaultAccess' );
+            $currentAccess = isset( $GLOBALS['eZCurrentAccess']['name'] ) ? $GLOBALS['eZCurrentAccess']['name'] : '';
+            if ( $defaultAccess && $defaultAccess !== $currentAccess )
+            {
+                $siteINI = eZSiteAccess::getIni( $defaultAccess, 'site.ini' );
+            }
+            $siteURL = rtrim( preg_replace( '#^https?://#', '', $siteINI->variable( 'SiteSettings', 'SiteURL' ) ), '/' );
+            $scheme = eZSys::isSSLNow() ? 'https://' : 'http://';
+            return $scheme . $siteURL . '/' . $mainNode->attribute( 'url_alias' );
+        case 'ezcontentobject.main_parent_name':
+            return xrowExtractNodeName( $obj->attribute( 'main_parent_node_id' ) );
+        case 'ezcontentobject.main_node_id':
+            return $obj->attribute( 'main_node_id' );
+        case 'ezcontentobject.main_parent_node_id':
+            return $obj->attribute( 'main_parent_node_id' );
+        case 'ezcontentobject.parent_nodes':
+            $names = array();
+            foreach ( (array)$obj->attribute( 'parent_nodes' ) as $nodeID )
+            {
+                $name = xrowExtractNodeName( $nodeID );
+                if ( $name !== '' )
+                    $names[] = $name;
+            }
+            return join( " ", $names );
+    }
+    return '';
+}
+
+/** A download file name from a node name: letters, digits, dot, dash and underscore only. */
+function xrowExtractFileName( $name )
+{
+    $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ), '._' );
+    return ( $name === '' ? 'export' : substr( $name, 0, 80 ) ) . '_export.csv';
 }
 }
 
+$csvINI = eZINI::instance( 'csv.ini' );
+$allowPasswordHash = $csvINI->hasVariable( 'General', 'AllowPasswordHashExport' )
+                     && $csvINI->variable( 'General', 'AllowPasswordHashExport' ) === 'enabled';
 
 // Array of extra node attributes
 $ExtraAttributes = array(
     'ezuser.login' => array(
         'id' => 'ezuser.login' ,
         'exportname' => 'login' ,
-        'name' => 'Login' ,
-        'function' => 'fetch'
+        'name' => 'Login'
     ) ,
     'ezuser.email' => array(
         'id' => 'ezuser.email' ,
         'exportname' => 'email' ,
-        'name' => 'E-Mail' ,
-        'function' => 'fetch'
+        'name' => 'E-Mail'
     ) ,
     'ezuser.password_hash' => array(
         'id' => 'ezuser.password_hash' ,
         'exportname' => 'password' ,
-        'name' => 'Password' ,
-        'function' => 'fetch'
+        'name' => 'Password'
     ) ,
     'ezuser.is_enabled' => array(
         'id' => 'ezuser.is_enabled' ,
         'exportname' => 'user_status' ,
-        'name' => 'User Status' ,
-        'filter' => 'state' ,
-        'function' => 'fetch'
+        'name' => 'User Status'
     ) ,
     'ezcontentobject.published' => array(
         'id' => 'ezcontentobject.published' ,
         'exportname' => 'published' ,
-        'name' => 'Content Object Published Time' ,
-        'filter' => 'date' ,
-        'function' => 'fetch'
+        'name' => 'Content Object Published Time'
     ) ,
     'ezcontentobject.modified' => array(
         'id' => 'ezcontentobject.modified' ,
         'exportname' => 'modified' ,
-        'name' => 'Content Object Modified Time' ,
-        'filter' => 'date' ,
-        'function' => 'fetch'
+        'name' => 'Content Object Modified Time'
     ) ,
     'ezcontentobject.url_alias' => array(
         'id' => 'ezcontentobject.url_alias' ,
         'exportname' => 'url_alias' ,
-        'name' => 'URL Alias' ,
-        'filter' => 'url_alias' ,
-        'function' => 'fetch'
+        'name' => 'URL Alias'
     ) ,
     'ezcontentobject.full_url_alias' => array(
         'id' => 'ezcontentobject.full_url_alias' ,
         'exportname' => 'full_url_alias' ,
-        'name' => 'Absolute URL Alias' ,
-        'filter' => 'full_url_alias' ,
-        'function' => 'fetch'
+        'name' => 'Absolute URL Alias'
     ) ,
-    'ezcontentobject.main_parent_node_id' => array(
-        'id' => 'ezcontentobject.main_parent_node_id' ,
+    'ezcontentobject.main_parent_name' => array(
+        'id' => 'ezcontentobject.main_parent_name' ,
         'exportname' => 'parent_name' ,
-        'name' => 'Content Object Main Parent Name' ,
-        'filter' => 'parent_name' ,
-        'function' => 'fetch'
+        'name' => 'Content Object Main Parent Name'
     ) ,
     'ezcontentobject.main_node_id' => array(
         'id' => 'ezcontentobject.main_node_id' ,
         'exportname' => 'main_node_id' ,
-        'name' => 'Main Node ID' ,
-        'function' => 'fetch'
+        'name' => 'Main Node ID'
     ) ,
     'ezcontentobject.main_parent_node_id' => array(
         'id' => 'ezcontentobject.main_parent_node_id' ,
         'exportname' => 'main_parent_node_id' ,
-        'name' => 'Main Parent Node ID' ,
-        'function' => 'fetch'
+        'name' => 'Main Parent Node ID'
     ) ,
     'ezcontentobject.parent_nodes' => array(
         'id' => 'ezcontentobject.parent_nodes' ,
         'exportname' => 'parent_nodes' ,
-        'name' => 'Content Object Parent Names' ,
-        'filter' => 'parent_nodes' ,
-        'function' => 'fetch'
+        'name' => 'Content Object Parent Names'
     )
 );
+if ( !$allowPasswordHash )
+{
+    unset( $ExtraAttributes['ezuser.password_hash'] );
+}
 
 // Start module definition
-$module = & $Params["Module"];
+$module = $Params["Module"];
 
 // Parse HTTP POST variables
 $http = eZHTTPTool::instance();
@@ -144,12 +169,19 @@ $sys = eZSys::instance();
 $tpl = eZTemplate::factory();
 // Access ini variables
 $ini = eZINI::instance();
-$ini_bis = eZINI::instance( 'export.ini.append' );
+$ini_bis = eZINI::instance( 'export.ini' );
 
-if ( isset( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] ) and count( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] ) > 0 )
-    $hasPreFilledData = true;
-else
-    $hasPreFilledData = false;
+// Object ids another view put in the session: only those the user may read
+$preFilledIDs = array();
+if ( isset( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] ) && is_array( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] ) )
+{
+    foreach ( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] as $objectID )
+    {
+        if ( (int)$objectID > 0 )
+            $preFilledIDs[] = (int)$objectID;
+    }
+}
+$hasPreFilledData = count( $preFilledIDs ) > 0;
 
 if ( $hasPreFilledData and $http->hasPostVariable( 'RemoveData' ) )
 {
@@ -159,10 +191,15 @@ if ( $hasPreFilledData and $http->hasPostVariable( 'RemoveData' ) )
 
 }
 $sessionConfig = $http->sessionVariable( 'eZExtractConfig' );
-// Set col & row separator
-$Separator = $http->hasPostVariable( 'Separator' ) ? $http->postVariable( 'Separator' ) : ',';
+if ( !is_array( $sessionConfig ) )
+    $sessionConfig = array();
 
-$LineSeparator = $http->hasPostVariable( 'LineSeparator' ) ? $http->postVariable( 'LineSeparator' ) : $sys->osType();
+// Set col & row separator: one or a few characters, never a quote or a line break
+$Separator = $http->hasPostVariable( 'Separator' ) ? (string)$http->postVariable( 'Separator' ) : ',';
+if ( $Separator === '\t' )
+    $Separator = "\t";
+if ( $Separator === '' || strlen( $Separator ) > 4 || strpbrk( $Separator, "\"\r\n" ) !== false )
+    $Separator = ',';
 
 $LineSeparatorArray = array(
     'win32' => array(
@@ -182,13 +219,17 @@ $LineSeparatorArray = array(
     )
 );
 
-$tpl->setVariable( 'Separator', $Separator );
+$LineSeparator = $http->hasPostVariable( 'LineSeparator' ) ? $http->postVariable( 'LineSeparator' ) : $sys->osType();
+if ( !is_string( $LineSeparator ) || !isset( $LineSeparatorArray[$LineSeparator] ) )
+    $LineSeparator = 'unix';
+
+$tpl->setVariable( 'Separator', $Separator === "\t" ? '\t' : $Separator );
 $tpl->setVariable( 'LineSeparator', $LineSeparator );
 $tpl->setVariable( 'LineSeparatorArray', $LineSeparatorArray );
 
 // Set limit & offset
-$Limit = $http->hasPostVariable( 'Limit' ) ? $http->postVariable( 'Limit' ) : $ini_bis->variable( 'ExportSettings', 'Limit' );
-$Offset = $http->hasPostVariable( 'Offset' ) ? $http->postVariable( 'Offset' ) : $ini_bis->variable( 'ExportSettings', 'Offset' );
+$Limit = max( 0, (int)( $http->hasPostVariable( 'Limit' ) ? $http->postVariable( 'Limit' ) : $ini_bis->variable( 'ExportSettings', 'Limit' ) ) );
+$Offset = max( 0, (int)( $http->hasPostVariable( 'Offset' ) ? $http->postVariable( 'Offset' ) : $ini_bis->variable( 'ExportSettings', 'Offset' ) ) );
 
 $tpl->setVariable( 'Limit', $Limit );
 $tpl->setVariable( 'Offset', $Offset );
@@ -203,40 +244,15 @@ else
     $Subtree = $http->postVariable( 'Subtree' );
 }
 // What is the default fetch type
-if ( ! $http->hasPostVariable( 'type' ) )
-{
-    $type = 'tree';
-}
-else
-{
-    $type = $http->postVariable( 'type' );
-}
+$type = ( $http->hasPostVariable( 'type' ) && $http->postVariable( 'type' ) === 'list' ) ? 'list' : 'tree';
 
-if ( $type == 'list' )
-    $depth['field'] = 1;
-else
-    $depth = false;
+// A list is the children only: depth 1
+$depth = $type == 'list' ? 1 : false;
+$depthOperator = $type == 'list' ? 'eq' : false;
 
-if ( ! $http->hasPostVariable( 'mainnodeonly' ) )
-{
-    $Mainnodeonly = '0';
-}
-else
-{
-    $Mainnodeonly = $http->postVariable( 'mainnodeonly' );
-}
+$Mainnodeonly = ( $http->hasPostVariable( 'mainnodeonly' ) && $http->postVariable( 'mainnodeonly' ) ) ? '1' : '0';
 
-if ( ! $http->hasPostVariable( 'Escape' ) )
-{
-    $Escape = true;
-}
-else
-{
-    if ( $http->postVariable( 'Escape' ) )
-        $Escape = true;
-    else
-        $Escape = false;
-}
+$Escape = $http->hasPostVariable( 'Escape' ) ? (bool)$http->postVariable( 'Escape' ) : true;
 
 if ( ! $hasPreFilledData )
 {
@@ -252,24 +268,27 @@ if ( ! $hasPreFilledData )
 }
 else
 {
-    $obj = eZContentObject::fetch( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'][0] );
-    $Class_id = $obj->attribute( 'contentclass_id' );
+    $obj = eZContentObject::fetch( $preFilledIDs[0] );
+    $Class_id = $obj ? $obj->attribute( 'contentclass_id' ) : 0;
 }
+$Class_id = (int)$Class_id;
 
 if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
 {
-    $nodes = $http->postVariable( 'SelectedNodeIDArray' );
-    $Subtree = $nodes[0];
+    $nodes = (array)$http->postVariable( 'SelectedNodeIDArray' );
+    if ( isset( $nodes[0] ) )
+        $Subtree = $nodes[0];
 }
+$Subtree = (int)$Subtree;
 
 // If we don't remove, add or download then or we load all attributes or we start empty
 if ( $http->hasPostVariable( 'Remove' ) || $http->hasPostVariable( 'AddAttribute' ) || $http->hasPostVariable( 'Download' ) )
 {
-    $Attributes = $http->postVariable( 'Attributes' );
+    $Attributes = $http->hasPostVariable( 'Attributes' ) ? $http->postVariable( 'Attributes' ) : array();
 }
 else
 {
-    if ( is_array( $sessionConfig ) and array_key_exists( 'Attributes', $sessionConfig ) and array_key_exists( $Class_id, $sessionConfig['Attributes'] ) )
+    if ( isset( $sessionConfig['Attributes'][$Class_id] ) && is_array( $sessionConfig['Attributes'][$Class_id] ) )
     {
         $Attributes = $sessionConfig['Attributes'][$Class_id];
     }
@@ -280,6 +299,7 @@ else
         }
         else
         {
+            $Attributes = array();
             $contentAttributeList = eZContentClassAttribute::fetchListByClassID( $Class_id, eZContentClass::VERSION_STATUS_DEFINED, true );
 
             foreach ( $contentAttributeList as $classattribute )
@@ -296,19 +316,21 @@ else
 // Add attribute action that modify previous array
 if ( $http->hasPostVariable( 'AddAttribute' ) )
 {
-    $addID = $http->postVariable( 'AddAttributeID' );
+    $addID = (string)$http->postVariable( 'AddAttributeID' );
 
-    if ( is_numeric( $addID ) )
+    if ( ctype_digit( $addID ) )
     {
-        $attribute = eZContentClassAttribute::fetch( $addID );
-        $element = array(
-            'id' => $attribute->attribute( 'identifier' ) ,
-            'name' => $attribute->attribute( 'name' ) ,
-            'exportname' => $attribute->attribute( 'identifier' )
-        );
-        $Attributes[] = $element;
+        $attribute = eZContentClassAttribute::fetch( (int)$addID );
+        if ( $attribute instanceof eZContentClassAttribute )
+        {
+            $Attributes[] = array(
+                'id' => $attribute->attribute( 'identifier' ) ,
+                'name' => $attribute->attribute( 'name' ) ,
+                'exportname' => $attribute->attribute( 'identifier' )
+            );
+        }
     }
-    else
+    elseif ( isset( $ExtraAttributes[$addID] ) )
     {
         $Attributes[] = $ExtraAttributes[$addID];
     }
@@ -317,17 +339,36 @@ if ( $http->hasPostVariable( 'AddAttribute' ) )
 // Remove action that modify previous array
 if ( $http->hasPostVariable( 'Remove' ) && $http->hasPostVariable( 'RemoveIDArray' ) )
 {
+    $Removes = array_map( 'intval', (array)$http->postVariable( 'RemoveIDArray' ) );
     $AttributesClean = array();
-
-    $Removes = $http->postVariable( 'RemoveIDArray' );
-
-    for ( $i = 0; $i < count( $Attributes ); $i ++ )
+    foreach ( array_values( (array)$Attributes ) as $i => $item )
     {
-        if ( ! in_array( $i, $Removes ) )
-            $AttributesClean[] = $Attributes[$i];
+        if ( ! in_array( $i, $Removes, true ) )
+            $AttributesClean[] = $item;
     }
     $Attributes = $AttributesClean;
 }
+
+// Every column is a class attribute identifier or one of the special columns; anything else is dropped
+$AttributesClean = array();
+foreach ( (array)$Attributes as $item )
+{
+    if ( !is_array( $item ) || !isset( $item['id'] ) || !is_string( $item['id'] ) )
+        continue;
+    if ( strpos( $item['id'], '.' ) !== false )
+    {
+        if ( !isset( $ExtraAttributes[$item['id']] ) )
+            continue;
+    }
+    elseif ( !preg_match( '/^[A-Za-z0-9_]+$/', $item['id'] ) )
+        continue;
+    $AttributesClean[] = array(
+        'id' => $item['id'],
+        'name' => isset( $item['name'] ) ? (string)$item['name'] : $item['id'],
+        'exportname' => ( isset( $item['exportname'] ) && trim( (string)$item['exportname'] ) !== '' ) ? trim( (string)$item['exportname'] ) : $item['id']
+    );
+}
+$Attributes = $AttributesClean;
 
 $sessionConfig['Attributes'][$Class_id] = $Attributes;
 $http->setSessionVariable( 'eZExtractConfig', $sessionConfig );
@@ -339,165 +380,96 @@ $tpl->setVariable( 'Attributes', $Attributes );
 $tpl->setVariable( 'ExtraAttributes', $ExtraAttributes );
 $tpl->setVariable( 'Mainnodeonly', $Mainnodeonly );
 $tpl->setVariable( 'has_prefilledata', $hasPreFilledData );
-$tpl->setVariable( 'Escape', $Escape );
+$tpl->setVariable( 'Escape', $Escape ? 1 : 0 );
 
+// The same selection as the export: the user's read access, depth and main nodes
 $fCollection = new eZContentFunctionCollection();
-$list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array( 
+$list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array(
     $Class_id
-), false, false, false, false, false, true, false, false );
-// echo 'Count: '; var_dump($list); echo '<br>';
+), false, $depth, $depthOperator, true, false, (bool)$Mainnodeonly, false, false );
 
-$tpl->setVariable( 'max_count', $list['result'] + 1 );
+$tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
 
 // Handle download action
 if ( $http->hasPostVariable( 'Download' ) )
 {
-    $row = "";
-    $first = true;
+    $parser = new ParserInterface( $Separator, $Escape );
+    $newLine = $LineSeparatorArray[$LineSeparator]['value'];
 
+    $cells = array();
     foreach ( $Attributes as $item )
     {
-        if ( $first )
-            $first = false;
-        else
-            $row .= $Separator;
-
-        $row .= preg_replace("/_/i", "-", $item['exportname'] );
+        $cells[] = $parser->escape( str_replace( '_', '-', $item['exportname'] ) );
     }
-
-    $data = $row . $LineSeparatorArray[$LineSeparator]['value'];
+    $data = implode( $Separator, $cells ) . $newLine;
+    $file = 'export.csv';
 
     if ( $hasPreFilledData )
     {
-        $list = $http->sessionVariable( 'EXTRACTCSV_OBJECTID_ARRAY' );
+        $list = $preFilledIDs;
     }
     else
     {
-        // Retrieve parent_node_id sort_array
         $node = eZContentObjectTreeNode::fetch( $Subtree );
-        $file = $node->attribute('name').'_export.csv';
-        // var_dump($file); echo "<hr><hr>";
+        if ( !( $node instanceof eZContentObjectTreeNode ) || !$node->canRead() )
+        {
+            return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
+        }
+        $file = xrowExtractFileName( $node->attribute( 'name' ) );
 
-        ( is_object( $node ) ) ? $sortBy = $node->sortArray() : $sortBy = array('published', false);
-
+        $sortBy = $node->sortArray();
         $sortBy = $sortBy[0];
-        $groupBy = false;
 
-        if ( $Limit == 0 )
-            $Limit = false;
-
-        $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $Limit, $depth, false, $Class_id, false, false, 'include', array( 
+        // Limitation false: the user's content/read policies apply
+        $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $Limit ? $Limit : false, $depth, $depthOperator, $Class_id, false, false, 'include', array(
             $Class_id
-        ), $groupBy, $Mainnodeonly, true, array(), true, false, true );
+        ), false, (bool)$Mainnodeonly, true, false, true, false, true );
 
-        $list = $list2['result'];
+        $list = isset( $list2['result'] ) && is_array( $list2['result'] ) ? $list2['result'] : array();
     }
-
-    $parser = new ParserInterface( $Separator, $Escape );
-
-/*
-var_dump($list2); echo "<hr /><hr />";
-
-var_dump($sortBy); echo "<hr /><hr />";
-var_dump($Class_id); echo "<hr /><hr />";
-var_dump($Subtree); echo "<hr /><hr />";
-
-var_dump($list);die();
-*/
 
     foreach ( $list as $item )
     {
-        $row = '';
-        if ( is_object( $item ) )
-            $obj = $item->attribute( 'object' );
-        else
-            $obj = eZContentObject::fetch( $item );
-        if ( ! is_object( $obj ) )
+        $obj = is_object( $item ) ? $item->attribute( 'object' ) : eZContentObject::fetch( (int)$item );
+        if ( ! ( $obj instanceof eZContentObject ) || ! $obj->canRead() )
             continue;
-        
-        $datamap = $obj->attribute( 'data_map' );
-        
-        $first = true;
 
+        $datamap = $obj->attribute( 'data_map' );
+
+        $cells = array();
         foreach ( $Attributes as $dataelement )
         {
-            $found = false;
-//var_dump( $parser->exportAttribute( $datamap[$dataelement['id']] ) );
-            if ( is_object( $datamap[$dataelement['id']] ) )
+            if ( isset( $ExtraAttributes[$dataelement['id']] ) )
             {
-                $row .= $parser->exportAttribute( $datamap[$dataelement['id']] );
+                $cells[] = $parser->escape( xrowExtractExtraValue( $dataelement['id'], $obj, $allowPasswordHash ) );
+            }
+            elseif ( isset( $datamap[$dataelement['id']] ) && is_object( $datamap[$dataelement['id']] ) )
+            {
+                $cells[] = $parser->exportValue( $datamap[$dataelement['id']] );
             }
             else
-                if ( preg_match( '#(.*)\.(.*)#', $dataelement['id'], $matches ) )
-                {
-                    $id = $obj->attribute( 'id' );
-                    $tmp = new $matches[1]();
-
-                    $tmp = $tmp->$ExtraAttributes[$dataelement['id']]['function']( $id );
-
-                    if ( array_key_exists( 'filter', $ExtraAttributes[$dataelement['id']] ) and $tmp->hasAttribute( $matches[2] ) )
-                    {
-
-                        $tmp = applyOutputFilter( $tmp->attribute( $matches[2] ), $ExtraAttributes[$dataelement['id']]['filter'] );
-                    }
-                    elseif ( array_key_exists( 'filter', $ExtraAttributes[$dataelement['id']] ) and ! $tmp->hasAttribute( $matches[2] ) )
-                    {
-                        $tmp = applyOutputFilter( $tmp, $ExtraAttributes[$dataelement['id']]['filter'] );
-                    }
-
-                    if ( $first )
-                        $first = false;
-                    else
-                        $row .= $Separator;
-                    if ( is_object( $tmp ) )
-                        $row .= $parser->escape( $tmp->attribute( $matches[2] ) );
-                    else
-                        $row .= $parser->escape( $tmp );
-
-                    unset( $tmp );
-                }
-                else
-                {
-                    $row .= $Separator;
-                }
+            {
+                $cells[] = $parser->escape( '' );
+            }
         }
-        $data .= $row . $LineSeparatorArray[$LineSeparator]['value'];
+        $data .= implode( $Separator, $cells ) . $newLine;
+
+        // A large export: keep the object cache from growing with every row
+        eZContentObject::clearCache( array( $obj->attribute( 'id' ) ) );
     }
 
-/*
-echo "<hr><hr>";
-echo $data;
-die();
-*/
+    $httpCharset = eZTextCodec::httpCharset();
+    header( 'Cache-Control: private, no-store, max-age=0' );
+    header( 'Pragma: no-cache' );
+    header( 'X-Content-Type-Options: nosniff' );
+    header( 'Content-Type: text/csv; charset=' . $httpCharset );
+    header( 'Content-Length: ' . strlen( $data ) );
+    header( 'Content-Disposition: attachment; filename="' . $file . '"' );
 
-//    @unlink( $file );
-    //    eZFile::create( $file, false, $data );
+    while ( @ob_end_clean() );
 
-    if ( $data )
-    {
-        // Set header settings
-        $lastModified = gmdate( 'D, d M Y H:i:s', time() ) . ' GMT';
-        $expires = gmdate( 'D, d M Y H:i:s', time() + 300 ) . ' GMT';
-        $httpCharset = eZTextCodec::httpCharset();
-        header( 'Cache-Control: max-age=300, public, must-revalidate' );
-        header( 'Expires:' . $expires );
-        header( 'Last-Modified: ' . $lastModified );
-        header( 'Content-Type: application/excel; charset=' . $httpCharset );
-        header( 'Content-Length: ' . strlen( $data ) );
-        header( 'Content-Disposition: attachment; filename="' . $file . '"' );
-
-        while ( @ob_end_clean() );
-
-        echo $data;
-        eZExecution::cleanExit();
-    }
-    else
-    {
-        $module->redirectTo( 'content/view/full/5' );
-    }
-    /*
-    if ( ! eZFile::download( $file ) )
-        $module->redirectTo( 'content/view/full/5' );*/
+    echo $data;
+    eZExecution::cleanExit();
 }
 
 if ( $http->hasPostVariable( 'BrowseSubtree' ) )

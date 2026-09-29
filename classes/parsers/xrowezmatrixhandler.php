@@ -5,17 +5,13 @@ class XroweZMatrixExportHandler extends XrowBaseHandler
     function exportAttribute(&$attribute)
     {
         $content = $attribute->content();
-        $rows = $content->attribute( 'rows' );
+        $rows = is_object( $content ) ? $content->attribute( 'rows' ) : array();
         $matrixArray = array();
-        foreach( $rows['sequential'] as $row )
+        foreach ( isset( $rows['sequential'] ) ? $rows['sequential'] : array() as $row )
         {
-
-        	$matrixArray[] = eZStringUtils::implodeStr( $row['columns'], '|' );
-        	
+            $matrixArray[] = eZStringUtils::implodeStr( $row['columns'], '|' );
         }
-        $string = eZStringUtils::implodeStr( $matrixArray, '&' );
-
-        return $string;
+        return $this->escape( eZStringUtils::implodeStr( $matrixArray, '&' ) );
     }
 }
 ?>

@@ -2,28 +2,19 @@
 
 class XroweZObjectRelationListHandler extends XrowBaseHandler
 {
-	public function exportAttribute( &$attribute )
-	{
-		$xmlText = $attribute->attribute( 'data_text' );
-        if ( trim( $xmlText ) == '' )
-        {
-            return "";
-        }
-        $rl = new eZObjectRelationListType();
-        $doc = $rl->parseXML( $xmlText );
-        $content = $rl->createObjectContentStructure( $doc );
+    public function exportAttribute( &$attribute )
+    {
+        $content = $attribute->content();
         $names = array();
-
-        foreach ($content["relation_list"] as $id)
+        foreach ( isset( $content['relation_list'] ) ? $content['relation_list'] : array() as $item )
         {
-            $object=eZContentObject::fetch($id["contentobject_id"]);
-            if (is_object($object))
+            $object = eZContentObject::fetch( (int)$item['contentobject_id'] );
+            if ( is_object( $object ) )
             {
-                $names[]=$object->name();
+                $names[] = $object->name();
             }
         }
-        $joinString = join(", ", $names);
-        return $this->escape( mb_convert_encoding( $joinString, "UTF-8", mb_detect_encoding( $joinString ) ) );
-        }
+        return $this->escape( self::utf8( join( ", ", $names ) ) );
+    }
 }
 ?>

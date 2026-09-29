@@ -2,6 +2,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>enabled</source>
+        <translation>activé</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>désactivé</translation>
+    </message>
+    <message>
         <source>Extract</source>
         <translation>Export</translation>
     </message>

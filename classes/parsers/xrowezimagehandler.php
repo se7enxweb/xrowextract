@@ -3,15 +3,9 @@ class XroweZImageExportHandler extends XrowBaseHandler
 {
        function exportAttribute( &$attribute )
        {
-		    $imageHandler=$attribute->content();
-		    
-		    $imageAlias = $imageHandler->imageAlias( 'original' );
-		   	
-		    //Return full url?  
-		    //$url = eZSys::hostname() . eZSys::wwwDir() .'/'. $imageAlias['url'];
-		    //$url = preg_replace( "#^(//)#", "/", $url );
-		
-		    return $imageAlias['url'];   	
+            $imageHandler = $attribute->content();
+            $imageAlias = ( is_object( $imageHandler ) && $attribute->hasContent() ) ? $imageHandler->imageAlias( 'original' ) : false;
+            return $this->escape( is_array( $imageAlias ) && isset( $imageAlias['url'] ) ? $imageAlias['url'] : '' );
        }
 }
 ?>

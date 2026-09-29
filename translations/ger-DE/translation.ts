@@ -142,6 +142,14 @@
         <translation>Ja</translation>
     </message>
     <message>
+        <source>enabled</source>
+        <translation>aktiviert</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>deaktiviert</translation>
+    </message>
+    <message>
         <source>Limit ( max %max_count )</source>
         <translation>Limit ( max. %max_count )</translation>
     </message>

@@ -44,6 +44,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Mainnode only</source>
         <translation type="unfinished"></translation>
     </message>
