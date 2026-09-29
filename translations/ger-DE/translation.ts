@@ -2238,8 +2238,8 @@
         <translation>Vorschau (Probelauf — es wurde nichts geschrieben)</translation>
     </message>
     <message>
-        <source>Read a CSV or JSON export back in: create or update objects</source>
-        <translation>Einen CSV- oder JSON-Export wieder einlesen: Objekte anlegen oder aktualisieren</translation>
+        <source>Read an XML, CSV or JSON export back in: create or update objects</source>
+        <translation>Einen XML-, CSV- oder JSON-Export wieder einlesen: Objekte anlegen oder aktualisieren</translation>
     </message>
     <message>
         <source>Remote ID</source>

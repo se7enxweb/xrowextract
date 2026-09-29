@@ -191,6 +191,8 @@
 .xe-count strong { color: var(--xe-text); }
 .xe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16em, 1fr)); gap: 1em 1.5em; }
 .xe-field { min-width: 0; margin-bottom: .25em; }
+/* A select with a long option (a language name with "site default") never reaches into the next column */
+.xe-field select, .xe-field input[type="text"], .xe-field input[type="search"] { max-width: 100%; box-sizing: border-box; }
 .xe-field + .xe-grid { margin-top: 1em; }
 .xe-label { display: block; margin: 0 0 .35em; font-weight: bold; }
 .xe-help { margin: .4em 0 0; color: var(--xe-muted); font-size: .88em; line-height: 1.4; }

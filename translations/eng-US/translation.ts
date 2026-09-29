@@ -2236,8 +2236,8 @@
         <translation>Preview (dry run — nothing was written)</translation>
     </message>
     <message>
-        <source>Read a CSV or JSON export back in: create or update objects</source>
-        <translation>Read a CSV or JSON export back in: create or update objects</translation>
+        <source>Read an XML, CSV or JSON export back in: create or update objects</source>
+        <translation>Read an XML, CSV or JSON export back in: create or update objects</translation>
     </message>
     <message>
         <source>Remote ID</source>

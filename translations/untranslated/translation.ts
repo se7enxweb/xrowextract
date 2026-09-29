@@ -2236,7 +2236,7 @@
         <translation></translation>
     </message>
     <message>
-        <source>Read a CSV or JSON export back in: create or update objects</source>
+        <source>Read an XML, CSV or JSON export back in: create or update objects</source>
         <translation></translation>
     </message>
     <message>
