@@ -22,6 +22,38 @@ if ( !$job || !XrowExtractJob::canSee( $job, $login, $allJobs ) )
 }
 
 $progress = XrowExtractJob::readProgress( XrowExtractJob::path( $id ) . '/' . XrowExtractJob::PROGRESS_FILE );
+
+// A package install: its real progress, counted in the database against what the package carries
+// (the kernel's installer reports nothing while it works), plus the latest objects it wrote
+$installProgress = null;
+$watchFile = XrowExtractJob::path( $id ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+if ( $job['type'] === 'package' && is_file( $watchFile ) && in_array( $job['state'], array( 'running', 'done', 'failed' ), true ) )
+{
+    $installProgress = XrowExtractPackage::installProgress( $watchFile );
+    if ( $installProgress && $job['state'] === 'running' )
+    {
+        $progress = array( 'done' => $installProgress['done'], 'total' => $installProgress['total'],
+                           'phase' => sprintf( '%d/%d classes, %d/%d objects', $installProgress['classes_done'], $installProgress['classes_total'],
+                                               $installProgress['objects_done'], $installProgress['objects_total'] ) );
+    }
+}
+
+// The job's log from a byte offset on (the page asks for what it has not shown yet), at most 64 KB a time
+$logPath = XrowExtractJob::path( $id ) . '/' . XrowExtractJob::LOG_FILE;
+$logOffset = isset( $_GET['log_offset'] ) && ctype_digit( (string)$_GET['log_offset'] ) ? (int)$_GET['log_offset'] : 0;
+$logSize = is_file( $logPath ) ? (int)@filesize( $logPath ) : 0;
+$logText = '';
+if ( $logSize > $logOffset )
+{
+    $fp = @fopen( $logPath, 'rb' );
+    if ( $fp )
+    {
+        fseek( $fp, $logOffset );
+        $logText = (string)fread( $fp, min( 65536, $logSize - $logOffset ) );
+        fclose( $fp );
+    }
+}
+
 echo json_encode( array(
     'id' => $job['id'],
     'state' => $job['state'],
@@ -32,5 +64,7 @@ echo json_encode( array(
     'ended' => $job['ended'],
     'has_file' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $id ) . '/' . $job['output_file'] ),
     'progress' => $progress,
-) );
+    'install' => $installProgress,
+    'log' => array( 'text' => $logText, 'offset' => $logOffset + strlen( $logText ), 'size' => $logSize ),
+), JSON_INVALID_UTF8_SUBSTITUTE );
 eZExecution::cleanExit();

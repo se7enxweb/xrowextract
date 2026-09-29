@@ -176,10 +176,27 @@ if ( $options['install'] )
         $fail( '--class-mode is skip, replace or new.' );
     $siteAccess = $options['site-access'] ? $options['site-access'] : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
 
+    // What this install is about to write: the Jobs page counts these in the database while the
+    // kernel works (it reports nothing itself), so the job's progress is real, item by item
+    $contents = XrowExtractPackage::packageContents( $package );
+    $total = count( $contents['classes'] ) + count( $contents['objects'] );
+    $cli->output( sprintf( '[%s] Installing %s below node %d (siteaccess %s): %d class(es), %d object(s); existing objects: %s, existing classes: %s',
+                           date( 'H:i:s' ), $package->attribute( 'name' ), $parentNodeID, $siteAccess,
+                           count( $contents['classes'] ), count( $contents['objects'] ), $objectMode, $classMode ) );
     if ( $options['progress-file'] )
-        XrowExtractJob::writeProgress( (string)$options['progress-file'], 1, 2, 'installing' );
+    {
+        $watchFile = dirname( (string)$options['progress-file'] ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+        // One second back, so an object written in the very second the watch starts still counts
+        file_put_contents( $watchFile, json_encode( array( 'started' => time() - 1, 'classes' => $contents['classes'], 'objects' => $contents['objects'] ) ) );
+        XrowExtractJob::fixOwnership( $watchFile );
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, max( 1, $total ), 'installing' );
+    }
 
+    $installStarted = microtime( true );
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
+    $cli->output( sprintf( '[%s] The package system finished after %.1f s: %d class(es) and %d object(s) created or updated, %d error(s)',
+                           date( 'H:i:s' ), microtime( true ) - $installStarted,
+                           count( $report['created_classes'] ), count( $report['created_objects'] ), count( $report['errors'] ) ) );
     foreach ( $report['errors'] as $error )
         $cli->error( '  ' . $error );
     foreach ( $report['created_classes'] as $row )
@@ -190,7 +207,7 @@ if ( $options['install'] )
     if ( $options['output'] )
         file_put_contents( (string)$options['output'], json_encode( array( 'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
     if ( $options['progress-file'] )
-        XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 2, 'done' );
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], max( 1, $total ), max( 1, $total ), 'done' );
     $script->shutdown( $report['ok'] ? 0 : 1 );
 }
 

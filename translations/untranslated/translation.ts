@@ -4,6 +4,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(the last 64 KB)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Latest objects written</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Install package %name below %parent</source>
         <translation type="unfinished"></translation>
     </message>

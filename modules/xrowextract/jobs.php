@@ -79,6 +79,22 @@ $rows = array();
 foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
 {
     $progress = XrowExtractJob::readProgress( XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::PROGRESS_FILE );
+    // A package install: the classes and objects it has written so far, counted in the database
+    $install = null;
+    $watchFile = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::INSTALL_WATCH_FILE;
+    if ( $job['type'] === 'package' && is_file( $watchFile ) )
+    {
+        $install = XrowExtractPackage::installProgress( $watchFile );
+        if ( $install && $job['state'] === 'running' )
+            $progress = array( 'done' => $install['done'], 'total' => $install['total'],
+                               'phase' => sprintf( '%d/%d classes, %d/%d objects', $install['classes_done'], $install['classes_total'], $install['objects_done'], $install['objects_total'] ) );
+    }
+    // The end of the job's log (what it printed: steps, warnings, errors), 64 KB at most; the page's poll
+    // appends to it from this offset while the job runs
+    $logPath = XrowExtractJob::path( $job['id'] ) . '/' . XrowExtractJob::LOG_FILE;
+    $logSize = is_file( $logPath ) ? (int)@filesize( $logPath ) : 0;
+    $logFrom = max( 0, $logSize - 65536 );
+    $logText = $logSize ? (string)@file_get_contents( $logPath, false, null, $logFrom ) : '';
     $percent = 0;
     if ( is_array( $progress ) && !empty( $progress['total'] ) )
         $percent = max( 0, min( 100, (int)round( 100 * $progress['done'] / $progress['total'] ) ) );
@@ -86,7 +102,14 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'id' => $job['id'],
         'type' => $job['type'],
         'what' => $job['what'],
-        'format' => $job['format'],
+        // A package job's file is the .ezpkg (export) or a JSON install report: name what the job is
+        'format' => $job['type'] === 'package'
+                    ? ( is_file( $watchFile ) || strpos( (string)$job['output_file'], 'install' ) !== false ? 'ezpkg · install' : 'ezpkg · export' )
+                    : $job['format'],
+        'install' => $install,
+        'log_text' => $logText,
+        'log_offset' => $logSize,
+        'log_cut' => $logFrom > 0,
         'state' => $job['state'],
         'owner' => $job['owner'],
         'owner_user' => $ownerInfo( (string)$job['owner'] ),

@@ -19,6 +19,8 @@ class XrowExtractJob
     const JOB_FILE = 'job.json';
     const LOG_FILE = 'job.log';
     const PROGRESS_FILE = 'progress.json';
+    /** A package install's watch list (remote ids + start time), counted by XrowExtractPackage::installProgress() */
+    const INSTALL_WATCH_FILE = 'install-watch.json';
 
     /** The folder all jobs live in, created (and handed to the var directory's owner) if missing. */
     public static function baseDir()

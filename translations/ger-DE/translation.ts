@@ -2,6 +2,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Log</source>
+        <translation>Protokoll</translation>
+    </message>
+    <message>
+        <source>(the last 64 KB)</source>
+        <translation>(die letzten 64 KB)</translation>
+    </message>
+    <message>
+        <source>Latest objects written</source>
+        <translation>Zuletzt geschriebene Objekte</translation>
+    </message>
+    <message>
         <source>Install package %name below %parent</source>
         <translation>Paket %name unter %parent installieren</translation>
     </message>

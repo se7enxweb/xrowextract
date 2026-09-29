@@ -40,7 +40,7 @@
             {if $jobs|count|eq( 0 )}
             <p class="xe-columns-empty">{'No jobs yet. Start one from the "Run in the background" button on the class or site archive page.'|i18n('design/standard/extract')}</p>
             {else}
-            <ul class="xe-jobs" data-poll-base={'xrowextract/job_status'|ezurl} data-download-base={'xrowextract/job_download'|ezurl} data-download-label="{'Download'|i18n('design/standard/extract')|wash}">
+            <ul class="xe-jobs" data-log-label="{'Log'|i18n('design/standard/extract')|wash}" data-poll-base={'xrowextract/job_status'|ezurl} data-download-base={'xrowextract/job_download'|ezurl} data-download-label="{'Download'|i18n('design/standard/extract')|wash}">
                 {foreach $jobs as $job}
                 <li id="job-{$job.id|wash}" class="xe-job xe-job-{$job.state}" data-job-id="{$job.id|wash}" data-state="{$job.state|wash}"{if $job.active} data-poll="1"{/if}>
                     <div class="xe-job-main">
@@ -94,6 +94,25 @@
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
+                    {* A package install: what it has written so far, counted in the database, and the latest objects *}
+                    {if $job.install}
+                    <div class="xe-job-install" data-role="install">
+                        <ul class="xe-stats xe-job-counts">
+                            <li class="xe-badge xe-badge-create"><strong data-role="install-classes">{$job.install.classes_done}</strong> / {$job.install.classes_total} {'classes'|i18n('design/standard/extract')}</li>
+                            <li class="xe-badge xe-badge-update"><strong data-role="install-objects">{$job.install.objects_done}</strong> / {$job.install.objects_total} {'objects'|i18n('design/standard/extract')}</li>
+                        </ul>
+                        <ol class="xe-job-recent" data-role="install-recent" aria-label="{'Latest objects written'|i18n('design/standard/extract')|wash}">
+                            {foreach $job.install.recent as $recent}<li><a href={concat( 'content/view/full/', $recent.id )|ezurl}>{$recent.name|wash}</a> <small>{$recent.at|l10n( shorttime )}</small></li>{/foreach}
+                        </ol>
+                    </div>
+                    {/if}
+                    {* The job's own log: live while it runs (the poll appends from data-offset), kept afterwards *}
+                    {if or( $job.log_text|ne( '' ), $job.active )}
+                    <details class="xe-job-log"{if $job.active} open{/if}>
+                        <summary>{'Log'|i18n('design/standard/extract')}{if $job.log_cut} <small>{'(the last 64 KB)'|i18n('design/standard/extract')}</small>{/if}</summary>
+                        <pre class="xe-job-log-text" data-role="log" data-offset="{$job.log_offset}" tabindex="0">{$job.log_text|wash}</pre>
+                    </details>
+                    {/if}
                     {if $job.type|eq( 'import' )|and( $job.counts )}
                     <ul class="xe-stats xe-job-counts">
                         <li class="xe-badge xe-badge-create"><strong>{$job.counts.create}</strong> {'create'|i18n('design/standard/extract')}</li>

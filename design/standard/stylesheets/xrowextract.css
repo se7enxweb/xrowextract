@@ -766,3 +766,14 @@ li.xe-badge { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
     .xe-returned { animation: none; outline-color: rgba(37, 99, 235, .8); background-color: rgba(37, 99, 235, .1); }
 }
+
+/* Jobs: a job's own log (live while it runs) and a package install's latest objects */
+.xe-job-log { margin-top: .6em; }
+.xe-job-log > summary { cursor: pointer; font-weight: bold; font-size: .9em; }
+.xe-job-log-text {
+    margin: .4em 0 0; padding: .6em .8em; max-height: 18em; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+    font-size: .8em; line-height: 1.45; background: #0f172a; color: #e2e8f0; border-radius: 6px;
+}
+.xe-job-install { margin-top: .5em; }
+.xe-job-recent { margin: .4em 0 0; padding-left: 1.4em; font-size: .88em; color: var(--xe-muted); }
+.xe-job-recent li { margin: .1em 0; }

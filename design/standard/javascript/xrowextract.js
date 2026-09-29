@@ -818,7 +818,61 @@
         });
     }
 
+    // The job's log: append what the poll brought since the last offset; follow the end while the reader
+    // is at the bottom, leave the scroll alone when they scrolled up to read something
+    function applyLog(row, data) {
+        var log = data.log;
+        if (!log) {
+            return;
+        }
+        var el = row.querySelector('[data-role="log"]');
+        if (!el && log.text) {
+            var details = document.createElement('details');
+            details.className = 'xe-job-log';
+            details.open = true;
+            details.innerHTML = '<summary></summary><pre class="xe-job-log-text" data-role="log" data-offset="0" tabindex="0"></pre>';
+            details.querySelector('summary').textContent = list.getAttribute('data-log-label') || 'Log';
+            var anchor = row.querySelector('.xe-job-buttons');
+            row.insertBefore(details, anchor);
+            el = details.querySelector('[data-role="log"]');
+        }
+        if (!el || !log.text) {
+            return;
+        }
+        var atEnd = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+        el.appendChild(document.createTextNode(log.text));
+        el.setAttribute('data-offset', String(log.offset));
+        if (atEnd) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }
+
+    // A package install: classes/objects written so far (counted in the database) and the latest objects
+    function applyInstall(row, data) {
+        var install = data.install;
+        var box = row.querySelector('[data-role="install"]');
+        if (!install || !box) {
+            return;
+        }
+        setText(box, 'install-classes', String(install.classes_done));
+        setText(box, 'install-objects', String(install.objects_done));
+        var recent = box.querySelector('[data-role="install-recent"]');
+        if (recent && install.recent) {
+            recent.textContent = '';
+            install.recent.forEach(function (item) {
+                var li = document.createElement('li');
+                li.textContent = item.name + ' ';
+                var small = document.createElement('small');
+                small.textContent = new Date(item.at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                li.appendChild(small);
+                recent.appendChild(li);
+            });
+        }
+    }
+
     function applyState(row, data) {
+        applyLog(row, data);
+        applyInstall(row, data);
         row.className = row.className.replace(/\bxe-job-\S+/, 'xe-job-' + data.state);
         row.setAttribute('data-state', data.state);
         var badge = row.querySelector('[data-role="state"]');
@@ -880,7 +934,9 @@
         }
         rows.forEach(function (row) {
             var id = row.getAttribute('data-job-id');
-            fetch(pollBase + '/' + id, { credentials: 'same-origin' })
+            var logEl = row.querySelector('[data-role="log"]');
+            var logOffset = logEl ? (parseInt(logEl.getAttribute('data-offset'), 10) || 0) : 0;
+            fetch(pollBase + '/' + id + '?log_offset=' + logOffset, { credentials: 'same-origin' })
                 .then(function (response) { return response.ok ? response.json() : null; })
                 .then(function (data) { if (data && !data.error) { applyState(row, data); } })
                 .catch(function () {});

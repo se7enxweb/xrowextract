@@ -862,6 +862,72 @@ class XrowExtractPackage
     // ------------------------------------------------------------ install
 
     /**
+     * The remote ids of every class and object a package carries (from its own XML, cheaply: no
+     * inspection against the site), plus their names: what an install is about to write. Used by a
+     * background install to record what to count its progress against (see installProgress()).
+     */
+    public static function packageContents( eZPackage $package )
+    {
+        $contents = array( 'classes' => array(), 'objects' => array() );
+        foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
+        {
+            $row = self::inspectClassItem( $package, $item );
+            if ( $row && $row['remote_id'] )
+                $contents['classes'][] = array( 'remote_id' => $row['remote_id'], 'identifier' => $row['identifier'] );
+        }
+        foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
+            foreach ( self::objectDOMNodes( $package, $item ) as $node )
+                if ( $node->getAttribute( 'remote_id' ) )
+                    $contents['objects'][] = $node->getAttribute( 'remote_id' );
+        return $contents;
+    }
+
+    /**
+     * How far a running install is, read from the database: of the classes and objects the package
+     * carries (a watch file written by bin/php/package.php --install: remote ids + the start time), how
+     * many exist now and were written since the start, and the names of the latest ones. The kernel's
+     * package installer reports nothing while it works, so this is what the Jobs page shows as the
+     * job's real progress.
+     * @return array|null array( done, total, classes_done, objects_done, recent => list of names ) or null
+     */
+    public static function installProgress( $watchFile )
+    {
+        $watch = is_file( $watchFile ) ? json_decode( (string)@file_get_contents( $watchFile ), true ) : null;
+        if ( !is_array( $watch ) || empty( $watch['started'] ) )
+            return null;
+        $db = eZDB::instance();
+        $since = (int)$watch['started'];
+        $count = function ( $table, array $remoteIDs ) use ( $db, $since )
+        {
+            $done = 0;
+            foreach ( array_chunk( $remoteIDs, 500 ) as $chunk )
+            {
+                $in = implode( ', ', array_map( function ( $id ) use ( $db ) { return "'" . $db->escapeString( (string)$id ) . "'"; }, $chunk ) );
+                $rows = $db->arrayQuery( "SELECT count(*) AS n FROM $table WHERE remote_id IN ( $in ) AND modified >= $since" );
+                $done += (int)$rows[0]['n'];
+            }
+            return $done;
+        };
+        $classIDs = array();
+        foreach ( (array)$watch['classes'] as $class )
+            $classIDs[] = $class['remote_id'];
+        $objectIDs = (array)$watch['objects'];
+        $classesDone = $classIDs ? $count( 'ezcontentclass', $classIDs ) : 0;
+        $objectsDone = $objectIDs ? $count( 'ezcontentobject', $objectIDs ) : 0;
+        $recent = array();
+        if ( $objectIDs )
+        {
+            $in = implode( ', ', array_map( function ( $id ) use ( $db ) { return "'" . $db->escapeString( (string)$id ) . "'"; }, array_slice( $objectIDs, 0, 2000 ) ) );
+            foreach ( (array)$db->arrayQuery( "SELECT id, name, modified FROM ezcontentobject WHERE remote_id IN ( $in ) AND modified >= $since ORDER BY modified DESC, id DESC", array( 'limit' => 6 ) ) as $row )
+                $recent[] = array( 'id' => (int)$row['id'], 'name' => (string)$row['name'], 'at' => (int)$row['modified'] );
+        }
+        $total = count( $classIDs ) + count( $objectIDs );
+        return array( 'done' => min( $total, $classesDone + $objectsDone ), 'total' => $total,
+                      'classes_done' => $classesDone, 'classes_total' => count( $classIDs ),
+                      'objects_done' => $objectsDone, 'objects_total' => count( $objectIDs ), 'recent' => $recent );
+    }
+
+    /**
      * Installs a package through eZPackage::install(), the same convenience
      * method kernel/package/install.php's per-item loop is built on. All
      * "top" nodes the package carries (a content package's own root objects)
