@@ -46,6 +46,8 @@ $types = array(
     'csv' => 'text/csv', 'json' => 'application/json', 'xml' => 'application/xml',
     'zip' => 'application/zip', 'tar.gz' => 'application/gzip', 'tar.bz2' => 'application/x-bzip2',
     'tar.xz' => 'application/x-xz', '7z' => 'application/x-7z-compressed', 'rar' => 'application/vnd.rar',
+    // A content package (.ezpkg) is the same gzip-compressed tar a .tar.gz is, only the extension differs
+    'ezpkg' => 'application/gzip',
 );
 $ext = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 if ( preg_match( '/\.(tar\.(gz|bz2|xz))$/i', $path, $m ) )

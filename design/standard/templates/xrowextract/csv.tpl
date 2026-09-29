@@ -716,6 +716,7 @@
             <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
             {if and( $BackgroundAvailable, $has_prefilledata|not )}
             <input class="button" name="RunInBackground" type="submit" value="{'Run in the background'|i18n('design/standard/extract')}" title="{'Start this export as a job and come back to it: see the Jobs tab'|i18n('design/standard/extract')|wash}" />
+            <input class="button" name="ExportAsPackage" type="submit" value="{'Export as package'|i18n('design/standard/extract')}" title="{'This class, below the node chosen above, as a real content package (.ezpkg) - installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.'|i18n('design/standard/extract')|wash}" />
             {/if}
             <input class="defaultbutton" name="Download" type="submit" value="{'Download %type'|i18n('design/standard/extract',, hash( '%type', $OutputFormat|upcase ))}" />
         </div>

@@ -35,13 +35,13 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[list][inspect:][install:][export][template][parent:][dry-run][site-access:][object-mode:][class-mode:]' .
-    '[node:][subtree][class:][variant:][object-count:][languages:][name:][file:][user:][output:][progress-file:]',
+    '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][user:][output:][progress-file:]',
     '',
     array(
         'list'         => 'List the packages in the repository that carry a content class or content object',
         'inspect'      => 'Package name: show what it carries and what installing it would do (nothing is written)',
         'install'      => 'Package name: install it (through the same eZPackage::install() the web view uses)',
-        'export'       => 'Export a node/subtree of live content as a new package (--node, optionally --subtree/--class)',
+        'export'       => 'Export a node/subtree (or several, --nodes) of live content as a new package (--node, optionally --subtree/--class)',
         'template'     => 'Build a sample content+class package for --class (--variant class/content/both, default both)',
         'parent'       => '--install: the parent node id for the package\'s own top-level objects',
         'dry-run'      => '--install: inspect only, do not write anything',
@@ -49,16 +49,17 @@ $options = $script->getOptions(
         'object-mode'  => '--install: skip, update (default) or new, for an object that already exists (matched by remote id)',
         'class-mode'   => '--install: skip (default), replace or new, for a class that already exists (matched by remote id/identifier)',
         'node'         => '--export: the node id to export',
-        'subtree'      => '--export: the whole subtree below --node, not only that node',
-        'class'        => '--export: only this class below --node (id or identifier); --template: the class to build a sample for (required)',
+        'nodes'        => '--export: several node ids, comma-separated (the whole One class/Site archive selection); an alternative to --node',
+        'subtree'      => '--export: the whole subtree below --node/--nodes, not only that node',
+        'class'        => '--export: only this class below --node (id or identifier, --node only, not --nodes); --template: the class to build a sample for (required)',
         'variant'      => '--template: class, content or both (default both)',
         'object-count' => '--template: how many sample content objects to create (default 3, max 5)',
         'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages)',
         'name'         => '--export: package name (default: a name derived from the node)',
-        'file'         => '--export/--template: file to write the .ezpkg to (required)',
+        'file'         => '--export/--template: file to write the .ezpkg to (default: --output, set by a background job)',
         'user'         => 'Run with the access rights of this login (default: admin)',
-        'output'       => '--inspect/--install: also write a JSON report here (for a background job; see bin/php/job.php)',
-        'progress-file' => '--install: write {"done":n,"total":m,"phase":"..."} to this path after each phase (for a background job)',
+        'output'       => '--inspect/--install/--export: also write a JSON report (inspect/install) or the archive itself (export) here (for a background job; see bin/php/job.php)',
+        'progress-file' => '--install/--export: write {"done":n,"total":m,"phase":"..."} to this path after each phase (for a background job)',
     )
 );
 $script->initialize();
@@ -167,41 +168,120 @@ if ( $options['install'] )
 
 if ( $options['export'] )
 {
-    if ( !$options['node'] )
-        $fail( 'Missing --node.' );
-    if ( !$options['file'] )
-        $fail( 'Missing --file.' );
-    $nodeID = (int)$options['node'];
-    $node = eZContentObjectTreeNode::fetch( $nodeID );
-    if ( !$node instanceof eZContentObjectTreeNode )
-        $fail( "No node $nodeID (--node)." );
+    $exportFile = $options['file'] ? (string)$options['file'] : (string)$options['output'];
+    if ( !$exportFile )
+        $fail( 'Missing --file (or --output, set automatically for a background job).' );
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 3, 'collecting' );
+
+    $nodeIDs = array();
+    if ( $options['nodes'] )
+    {
+        foreach ( explode( ',', (string)$options['nodes'] ) as $piece )
+            if ( ctype_digit( trim( $piece ) ) )
+                $nodeIDs[] = (int)trim( $piece );
+    }
+    elseif ( $options['node'] )
+    {
+        $nodeIDs[] = (int)$options['node'];
+    }
+    else
+    {
+        $fail( 'Missing --node or --nodes.' );
+    }
+    $nodeIDs = array_values( array_unique( array_filter( $nodeIDs ) ) );
+    $firstNode = null;
+    foreach ( $nodeIDs as $nodeID )
+    {
+        $node = eZContentObjectTreeNode::fetch( $nodeID );
+        if ( !$node instanceof eZContentObjectTreeNode )
+            $fail( "No node $nodeID (--node/--nodes)." );
+        if ( $firstNode === null )
+            $firstNode = $node;
+    }
+
     $classID = false;
+    $classIdentifier = false;
     if ( $options['class'] )
     {
+        if ( $options['nodes'] )
+            $fail( '--class only works with a single --node, not --nodes.' );
         $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)$options['class'] ) : eZContentClass::fetchByIdentifier( $options['class'] );
         if ( !$class instanceof eZContentClass )
             $fail( "No class {$options['class']} (--class)." );
         $classID = (int)$class->attribute( 'id' );
+        $classIdentifier = $class->attribute( 'identifier' );
     }
 
-    $packageName = $options['name'] ? $options['name'] : ( 'xrowextract_export_' . preg_replace( '/[^A-Za-z0-9_]+/', '_', $node->attribute( 'name' ) ) . '_' . $nodeID );
-    $package = eZPackage::create( $packageName, array( 'summary' => 'Exported below node ' . $nodeID . ' (' . $node->attribute( 'name' ) . ')', 'vendor' => 'xrowextract' ) );
-    XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, below node ' . $nodeID . ' (' . $node->attribute( 'name' ) . ').' );
+    $packageName = $options['name'] ? $options['name']
+                 : ( 'xrowextract_export_' . preg_replace( '/[^A-Za-z0-9_]+/', '_', $firstNode->attribute( 'name' ) ) . '_' . $firstNode->attribute( 'node_id' ) );
+    $summaryWhat = count( $nodeIDs ) > 1 ? ( count( $nodeIDs ) . ' selected nodes' ) : ( 'below node ' . $nodeIDs[0] . ' (' . $firstNode->attribute( 'name' ) . ')' );
+    $package = eZPackage::create( $packageName, array( 'summary' => 'Exported ' . $summaryWhat, 'vendor' => 'xrowextract' ) );
+    XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, ' . $summaryWhat . '.' );
     $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
-    $objectHandler->addNode( $nodeID, (bool)$options['subtree'] );
+
+    if ( $classID && $options['subtree'] )
+    {
+        // No node-level class filter exists in the kernel handler's own addNode()/
+        // generateObjectArray() - every matching node in the subtree is collected here instead
+        // (paged, no cap: "One class" export can be as large as the class itself) and each is
+        // added on its own, non-recursively - addNode()'s own $isSubtree only means "this node
+        // plus everything below it", nothing narrower.
+        $offset = 0;
+        $batch = 500;
+        $matched = 0;
+        do
+        {
+            $found = $firstNode->subTree( array(
+                'ClassFilterType' => 'include', 'ClassFilterArray' => array( $classIdentifier ),
+                'Offset' => $offset, 'Limit' => $batch, 'SortBy' => array( array( 'node_id', true ) ),
+            ) );
+            foreach ( (array)$found as $foundNode )
+            {
+                $objectHandler->addNode( (int)$foundNode->attribute( 'node_id' ), false );
+                $matched++;
+            }
+            $offset += $batch;
+            if ( $options['progress-file'] && $matched > 0 )
+                XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 3, "collecting ($matched matched)" );
+        }
+        while ( count( (array)$found ) === $batch );
+        // The class-filtered subtree walk above never revisits the root itself unless it is of
+        // that class too - check it on its own so "the root is of this class" is not silently dropped
+        if ( $firstNode->attribute( 'object' )->attribute( 'class_identifier' ) === $classIdentifier )
+            $objectHandler->addNode( $nodeIDs[0], false );
+    }
+    elseif ( $classID )
+    {
+        // Not a subtree: the one node itself, only if it is that class
+        if ( $firstNode->attribute( 'object' )->attribute( 'class_identifier' ) === $classIdentifier )
+            $objectHandler->addNode( $nodeIDs[0], false );
+    }
+    else
+    {
+        foreach ( $nodeIDs as $nodeID )
+            $objectHandler->addNode( $nodeID, (bool)$options['subtree'] );
+    }
+
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 1, 3, 'serializing' );
     $objectHandler->generatePackage( $package, array(
         'include_classes'   => true,
         'include_templates' => false,
         'site_access_array' => array(),
         'versions'          => 'current',
         'language_array'    => array_keys( XrowExtractColumns::contentLanguages() ),
-        'node_assignment'   => $options['subtree'] ? 'selected' : 'selected',
+        'node_assignment'   => 'selected',
         'related_objects'   => 'selected',
         'embed_objects'     => 'selected',
     ) );
     $package->setAttribute( 'is_active', true );
     $package->store();
-    $exportPath = $package->exportToArchive( (string)$options['file'] );
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 3, 'archiving' );
+    $exportPath = $package->exportToArchive( $exportFile );
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 3, 3, 'done' );
     $cli->output( "PASS wrote $exportPath (package '{$package->attribute( 'name' )}')" );
     $script->shutdown( 0 );
 }

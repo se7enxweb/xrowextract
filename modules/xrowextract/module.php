@@ -6,13 +6,13 @@ $ViewList = array();
 $ViewList['csv'] = array( 'script' => 'csv.php',
                           'functions' => array( 'csv' ),
             			  'default_navigation_part' => 'ezextractnavigationpart',
-            			  'post_actions' => array( 'Download', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData', 'RunInBackground' ),
+            			  'post_actions' => array( 'Download', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData', 'RunInBackground', 'ExportAsPackage' ),
             			  'params' => array() );
 
 $ViewList['archive'] = array( 'script' => 'archive.php',
                               'functions' => array( 'csv' ),
                               'default_navigation_part' => 'ezextractnavigationpart',
-                              'post_actions' => array( 'DownloadArchive', 'BrowseArchiveNode', 'RunInBackground' ),
+                              'post_actions' => array( 'DownloadArchive', 'BrowseArchiveNode', 'RunInBackground', 'ExportAsPackage' ),
                               'params' => array() );
 
 // Background export jobs: the jobs page, its JSON poll and its download, one class attribute
