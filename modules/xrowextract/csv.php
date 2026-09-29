@@ -154,7 +154,11 @@ $tpl->setVariable( 'Limit', $Limit );
 $tpl->setVariable( 'Offset', $Offset );
 
 // What is the default subtree
-if ( ! $http->hasPostVariable( 'Subtree' ) )
+if ( ! $http->hasPostVariable( 'Subtree' ) && isset( $sessionConfig['Subtree'] ) && (int)$sessionConfig['Subtree'] > 0 )
+{
+    $Subtree = (int)$sessionConfig['Subtree'];
+}
+elseif ( ! $http->hasPostVariable( 'Subtree' ) )
 {
     $Subtree = ( $ini_bis->variable( 'ExportSettings', 'StartNodeID' ) == '' ) ? $ini->variable( 'UserSettings', 'DefaultUserPlacement' ) : $ini_bis->variable( 'ExportSettings', 'StartNodeID' );
 }
@@ -199,11 +203,23 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
         $Subtree = $nodes[0];
 }
 $Subtree = (int)$Subtree;
+$sessionConfig['Subtree'] = $Subtree;
 
 // Scope: below the chosen node, or every object of the class in the whole site (read from the top of the
 // tree, at main locations, so each object is one row). The chosen node stays for switching back.
-$Scope = $http->hasPostVariable( 'Scope' ) ? ( $http->postVariable( 'Scope' ) === 'all' ? 'all' : 'node' )
-                                           : ( isset( $sessionConfig['Scope'] ) && $sessionConfig['Scope'] === 'all' ? 'all' : 'node' );
+// list: the node's direct children; tree: its whole subtree; all: the whole site. A form without the
+// three-way choice (or "node") keeps the depth field it posted.
+$scopeIn = $http->hasPostVariable( 'Scope' ) ? (string)$http->postVariable( 'Scope' )
+                                             : ( isset( $sessionConfig['Scope'] ) ? (string)$sessionConfig['Scope'] : '' );
+if ( $scopeIn === 'node' || $scopeIn === '' )
+    $scopeIn = $type;
+$Scope = in_array( $scopeIn, array( 'list', 'tree', 'all' ), true ) ? $scopeIn : 'tree';
+if ( $Scope !== 'all' )
+{
+    $type = $Scope;
+    $depth = $type == 'list' ? 1 : false;
+    $depthOperator = $type == 'list' ? 'eq' : false;
+}
 $sessionConfig['Scope'] = $Scope;
 $FetchSubtree = $Subtree;
 $FetchMainnodeonly = $Mainnodeonly;
@@ -429,6 +445,12 @@ $tpl->setVariable( 'ClassChoices', $ClassChoices );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
 $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
 $tpl->setVariable( 'ExportableDatatypes', (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) );
+// The exported datatypes by name, for the sidebar
+$datatypeNames = array();
+foreach ( array_unique( (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) ) as $datatype )
+    $datatypeNames[] = array( 'id' => $datatype, 'name' => XrowExtractColumns::datatypeName( $datatype ), 'cell' => (string)XrowExtractColumns::cellDescription( $datatype ) );
+usort( $datatypeNames, function ( $a, $b ) { return strcasecmp( $a['name'], $b['name'] ); } );
+$tpl->setVariable( 'ExportableDatatypeNames', $datatypeNames );
 
 // Download and preview build the file the same way; the preview reads it back as a spreadsheet would
 $isPreview = !$http->hasPostVariable( 'Download' ) && $http->hasPostVariable( 'Preview' );

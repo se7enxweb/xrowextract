@@ -460,3 +460,11 @@
 /* Parts of the selection that do not apply to the whole site */
 .xe-inactive { opacity: .45; }
 .xe-inactive:hover, .xe-inactive:focus-within { opacity: .8; }
+
+/* The sidebar's list of exported datatypes: one per line, name first */
+.xe-side ul.xe-typelist { margin: .4em 0 0; padding: 0; list-style: none; }
+.xe-side ul.xe-typelist li { margin: 0; padding: .25em 0; border-bottom: 1px solid #eee; line-height: 1.35; }
+.xe-side ul.xe-typelist li:last-child { border-bottom: 0; }
+.xe-side ul.xe-typelist code { color: #666; font-size: .85em; }
+.xe-side ul.xe-typelist small { display: block; color: #777; }
+.xe-side ul.xe-typelist li.xe-typelist-missing { opacity: .6; }

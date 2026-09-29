@@ -2,6 +2,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>The direct children of the node</source>
+        <translation>Die direkten Unterelemente des Knotens</translation>
+    </message>
+    <message>
+        <source>Everything below the node, at every depth</source>
+        <translation>Alles unterhalb des Knotens, in jeder Tiefe</translation>
+    </message>
+    <message>
+        <source>Below a node tree</source>
+        <translation>Unterhalb eines Knotenbaums</translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed</source>
+        <translation>Jedes Objekt der Klasse, wo immer es platziert ist</translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed, one row each at its main location. The node and main locations below do not apply.</source>
+        <translation>Jedes Objekt der Klasse, wo immer es platziert ist, je eine Zeile an seiner Hauptplatzierung. Knoten und Hauptplatzierungen darunter gelten dafür nicht.</translation>
+    </message>
+    <message>
+        <source>The direct children of the node below.</source>
+        <translation>Die direkten Unterelemente des Knotens darunter.</translation>
+    </message>
+    <message>
+        <source>Everything below the node, at every depth.</source>
+        <translation>Alles unterhalb des Knotens, in jeder Tiefe.</translation>
+    </message>
+    <message>
+        <source>Locations</source>
+        <translation>Platzierungen</translation>
+    </message>
+    <message>
+        <source>not installed on this site</source>
+        <translation>auf dieser Seite nicht installiert</translation>
+    </message>
+    <message>
         <source>Include password hashes</source>
         <translation>Passwort-Hashes aufnehmen</translation>
     </message>

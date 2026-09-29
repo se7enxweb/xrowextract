@@ -4,6 +4,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>The direct children of the node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything below the node, at every depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Below a node tree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed, one row each at its main location. The node and main locations below do not apply.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The direct children of the node below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything below the node, at every depth.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Locations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not installed on this site</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Include password hashes</source>
         <translation type="unfinished"></translation>
     </message>

@@ -59,10 +59,20 @@
 <details>
     <summary>{'Exported datatypes'|i18n( 'design/standard/extract' )}</summary>
     <p class="xe-side-lead">{'Attributes of other datatypes give empty cells.'|i18n( 'design/standard/extract' )}</p>
-    <ul class="xe-types">
-        {foreach ezini( 'General', 'ExportableDatatypes', 'csv.ini' ) as $datatype}
-        <li>{$datatype|wash}</li>
+    <ul class="xe-typelist">
+        {if is_set( $ExportableDatatypeNames )}
+        {foreach $ExportableDatatypeNames as $datatype}
+        {if $datatype.name|eq( $datatype.id )}
+        <li class="xe-typelist-missing"><code>{$datatype.id|wash}</code> <small>{'not installed on this site'|i18n( 'design/standard/extract' )}</small></li>
+        {else}
+        <li><strong>{$datatype.name|wash}</strong> <code>{$datatype.id|wash}</code>{if $datatype.cell} <small>→ {$datatype.cell|wash}</small>{/if}</li>
+        {/if}
         {/foreach}
+        {else}
+        {foreach ezini( 'General', 'ExportableDatatypes', 'csv.ini' ) as $datatype}
+        <li><code>{$datatype|wash}</code></li>
+        {/foreach}
+        {/if}
     </ul>
 </details>
 

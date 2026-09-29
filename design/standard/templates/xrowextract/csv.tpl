@@ -41,10 +41,11 @@
             <div class="xe-field">
                 <span class="xe-label" id="xe-scope-label">{'Scope'|i18n('design/standard/extract')}</span>
                 <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-scope-label">
-                    <label><input type="radio" name="Scope" value="node" class="xe-autosubmit"{if $Scope|ne( 'all' )} checked{/if} /><span>{'Below a node'|i18n('design/standard/extract')}</span></label>
-                    <label><input type="radio" name="Scope" value="all" class="xe-autosubmit"{if $Scope|eq( 'all' )} checked{/if} /><span>{'Whole site'|i18n('design/standard/extract')}</span></label>
+                    <label title="{'The direct children of the node'|i18n('design/standard/extract')|wash}"><input type="radio" name="Scope" value="list" class="xe-autosubmit"{if $Scope|eq( 'list' )} checked{/if} /><span>{'Below a node'|i18n('design/standard/extract')}</span></label>
+                    <label title="{'Everything below the node, at every depth'|i18n('design/standard/extract')|wash}"><input type="radio" name="Scope" value="tree" class="xe-autosubmit"{if $Scope|eq( 'tree' )} checked{/if} /><span>{'Below a node tree'|i18n('design/standard/extract')}</span></label>
+                    <label title="{'Every object of the class, wherever it is placed'|i18n('design/standard/extract')|wash}"><input type="radio" name="Scope" value="all" class="xe-autosubmit"{if $Scope|eq( 'all' )} checked{/if} /><span>{'Whole site'|i18n('design/standard/extract')}</span></label>
                 </div>
-                <p class="xe-help">{if $Scope|eq( 'all' )}{'Every object of the class, wherever it is placed, one row each at its main location. The node, depth and main locations below do not apply.'|i18n('design/standard/extract')}{else}{'Whole site exports every object of the class, wherever it is placed, in one file.'|i18n('design/standard/extract')}{/if}</p>
+                <p class="xe-help">{if $Scope|eq( 'all' )}{'Every object of the class, wherever it is placed, one row each at its main location. The node and main locations below do not apply.'|i18n('design/standard/extract')}{elseif $Scope|eq( 'list' )}{'The direct children of the node below.'|i18n('design/standard/extract')}{else}{'Everything below the node, at every depth.'|i18n('design/standard/extract')}{/if}</p>
             </div>
             <div class="xe-field{if $Scope|eq( 'all' )} xe-inactive{/if}">
                 <span class="xe-label">{'Node'|i18n('design/standard/extract')}</span>
@@ -95,11 +96,7 @@
 
                 {if $has_prefilledata|not}
                 <div class="xe-field{if $Scope|eq( 'all' )} xe-inactive{/if}">
-                    <span class="xe-label" id="xe-depth-label">{'Depth'|i18n('design/standard/extract')}</span>
-                    <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-depth-label">
-                        <label><input type="radio" name="type" value="tree"{if $Type|ne( 'list' )} checked{/if} /><span>{'Whole subtree'|i18n('design/standard/extract')}</span></label>
-                        <label><input type="radio" name="type" value="list"{if $Type|eq( 'list' )} checked{/if} /><span>{'Direct children'|i18n('design/standard/extract')}</span></label>
-                    </div>
+                    <span class="xe-label">{'Locations'|i18n('design/standard/extract')}</span>
                     <label class="xe-check"><input type="checkbox" name="mainnodeonly" value="1"{if $Mainnodeonly|eq( '1' )} checked{/if} /> {'Main locations only'|i18n('design/standard/extract')}</label>
                     <p class="xe-help">{'An object with several locations is then one row, not one per location.'|i18n('design/standard/extract')}</p>
                 </div>
