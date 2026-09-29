@@ -260,6 +260,10 @@
                 </div>
             </header>
 
+            {if and( is_set( $ImportManifest ), $ImportManifest )}
+            <p class="xe-note" role="status">{'The file has a typed column manifest: %exact of %all columns are mapped exactly from it, not guessed from their names.'|i18n('design/standard/extract',, hash( '%exact', $ImportManifest.matched|count, '%all', $FileHeader|count ))}
+                {if $ImportManifest.checksum|eq( 'mismatch' )}<strong>{'The file was changed after the export (its checksum differs from the manifest).'|i18n('design/standard/extract')}</strong>{/if}</p>
+            {/if}
             {if $Mapping|count|eq( 0 )}
             <p class="xe-empty-state">{'The file has no columns.'|i18n('design/standard/extract')}</p>
             {else}

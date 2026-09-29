@@ -29,7 +29,8 @@ $options = $script->getOptions(
     '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
     '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
     '[extended-filter:][extended-params:][fetch-alias:][alias-param:*][preset:][param:*][list-presets][show-preset:]' .
-    '[output:][preview;][list-classes][list-columns][user:][progress-file:]',
+    '[output:][preview;][list-classes][list-columns][user:][progress-file:]' .
+    '[changed-since:][lenient][no-manifest][schedule:][run-mode:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export, unless --fetch-alias names one)',
@@ -78,6 +79,11 @@ $options = $script->getOptions(
         'list-columns' => 'List the attributes of --class with datatype and meta information, and the special columns',
         'user'         => 'Export with the read access of this login (default: admin)',
         'progress-file' => 'Write {"done":n,"total":m,"phase":"<locale>"} to this path after every batch (for a background job)',
+        'changed-since' => 'Only objects modified after this Unix time or date, on top of every other filter (a preset\'s own filters included): a delta run',
+        'lenient'      => 'Skip what no longer resolves (a deleted column, condition field, node or class of a preset) with a WARNING line instead of failing; exit code 3 when nothing is left to export',
+        'no-manifest'  => 'Write no typed column manifest (default: <file>.manifest.json next to the file, and embedded in XML/JSON)',
+        'schedule'     => 'The schedule this run belongs to (recorded in the manifest)',
+        'run-mode'     => 'full or delta (recorded in the manifest)',
     )
 );
 $script->initialize();
@@ -87,6 +93,32 @@ $fail = function ( $message ) use ( $cli, $script )
     $cli->error( $message );
     $script->shutdown( 1 );
 };
+// --lenient: what no longer resolves is a WARNING line (bin/php/job.php collects them for the history
+// and the notifications), not a failure; exit code 3 means nothing was left to export at all
+$warnings = array();
+$lenient = (bool)$options['lenient'];
+$warnToStderr = $options['output'] === '-';
+$warn = function ( $message ) use ( $cli, &$warnings, $warnToStderr )
+{
+    $warnings[] = $message;
+    if ( $warnToStderr )
+        fwrite( STDERR, 'WARNING: ' . $message . "\n" ); // the file itself goes to stdout
+    else
+        $cli->output( 'WARNING: ' . $message );
+};
+$skipRun = function ( $message ) use ( $cli, $script, $warn )
+{
+    $warn( $message );
+    $cli->output( 'Nothing left to export; skipped.' );
+    $script->shutdown( 3 );
+};
+$changedSince = false;
+if ( $options['changed-since'] )
+{
+    $changedSince = ctype_digit( (string)$options['changed-since'] ) ? (int)$options['changed-since'] : XrowExtractFilters::timestamp( $options['changed-since'] );
+    if ( !$changedSince )
+        $fail( "Cannot read the date in --changed-since: {$options['changed-since']}" );
+}
 
 /**
  * key=value pairs from a repeatable option ("[name:*]" in the option string, so $optionValue is an array,
@@ -174,7 +206,11 @@ if ( $options['preset'] )
     $presetParamOverrides = $parseKeyValueOption( $options['param'] );
     $resolvedForRun = XrowExtractPreset::resolve( $options['preset'], $options['node'] ? (int)$options['node'] : 0, $presetParamOverrides );
     if ( $resolvedForRun['error'] !== '' )
+    {
+        if ( $lenient && strpos( $resolvedForRun['error'], 'not found' ) !== false )
+            $skipRun( "The preset {$options['preset']} no longer resolves: {$resolvedForRun['error']}" );
         $fail( "--preset: {$resolvedForRun['error']}" );
+    }
     $filledForRun = XrowExtractPreset::fillPlaceholders( $resolvedForRun['definition'], $resolvedForRun['placeholders'], $presetParamOverrides );
     $presetDef = $filledForRun['definition'];
     if ( $filledForRun['unresolved'] )
@@ -187,6 +223,8 @@ if ( $options['preset'] )
         $presetClassForRun = eZContentClass::fetchByIdentifier( $presetDef['class_identifier'] );
         if ( $presetClassForRun instanceof eZContentClass )
             $presetValues['class_id'] = (int)$presetClassForRun->attribute( 'id' );
+        elseif ( $lenient && !$options['class'] )
+            $skipRun( "The class {$presetDef['class_identifier']} of the preset no longer exists." );
     }
     if ( !isset( $presetValues['class_id'] ) && isset( $presetDef['class_id'] ) )
         $presetValues['class_id'] = (int)$presetDef['class_id'];
@@ -220,6 +258,11 @@ if ( $options['preset'] )
 $scope = $options['scope'] === 'all' ? 'all' : 'node';
 if ( $options['scope'] && !in_array( $options['scope'], array( 'node', 'all' ), true ) )
     $fail( '--scope is node or all.' );
+// A preset's own scope, as the view reads it: "all" (the whole site) or "list" (direct children only)
+if ( !$options['scope'] && isset( $presetDef['scope'] ) && $presetDef['scope'] === 'all' )
+    $scope = 'all';
+if ( !$options['depth'] && isset( $presetDef['scope'] ) && $presetDef['scope'] === 'list' )
+    $options['depth'] = 'list';
 // A named fetch or a preset that takes the node as a Parameter[], but was not actually given one (no
 // --alias-param/--param and no --node to fall back on), resolves to 0 rather than a real node — that is
 // not "node 0", it is "no node was ever supplied", so it defaults the same way plain --node absent does,
@@ -269,7 +312,11 @@ else
 {
     $node = eZContentObjectTreeNode::fetch( $nodeID );
     if ( !$node instanceof eZContentObjectTreeNode || !$node->canRead() )
+    {
+        if ( $lenient )
+            $skipRun( "Node $nodeID no longer exists or $login may not read it." );
         $fail( "Node $nodeID does not exist or $login may not read it (--node)." );
+    }
 }
 $offset = isset( $aliasValues['offset'] ) ? $aliasValues['offset'] : max( 0, (int)$options['offset'] );
 $limit = isset( $aliasValues['limit'] ) ? $aliasValues['limit'] : max( 0, (int)$options['limit'] );
@@ -381,6 +428,19 @@ $explicitFilterOption = $options['since'] || $options['before'] || $options['dat
                        || $options['state'] || $options['visibility'] || $options['name'] || $options['where'] || $options['extended-filter'];
 if ( !$explicitFilterOption && isset( $presetDef['filters'] ) && is_array( $presetDef['filters'] ) )
     $filterValues = $presetDef['filters'];
+// A delta run: only objects modified after the last successful run, on top of every other filter. The
+// kernel's attribute filter has one date filter; a preset's own date filter is replaced (and said so).
+if ( $changedSince )
+{
+    if ( isset( $filterValues['date_mode'] ) && $filterValues['date_mode'] !== 'any' && $filterValues['date_mode'] !== 'since_last' )
+        $warn( 'The delta run replaces the date filter of this export (' . $filterValues['date_mode'] . ' on ' . ( isset( $filterValues['date_field'] ) ? $filterValues['date_field'] : 'modified' ) . ').' );
+    if ( isset( $filterValues['conditions_join'] ) && $filterValues['conditions_join'] === 'or' && !empty( $filterValues['conditions'] ) )
+        $warn( 'The conditions are joined with "or", which the fetch applies to the whole filter: the delta run may export unchanged objects too.' );
+    $filterValues['date_mode'] = 'since';
+    $filterValues['date_from'] = (string)$changedSince;
+    $filterValues['date_to'] = '';
+    $filterValues['date_field'] = 'modified';
+}
 $filters = new XrowExtractFilters( $filterValues );
 $attributeFilter = false;   // set once the class is known
 
@@ -420,14 +480,28 @@ if ( !$classOption )
     $fail( 'Missing --class (id or identifier). --list-classes shows them.' );
 $class = ctype_digit( (string)$classOption ) ? eZContentClass::fetch( (int)$classOption ) : eZContentClass::fetchByIdentifier( $classOption );
 if ( !$class instanceof eZContentClass )
+{
+    if ( $lenient )
+        $skipRun( "The class $classOption no longer exists." );
     $fail( "No class $classOption (--class)." );
+}
 $classID = (int)$class->attribute( 'id' );
 $conditionFields = array_merge( XrowExtractFilters::classFields( $classID ), XrowExtractFilters::objectFields() );
-foreach ( $filters->values['conditions'] as $condition )
+foreach ( $filters->values['conditions'] as $conditionIndex => $condition )
 {
     if ( $condition['field'] !== '' && !array_key_exists( $condition['field'], $conditionFields ) )
+    {
+        if ( $lenient )
+        {
+            // A condition on an attribute that was removed from the class: dropped, not guessed
+            $warn( "The condition on {$condition['field']} was skipped: it is no longer an attribute of " . $class->attribute( 'identifier' ) . '.' );
+            unset( $filters->values['conditions'][$conditionIndex] );
+            continue;
+        }
         $fail( "--where: {$condition['field']} is not a class attribute of " . $class->attribute( 'identifier' ) . ' or a known object field.' );
+    }
 }
+$filters->values['conditions'] = array_values( $filters->values['conditions'] );
 $attributeFilter = $filters->attributeFilter( $class->attribute( 'identifier' ) );
 $meta = XrowExtractColumns::attributeMeta( $classID );
 $extras = XrowExtractColumns::extraAttributes();
@@ -487,12 +561,20 @@ if ( $presetColumns )
     foreach ( $presetColumns as $presetColumn )
     {
         if ( !isset( $presetColumn['id'] ) || !isset( $byId[$presetColumn['id']] ) )
-            continue; // a stale preset column (a renamed/removed attribute): skipped rather than failing the export
+        {
+            // a stale preset column (a renamed/removed attribute): skipped rather than failing the export
+            $warn( 'The column ' . ( isset( $presetColumn['id'] ) ? $presetColumn['id'] : '?' ) . ' of the preset was skipped: it no longer exists on ' . $class->attribute( 'identifier' ) . '.' );
+            continue;
+        }
         $columns[] = array( 'id' => $presetColumn['id'], 'name' => isset( $presetColumn['name'] ) ? $presetColumn['name'] : $presetColumn['id'],
                             'exportname' => isset( $presetColumn['exportname'] ) && $presetColumn['exportname'] !== '' ? $presetColumn['exportname'] : $presetColumn['id'] );
     }
     if ( !$columns )
+    {
+        if ( $lenient )
+            $skipRun( 'None of the preset\'s own columns exist on ' . $class->attribute( 'identifier' ) . ' any more.' );
         $fail( 'The preset\'s own columns no longer exist on this class; pass --columns explicitly.' );
+    }
 }
 else
 {
@@ -513,9 +595,18 @@ $wanted = array_values( array_unique( $wanted ) );
 foreach ( $wanted as $id )
 {
     if ( !isset( $byId[$id] ) )
+    {
+        if ( $lenient )
+        {
+            $warn( "The column $id was skipped: it no longer exists on " . $class->attribute( 'identifier' ) . '.' );
+            continue;
+        }
         $fail( "Unknown column $id for class " . $class->attribute( 'identifier' ) . '. --list-columns shows them.' );
+    }
     $columns[] = $byId[$id];
 }
+if ( !$columns && $lenient )
+    $skipRun( 'None of the columns exist on ' . $class->attribute( 'identifier' ) . ' any more.' );
 }
 if ( $options['names'] )
 {
@@ -579,6 +670,16 @@ if ( isset( $aliasValues['sort_by'] ) )
     $sort2Option = isset( $aliasSortPairs[1][0] ) ? $aliasSortPairs[1][0] : '';
     $order2Option = ( isset( $aliasSortPairs[1][1] ) && $aliasSortPairs[1][1] ) ? 'asc' : 'desc';
 }
+foreach ( array( 'sortOption' => '--sort', 'sort2Option' => '--sort2' ) as $sortVariable => $sortOptionName )
+{
+    $sortValue = $$sortVariable;
+    if ( $lenient && $sortValue && $sortValue !== 'tree' && !array_key_exists( $sortValue, XrowExtractFilters::sortFields() )
+         && !array_key_exists( $sortValue, XrowExtractFilters::classFields( $classID ) ) )
+    {
+        $warn( "The sort by $sortValue was skipped: it is no longer a sortable attribute of " . $class->attribute( 'identifier' ) . '.' );
+        $$sortVariable = '';
+    }
+}
 if ( $sortOption && $sortOption !== 'tree' )
 {
     if ( !array_key_exists( $sortOption, XrowExtractFilters::sortFields() ) && !array_key_exists( $sortOption, XrowExtractFilters::classFields( $classID ) ) )
@@ -601,8 +702,23 @@ if ( $limit )
 if ( $previewRows )
     $wantRows = min( $wantRows, $previewRows );
 
+// The typed column manifest: embedded in XML/JSON, and written next to the file (not for a preview or stdout)
+$wantManifest = !$previewRows && !$options['no-manifest'];
+$manifest = null;
+if ( $wantManifest )
+{
+    $manifest = XrowExtractManifest::build( array(
+        'type' => 'csv', 'format' => $outputFormat, 'separator' => $separator, 'quoted' => !$unquoted, 'line_endings' => $newLine,
+        'languages' => $languages, 'columns' => $columns, 'class_id' => $classID, 'allow_password_hash' => $allowHash,
+        'filters' => $filters->values, 'preset' => $options['preset'] ? $options['preset'] : null,
+        'schedule' => $options['schedule'] ? (int)$options['schedule'] : null, 'run_mode' => $options['run-mode'] ? $options['run-mode'] : ( $changedSince ? 'delta' : 'full' ),
+        'selection' => array( 'scope' => $scope, 'node_id' => $scope === 'all' ? null : $nodeID, 'depth' => $depth, 'depth_operator' => $depthOperator,
+                              'main_only' => $mainOnly, 'offset' => $offset, 'limit' => $limit, 'changed_since' => $changedSince ? date( 'c', $changedSince ) : null,
+                              'user' => $login ),
+    ) );
+}
 $writer = new XrowExtractWriter( $previewRows ? 'csv' : $outputFormat, $columns, $separator, !$unquoted, $previewRows ? "\n" : $newLine,
-                                 array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ) ) );
+                                 array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ), 'manifest' => $manifest ) );
 $parser = $writer->parser();
 $file = $options['output'];
 if ( !$previewRows && !$file )
@@ -621,6 +737,7 @@ $buffer = $previewRows ? $begin : null;
 if ( $fh )
     fwrite( $fh, $begin );
 $written = 0;
+$rowsPerLanguage = array();
 $skip = $offset;
 $progressFile = $options['progress-file'] ? (string)$options['progress-file'] : false;
 foreach ( $languages as $locale )
@@ -650,6 +767,7 @@ foreach ( $languages as $locale )
             else
                 $buffer .= $line;
             $written++;
+            $rowsPerLanguage[$locale] = ( isset( $rowsPerLanguage[$locale] ) ? $rowsPerLanguage[$locale] : 0 ) + 1;
         }
         eZContentObject::clearCache();
         if ( $progressFile )
@@ -694,5 +812,13 @@ if ( $file !== '-' )
     $cli->output( sprintf( 'Wrote %s: %d rows, %d columns, %.1f KB, %.1f s (%s, class %s, read access of %s)', $file, $written, count( $columns ),
                            filesize( $file ) / 1024, microtime( true ) - $started,
                            ( $scope === 'all' ? 'whole site' : "below node $nodeID" ) . ', ' . implode( '+', $languages ), $class->attribute( 'identifier' ), $login ) );
+    if ( $manifest !== null )
+    {
+        $sidecar = XrowExtractManifest::writeSidecar( $file, XrowExtractManifest::finish( $manifest, $file, $written, $rowsPerLanguage, $warnings ) );
+        if ( $sidecar )
+            $cli->output( 'Manifest: ' . $sidecar );
+        else
+            $warn( 'The manifest could not be written next to ' . $file . '.' );
+    }
 }
 $script->shutdown( 0 );

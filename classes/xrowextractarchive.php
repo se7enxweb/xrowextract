@@ -340,8 +340,18 @@ class XrowExtractArchive
                     $columns[] = $extras['ezuser.password_hash'];
                     $columns[] = $extras['ezuser.password_hash_type'];
                 }
+                // The class's typed column manifest: embedded in its XML/JSON file, a sidecar next to it, listed in manifest.json
+                $classManifest = XrowExtractManifest::build( array(
+                    'type' => 'archive', 'format' => $output, 'separator' => $separator, 'quoted' => (bool)$escape, 'line_endings' => $newLine,
+                    'languages' => $languages, 'columns' => $columns, 'class_id' => (int)$classID, 'allow_password_hash' => $passwordHashes,
+                    'filters' => isset( $options['filters'] ) ? $options['filters'] : null,
+                    'schedule' => isset( $options['schedule'] ) ? $options['schedule'] : null,
+                    'run_mode' => isset( $options['run_mode'] ) ? $options['run_mode'] : null,
+                    'selection' => array( 'nodes' => array_map( function ( $root ) { return (int)$root->attribute( 'node_id' ); }, $roots ) ),
+                ) );
                 $writer = new XrowExtractWriter( $output, $columns, $separator, $escape, $newLine,
-                                                 array( 'class' => $class->attribute( 'identifier' ), 'site' => $siteName, 'created' => date( 'c' ) ) );
+                                                 array( 'class' => $class->attribute( 'identifier' ), 'site' => $siteName, 'created' => date( 'c' ),
+                                                        'manifest' => $classManifest ) );
                 $parser = $writer->parser();
                 $name = XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '.' . $writer->extension(), 'class_' . (int)$classID );
                 $fh = fopen( $dir . '/' . $name, 'w' );
@@ -384,13 +394,27 @@ class XrowExtractArchive
                 fwrite( $fh, $writer->end() );
                 fclose( $fh );
                 $files[] = $name;
+                $classManifest = XrowExtractManifest::finish( $classManifest, $dir . '/' . $name, $rows, $rowsPerLanguage );
+                file_put_contents( XrowExtractManifest::sidecarPath( $dir . '/' . $name ), XrowExtractManifest::encode( $classManifest ) );
+                $files[] = $name . XrowExtractManifest::SIDECAR_SUFFIX;
                 $manifestClasses[] = array( 'file' => $name, 'class' => $class->attribute( 'identifier' ),
                                             'name' => $class->attribute( 'name' ), 'rows' => $rows, 'columns' => count( $columns ),
-                                            'rows_per_language' => $rowsPerLanguage );
+                                            'rows_per_language' => $rowsPerLanguage,
+                                            'manifest' => $name . XrowExtractManifest::SIDECAR_SUFFIX,
+                                            'bytes' => $classManifest['file']['bytes'], 'sha256' => $classManifest['file']['sha256'],
+                                            'class_info' => $classManifest['class'], 'column_list' => $classManifest['columns'] );
             }
 
             $manifest = array(
+                'manifest_version' => XrowExtractManifest::VERSION,
                 'site' => $siteName,
+                'source' => XrowExtractManifest::source(),
+                'filters' => isset( $options['filters'] ) ? $options['filters'] : null,
+                'schedule' => isset( $options['schedule'] ) ? $options['schedule'] : null,
+                'run_mode' => isset( $options['run_mode'] ) ? $options['run_mode'] : null,
+                'warnings' => isset( $options['warnings'] ) ? array_values( (array)$options['warnings'] ) : array(),
+                'import' => 'Each class file has its own typed column manifest next to it (<file>.manifest.json, also under "column_list" '
+                          . 'below): import the file together with it and every column maps exactly.',
                 'created' => date( 'c' ),
                 'format' => array( 'archive' => $format, 'files' => $output, 'separator' => $separator === "\t" ? 'tab' : $separator,
                                    'quoted' => (bool)$escape, 'line_endings' => $newLine === "\r\n" ? 'CRLF' : ( $newLine === "\r" ? 'CR' : 'LF' ),
@@ -438,7 +462,8 @@ class XrowExtractArchive
             'Each row is one object at its main location in one language (' . implode( ', ', $manifest['languages'] ) . '); the first columns identify it',
             '(object id, remote id, main node, parent node, URL alias, published, modified),',
             'the others are the attributes of its class, named by their identifiers.',
-            'manifest.json lists the nodes, the classes and the rows of each file.',
+            'manifest.json lists the nodes, the classes and the rows of each file; each file has a typed',
+            'column manifest next to it (<file>.manifest.json: datatype, format, language and import target of every column).',
             '',
             'Nodes:',
         );

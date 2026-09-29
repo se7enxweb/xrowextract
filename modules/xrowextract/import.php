@@ -32,13 +32,30 @@ $forgetFile = function () use ( &$SESSION_KEY )
     if ( isset( $current['source'] ) && $current['source'] === 'chunked' && !empty( $current['upload_id'] ) )
         XrowExtractUpload::delete( $current['upload_id'] );
     elseif ( isset( $current['path'] ) && is_file( $current['path'] ) )
+    {
         @unlink( $current['path'] );
+        if ( is_file( XrowExtractManifest::sidecarPath( $current['path'] ) ) )
+            @unlink( XrowExtractManifest::sidecarPath( $current['path'] ) );
+    }
     elseif ( !empty( $current['package_name'] ) )
         // A package (or standalone class/object XML wrapped as one) has no loose file on disk -
         // an unkept "Try a sample" one is removed from the repository right away; an uploaded or
         // installed one is left there (xrowextract/package, or package/list, can still reach it).
         XrowExtractPackage::forgetUnkeptSamplePackage( $current );
     unset( $_SESSION[$SESSION_KEY] );
+};
+
+/**
+ * A zip of one data file and its typed column manifest ("Download with manifest (.zip)"): the data file
+ * is unpacked next to the upload, the manifest as its sidecar, so the mapping below uses it exactly.
+ * Returns array( path, name, error ); path false when it is not such a zip (the upload is used as it is).
+ */
+$unpackManifestZip = function ( $stored, $originalName )
+{
+    $unpacked = XrowExtractManifest::unpackZip( $stored, $stored . '.data' );
+    if ( !$unpacked['ok'] )
+        return array( 'path' => false, 'name' => $originalName, 'error' => $unpacked['error'] );
+    return array( 'path' => $unpacked['path'], 'name' => $unpacked['name'], 'error' => '' );
 };
 
 // Resume a job (from the Jobs page): the same file and settings, a new job, --resume-from added
@@ -117,11 +134,26 @@ if ( $http->hasPostVariable( 'Upload' ) && $http->hasPostVariable( 'UploadID' ) 
         }
         else
         {
-            $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
-            $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
-            $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
-                                             'source' => 'chunked', 'upload_id' => $uploadID, 'size' => filesize( $stored ) );
-            return $module->redirectTo( 'xrowextract/import' );
+            // A zip of a data file and its manifest: unpacked in the upload's own folder (removed with it)
+            $zip = $unpackManifestZip( $stored, $originalName );
+            if ( $zip['path'] )
+            {
+                $stored = $zip['path'];
+                $originalName = $zip['name'];
+            }
+            if ( $zip['error'] !== '' )
+            {
+                XrowExtractUpload::delete( $uploadID );
+                $uploadError = ezpI18n::tr( 'design/standard/extract', 'Could not read %name: %reason', null, array( '%name' => $originalName, '%reason' => $zip['error'] ) );
+            }
+            else
+            {
+                $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
+                $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
+                $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
+                                                 'source' => 'chunked', 'upload_id' => $uploadID, 'size' => filesize( $stored ) );
+                return $module->redirectTo( 'xrowextract/import' );
+            }
         }
     }
 }
@@ -165,11 +197,27 @@ elseif ( $http->hasPostVariable( 'Upload' ) && isset( $_FILES['ImportFile'] ) &&
             }
             else
             {
-                $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
-                $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
-                $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
-                                                 'source' => 'plain', 'size' => filesize( $stored ) );
-                return $module->redirectTo( 'xrowextract/import' );
+                // A zip of a data file and its manifest: the data file replaces the upload, its manifest next to it
+                $zip = $unpackManifestZip( $stored, $originalName );
+                if ( $zip['path'] || $zip['error'] !== '' )
+                    @unlink( $stored );
+                if ( $zip['path'] )
+                {
+                    $stored = $zip['path'];
+                    $originalName = $zip['name'];
+                }
+                if ( $zip['error'] !== '' )
+                {
+                    $uploadError = ezpI18n::tr( 'design/standard/extract', 'Could not read %name: %reason', null, array( '%name' => $originalName, '%reason' => $zip['error'] ) );
+                }
+                else
+                {
+                    $format = XrowExtractImport::detectFormat( XrowExtractImport::sniff( $stored ) );
+                    $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( XrowExtractImport::sniff( $stored ) ) : ',';
+                    $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
+                                                     'source' => 'plain', 'size' => filesize( $stored ) );
+                    return $module->redirectTo( 'xrowextract/import' );
+                }
             }
         }
     }
@@ -303,6 +351,7 @@ elseif ( $hasFile )
 }
 $tpl->setVariable( 'ParseError', isset( $parsed['error'] ) ? $parsed['error'] : false );
 $tpl->setVariable( 'FileHeader', $parsed['header'] );
+$tpl->setVariable( 'ImportManifest', isset( $parsed['manifest'] ) ? $parsed['manifest'] : null );
 // A file large enough by bytes alone to be queued regardless never has its exact row count computed
 // inline (see the note above the parseFile()/fileHeader() choice) - "total_rows" stays null for it.
 $tpl->setVariable( 'FileRowCount', isset( $parsed['total_rows'] ) ? $parsed['total_rows'] : count( $parsed['rows'] ) );
