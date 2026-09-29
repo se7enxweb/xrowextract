@@ -155,6 +155,11 @@ class XrowExtractPackage
      */
     public static function importUploadedArchive( $storedPath )
     {
+        // An absolute path: the kernel opens the archive as "compress.zlib://<path>", and a relative
+        // one (var/site/cache/...) cannot be opened that way ("can not be opened for reading")
+        $real = realpath( (string)$storedPath );
+        if ( $real !== false )
+            $storedPath = $real;
         $scan = self::scanArchiveEntries( $storedPath );
         if ( !$scan['ok'] )
             return array( 'ok' => false, 'package' => null, 'error' => $scan['error'] );
