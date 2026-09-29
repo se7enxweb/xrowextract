@@ -29,12 +29,17 @@ $ViewList['job_status'] = array( 'script' => 'job_status.php',
 
 $ViewList['job_download'] = array( 'script' => 'job_download.php',
                                    'functions' => array( 'jobs' ),
-                                   'params' => array( 'JobID' ) );
+                                   'params' => array( 'JobID', 'What' ) );
 $ViewList['import'] = array( 'script' => 'import.php',
                              'functions' => array( 'import' ),
                              'default_navigation_part' => 'ezextractnavigationpart',
-                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply' ),
+                             'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply', 'RunInBackground', 'ResumeJobID' ),
                              'params' => array() );
+// The chunked upload endpoint XrowExtractUploadJS talks to: same policy as xrowextract/import
+$ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
+                                   'functions' => array( 'import' ),
+                                   'post_actions' => array( 'Action' ),
+                                   'params' => array() );
 
 $FunctionList = array();
 $FunctionList['csv'] = array();
