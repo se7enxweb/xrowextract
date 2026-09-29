@@ -2,6 +2,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Scope</source>
+        <translation>Umfang</translation>
+    </message>
+    <message>
+        <source>Below a node</source>
+        <translation>Unterhalb eines Knotens</translation>
+    </message>
+    <message>
+        <source>Whole site</source>
+        <translation>Ganze Seite</translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed, one row each at its main location. The node, depth and main locations below do not apply.</source>
+        <translation>Jedes Objekt der Klasse, wo immer es platziert ist, je eine Zeile an seiner Hauptplatzierung. Knoten, Tiefe und Hauptplatzierungen darunter gelten dafür nicht.</translation>
+    </message>
+    <message>
+        <source>Whole site exports every object of the class, wherever it is placed, in one file.</source>
+        <translation>„Ganze Seite“ exportiert jedes Objekt der Klasse, wo immer es platziert ist, in einer Datei.</translation>
+    </message>
+    <message>
         <source>%count attributes</source>
         <translation>%count Attribute</translation>
     </message>

@@ -39,6 +39,14 @@
             </div>
             {else}
             <div class="xe-field">
+                <span class="xe-label" id="xe-scope-label">{'Scope'|i18n('design/standard/extract')}</span>
+                <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-scope-label">
+                    <label><input type="radio" name="Scope" value="node" class="xe-autosubmit"{if $Scope|ne( 'all' )} checked{/if} /><span>{'Below a node'|i18n('design/standard/extract')}</span></label>
+                    <label><input type="radio" name="Scope" value="all" class="xe-autosubmit"{if $Scope|eq( 'all' )} checked{/if} /><span>{'Whole site'|i18n('design/standard/extract')}</span></label>
+                </div>
+                <p class="xe-help">{if $Scope|eq( 'all' )}{'Every object of the class, wherever it is placed, one row each at its main location. The node, depth and main locations below do not apply.'|i18n('design/standard/extract')}{else}{'Whole site exports every object of the class, wherever it is placed, in one file.'|i18n('design/standard/extract')}{/if}</p>
+            </div>
+            <div class="xe-field{if $Scope|eq( 'all' )} xe-inactive{/if}">
                 <span class="xe-label">{'Node'|i18n('design/standard/extract')}</span>
                 <div class="xe-node">
                     {if $subtree_node}
@@ -86,7 +94,7 @@
                 </div>
 
                 {if $has_prefilledata|not}
-                <div class="xe-field">
+                <div class="xe-field{if $Scope|eq( 'all' )} xe-inactive{/if}">
                     <span class="xe-label" id="xe-depth-label">{'Depth'|i18n('design/standard/extract')}</span>
                     <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-depth-label">
                         <label><input type="radio" name="type" value="tree"{if $Type|ne( 'list' )} checked{/if} /><span>{'Whole subtree'|i18n('design/standard/extract')}</span></label>
@@ -241,7 +249,7 @@
         <div class="xe-actionbar-summary" aria-live="polite">
             <strong>{$export_rows}</strong> {'rows'|i18n('design/standard/extract')} ·
             <strong class="xe-column-total">{$Attributes|count}</strong> {'columns'|i18n('design/standard/extract')}
-            {if $subtree_node}· <span class="xe-actionbar-node">{$subtree_node.name|wash}</span>{/if}
+            {if $Scope|eq( 'all' )}· <span class="xe-actionbar-node">{'Whole site'|i18n('design/standard/extract')}</span>{elseif $subtree_node}· <span class="xe-actionbar-node">{$subtree_node.name|wash}</span>{/if}
         </div>
         <div class="xe-actionbar-buttons">
             <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />

@@ -4,6 +4,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Scope</source>
+        <translation>Scope</translation>
+    </message>
+    <message>
+        <source>Below a node</source>
+        <translation>Below a node</translation>
+    </message>
+    <message>
+        <source>Whole site</source>
+        <translation>Whole site</translation>
+    </message>
+    <message>
+        <source>Every object of the class, wherever it is placed, one row each at its main location. The node, depth and main locations below do not apply.</source>
+        <translation>Every object of the class, wherever it is placed, one row each at its main location. The node, depth and main locations below do not apply.</translation>
+    </message>
+    <message>
+        <source>Whole site exports every object of the class, wherever it is placed, in one file.</source>
+        <translation>Whole site exports every object of the class, wherever it is placed, in one file.</translation>
+    </message>
+    <message>
         <source>%count attributes</source>
         <translation>%count attributes</translation>
     </message>

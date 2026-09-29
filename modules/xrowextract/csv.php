@@ -200,6 +200,22 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
 }
 $Subtree = (int)$Subtree;
 
+// Scope: below the chosen node, or every object of the class in the whole site (read from the top of the
+// tree, at main locations, so each object is one row). The chosen node stays for switching back.
+$Scope = $http->hasPostVariable( 'Scope' ) ? ( $http->postVariable( 'Scope' ) === 'all' ? 'all' : 'node' )
+                                           : ( isset( $sessionConfig['Scope'] ) && $sessionConfig['Scope'] === 'all' ? 'all' : 'node' );
+$sessionConfig['Scope'] = $Scope;
+$FetchSubtree = $Subtree;
+$FetchMainnodeonly = $Mainnodeonly;
+if ( $Scope === 'all' )
+{
+    $FetchSubtree = 1;
+    $depth = false;
+    $depthOperator = false;
+    $FetchMainnodeonly = '1';
+}
+$tpl->setVariable( 'Scope', $Scope );
+
 // The posted column list is kept by every action on the same class (the form holds the columns of
 // AttributesClassID); a class change, or a first visit, starts from the saved or preselected list
 $columnActions = array( 'Remove', 'RemoveAttribute', 'RemoveAllAttributes', 'ResetAttributes', 'MoveAttributeUp', 'MoveAttributeDown',
@@ -376,9 +392,9 @@ $tpl->setVariable( 'Escape', $Escape ? 1 : 0 );
 
 // The same selection as the export: the user's read access, depth and main nodes
 $fCollection = new eZContentFunctionCollection();
-$list = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array(
+$list = $fCollection->fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array(
     $Class_id
-), false, $depth, $depthOperator, true, false, (bool)$Mainnodeonly, false, false );
+), false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
 
 $tpl->setVariable( 'max_count', isset( $list['result'] ) ? $list['result'] : 0 );
 
@@ -401,8 +417,8 @@ foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, tru
     $count = null;
     if ( !$hasPreFilledData )
     {
-        $classCount = $fCollection->fetchObjectTreeCount( $Subtree, false, false, 'include', array( $class->attribute( 'id' ) ),
-                                                          false, $depth, $depthOperator, true, false, (bool)$Mainnodeonly, false, false );
+        $classCount = $fCollection->fetchObjectTreeCount( $FetchSubtree, false, false, 'include', array( $class->attribute( 'id' ) ),
+                                                          false, $depth, $depthOperator, true, false, (bool)$FetchMainnodeonly, false, false );
         $count = isset( $classCount['result'] ) ? (int)$classCount['result'] : 0;
     }
     $ClassChoices[] = array( 'id' => (int)$class->attribute( 'id' ), 'name' => $class->attribute( 'name' ), 'count' => $count );
@@ -452,15 +468,25 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
     }
     else
     {
-        $node = eZContentObjectTreeNode::fetch( $Subtree );
-        if ( !( $node instanceof eZContentObjectTreeNode ) || !$node->canRead() )
+        if ( $Scope === 'all' )
         {
-            return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
+            // Every object of the class the user may read, by name; the file is named after the class
+            $exportClass = eZContentClass::fetch( $Class_id );
+            $file = XrowExtractColumns::fileName( $exportClass ? $exportClass->attribute( 'identifier' ) : 'class_' . $Class_id, '_all_export.csv' );
+            $sortBy = array( 'name', true );
         }
-        $file = XrowExtractColumns::fileName( $node->attribute( 'name' ) );
+        else
+        {
+            $node = eZContentObjectTreeNode::fetch( $Subtree );
+            if ( !( $node instanceof eZContentObjectTreeNode ) || !$node->canRead() )
+            {
+                return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
+            }
+            $file = XrowExtractColumns::fileName( $node->attribute( 'name' ) );
 
-        $sortBy = $node->sortArray();
-        $sortBy = $sortBy[0];
+            $sortBy = $node->sortArray();
+            $sortBy = $sortBy[0];
+        }
 
         $fetchLimit = $Limit ? $Limit : false;
         $exportTotal = max( 0, ( isset( $list['result'] ) ? (int)$list['result'] : 0 ) - $Offset );
@@ -470,9 +496,9 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
             $fetchLimit = $Limit ? min( $Limit, $PreviewRows ) : $PreviewRows;
 
         // Limitation false: the user's content/read policies apply
-        $list2 = $fCollection->fetchObjectTree( $Subtree, $sortBy, false, false, $Offset, $fetchLimit, $depth, $depthOperator, $Class_id, false, false, 'include', array(
+        $list2 = $fCollection->fetchObjectTree( $FetchSubtree, $sortBy, false, false, $Offset, $fetchLimit, $depth, $depthOperator, $Class_id, false, false, 'include', array(
             $Class_id
-        ), false, (bool)$Mainnodeonly, true, false, true, false, true );
+        ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
 
         $list = isset( $list2['result'] ) && is_array( $list2['result'] ) ? $list2['result'] : array();
     }

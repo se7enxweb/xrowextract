@@ -456,3 +456,7 @@
 .xe-badge-warn { background: #fdecea; color: #b42318; }
 .xe-coltype { display: block; color: var(--xe-accent); font-weight: normal; font-size: .8em; overflow: hidden; text-overflow: ellipsis; }
 @media (min-width: 721px) { .xe-column { grid-template-columns: auto 2.2em minmax(12em, 1fr) minmax(8em, 13em) auto; } }
+
+/* Parts of the selection that do not apply to the whole site */
+.xe-inactive { opacity: .45; }
+.xe-inactive:hover, .xe-inactive:focus-within { opacity: .8; }
