@@ -2844,10 +2844,6 @@
         <translation>Additional conditions</translation>
     </message>
     <message>
-        <source>%count rows</source>
-        <translation>%count rows</translation>
-    </message>
-    <message>
         <source>Join</source>
         <translation>Join</translation>
     </message>
@@ -3466,10 +3462,6 @@
     <message>
         <source>Preset name</source>
         <translation>Preset name</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation>Description</translation>
     </message>
     <message>
         <source>Description (optional)</source>

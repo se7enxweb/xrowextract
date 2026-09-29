@@ -2844,10 +2844,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%count rows</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3465,10 +3461,6 @@
     </message>
     <message>
         <source>Preset name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

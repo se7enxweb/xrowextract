@@ -2846,10 +2846,6 @@
         <translation>Weitere Bedingungen</translation>
     </message>
     <message>
-        <source>%count rows</source>
-        <translation>%count Zeilen</translation>
-    </message>
-    <message>
         <source>Join</source>
         <translation>Verknüpfung</translation>
     </message>
@@ -3468,10 +3464,6 @@
     <message>
         <source>Preset name</source>
         <translation>Name der Vorlage</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation>Beschreibung</translation>
     </message>
     <message>
         <source>Description (optional)</source>
