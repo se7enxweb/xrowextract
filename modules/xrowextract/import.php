@@ -232,6 +232,34 @@ if ( $PackageMode )
     }
 }
 
+// A loaded package's review step: what it carries (read from its own XML, quick), how existing objects and
+// classes are to be treated, and whether its dry run is small enough to show at once without being asked
+$PkgObjectMode = $http->hasPostVariable( 'PkgObjectMode' ) && in_array( $http->postVariable( 'PkgObjectMode' ), array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true )
+               ? $http->postVariable( 'PkgObjectMode' ) : XrowExtractPackage::OBJECT_UPDATE;
+$PkgClassMode = $http->hasPostVariable( 'PkgClassMode' ) && in_array( $http->postVariable( 'PkgClassMode' ), array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true )
+              ? $http->postVariable( 'PkgClassMode' ) : XrowExtractPackage::CLASS_SKIP;
+$tpl->setVariable( 'PkgObjectMode', $PkgObjectMode );
+$tpl->setVariable( 'PkgClassMode', $PkgClassMode );
+$PackageSummary = false;
+$PackageAutoReview = false;
+if ( $PackageMode && $Package instanceof eZPackage )
+{
+    $contents = XrowExtractPackage::packageContents( $Package );
+    $PackageSummary = array(
+        'name' => $Package->attribute( 'name' ),
+        'summary' => (string)$Package->attribute( 'summary' ),
+        'classes' => count( $contents['classes'] ),
+        'objects' => count( $contents['objects'] ),
+        'class_identifiers' => array_slice( array_map( function ( $c ) { return $c['identifier']; }, $contents['classes'] ), 0, 12 ),
+    );
+    // Up to 500 classes and objects the dry run takes a few seconds and is shown straight away; a larger
+    // package waits for "Review the package" (it compares every item with the site)
+    $PackageAutoReview = ( $PackageSummary['classes'] + $PackageSummary['objects'] ) <= 500;
+}
+$tpl->setVariable( 'PackageSummary', $PackageSummary );
+$tpl->setVariable( 'PackageAutoReview', $PackageAutoReview );
+$tpl->setVariable( 'PackageImportError', $PackageImportError );
+
 $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'separator' => ',' );
 if ( $hasFile && $PackageMode )
 {
@@ -751,8 +779,8 @@ if ( $hasFile && $PackageMode && $http->hasPostVariable( 'Apply' ) && $Package i
         '--install=' . $Package->attribute( 'name' ),
         '--parent=' . (int)$ParentNodeID,
         '--site-access=' . eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
-        '--object-mode=' . XrowExtractPackage::OBJECT_UPDATE,
-        '--class-mode=' . XrowExtractPackage::CLASS_SKIP,
+        '--object-mode=' . $PkgObjectMode,
+        '--class-mode=' . $PkgClassMode,
     );
     if ( $PackageIsTransient )
         $installArgs[] = '--remove-after';
@@ -771,7 +799,8 @@ if ( $hasFile && $PackageMode && $http->hasPostVariable( 'Apply' ) && $Package i
     $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
     return $module->redirectTo( 'xrowextract/jobs' );
 }
-elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
+elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' )
+                                       || ( $PackageAutoReview && !$http->hasPostVariable( 'BrowseParent' ) ) ) )
 {
     // A content package's dry run/apply: the same Preview/Apply buttons and the same row-shaped
     // display as XML/CSV/JSON ("just like json, csv, xml"), through inspectionToResultRows(). Apply
@@ -784,7 +813,7 @@ elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $h
     if ( $apply && $Package instanceof eZPackage )
     {
         $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
-                                                       XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::CLASS_SKIP );
+                                                       $PkgObjectMode, $PkgClassMode );
         if ( $installReport['ok'] )
             eZContentObject::clearCache();
         $tpl->setVariable( 'PackageInstallErrors', $installReport['errors'] );

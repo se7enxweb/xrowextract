@@ -181,6 +181,7 @@
             {/if}
         </section>
 
+        {if $PackageMode|not}
         {* 2. Class, matching, language, placement: chosen before or after the upload *}
         <section class="xe-card" aria-labelledby="xe-card-target">
             <header class="xe-card-head">
@@ -248,8 +249,15 @@
                moved into the File card's format tiles above (pass 1 of the File-card redesign) -
                nothing left to show here for them. *}
         </section>
+        {/if}
 
-        {if $HasFile}
+        {* A content package: one step instead of class/matching and column mapping - its contents, where it goes,
+           how existing objects and classes are treated, the dry run, then the install as a background job *}
+        {if and( $HasFile, $PackageMode )}
+        {include uri='design:xrowextract/import_package_review.tpl'}
+        {/if}
+
+        {if and( $HasFile, $PackageMode|not )}
         {* 3. Column mapping *}
         <section class="xe-card" aria-labelledby="xe-card-mapping">
             <header class="xe-card-head">

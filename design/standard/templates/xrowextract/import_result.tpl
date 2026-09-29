@@ -112,6 +112,9 @@
         {if $IsSample}
         <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes (writes real content)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}"
                onclick="return confirm('{'This sample really writes to the site: %count objects will be created or updated. Continue?'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))|wash}');" />
+        {elseif $PackageMode}
+        <input class="defaultbutton" type="submit" name="Apply" value="{'Install %count changes (in the background)'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}"
+               onclick="return confirm('{'Install the package now? It runs as a background job; its progress and log are on the Jobs page.'|i18n('design/standard/extract')|wash}');" />
         {else}
         <input class="defaultbutton" type="submit" name="Apply" value="{'Import %count changes'|i18n('design/standard/extract',, hash( '%count', $ApplyCount ))}" />
         {/if}
