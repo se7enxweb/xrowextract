@@ -170,6 +170,10 @@
                 </div>
             </div>
             <p class="xe-help">{'Each file starts with the object id, remote id, main node, parent node, URL alias and dates, then every attribute of its class. manifest.json and README.txt describe the archive.'|i18n('design/standard/extract')}</p>
+            {if $allow_password_hashes}
+            <label class="xe-check"><input type="checkbox" name="IncludePasswordHashes" value="1"{if $state.password_hashes} checked{/if} /> {'Include password hashes'|i18n('design/standard/extract')} <span class="xe-badge xe-badge-warn">{'sensitive'|i18n('design/standard/extract')}</span></label>
+            <p class="xe-help">{'Adds the password hash and its type (md5_password, bcrypt ...) to every class with a user account, for a migration to another system.'|i18n('design/standard/extract')}</p>
+            {/if}
         </section>
     </div>
 

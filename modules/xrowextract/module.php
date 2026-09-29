@@ -16,5 +16,7 @@ $ViewList['archive'] = array( 'script' => 'archive.php',
 
 $FunctionList = array();
 $FunctionList['csv'] = array();
+// Export the password hash and hash type of user accounts (special columns, site archive option)
+$FunctionList['password_hash'] = array();
 
 ?>

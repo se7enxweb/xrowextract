@@ -2,6 +2,34 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Include password hashes</source>
+        <translation>Passwort-Hashes aufnehmen</translation>
+    </message>
+    <message>
+        <source>sensitive</source>
+        <translation>sensibel</translation>
+    </message>
+    <message>
+        <source>Adds the password hash and its type (md5_password, bcrypt ...) to every class with a user account, for a migration to another system.</source>
+        <translation>Fügt jeder Klasse mit Benutzerkonto den Passwort-Hash und seinen Typ (md5_password, bcrypt ...) hinzu, für eine Migration in ein anderes System.</translation>
+    </message>
+    <message>
+        <source>Handle with care: it lets anyone try the passwords offline</source>
+        <translation>Sorgfältig behandeln: damit lassen sich die Passwörter offline durchprobieren</translation>
+    </message>
+    <message>
+        <source>Password hash and hash type are special columns for users with the policy xrowextract/password_hash (administrators have it); csv.ini can switch them off.</source>
+        <translation>Passwort-Hash und Hash-Typ sind Sonderspalten für Benutzer mit der Richtlinie xrowextract/password_hash (Administratoren haben sie); csv.ini kann sie abschalten.</translation>
+    </message>
+    <message>
+        <source>Password hashes are only in the archive when you include them; that needs the policy xrowextract/password_hash.</source>
+        <translation>Passwort-Hashes sind nur im Archiv, wenn Sie sie aufnehmen; dazu braucht es die Richtlinie xrowextract/password_hash.</translation>
+    </message>
+    <message>
+        <source>md5_password, bcrypt ...</source>
+        <translation>md5_password, bcrypt ...</translation>
+    </message>
+    <message>
         <source>Scope</source>
         <translation>Umfang</translation>
     </message>

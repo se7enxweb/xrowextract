@@ -35,9 +35,11 @@ StripURLText=true
 # spreadsheet shows it as text instead of running it as a formula.
 # disabled exports the values exactly as stored.
 NeutralizeFormulas=enabled
-# The password hash of user accounts can be picked as a column only when
-# this is enabled. Nobody needs it in a spreadsheet; keep it disabled.
-AllowPasswordHashExport=disabled
+# The password hash and hash type of user accounts (for a migration to
+# another system) can be exported by users with the policy
+# xrowextract/password_hash; administrators have it. disabled switches it
+# off for everyone.
+AllowPasswordHashExport=enabled
 
 # you can place the handler files in your extension
 # just enter the full path to the handler

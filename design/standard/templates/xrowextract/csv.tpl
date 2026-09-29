@@ -211,7 +211,7 @@
                         <strong>{$item.name|wash}</strong>
                         {if is_set( $AttributeMeta[$item.id] )}{def $meta = $AttributeMeta[$item.id]}
                         <small class="xe-meta">
-                            {if $meta.special}<span class="xe-badge">{'Special column'|i18n('design/standard/extract')}</span>{else}<code>{$item.id|wash}</code>
+                            {if $meta.special}<span class="xe-badge">{'Special column'|i18n('design/standard/extract')}</span>{if $meta.sensitive} <span class="xe-badge xe-badge-warn" title="{'Handle with care: it lets anyone try the passwords offline'|i18n('design/standard/extract')|wash}">{'sensitive'|i18n('design/standard/extract')}</span>{/if}{else}<code>{$item.id|wash}</code>
                             <span class="xe-type" title="{$meta.datatype|wash}">{$meta.datatype_name|wash}</span>{/if}
                             {if $meta.required}<span class="xe-flag" title="{'Required'|i18n('design/standard/extract')|wash}">{'required'|i18n('design/standard/extract')}</span>{/if}
                             {if $meta.translatable|not}{if $meta.special|not}<span class="xe-flag" title="{'Not translatable'|i18n('design/standard/extract')|wash}">{'not translatable'|i18n('design/standard/extract')}</span>{/if}{/if}

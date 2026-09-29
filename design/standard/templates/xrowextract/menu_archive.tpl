@@ -34,7 +34,7 @@
     <summary>{'Safety'|i18n( 'design/standard/extract' )}</summary>
     <ul>
         <li>{'Only objects you may read are exported.'|i18n( 'design/standard/extract' )}</li>
-        <li>{'Password hashes are never part of the archive.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Password hashes are only in the archive when you include them; that needs the policy xrowextract/password_hash.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Cells that start like a formula (= + - @) get a leading apostrophe, so a spreadsheet does not run them.'|i18n( 'design/standard/extract' )}</li>
         <li>{'An export can hold personal data: store and share it accordingly, and delete it when it is no longer needed.'|i18n( 'design/standard/extract' )}</li>
     </ul>

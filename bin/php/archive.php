@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][output:][dry-run][list-sets][list-formats][list-classes][user:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][output:][dry-run][list-sets][list-formats][list-classes][user:]',
     '',
     array(
         'set'             => 'A ready-made node set (default content_media); --list-sets shows them',
@@ -38,6 +38,7 @@ $options = $script->getOptions(
         'separator'       => 'One character, or comma (default), semicolon, tab, pipe',
         'line-endings'    => 'win32/crlf (default), unix/lf, mac/cr',
         'unquoted'        => 'Do not quote cells',
+        'password-hashes' => 'Add the password hash and hash type to classes with a user account (needs the policy xrowextract/password_hash)',
         'output'          => 'File, or directory to write the archive into (default: the current directory, named <site>_export_<date>.<format>)',
         'dry-run'         => 'Show what would be exported, write nothing',
         'list-sets'       => 'List the node sets',
@@ -59,6 +60,8 @@ $user = eZUser::fetchByName( $login );
 if ( !$user instanceof eZUser )
     $fail( "No user with login $login (--user)." );
 $user->loginCurrent();
+if ( $options['password-hashes'] && !XrowExtractColumns::allowPasswordHash() )
+    $fail( "$login may not export password hashes (policy xrowextract/password_hash, or csv.ini AllowPasswordHashExport=disabled)." );
 
 $sets = XrowExtractArchive::nodeSets();
 $formats = XrowExtractArchive::formats();
@@ -152,7 +155,7 @@ if ( !isset( $lines[$lineKey] ) )
 $started = microtime( true );
 try
 {
-    $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey] );
+    $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'] );
 }
 catch ( Exception $e )
 {
@@ -167,6 +170,7 @@ if ( !@copy( $result['path'], $target ) )
     $fail( "Cannot write $target (--output)." );
 }
 XrowExtractArchive::removeWork( $result['work'] );
-$cli->output( sprintf( 'Wrote %s: %d files, %d rows, %.1f KB, %.1f s (read access of %s)', $target, count( $result['manifest']['classes'] ),
-                       $result['manifest']['rows'], filesize( $target ) / 1024, microtime( true ) - $started, $login ) );
+$cli->output( sprintf( 'Wrote %s: %d files, %d rows, %.1f KB, %.1f s (read access of %s%s)', $target, count( $result['manifest']['classes'] ),
+                       $result['manifest']['rows'], filesize( $target ) / 1024, microtime( true ) - $started, $login,
+                       $result['manifest']['password_hashes'] ? ', with password hashes' : '' ) );
 $script->shutdown( 0 );

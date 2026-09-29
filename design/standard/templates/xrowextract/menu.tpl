@@ -51,7 +51,7 @@
     <ul>
         <li>{'Only objects you may read are exported.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Cells that start like a formula (= + - @) get a leading apostrophe, so a spreadsheet does not run them.'|i18n( 'design/standard/extract' )}{if ezini( 'General', 'NeutralizeFormulas', 'csv.ini' )|eq( 'disabled' )} <strong>{'Switched off in csv.ini.'|i18n( 'design/standard/extract' )}</strong>{/if}</li>
-        <li>{'Password hashes are not offered as a column.'|i18n( 'design/standard/extract' )}{if ezini( 'General', 'AllowPasswordHashExport', 'csv.ini' )|eq( 'enabled' )} <strong>{'Allowed in csv.ini.'|i18n( 'design/standard/extract' )}</strong>{/if}</li>
+        <li>{'Password hash and hash type are special columns for users with the policy xrowextract/password_hash (administrators have it); csv.ini can switch them off.'|i18n( 'design/standard/extract' )}{if ezini( 'General', 'AllowPasswordHashExport', 'csv.ini' )|eq( 'disabled' )} <strong>{'Switched off in csv.ini.'|i18n( 'design/standard/extract' )}</strong>{/if}</li>
         <li>{'An export can hold personal data: store and share it accordingly, and delete it when it is no longer needed.'|i18n( 'design/standard/extract' )}</li>
     </ul>
 </details>
@@ -82,7 +82,7 @@
         <dt>csv.ini NeutralizeFormulas</dt>
         <dd>{if ezini_hasvariable( 'General', 'NeutralizeFormulas', 'csv.ini' )}{ezini( 'General', 'NeutralizeFormulas', 'csv.ini' )|wash}{else}enabled{/if}</dd>
         <dt>csv.ini AllowPasswordHashExport</dt>
-        <dd>{if ezini_hasvariable( 'General', 'AllowPasswordHashExport', 'csv.ini' )}{ezini( 'General', 'AllowPasswordHashExport', 'csv.ini' )|wash}{else}disabled{/if}</dd>
+        <dd>{if ezini_hasvariable( 'General', 'AllowPasswordHashExport', 'csv.ini' )}{ezini( 'General', 'AllowPasswordHashExport', 'csv.ini' )|wash}{else}enabled{/if}</dd>
     </dl>
 </details>
 </div>

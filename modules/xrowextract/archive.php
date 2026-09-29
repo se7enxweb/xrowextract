@@ -57,6 +57,12 @@ if ( $http->hasPostVariable( 'Separator' ) )
 }
 if ( $http->hasPostVariable( 'Escape' ) )
     $state['escape'] = (bool)$http->postVariable( 'Escape' );
+// The checkbox is only on the form for users allowed to export password hashes
+$allowHashes = XrowExtractColumns::allowPasswordHash();
+if ( $http->hasPostVariable( 'ClassSelection' ) )
+    $state['password_hashes'] = $allowHashes && $http->hasPostVariable( 'IncludePasswordHashes' );
+if ( !$allowHashes || !isset( $state['password_hashes'] ) )
+    $state['password_hashes'] = false;
 if ( $http->hasPostVariable( 'LineSeparator' ) && isset( $lineSeparators[$http->postVariable( 'LineSeparator' )] ) )
     $state['line'] = $http->postVariable( 'LineSeparator' );
 if ( !isset( $formats[$state['format']] ) || !$formats[$state['format']]['available'] )
@@ -121,7 +127,7 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
         $result = false;
         try
         {
-            $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']] );
+            $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']], $state['password_hashes'] );
         }
         catch ( Exception $e )
         {
@@ -217,6 +223,7 @@ $tpl->setVariable( 'selected_class_count', count( $selectedClassIDs ) );
 $tpl->setVariable( 'total_rows', $totalRows );
 $tpl->setVariable( 'formats', $formats );
 $tpl->setVariable( 'error', $error );
+$tpl->setVariable( 'allow_password_hashes', $allowHashes );
 $tpl->setVariable( 'TabNotation', '\t' );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
 $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );

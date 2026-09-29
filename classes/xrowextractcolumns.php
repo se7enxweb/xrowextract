@@ -21,7 +21,8 @@ class XrowExtractColumns
             'ezcontentobject.owner'               => array( 'exportname' => 'owner',               'name' => 'Owner Name' ),
             'ezuser.login'                        => array( 'exportname' => 'login',               'name' => 'Login' ),
             'ezuser.email'                        => array( 'exportname' => 'email',               'name' => 'E-Mail' ),
-            'ezuser.password_hash'                => array( 'exportname' => 'password',            'name' => 'Password' ),
+            'ezuser.password_hash'                => array( 'exportname' => 'password_hash',       'name' => 'Password hash' ),
+            'ezuser.password_hash_type'           => array( 'exportname' => 'password_hash_type',  'name' => 'Password hash type' ),
             'ezuser.is_enabled'                   => array( 'exportname' => 'user_status',         'name' => 'User Status' ),
             'ezcontentobject.published'           => array( 'exportname' => 'published',           'name' => 'Content Object Published Time' ),
             'ezcontentobject.modified'            => array( 'exportname' => 'modified',            'name' => 'Content Object Modified Time' ),
@@ -33,7 +34,7 @@ class XrowExtractColumns
             'ezcontentobject.parent_nodes'        => array( 'exportname' => 'parent_nodes',        'name' => 'Content Object Parent Names' ),
         );
         if ( !$allowPasswordHash )
-            unset( $list['ezuser.password_hash'] );
+            unset( $list['ezuser.password_hash'], $list['ezuser.password_hash_type'] );
         foreach ( $list as $id => $column )
             $list[$id]['id'] = $id;
         return $list;
@@ -106,6 +107,7 @@ class XrowExtractColumns
             $cell = self::cellDescription( $datatype );
             $meta[$attribute->attribute( 'identifier' )] = array(
                 'special' => false,
+                'sensitive' => false,
                 'datatype' => $datatype,
                 'datatype_name' => self::datatypeName( $datatype ),
                 'required' => (bool)$attribute->attribute( 'is_required' ),
@@ -120,7 +122,7 @@ class XrowExtractColumns
         $extraCells = array(
             'ezcontentobject.id' => 'number', 'ezcontentobject.remote_id' => 'identifier', 'ezcontentobject.name' => 'text',
             'ezcontentobject.class_identifier' => 'identifier', 'ezcontentobject.section' => 'section name', 'ezcontentobject.owner' => 'owner name',
-            'ezuser.login' => 'login', 'ezuser.email' => 'e-mail address', 'ezuser.password_hash' => 'password hash', 'ezuser.is_enabled' => 'enabled or disabled',
+            'ezuser.login' => 'login', 'ezuser.email' => 'e-mail address', 'ezuser.password_hash' => 'password hash', 'ezuser.password_hash_type' => 'md5_password, bcrypt ...', 'ezuser.is_enabled' => 'enabled or disabled',
             'ezcontentobject.published' => 'YYYY-MM-DD', 'ezcontentobject.modified' => 'YYYY-MM-DD',
             'ezcontentobject.url_alias' => 'URL path', 'ezcontentobject.full_url_alias' => 'URL',
             'ezcontentobject.main_parent_name' => 'node name', 'ezcontentobject.main_node_id' => 'number',
@@ -129,7 +131,7 @@ class XrowExtractColumns
         foreach ( self::extraAttributes() as $id => $column )
         {
             $meta[$id] = array(
-                'special' => true, 'datatype' => strtok( $id, '.' ), 'datatype_name' => ezpI18n::tr( 'design/standard/extract', 'Special column' ),
+                'special' => true, 'sensitive' => strpos( $id, 'ezuser.password_hash' ) === 0, 'datatype' => strtok( $id, '.' ), 'datatype_name' => ezpI18n::tr( 'design/standard/extract', 'Special column' ),
                 'required' => false, 'translatable' => false, 'searchable' => false, 'collector' => false, 'exportable' => true,
                 'cell' => ezpI18n::tr( 'design/standard/extract', isset( $extraCells[$id] ) ? $extraCells[$id] : 'value' ), 'position' => 0,
             );
@@ -137,11 +139,25 @@ class XrowExtractColumns
         return $meta;
     }
 
+    /**
+     * Whether the current user may export password hashes: the policy xrowextract/password_hash
+     * (administrators have it), unless csv.ini AllowPasswordHashExport=disabled switches it off.
+     */
     public static function allowPasswordHash()
     {
         $csvINI = eZINI::instance( 'csv.ini' );
-        return $csvINI->hasVariable( 'General', 'AllowPasswordHashExport' )
-               && $csvINI->variable( 'General', 'AllowPasswordHashExport' ) === 'enabled';
+        if ( $csvINI->hasVariable( 'General', 'AllowPasswordHashExport' )
+             && $csvINI->variable( 'General', 'AllowPasswordHashExport' ) === 'disabled' )
+            return false;
+        $access = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'password_hash' );
+        return $access['accessWord'] !== 'no';
+    }
+
+    /** The name of a password hash type (md5_password, bcrypt ...), or "type <n>" for one the kernel does not name. */
+    public static function passwordHashTypeName( $type )
+    {
+        $name = eZUser::passwordHashTypeName( (int)$type );
+        return $name ? $name : 'type ' . (int)$type;
     }
 
     /** The header cells of a column list. */
@@ -224,6 +240,8 @@ class XrowExtractColumns
                 case 'ezuser.login':         return $user->attribute( 'login' );
                 case 'ezuser.email':         return $user->attribute( 'email' );
                 case 'ezuser.password_hash': return $allowPasswordHash ? $user->attribute( 'password_hash' ) : '';
+                case 'ezuser.password_hash_type':
+                    return $allowPasswordHash ? self::passwordHashTypeName( $user->attribute( 'password_hash_type' ) ) : '';
                 case 'ezuser.is_enabled':
                     return $user->attribute( 'is_enabled' ) ? ezpI18n::tr( 'design/standard/extract', 'enabled' )
                                                             : ezpI18n::tr( 'design/standard/extract', 'disabled' );

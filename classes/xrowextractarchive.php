@@ -165,7 +165,7 @@ class XrowExtractArchive
      * Write the archive. Returns array( 'path' => archive file, 'name' => download name,
      * 'work' => the work directory to remove afterwards, 'manifest' => ... ).
      */
-    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine )
+    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false )
     {
         $formats = self::formats();
         if ( !isset( $formats[$format] ) || !$formats[$format]['available'] )
@@ -187,7 +187,9 @@ class XrowExtractArchive
         }
 
         $parser = new ParserInterface( $separator, $escape );
-        $extras = XrowExtractColumns::extraAttributes( false );
+        // Password hashes only when asked for and allowed for the current user
+        $passwordHashes = $passwordHashes && XrowExtractColumns::allowPasswordHash();
+        $extras = XrowExtractColumns::extraAttributes( $passwordHashes );
         $identity = XrowExtractColumns::identityColumns();
         $files = array();
         $manifestClasses = array();
@@ -199,6 +201,11 @@ class XrowExtractArchive
                 if ( !$class instanceof eZContentClass )
                     continue;
                 $columns = array_merge( $identity, XrowExtractColumns::classColumns( $classID ) );
+                if ( $passwordHashes && self::hasUserAccount( $class ) )
+                {
+                    $columns[] = $extras['ezuser.password_hash'];
+                    $columns[] = $extras['ezuser.password_hash_type'];
+                }
                 $name = XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '.csv', 'class_' . (int)$classID );
                 $fh = fopen( $dir . '/' . $name, 'w' );
                 fwrite( $fh, implode( $separator, XrowExtractColumns::headerCells( $columns, $parser ) ) . $newLine );
@@ -217,7 +224,7 @@ class XrowExtractArchive
                             if ( !$obj instanceof eZContentObject || isset( $seen[$obj->attribute( 'id' )] ) )
                                 continue;
                             $seen[$obj->attribute( 'id' )] = true;
-                            fwrite( $fh, implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, false ) ) . $newLine );
+                            fwrite( $fh, implode( $separator, XrowExtractColumns::rowCells( $columns, $obj, $parser, $extras, $passwordHashes ) ) . $newLine );
                             $rows++;
                         }
                         // Keep memory flat on large sites
@@ -243,6 +250,7 @@ class XrowExtractArchive
                                   'path' => $root->attribute( 'path_identification_string' ) );
                 }, $roots ),
                 'classes' => $manifestClasses,
+                'password_hashes' => $passwordHashes,
                 'rows' => array_sum( array_map( function ( $c ) { return $c['rows']; }, $manifestClasses ) ),
                 'seconds' => round( microtime( true ) - $started, 2 ),
             );
@@ -285,6 +293,8 @@ class XrowExtractArchive
         foreach ( $manifest['classes'] as $class )
             $lines[] = sprintf( '  %-40s %6d rows  %s', $class['file'], $class['rows'], $class['name'] );
         $lines[] = '';
+        if ( !empty( $manifest['password_hashes'] ) )
+            $lines[] = 'User classes carry the password hash and its type (password-hash, password-hash-type).';
         $lines[] = 'The export can hold personal data: store and share it accordingly.';
         return implode( "\n", $lines ) . "\n";
     }
@@ -343,6 +353,17 @@ class XrowExtractArchive
         exec( $command . ' 2>&1', $output, $status );
         if ( $status !== 0 )
             throw new RuntimeException( 'Packing failed (exit ' . $status . ')' );
+    }
+
+    /** Whether a class has a user account attribute (ezuser). */
+    public static function hasUserAccount( eZContentClass $class )
+    {
+        foreach ( $class->dataMap() as $attribute )
+        {
+            if ( $attribute->attribute( 'data_type_string' ) === 'ezuser' )
+                return true;
+        }
+        return false;
     }
 
     /** Remove a work folder made by build(): only an xrowextract-<hex> folder directly in the cache directory. */
