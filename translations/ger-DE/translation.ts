@@ -2,6 +2,230 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Total jobs</source>
+        <translation>Aufträge gesamt</translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation>Abgeschlossen</translation>
+    </message>
+    <message>
+        <source>Running</source>
+        <translation>Laufend</translation>
+    </message>
+    <message>
+        <source>Started by %name (%login)</source>
+        <translation>Gestartet von %name (%login)</translation>
+    </message>
+    <message>
+        <source>Started by %login (account no longer exists)</source>
+        <translation>Gestartet von %login (Konto existiert nicht mehr)</translation>
+    </message>
+    <message>
+        <source>you</source>
+        <translation>Sie</translation>
+    </message>
+    <message>
+        <source>Queued</source>
+        <translation>Eingereiht</translation>
+    </message>
+    <message>
+        <source>Started</source>
+        <translation>Gestartet</translation>
+    </message>
+    <message>
+        <source>Ended</source>
+        <translation>Beendet</translation>
+    </message>
+    <message>
+        <source>Failed</source>
+        <translation>Fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>waiting …</source>
+        <translation>wartet …</translation>
+    </message>
+    <message>
+        <source>after %time in the queue</source>
+        <translation>nach %time in der Warteschlange</translation>
+    </message>
+    <message>
+        <source>took %time</source>
+        <translation>Dauer %time</translation>
+    </message>
+    <message>
+        <source>Start from a template</source>
+        <translation>Mit einer Vorlage beginnen</translation>
+    </message>
+    <message>
+        <source>Download a template for this class</source>
+        <translation>Vorlage für diese Klasse herunterladen</translation>
+    </message>
+    <message>
+        <source>Choose a class first</source>
+        <translation>Zuerst eine Klasse wählen</translation>
+    </message>
+    <message>
+        <source>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in.</source>
+        <translation>Eine leere Datei mit jeder Spalte, die der Import für die Klasse versteht (der Spaltensatz Migration): Zeilen ausfüllen und importieren. Ein Export mit dem Satz Migration ist dieselbe Datei mit ausgefüllten Zeilen.</translation>
+    </message>
+    <message>
+        <source>Reads a CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</source>
+        <translation>Liest eine CSV- oder JSON-Datei in eine Klasse ein: Zeilen aktualisieren die passenden Objekte und legen die übrigen an. Geschrieben wird erst, nachdem Sie den Probelauf gesehen haben.</translation>
+    </message>
+    <message>
+        <source>Choose the class, matching, language and parent</source>
+        <translation>Klasse, Zuordnung, Sprache und Elternknoten wählen</translation>
+    </message>
+    <message>
+        <source>Before or after the upload; a class, language or parent column in the file wins for its rows.</source>
+        <translation>Vor oder nach dem Hochladen; eine Klassen-, Sprach- oder Elternspalte in der Datei gilt für ihre Zeilen.</translation>
+    </message>
+    <message>
+        <source>Upload the file</source>
+        <translation>Datei hochladen</translation>
+    </message>
+    <message>
+        <source>An export of this tool (the Migration column set carries everything needed), or a filled template.</source>
+        <translation>Ein Export dieses Werkzeugs (der Spaltensatz Migration enthält alles Nötige) oder eine ausgefüllte Vorlage.</translation>
+    </message>
+    <message>
+        <source>Check the column mapping</source>
+        <translation>Spaltenzuordnung prüfen</translation>
+    </message>
+    <message>
+        <source>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.</source>
+        <translation>Spalten werden nach Namen Attributen, Attributformaten und Sonderspalten zugeordnet; jede lässt sich ändern oder ignorieren.</translation>
+    </message>
+    <message>
+        <source>Read the dry run</source>
+        <translation>Probelauf lesen</translation>
+    </message>
+    <message>
+        <source>Per row: create, update (old and new values), unchanged, skip or error with the reason.</source>
+        <translation>Je Zeile: anlegen, aktualisieren (alte und neue Werte), unverändert, überspringen oder Fehler mit Grund.</translation>
+    </message>
+    <message>
+        <source>Import the changes</source>
+        <translation>Änderungen importieren</translation>
+    </message>
+    <message>
+        <source>Only the changed attributes of each row are written; a row with an error writes nothing.</source>
+        <translation>Nur die geänderten Attribute jeder Zeile werden geschrieben; eine Zeile mit Fehler schreibt nichts.</translation>
+    </message>
+    <message>
+        <source>Matching</source>
+        <translation>Zuordnung</translation>
+    </message>
+    <message>
+        <source>Remote ID: a row updates the object with the same remote id (the remote-id column), otherwise it creates one with that remote id. Best for moving content between sites.</source>
+        <translation>Remote-ID: eine Zeile aktualisiert das Objekt mit derselben Remote-ID (Spalte remote-id), sonst legt sie eines mit dieser Remote-ID an. Am besten für Inhalte zwischen Websites.</translation>
+    </message>
+    <message>
+        <source>Object ID: a row updates the object with that id (the object-id column); for changes made to an export of the same site.</source>
+        <translation>Objekt-ID: eine Zeile aktualisiert das Objekt mit dieser ID (Spalte object-id); für Änderungen an einem Export derselben Website.</translation>
+    </message>
+    <message>
+        <source>Always create: every row is a new object.</source>
+        <translation>Immer anlegen: jede Zeile ist ein neues Objekt.</translation>
+    </message>
+    <message>
+        <source>Values</source>
+        <translation>Werte</translation>
+    </message>
+    <message>
+        <source>Dates: 2026-09-29, 2026-09-29 12:00, ISO 8601 or Unix time.</source>
+        <translation>Datumsangaben: 2026-09-29, 2026-09-29 12:00, ISO 8601 oder Unix-Zeit.</translation>
+    </message>
+    <message>
+        <source>Checkboxes: 1 or 0, yes or no, ja or nein.</source>
+        <translation>Checkboxen: 1 oder 0, yes oder no, ja oder nein.</translation>
+    </message>
+    <message>
+        <source>Relations: the attribute-ids or attribute-remote-ids columns; names are ambiguous and refused.</source>
+        <translation>Beziehungen: die Spalten attribut-ids oder attribut-remote-ids; Namen sind mehrdeutig und werden abgelehnt.</translation>
+    </message>
+    <message>
+        <source>Images and files: a path below var/storage or an address on this site.</source>
+        <translation>Bilder und Dateien: ein Pfad unter var/storage oder eine Adresse auf dieser Website.</translation>
+    </message>
+    <message>
+        <source>Rich text: the HTML the export writes.</source>
+        <translation>Rich Text: das HTML, das der Export schreibt.</translation>
+    </message>
+    <message>
+        <source>Importable datatypes</source>
+        <translation>Importierbare Datentypen</translation>
+    </message>
+    <message>
+        <source>Other datatypes are shown in the mapping as not supported, with the reason, and never written.</source>
+        <translation>Andere Datentypen erscheinen in der Zuordnung als nicht unterstützt, mit Grund, und werden nie geschrieben.</translation>
+    </message>
+    <message>
+        <source>Your permissions apply to every row: creating below the parent, editing the matched object.</source>
+        <translation>Ihre Rechte gelten für jede Zeile: Anlegen unter dem Elternknoten, Bearbeiten des gefundenen Objekts.</translation>
+    </message>
+    <message>
+        <source>Every import publishes new versions; keep a backup or an export of the class before a large import.</source>
+        <translation>Jeder Import veröffentlicht neue Versionen; sichern oder exportieren Sie die Klasse vor einem großen Import.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is kept privately on the server and removed after the import or after a day.</source>
+        <translation>Die hochgeladene Datei bleibt privat auf dem Server und wird nach dem Import oder nach einem Tag entfernt.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:import --file ... (a dry run unless --apply).</source>
+        <translation>Kommandozeile: ext:xrowextract:import --file ... (ein Probelauf, außer mit --apply).</translation>
+    </message>
+    <message>
+        <source>Exports that run in the background, for selections too large for one page request. Start one with &quot;Run in the background&quot; in the One class or Site archive tab.</source>
+        <translation>Exporte, die im Hintergrund laufen, für Auswahlen, die für eine Seitenanfrage zu groß sind. Starten mit „Im Hintergrund ausführen“ im Reiter Eine Klasse oder Seitenarchiv.</translation>
+    </message>
+    <message>
+        <source>Set up the export as usual</source>
+        <translation>Den Export wie gewohnt einrichten</translation>
+    </message>
+    <message>
+        <source>Everything you chose (nodes, classes, languages, filters, sort, columns, format) goes into the job.</source>
+        <translation>Alles Gewählte (Knoten, Klassen, Sprachen, Filter, Sortierung, Spalten, Format) geht in den Job ein.</translation>
+    </message>
+    <message>
+        <source>The job starts at once; this page shows its progress and updates on its own.</source>
+        <translation>Der Job startet sofort; diese Seite zeigt den Fortschritt und aktualisiert sich von selbst.</translation>
+    </message>
+    <message>
+        <source>Download the file</source>
+        <translation>Die Datei herunterladen</translation>
+    </message>
+    <message>
+        <source>When the job is done; you can leave and come back.</source>
+        <translation>Wenn der Job fertig ist; Sie können gehen und wiederkommen.</translation>
+    </message>
+    <message>
+        <source>Good to know</source>
+        <translation>Gut zu wissen</translation>
+    </message>
+    <message>
+        <source>A job exports with your read access, like the page does.</source>
+        <translation>Ein Job exportiert mit Ihren Leserechten, wie die Seite.</translation>
+    </message>
+    <message>
+        <source>You see your own jobs; users with the policy xrowextract/all_jobs see the jobs of every user.</source>
+        <translation>Sie sehen Ihre eigenen Jobs; Benutzer mit der Richtlinie xrowextract/all_jobs sehen die Jobs aller Benutzer.</translation>
+    </message>
+    <message>
+        <source>Finished jobs and their files are removed after the days set in csv.ini [Jobs] RetentionDays.</source>
+        <translation>Fertige Jobs und ihre Dateien werden nach den in csv.ini [Jobs] RetentionDays gesetzten Tagen entfernt.</translation>
+    </message>
+    <message>
+        <source>Files are kept privately on the server and are only sent to their owner.</source>
+        <translation>Dateien bleiben privat auf dem Server und gehen nur an ihren Eigentümer.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</source>
+        <translation>Kommandozeile: ext:xrowextract:job --list, --run=&lt;id&gt;, --clean.</translation>
+    </message>
+    <message>
         <source>Job started: </source>
         <translation>Job gestartet: </translation>
     </message>
@@ -2014,8 +2238,8 @@
         <translation>Vorschau (Probelauf — es wurde nichts geschrieben)</translation>
     </message>
     <message>
-        <source>Read a CSV or JSON export back in: create or update objects</source>
-        <translation>Einen CSV- oder JSON-Export wieder einlesen: Objekte anlegen oder aktualisieren</translation>
+        <source>Read an XML, CSV or JSON export back in: create or update objects</source>
+        <translation>Einen XML-, CSV- oder JSON-Export wieder einlesen: Objekte anlegen oder aktualisieren</translation>
     </message>
     <message>
         <source>Remote ID</source>
@@ -2388,6 +2612,290 @@
     <message>
         <source>Class name</source>
         <translation>Klassenname</translation>
+    </message>
+    <message>
+        <source>An XML, CSV or JSON file written by the export views, any column set.</source>
+        <translation>Eine XML-, CSV- oder JSON-Datei, wie sie die Export-Ansichten schreiben, jede Spaltenauswahl.</translation>
+    </message>
+    <message>
+        <source>XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row.</source>
+        <translation>XML: die Form, die XrowExtractWriter schreibt, mit eigenen Spalten-IDs und Klasse - am genauesten, und das, was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen. CSV: Trennzeichen und Kodierung werden automatisch erkannt (UTF-8 mit oder ohne BOM); das Trennzeichen kann nach dem Hochladen noch geändert werden. JSON: ein Array von Objekten, eines je Zeile.</translation>
+    </message>
+    <message>
+        <source>Try a sample</source>
+        <translation>Beispiel ausprobieren</translation>
+    </message>
+    <message>
+        <source>Nothing to import yet? One click builds a small file from the site’s own content for %class - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. Applying it writes real content.</source>
+        <translation>Noch nichts zum Importieren? Ein Klick baut aus den eigenen Inhalten der Website eine kleine Datei für %class - eine geänderte Zeile, eine unveränderte Zeile, ein neues Objekt und (wenn die Klasse ein Datumsattribut hat) eine Zeile mit einem absichtlichen Fehler - und lädt sie unten, bereit zur Vorschau. Das Anwenden schreibt echte Inhalte.</translation>
+    </message>
+    <message>
+        <source>Try a sample (XML - recommended)</source>
+        <translation>Beispiel ausprobieren (XML - empfohlen)</translation>
+    </message>
+    <message>
+        <source>Try a sample (JSON)</source>
+        <translation>Beispiel ausprobieren (JSON)</translation>
+    </message>
+    <message>
+        <source>Try a sample (CSV)</source>
+        <translation>Beispiel ausprobieren (CSV)</translation>
+    </message>
+    <message>
+        <source>sample</source>
+        <translation>Beispiel</translation>
+    </message>
+    <message>
+        <source>This is a sample built from the site’s own content, for trying the importer - not a file you uploaded. Applying it writes real content (see step 4).</source>
+        <translation>Dies ist ein Beispiel aus den eigenen Inhalten der Website, zum Ausprobieren des Imports - keine hochgeladene Datei. Das Anwenden schreibt echte Inhalte (siehe Schritt 4).</translation>
+    </message>
+    <message>
+        <source>XML (recommended)</source>
+        <translation>XML (empfohlen)</translation>
+    </message>
+    <message>
+        <source>An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand.</source>
+        <translation>Eine leere Datei mit jeder Spalte, die der Import für diese Klasse versteht (die Spaltenauswahl Migration): Zeilen ausfüllen und importieren. Ein Export mit der Auswahl Migration ist dieselbe Datei mit ausgefüllten Zeilen. XML trägt zusätzlich die Spalten-IDs und die Klasse selbst, darum ist es von Hand am genauesten auszufüllen.</translation>
+    </message>
+    <message>
+        <source>File format reference</source>
+        <translation>Referenz zum Dateiformat</translation>
+    </message>
+    <message>
+        <source>Examples below use real data of %class where the site has some.</source>
+        <translation>Die folgenden Beispiele verwenden echte Daten von %class, soweit die Website welche hat.</translation>
+    </message>
+    <message>
+        <source>Choose a class above for examples built from its own content.</source>
+        <translation>Wählen Sie oben eine Klasse für Beispiele aus deren eigenen Inhalten.</translation>
+    </message>
+    <message>
+        <source>XML - the recommended format</source>
+        <translation>XML - das empfohlene Format</translation>
+    </message>
+    <message>
+        <source>What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root &lt;export&gt;, its class and when it was written; a &lt;columns&gt; block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one &lt;object&gt; per row, one &lt;field name="..."&gt; per column, matched to the &lt;columns&gt; block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).</source>
+        <translation>Was XrowExtractWriter schreibt, und was „Vorlage für diese Klasse“ und „Beispiel ausprobieren“ erzeugen: ein Wurzelelement &lt;export&gt;, seine Klasse und wann es geschrieben wurde; ein &lt;columns&gt;-Block, der jede Spalte einmal benennt, mit einem kurzen Anzeigenamen und ihrer genauen Spalten-ID (ein Attribut-Identifier, „identifier:format“ für ein Attributformat, oder eine Sonderspalten-ID wie ezcontentobject.remote_id); dann ein &lt;object&gt; je Zeile, ein &lt;field name="..."&gt; je Spalte, zugeordnet zum &lt;columns&gt;-Block über denselben Namen. Der Import liest eine Spalte über ihre ID, nicht durch Raten aus einem Namen, darum ist die XML-Zuordnung immer exakt. Ein DOCTYPE wird grundsätzlich abgelehnt (wird von diesem Werkzeug nie geschrieben, und ist der klassische Weg, externe Entities einzuschleusen).</translation>
+    </message>
+    <message>
+        <source>A static example (this class has no content on this site yet to show a real one).</source>
+        <translation>Ein statisches Beispiel (diese Klasse hat auf dieser Website noch keine Inhalte, um ein echtes zu zeigen).</translation>
+    </message>
+    <message>
+        <source>The header row holds the column names (an attribute identifier with "-" for "_", an attribute format as identifier-format, or a special column such as remote-id); the importer maps them by name, or lets you change any mapping by hand.</source>
+        <translation>Die Kopfzeile enthält die Spaltennamen (ein Attribut-Identifier mit „-“ statt „_“, ein Attributformat als identifier-format, oder eine Sonderspalte wie remote-id); der Import ordnet sie nach Namen zu, oder lässt jede Zuordnung von Hand ändern.</translation>
+    </message>
+    <message>
+        <source>The separator is detected from the header row (comma, semicolon, tab or pipe, whichever appears most) and can be changed once the file is uploaded.</source>
+        <translation>Das Trennzeichen wird aus der Kopfzeile erkannt (Komma, Semikolon, Tab oder Pipe, je nachdem, was am häufigsten vorkommt) und kann nach dem Hochladen geändert werden.</translation>
+    </message>
+    <message>
+        <source>Standard RFC 4180 quoting: a cell that holds the separator, a quote or a line break is wrapped in double quotes, and a quote inside it is doubled ("" for a literal "); a quoted cell may contain real line breaks.</source>
+        <translation>Standard-Anführung nach RFC 4180: eine Zelle mit dem Trennzeichen, einem Anführungszeichen oder einem Zeilenumbruch wird in doppelte Anführungszeichen gesetzt, und ein Anführungszeichen darin wird verdoppelt ("" für ein einzelnes "); eine angeführte Zelle darf echte Zeilenumbrüche enthalten.</translation>
+    </message>
+    <message>
+        <source>UTF-8, with or without a byte order mark (BOM); either is read correctly.</source>
+        <translation>UTF-8, mit oder ohne Byte-Reihenfolge-Kennung (BOM); beides wird korrekt gelesen.</translation>
+    </message>
+    <message>
+        <source>An empty cell is an empty value, not "not present": for an update, an empty cell can clear an attribute.</source>
+        <translation>Eine leere Zelle ist ein leerer Wert, nicht „nicht vorhanden“: bei einer Aktualisierung kann eine leere Zelle ein Attribut leeren.</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.</source>
+        <translation>Ein Array von Objekten, eines je Zeile, jeder Schlüssel ein Spaltenname (dieselben Namen wie bei CSV); jeder Wert eine Zeichenkette. Keine Spaltenliste und kein Klassen-Attribut - eine Spalte „class“ trägt die Klasse, genau wie bei CSV.</translation>
+    </message>
+    <message>
+        <source>Every column this importer reads outside the class’s own attributes. A column not listed here, or an attribute the class does not have, is ignored (never guessed at).</source>
+        <translation>Jede Spalte, die dieser Import außerhalb der eigenen Attribute der Klasse liest. Eine hier nicht aufgeführte Spalte, oder ein Attribut, das die Klasse nicht hat, wird ignoriert (nie geraten).</translation>
+    </message>
+    <message>
+        <source>Column</source>
+        <translation>Spalte</translation>
+    </message>
+    <message>
+        <source>id</source>
+        <translation>ID</translation>
+    </message>
+    <message>
+        <source>What it does</source>
+        <translation>Was sie bewirkt</translation>
+    </message>
+    <message>
+        <source>The default match key: an existing object with this remote id is updated; otherwise it is created with it.</source>
+        <translation>Der Standard-Schlüssel zur Zuordnung: ein vorhandenes Objekt mit dieser Remote-ID wird aktualisiert; sonst wird eines damit angelegt.</translation>
+    </message>
+    <message>
+        <source>Matches by object id instead, when matching is set to Object ID.</source>
+        <translation>Ordnet stattdessen über die Objekt-ID zu, wenn die Zuordnung auf Objekt-ID steht.</translation>
+    </message>
+    <message>
+        <source>The class for this row, overriding the class chosen above (an identifier or a numeric id); an XML file’s own export class attribute is the default when none is chosen.</source>
+        <translation>Die Klasse für diese Zeile, sie überschreibt die oben gewählte Klasse (ein Identifier oder eine numerische ID); das eigene class-Attribut einer XML-Datei ist die Voreinstellung, wenn keine gewählt ist.</translation>
+    </message>
+    <message>
+        <source>The translation this row creates or updates, overriding the language chosen above.</source>
+        <translation>Die Übersetzung, die diese Zeile anlegt oder aktualisiert, sie überschreibt die oben gewählte Sprache.</translation>
+    </message>
+    <message>
+        <source>Where a new object is placed, by the parent’s remote id; wins over main-parent-node-id and the chosen parent.</source>
+        <translation>Wohin ein neues Objekt kommt, über die Remote-ID des Elternknotens; hat Vorrang vor main-parent-node-id und dem gewählten Elternknoten.</translation>
+    </message>
+    <message>
+        <source>Where a new object is placed, by node id; used when there is no parent-remote-id column.</source>
+        <translation>Wohin ein neues Objekt kommt, über die Knoten-ID; wird verwendet, wenn keine Spalte parent-remote-id vorhanden ist.</translation>
+    </message>
+    <message>
+        <source>Sets the object’s published date after writing it (Unix time, or any accepted date form) - for preserving history on a migration.</source>
+        <translation>Setzt das Veröffentlichungsdatum des Objekts nach dem Schreiben (Unix-Zeit oder jede akzeptierte Datumsform) - um die Historie bei einer Migration zu erhalten.</translation>
+    </message>
+    <message>
+        <source>Sets the object’s last modified date the same way.</source>
+        <translation>Setzt das Datum der letzten Änderung des Objekts auf dieselbe Weise.</translation>
+    </message>
+    <message>
+        <source>The section, by name or numeric id.</source>
+        <translation>Die Rubrik, nach Name oder numerischer ID.</translation>
+    </message>
+    <message>
+        <source>The main node’s own remote id, as exported; informational only, not written back.</source>
+        <translation>Die eigene Remote-ID des Hauptknotens, wie exportiert; nur informativ, wird nicht zurückgeschrieben.</translation>
+    </message>
+    <message>
+        <source>Attribute and attribute format columns</source>
+        <translation>Attribut- und Attributformat-Spalten</translation>
+    </message>
+    <message>
+        <source>An attribute column is named after the attribute identifier, "-" for "_" (a CSV/JSON header only; XML uses the identifier itself as the column id and any display name).</source>
+        <translation>Eine Attributspalte heißt wie der Attribut-Identifier, „-“ statt „_“ (nur eine CSV/JSON-Kopfzeile; XML verwendet den Identifier selbst als Spalten-ID und einen beliebigen Anzeigenamen).</translation>
+    </message>
+    <message>
+        <source>An attribute format column is identifier-format, for example authors-ids, authors-remote-ids or metadata-json (identifier:format as the XML/mapping id). Only the formats named per datatype below are accepted for import; the others (word counts, sizes, URLs of a file...) are export-only.</source>
+        <translation>Eine Attributformat-Spalte heißt identifier-format, zum Beispiel authors-ids, authors-remote-ids oder metadata-json (identifier:format als XML-/Zuordnungs-ID). Nur die unten je Datentyp genannten Formate werden für den Import akzeptiert; die anderen (Wortanzahl, Größen, URLs einer Datei ...) sind nur für den Export.</translation>
+    </message>
+    <message>
+        <source>Every importable datatype: accepted values, with an example</source>
+        <translation>Jeder importierbare Datentyp: akzeptierte Werte, mit Beispiel</translation>
+    </message>
+    <message>
+        <source>Datatype</source>
+        <translation>Datentyp</translation>
+    </message>
+    <message>
+        <source>Accepted as</source>
+        <translation>Akzeptiert als</translation>
+    </message>
+    <message>
+        <source>Example</source>
+        <translation>Beispiel</translation>
+    </message>
+    <message>
+        <source>The text itself.</source>
+        <translation>Der Text selbst.</translation>
+    </message>
+    <message>
+        <source>A whole number.</source>
+        <translation>Eine ganze Zahl.</translation>
+    </message>
+    <message>
+        <source>A decimal number.</source>
+        <translation>Eine Dezimalzahl.</translation>
+    </message>
+    <message>
+        <source>1 or 0, yes or no, ja or nein, true or false, on or off.</source>
+        <translation>1 oder 0, yes oder no, ja oder nein, true oder false, on oder off.</translation>
+    </message>
+    <message>
+        <source>The address.</source>
+        <translation>Die Adresse.</translation>
+    </message>
+    <message>
+        <source>A URL, or "URL|link text".</source>
+        <translation>Eine URL, oder „URL|Linktext“.</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD, ISO 8601, or a Unix timestamp.</source>
+        <translation>JJJJ-MM-TT, ISO 8601, oder ein Unix-Zeitstempel.</translation>
+    </message>
+    <message>
+        <source>YYYY-MM-DD HH:MM:SS, ISO 8601, or a Unix timestamp.</source>
+        <translation>JJJJ-MM-TT HH:MM:SS, ISO 8601, oder ein Unix-Zeitstempel.</translation>
+    </message>
+    <message>
+        <source>An option name, or (the :ids format) its numeric id.</source>
+        <translation>Ein Optionsname, oder (Format :ids) seine numerische ID.</translation>
+    </message>
+    <message>
+        <source>Comma-separated keywords.</source>
+        <translation>Durch Komma getrennte Stichwörter.</translation>
+    </message>
+    <message>
+        <source>Comma-separated tag names, each already existing and unambiguous (a tag path, or an ambiguous or missing name, is refused with a warning).</source>
+        <translation>Durch Komma getrennte Tag-Namen, jeder bereits vorhanden und eindeutig (ein Tag-Pfad, oder ein mehrdeutiger oder fehlender Name, wird mit einer Warnung abgelehnt).</translation>
+    </message>
+    <message>
+        <source>The HTML the export writes, converted through the ezoe input parser when that extension is active, else as plain paragraphs.</source>
+        <translation>Das HTML, das der Export schreibt, umgewandelt über den ezoe-Eingabe-Parser, wenn diese Erweiterung aktiv ist, sonst als einfache Absätze.</translation>
+    </message>
+    <message>
+        <source>A path already inside var/storage (as the export writes it), or an absolute URL of this site - either way, the file is imported.</source>
+        <translation>Ein Pfad bereits innerhalb von var/storage (wie der Export ihn schreibt), oder eine absolute URL dieser Website - so oder so wird die Datei importiert.</translation>
+    </message>
+    <message>
+        <source>Only from an :ids or :remote_ids column (comma-separated); names are ambiguous and refused with a message.</source>
+        <translation>Nur aus einer Spalte :ids oder :remote_ids (durch Komma getrennt); Namen sind mehrdeutig und werden mit einer Meldung abgelehnt.</translation>
+    </message>
+    <message>
+        <source>(as authors-ids)</source>
+        <translation>(als authors-ids)</translation>
+    </message>
+    <message>
+        <source>Only from the :json column - the same fields the export writes as JSON.</source>
+        <translation>Nur aus der Spalte :json - dieselben Felder, die der Export als JSON schreibt.</translation>
+    </message>
+    <message>
+        <source>(as metadata-json)</source>
+        <translation>(als metadata-json)</translation>
+    </message>
+    <message>
+        <source>Datatypes this importer cannot write</source>
+        <translation>Datentypen, die dieser Import nicht schreiben kann</translation>
+    </message>
+    <message>
+        <source>Shown in the mapping as not supported, with this reason, and never written - not dropped without a trace.</source>
+        <translation>In der Zuordnung als nicht unterstützt angezeigt, mit diesem Grund, und nie geschrieben - nicht spurlos verworfen.</translation>
+    </message>
+    <message>
+        <source>This was a sample built from the site’s own content: real content was just written (see below).</source>
+        <translation>Dies war ein Beispiel aus den eigenen Inhalten der Website: soeben wurden echte Inhalte geschrieben (siehe unten).</translation>
+    </message>
+    <message>
+        <source>This is a sample built from the site’s own content, to try the importer. Applying it writes real content.</source>
+        <translation>Dies ist ein Beispiel aus den eigenen Inhalten der Website, zum Ausprobieren des Imports. Das Anwenden schreibt echte Inhalte.</translation>
+    </message>
+    <message>
+        <source>Import %count changes (writes real content)</source>
+        <translation>%count Änderungen importieren (schreibt echte Inhalte)</translation>
+    </message>
+    <message>
+        <source>This sample really writes to the site: %count objects will be created or updated. Continue?</source>
+        <translation>Dieses Beispiel schreibt wirklich auf die Website: %count Objekte werden angelegt oder aktualisiert. Fortfahren?</translation>
+    </message>
+    <message>
+        <source>Reads an XML, CSV or JSON file back into a class: rows update the objects they match and create the others. Nothing is written before you have seen the dry run.</source>
+        <translation>Liest eine XML-, CSV- oder JSON-Datei zurück in eine Klasse: Zeilen aktualisieren die Objekte, zu denen sie passen, und legen die übrigen an. Nichts wird geschrieben, bevor der Probelauf gesehen wurde.</translation>
+    </message>
+    <message>
+        <source>Upload the file, or try a sample, or a filled template</source>
+        <translation>Die Datei hochladen, oder ein Beispiel ausprobieren, oder eine ausgefüllte Vorlage</translation>
+    </message>
+    <message>
+        <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
+        <translation>XML, CSV oder JSON, aus einem Export dieses Werkzeugs (die Spaltenauswahl Migration trägt alles Nötige) oder einer heruntergeladenen Vorlage; XML trägt eigene Spalten-IDs und die Klasse und ist am genauesten.</translation>
     </message>
 </context>
 <context>

@@ -740,6 +740,84 @@
         }
     }
 
+    // Same wording as the page's PHP: "8 s", "3 min 12 s", "2 h 5 min"
+    function duration(seconds) {
+        seconds = Math.max(0, Math.round(seconds));
+        if (seconds < 60) {
+            return seconds + ' s';
+        }
+        if (seconds < 3600) {
+            return Math.floor(seconds / 60) + ' min' + (seconds % 60 ? ' ' + (seconds % 60) + ' s' : '');
+        }
+        var minutes = Math.floor(seconds % 3600 / 60);
+        return Math.floor(seconds / 3600) + ' h' + (minutes ? ' ' + minutes + ' min' : '');
+    }
+
+    // The Started / Ended steps of the job's timeline, once the poll reports them
+    function applyTimes(row, data) {
+        var times = row.querySelector('.xe-job-times');
+        var meta = row.querySelector('.xe-job-meta');
+        if (!times || !meta) {
+            return;
+        }
+        var created = parseInt(times.getAttribute('data-created'), 10);
+        var stamp = function (el, value) {
+            if (el && !el.hasAttribute('datetime')) {
+                var date = new Date(value * 1000);
+                el.setAttribute('datetime', date.toISOString());
+                el.textContent = date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+            }
+        };
+        if (data.started) {
+            var startedStep = row.querySelector('[data-role="started-step"]');
+            if (startedStep) {
+                startedStep.className = 'xe-time-done';
+            }
+            stamp(row.querySelector('[data-role="started"]'), data.started);
+            if (created) {
+                setText(row, 'wait', meta.getAttribute('data-label-wait').replace('%time', duration(data.started - created)));
+            }
+        }
+        if (data.ended) {
+            var endedStep = row.querySelector('[data-role="ended-step"]');
+            if (endedStep) {
+                endedStep.className = 'xe-time-done' + (data.state === 'failed' ? ' xe-time-bad' : '');
+            }
+            if (data.state === 'failed') {
+                setText(row, 'ended-label', meta.getAttribute('data-label-failed'));
+            }
+            stamp(row.querySelector('[data-role="ended"]'), data.ended);
+            if (data.started) {
+                setText(row, 'took', meta.getAttribute('data-label-took').replace('%time', duration(data.ended - data.started)));
+            }
+        }
+    }
+
+    // The Total / Completed / Running / Queued / Failed tiles, recounted from the rows' states
+    function applyCounts() {
+        var stats = document.querySelector('[data-role="job-stats"]');
+        if (!stats) {
+            return;
+        }
+        var counts = { total: 0, done: 0, running: 0, queued: 0, failed: 0 };
+        Array.prototype.forEach.call(list.querySelectorAll('.xe-job'), function (row) {
+            counts.total++;
+            var state = row.getAttribute('data-state');
+            if (counts.hasOwnProperty(state)) {
+                counts[state]++;
+            }
+        });
+        Object.keys(counts).forEach(function (key) {
+            var el = stats.querySelector('[data-count="' + key + '"]');
+            if (el) {
+                el.textContent = counts[key];
+                if (key !== 'total' && key !== 'done') {
+                    el.parentNode.classList.toggle('xe-stat-zero', counts[key] === 0);
+                }
+            }
+        });
+    }
+
     function applyState(row, data) {
         row.className = row.className.replace(/\bxe-job-\S+/, 'xe-job-' + data.state);
         row.setAttribute('data-state', data.state);
@@ -756,6 +834,7 @@
             }
             setText(row, 'progress-text', data.progress.done + ' / ' + data.progress.total + (data.progress.phase ? ' · ' + data.progress.phase : ''));
         }
+        applyTimes(row, data);
         if (data.rows !== null && data.rows !== undefined) {
             setText(row, 'rows', data.rows + ' rows');
         }
@@ -790,6 +869,7 @@
                 wrap.hidden = true;
             }
         }
+        applyCounts();
     }
 
     function poll() {
