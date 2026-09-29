@@ -2,6 +2,26 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Try a sample: %format</source>
+        <translation>Beispiel ausprobieren: %format</translation>
+    </message>
+    <message>
+        <source>Download a template: %format</source>
+        <translation>Vorlage herunterladen: %format</translation>
+    </message>
+    <message>
+        <source>Read the %format reference</source>
+        <translation>Referenz zu %format lesen</translation>
+    </message>
+    <message>
+        <source>Upload a %format file</source>
+        <translation>Datei vom Typ %format hochladen</translation>
+    </message>
+    <message>
+        <source>Download %format</source>
+        <translation>%format herunterladen</translation>
+    </message>
+    <message>
         <source>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</source>
         <translation>Wählen Sie unten ein Format, um ein Beispiel auszuprobieren, eine Vorlage zu erhalten, die Referenz zu lesen oder eine Datei dieser Art hochzuladen.</translation>
     </message>
