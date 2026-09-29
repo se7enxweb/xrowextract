@@ -114,3 +114,48 @@ shows it next to the job.
 ext:xrowextract:csv --preset "user:<id>"/"site:<id>" --param
 key=value,key=value; --list-presets; --show-preset "<ref>" prints the
 resolved definition (its own Extends chain followed) as JSON.
+
+Typed column manifest
+
+Every export carries a manifest: per column its key in the file, id,
+name, datatype, chosen format, language and the import target it maps
+back to; the class meta (required, translatable, selection options,
+relation targets, identifier, remote id, a version signature); row
+count, file size and SHA-256; export time, filters, preset, schedule,
+site and siteaccess. It is written as <file>.manifest.json next to a
+background job's or the command line's file, next to every class file
+inside a site archive (and next to the archive itself), and on the One
+class view as "Manifest only" or "Download with manifest (.zip)". XML
+files carry it in a <manifest> element after <columns>, JSON files as an
+envelope {"manifest": ..., "rows": [...], "summary": ...} (csv.ini
+[Manifest] EmbedInJSON/EmbedInXML=disabled switch that off). The
+importer (view and ext:xrowextract:import, which also takes --manifest,
+--no-manifest and a zip of file + manifest) maps every column the
+manifest describes exactly; a file without one imports as before.
+
+Schedules, destinations, history (the Schedules tab)
+
+xrowextract/schedules: a saved preset, a site archive, an Export as
+package or an import from a local folder or a destination, on an hourly,
+daily, weekly or monthly choice or a 5-field cron expression, in full or
+as a delta (only changes since the last successful run). Imports always
+do a dry run first and are applied only when it found no errors. What a
+schedule refers to and no longer exists is skipped with a warning.
+Started by the cronjob part (php runcronjobs.php xrowextract) or by
+system cron with the crontab lines the page shows.
+xrowextract/destinations: SFTP (system OpenSSH client, key or password,
+trusted host key), FTP/FTPS, a local or NAS folder (below xrowextract.ini
+[Destinations] LocalPathRoots[]), S3 compatible storage (SigV4), WebDAV
+and HTTP POST. Credentials are encrypted with libsodium; the key file is
+xrowextract.ini [Secrets] KeyFile (generated with 0600 on first use).
+xrowextract/history: every run with who, what, rows, size, checksum,
+delivery and warnings; filters and pages. Failed scheduled runs show as
+a red badge on the Jobs tab until marked as seen. Notifications: e-mail
+on failure (always the owner), on success (optional), a webhook.
+Policies: xrowextract/schedule, xrowextract/destinations,
+xrowextract/history. Tables (xrowextract_schedule, _destination,
+_history) are created on first use from share/db_schema.dba; sql/<engine>
+holds the same for a manual install.
+Command line: ext:xrowextract:schedule (--list, --run, --enable,
+--disable, --cron, --crontab, --create), ext:xrowextract:destination
+(--list, --test, --send, --trust-host-key), ext:xrowextract:history.
