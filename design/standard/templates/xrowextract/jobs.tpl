@@ -18,6 +18,10 @@
     {if $started_job_id}
     <p class="xe-note" role="status">{'Job started: '|i18n('design/standard/extract')}<a href="#job-{$started_job_id|wash}">{'see it below'|i18n('design/standard/extract')}</a>{' — it runs in the background; this page updates on its own while it does.'|i18n('design/standard/extract')}</p>
     {/if}
+    {if and( is_set( $schedule_alerts ), $schedule_alerts|gt( 0 ) )}
+    <p class="xe-note xe-note-bad" role="status">{'%count scheduled run(s) failed, were skipped or could not be delivered since you last looked.'|i18n('design/standard/extract',, hash( '%count', $schedule_alerts ))}
+        {if $can_view_history}<a href={'xrowextract/history'|ezurl}>{'Open the history'|i18n('design/standard/extract')}</a>{/if}</p>
+    {/if}
 
     <div class="xe-cards">
         <section class="xe-card" aria-labelledby="xe-card-jobs">
@@ -47,7 +51,7 @@
                         <span class="xe-job-type" title="{if $job.type|eq( 'archive' )}{'Site archive'|i18n('design/standard/extract')|wash}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')|wash}{elseif $job.type|eq( 'package' )}{'Content package'|i18n('design/standard/extract')|wash}{else}{'One class'|i18n('design/standard/extract')|wash}{/if}">{if $job.type|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{elseif $job.type|eq( 'import' )}{'Import'|i18n('design/standard/extract')}{elseif $job.type|eq( 'package' )}{'Package'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
                         <span class="xe-colinfo">
                             <strong>{$job.what|wash}</strong>
-                            <small><code>{$job.format|wash}</code>{if $job.preset|ne( '' )} · <span class="xe-badge" title="{'Started from a saved preset'|i18n('design/standard/extract')|wash}">{$job.preset_name|wash}</span>{/if}</small>
+                            <small><code>{$job.format|wash}</code>{if $job.preset|ne( '' )} · <span class="xe-badge" title="{'Started from a saved preset'|i18n('design/standard/extract')|wash}">{$job.preset_name|wash}</span>{/if}{if $job.schedule_id} · <span class="xe-badge" title="{'Started by a schedule'|i18n('design/standard/extract')|wash}">{$job.schedule_name|wash}</span>{/if}{if $job.run_mode|eq( 'delta' )} · <span class="xe-badge xe-badge-update">{'delta'|i18n('design/standard/extract')}</span>{/if}</small>
                         </span>
                         {def $owner = $job.owner_user}
                         {if $owner.node_id}
@@ -63,6 +67,7 @@
                             {if $job.state|eq( 'queued' )}{'queued'|i18n('design/standard/extract')}
                             {elseif $job.state|eq( 'running' )}{'running'|i18n('design/standard/extract')}
                             {elseif $job.state|eq( 'done' )}{'done'|i18n('design/standard/extract')}
+                            {elseif $job.state|eq( 'skipped' )}{'skipped'|i18n('design/standard/extract')}
                             {else}{'failed'|i18n('design/standard/extract')}{/if}
                         </span>
                     </div>
@@ -94,6 +99,13 @@
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
+                    {if or( $job.warnings, $job.delivery )}
+                    <details class="xe-history-details">
+                        <summary>{if $job.warnings}{'%count warning(s)'|i18n('design/standard/extract',, hash( '%count', $job.warnings|count ))}{/if}{if and( $job.warnings, $job.delivery )} · {/if}{if $job.delivery}{'Delivery'|i18n('design/standard/extract')}: {if $job.delivery_state|eq( 'ok' )}{'delivered'|i18n('design/standard/extract')}{elseif $job.delivery_state|eq( 'partial' )}{'partly delivered'|i18n('design/standard/extract')}{else}{'not delivered'|i18n('design/standard/extract')}{/if}{/if}</summary>
+                        {if $job.warnings}<ul class="xe-warning-list">{foreach $job.warnings as $warning}<li>{$warning|wash}</li>{/foreach}</ul>{/if}
+                        {if $job.delivery}<ul class="xe-delivery-list">{foreach $job.delivery as $delivery}<li class="{if $delivery.ok}xe-delivery-ok{else}xe-delivery-bad{/if}"><strong>{$delivery.destination|wash}</strong>: {$delivery.message|wash}</li>{/foreach}</ul>{/if}
+                    </details>
+                    {/if}
                     {if $job.type|eq( 'import' )|and( $job.counts )}
                     <ul class="xe-stats xe-job-counts">
                         <li class="xe-badge xe-badge-create"><strong>{$job.counts.create}</strong> {'create'|i18n('design/standard/extract')}</li>
@@ -108,6 +120,9 @@
                         <a class="button" data-role="download" href={concat( 'xrowextract/job_download/', $job.id )|ezurl}>{if $job.type|eq( 'import' )}{'Download report'|i18n('design/standard/extract')}{else}{'Download'|i18n('design/standard/extract')}{/if}</a>
                         {if $job.has_errors_file}
                         <a class="button" href={concat( 'xrowextract/job_download/', $job.id, '/errors' )|ezurl}>{'Download error rows'|i18n('design/standard/extract')}</a>
+                        {/if}
+                        {if $job.has_manifest}
+                        <a class="button" href={concat( 'xrowextract/job_download/', $job.id, '/manifest' )|ezurl} title="{'The typed column manifest of the file: datatype, format and language of every column, row count and checksum'|i18n('design/standard/extract')|wash}">{'Download manifest'|i18n('design/standard/extract')}</a>
                         {/if}
                         {/if}
                         {if $job.type|eq( 'import' )|and( or( $job.state|eq( 'failed' ), $job.counts.error|gt( 0 ) ) )}

@@ -1149,7 +1149,11 @@ usort( $datatypeNames, function ( $a, $b ) { return strcasecmp( $a['name'], $b['
 $tpl->setVariable( 'ExportableDatatypeNames', $datatypeNames );
 
 // Download and preview build the file the same way; the preview reads it back as a spreadsheet would
-$isPreview = !$http->hasPostVariable( 'Download' ) && $http->hasPostVariable( 'Preview' );
+// "Download with manifest" (a zip of the file and its typed column manifest) and "Manifest only" build
+// the same file as Download; they only send something else at the end
+$downloadWithManifest = $http->hasPostVariable( 'DownloadWithManifest' ) && class_exists( 'ZipArchive' );
+$downloadManifestOnly = $http->hasPostVariable( 'DownloadManifest' );
+$isPreview = !$http->hasPostVariable( 'Download' ) && !$downloadWithManifest && !$downloadManifestOnly && $http->hasPostVariable( 'Preview' );
 $previewRowChoices = array( 10, 25, 50, 100 );
 $PreviewRows = (int)eZPreferences::value( 'admin_xrowextract_preview_rows' );
 if ( $http->hasPostVariable( 'PreviewRows' ) && in_array( (int)$http->postVariable( 'PreviewRows' ), $previewRowChoices, true ) )
@@ -1406,7 +1410,7 @@ if ( $http->hasPostVariable( 'ExportAsPackage' ) )
     }
 }
 
-if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoad )
+if ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloadManifestOnly || $isPreview || $AutoDownloadAfterLoad )
 {
     $started = microtime( true );
     $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];
@@ -1420,6 +1424,19 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoa
         array_unshift( $ExportColumns, $ExtraAttributes['ezcontentobject.language'] );
     // The preview reads CSV back into its table; JSON and XML get a sample of the first rows next to it
     $writerMeta = array( 'class' => ( $metaClass = eZContentClass::fetch( $Class_id ) ) ? $metaClass->attribute( 'identifier' ) : '', 'created' => date( 'c' ) );
+    // The typed column manifest: embedded in an XML/JSON download, and the second file of "with manifest"
+    $downloadManifest = null;
+    if ( !$isPreview )
+    {
+        $downloadManifest = XrowExtractManifest::build( array(
+            'type' => 'csv', 'format' => $OutputFormat, 'separator' => $Separator, 'quoted' => (bool)$Escape, 'line_endings' => $newLine,
+            'languages' => $SelectedLanguages, 'columns' => $ExportColumns, 'class_id' => (int)$Class_id, 'allow_password_hash' => $allowPasswordHash,
+            'filters' => $Filters->values, 'preset' => isset( $LoadedPresetRef ) && $LoadedPresetRef !== '' ? $LoadedPresetRef : null, 'run_mode' => 'full',
+            'selection' => array( 'scope' => $Scope, 'node_id' => $Scope === 'all' ? null : (int)$Subtree, 'offset' => (int)$Offset, 'limit' => (int)$Limit,
+                                  'main_only' => $FetchMainnodeonly === '1', 'user' => eZUser::currentUser()->attribute( 'login' ) ),
+        ) );
+        $writerMeta['manifest'] = $downloadManifest;
+    }
     $writer = new XrowExtractWriter( $isPreview ? 'csv' : $OutputFormat, $ExportColumns, $Separator, $Escape, $newLine, $writerMeta );
     $parser = $writer->parser();
     $sampleWriter = ( $isPreview && $OutputFormat !== 'csv' ) ? new XrowExtractWriter( $OutputFormat, $ExportColumns, $Separator, $Escape, "\n", $writerMeta ) : null;
@@ -1557,12 +1574,41 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoa
         header( 'Pragma: no-cache' );
         header( 'X-Content-Type-Options: nosniff' );
         $file = preg_replace( '/\.csv$/', '.' . $writer->extension(), $file );
-        header( 'Content-Type: ' . $writer->contentType( $httpCharset ) );
+        // The manifest, finished: rows, size and checksum of exactly the bytes sent
+        $finishedManifest = XrowExtractManifest::finish( $downloadManifest, null, $written );
+        $finishedManifest['file'] = array( 'name' => $file, 'bytes' => strlen( $data ), 'sha256' => hash( 'sha256', $data ) );
+        $manifestJSON = XrowExtractManifest::encode( $finishedManifest );
+        // Every download is a row of the export history (no file is kept for it)
+        XrowExtractHistory::record( array(
+            'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'kind' => 'csv', 'trigger_type' => 'download', 'run_mode' => 'full',
+            'what' => ( $metaClass ? $metaClass->attribute( 'name' ) : 'class ' . $Class_id ) . ' — ' . ( $Scope === 'all' ? ezpI18n::tr( 'design/standard/extract', 'whole site' ) : ( ( $historyNode = eZContentObjectTreeNode::fetch( $Subtree ) ) ? $historyNode->attribute( 'name' ) : 'node ' . $Subtree ) ),
+            'preset_ref' => isset( $LoadedPresetRef ) ? (string)$LoadedPresetRef : '', 'output_format' => $OutputFormat,
+            'started_at' => (int)$started, 'ended_at' => time(), 'run_state' => 'done', 'row_count' => $written,
+            'byte_size' => strlen( $data ), 'checksum' => $finishedManifest['file']['sha256'],
+            'file_name' => $downloadManifestOnly ? $file . XrowExtractManifest::SIDECAR_SUFFIX : ( $downloadWithManifest ? $file . '.zip' : $file ),
+        ) );
+        if ( $downloadManifestOnly )
+        {
+            $data = $manifestJSON;
+            $file .= XrowExtractManifest::SIDECAR_SUFFIX;
+            header( 'Content-Type: application/json; charset=utf-8' );
+        }
+        elseif ( $downloadWithManifest )
+        {
+            $data = XrowExtractManifest::zipWithManifest( $file, $data, $manifestJSON );
+            $file .= '.zip';
+            header( 'Content-Type: application/zip' );
+        }
+        else
+        {
+            header( 'Content-Type: ' . $writer->contentType( $httpCharset ) );
+        }
         header( 'Content-Length: ' . strlen( $data ) );
         header( 'Content-Disposition: attachment; filename="' . $file . '"' );
 
-        // "Changed since my last export" starts from here next time
-        eZPreferences::setValue( XrowExtractFilters::lastExportPreference( $Class_id ), time() );
+        // "Changed since my last export" starts from here next time (not for the manifest alone: no rows went out)
+        if ( !$downloadManifestOnly )
+            eZPreferences::setValue( XrowExtractFilters::lastExportPreference( $Class_id ), time() );
         while ( @ob_end_clean() );
 
         echo $data;

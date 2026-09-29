@@ -107,6 +107,13 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'active' => $job['state'] === 'queued' || $job['state'] === 'running',
         'counts' => isset( $job['counts'] ) ? $job['counts'] : null,
         'has_errors_file' => !empty( $job['has_errors_file'] ),
+        'has_manifest' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $job['id'] ) . '/' . $job['output_file'] . XrowExtractManifest::SIDECAR_SUFFIX ),
+        'warnings' => isset( $job['warnings'] ) ? array_values( (array)$job['warnings'] ) : array(),
+        'schedule_id' => isset( $job['schedule_id'] ) ? (int)$job['schedule_id'] : 0,
+        'schedule_name' => isset( $job['schedule_name'] ) ? (string)$job['schedule_name'] : '',
+        'run_mode' => isset( $job['run_mode'] ) ? (string)$job['run_mode'] : '',
+        'delivery' => isset( $job['delivery'] ) && is_array( $job['delivery'] ) ? $job['delivery'] : array(),
+        'delivery_state' => isset( $job['delivery_state'] ) ? (string)$job['delivery_state'] : '',
     );
 }
 
@@ -115,7 +122,13 @@ foreach ( $rows as $row )
 {
     if ( isset( $counts[$row['state']] ) )
         $counts[$row['state']]++;
+    elseif ( $row['state'] === 'skipped' )
+        $counts['failed']++;
 }
+// Failed scheduled runs this user has not acknowledged yet (the red badge on the tab): a notice here
+$scheduleAlerts = XrowExtractFunctionCollection::fetchScheduleAlerts();
+$tpl->setVariable( 'schedule_alerts', $scheduleAlerts['result'] );
+$tpl->setVariable( 'can_view_history', XrowExtractHistory::canView() );
 
 $tpl->setVariable( 'jobs', $rows );
 $tpl->setVariable( 'job_counts', $counts );
