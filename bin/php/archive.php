@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][output:][dry-run][list-sets][list-formats][list-classes][user:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][output:][dry-run][list-sets][list-formats][list-classes][user:][progress-file:]',
     '',
     array(
         'set'             => 'A ready-made node set (default content_media); --list-sets shows them',
@@ -48,6 +48,7 @@ $options = $script->getOptions(
         'list-formats'    => 'List the archive formats and whether this server can write them',
         'list-classes'    => 'List the classes with how many objects each has below the nodes',
         'user'            => 'Export with the read access of this login (default: admin)',
+        'progress-file'   => 'Write {"done":n,"total":m,"phase":"<class>"} to this path after every batch (for a background job)',
     )
 );
 $script->initialize();
@@ -169,11 +170,35 @@ $lineKey = $options['line-endings'] ? strtolower( $options['line-endings'] ) : '
 if ( !isset( $lines[$lineKey] ) )
     $fail( '--line-endings is win32 (crlf), unix (lf) or mac (cr).' );
 
+// A running total across every selected class: build()'s progress callback only reports the rows
+// written so far within the class it is on, so the classes already finished need to be added in.
+$buildOptions = array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'] );
+if ( $options['progress-file'] )
+{
+    $progressFile = (string)$options['progress-file'];
+    $progressTotal = 0;
+    foreach ( $selected as $id )
+        $progressTotal += isset( $counts[$id] ) ? $counts[$id] : 0;
+    $progressBase = array();
+    $acc = 0;
+    foreach ( $selected as $id )
+    {
+        $identifier = eZContentClass::fetch( $id )->attribute( 'identifier' );
+        $progressBase[$identifier] = $acc;
+        $acc += isset( $counts[$id] ) ? $counts[$id] : 0;
+    }
+    $buildOptions['progress'] = function ( $classIdentifier, $rowsInClass ) use ( $progressFile, $progressBase, $progressTotal )
+    {
+        $done = ( isset( $progressBase[$classIdentifier] ) ? $progressBase[$classIdentifier] : 0 ) + $rowsInClass;
+        XrowExtractJob::writeProgress( $progressFile, $done, $progressTotal, $classIdentifier );
+    };
+}
+
 $started = microtime( true );
 try
 {
     $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'],
-                                          array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'] ) );
+                                          $buildOptions );
 }
 catch ( Exception $e )
 {
