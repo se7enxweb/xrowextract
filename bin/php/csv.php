@@ -28,7 +28,7 @@ $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
     '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
-    '[extended-filter:][extended-params:][fetch-alias:][alias-param:][preset:][param:][list-presets][show-preset:]' .
+    '[extended-filter:][extended-params:][fetch-alias:][alias-param:*][preset:][param:*][list-presets][show-preset:]' .
     '[output:][preview;][list-classes][list-columns][user:][progress-file:]',
     '',
     array(
@@ -67,9 +67,9 @@ $options = $script->getOptions(
         'extended-filter' => 'An extendedattributefilter.ini id to chain with the language filter (e.g. an eztags filter); --list-columns lists the ids',
         'extended-params' => 'Its params as a JSON object, e.g. {"tag_id":12}',
         'fetch-alias'  => 'Apply a fetchalias.ini named fetch (Module=content, FunctionName tree/list/tree_count/list_count): its node, class, sort, depth, limit/offset, main-only and a simple condition, where they can be read back',
-        'alias-param'  => 'Values for the named fetch\'s own Parameter[] entries (besides parent_node_id, which takes --node): key=value,key=value',
+        'alias-param'  => 'A value for one of the named fetch\'s own Parameter[] entries: key=value. Repeatable (--alias-param=a=1 --alias-param=b=2), or several in one: key=value,key=value',
         'preset'       => 'Apply a saved export preset ("user:<id>" or "site:<id>"; --list-presets shows them): its whole definition — node, class, columns, languages, every filter, sort and output setting',
-        'param'        => 'Values for the preset\'s own {placeholder} tokens (and, through it, an extended fetch alias\'s Parameter[] entries): key=value,key=value',
+        'param'        => 'A value for one of the preset\'s own {placeholder} tokens (and, through it, an extended fetch alias\'s Parameter[] entries): key=value. Repeatable (--param=a=1 --param=b=2), or several in one: key=value,key=value',
         'list-presets' => 'List the presets this login may see: your own, shared ones, and the site\'s',
         'show-preset'  => 'Print one preset\'s resolved definition (its own Extends chain followed, no --param applied) as JSON',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
@@ -86,6 +86,29 @@ $fail = function ( $message ) use ( $cli, $script )
 {
     $cli->error( $message );
     $script->shutdown( 1 );
+};
+
+/**
+ * key=value pairs from a repeatable option ("[name:*]" in the option string, so $optionValue is an array,
+ * one entry per time the option was given on the command line — a comma list within one entry still works
+ * too, for "--foo=a=1,b=2" in a single occurrence). Used for --alias-param and --param.
+ */
+$parseKeyValueOption = function ( $optionValue )
+{
+    $overrides = array();
+    foreach ( (array)$optionValue as $entry )
+    {
+        foreach ( explode( ',', (string)$entry ) as $pair )
+        {
+            $pair = trim( $pair );
+            if ( $pair === '' || strpos( $pair, '=' ) === false )
+                continue;
+            list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
+            if ( $pKey !== '' )
+                $overrides[$pKey] = $pValue;
+        }
+    }
+    return $overrides;
 };
 
 // Whose read access applies
@@ -107,19 +130,7 @@ if ( $options['fetch-alias'] )
     $aliasDefinition = XrowExtractFetchAlias::find( $options['fetch-alias'], '' );
     if ( !$aliasDefinition )
         $fail( "No named fetch {$options['fetch-alias']} for content tree/list/tree_count/list_count (--fetch-alias)." );
-    $aliasParamOverrides = array();
-    if ( $options['alias-param'] )
-    {
-        foreach ( explode( ',', $options['alias-param'] ) as $pair )
-        {
-            $pair = trim( $pair );
-            if ( $pair === '' || strpos( $pair, '=' ) === false )
-                continue;
-            list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
-            if ( $pKey !== '' )
-                $aliasParamOverrides[$pKey] = $pValue;
-        }
-    }
+    $aliasParamOverrides = $parseKeyValueOption( $options['alias-param'] );
     $aliasResult = XrowExtractFetchAlias::apply( $aliasDefinition, $options['node'] ? (int)$options['node'] : 0, $aliasParamOverrides );
     $aliasApplied = $aliasResult['applied'];
     $aliasUnknown = $aliasResult['unknown'];
@@ -160,18 +171,7 @@ $presetDef = array();
 $presetParamOverrides = array();
 if ( $options['preset'] )
 {
-    if ( $options['param'] )
-    {
-        foreach ( explode( ',', $options['param'] ) as $pair )
-        {
-            $pair = trim( $pair );
-            if ( $pair === '' || strpos( $pair, '=' ) === false )
-                continue;
-            list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
-            if ( $pKey !== '' )
-                $presetParamOverrides[$pKey] = $pValue;
-        }
-    }
+    $presetParamOverrides = $parseKeyValueOption( $options['param'] );
     $resolvedForRun = XrowExtractPreset::resolve( $options['preset'], $options['node'] ? (int)$options['node'] : 0, $presetParamOverrides );
     if ( $resolvedForRun['error'] !== '' )
         $fail( "--preset: {$resolvedForRun['error']}" );
@@ -220,9 +220,15 @@ if ( $options['preset'] )
 $scope = $options['scope'] === 'all' ? 'all' : 'node';
 if ( $options['scope'] && !in_array( $options['scope'], array( 'node', 'all' ), true ) )
     $fail( '--scope is node or all.' );
-$nodeID = isset( $aliasValues['parent_node_id'] ) ? $aliasValues['parent_node_id']
+// A named fetch or a preset that takes the node as a Parameter[], but was not actually given one (no
+// --alias-param/--param and no --node to fall back on), resolves to 0 rather than a real node — that is
+// not "node 0", it is "no node was ever supplied", so it defaults the same way plain --node absent does,
+// instead of failing on a node id nothing meant to name.
+$nodeID = isset( $aliasValues['parent_node_id'] ) && (int)$aliasValues['parent_node_id'] > 0 ? (int)$aliasValues['parent_node_id']
         : ( $options['node'] ? (int)$options['node']
           : (int)( $exportINI->variable( 'ExportSettings', 'StartNodeID' ) ?: $siteINI->variable( 'UserSettings', 'DefaultUserPlacement' ) ) );
+if ( $nodeID <= 0 )
+    $nodeID = 2; // the content structure root, the same last-resort default the view falls back to
 $depthOption = $options['depth'];
 if ( $depthOption === '' && $aliasFunction !== '' )
     $depthOption = in_array( $aliasFunction, array( 'list', 'list_count' ), true ) ? 'list' : 'tree';
