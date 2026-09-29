@@ -1122,22 +1122,45 @@
 }());
 
 /**
- * "Start from a template": the content-package class/content-only choice (data-shows-for="package")
- * only makes sense once "Content package (.ezpkg)" is picked in the format select next to it - shown
- * or hidden to match, on load and on every change (no page reload; the value still posts either way,
- * import.php only reads TemplatePackageVariant when TemplateFormat is actually "package").
+ * "Upload a file of this kind" on a File-card format tile (pass 1 of the redesign): scrolls to and
+ * focuses the one shared upload field, narrows its accept filter to that format's own extensions (a
+ * convenience for the OS file picker only - detection stays server-side, by content, once a file is
+ * actually chosen: XrowExtractPackage::detectUploadKind()/XrowExtractImport::detectFormat()), and
+ * shows which kind is expected next to it until a file is picked or another tile is used instead.
  */
 (function () {
     'use strict';
-    var select = document.getElementById('xe-template-format');
-    if (!select) {
+    var fileInput = document.getElementById('xe-file');
+    var expecting = document.querySelector('.xe-upload-expecting');
+    if (!fileInput) {
         return;
     }
-    var sync = function () {
-        document.querySelectorAll('[data-shows-for]').forEach(function (el) {
-            el.hidden = el.getAttribute('data-shows-for') !== select.value;
+    var defaultAccept = fileInput.getAttribute('accept') || '';
+    document.querySelectorAll('.xe-format-upload-hint').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var format = button.getAttribute('data-format') || '';
+            var accept = button.getAttribute('data-accept');
+            if (accept) {
+                fileInput.setAttribute('accept', accept);
+            }
+            if (expecting) {
+                var template = expecting.getAttribute('data-expecting') || '%format';
+                expecting.textContent = format ? template.replace('%format', format) : '';
+                expecting.hidden = !format;
+            }
+            fileInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            try { fileInput.focus({ preventScroll: true }); } catch (e) { fileInput.focus(); }
         });
-    };
-    select.addEventListener('change', sync);
-    sync();
+    });
+    // Choosing a file directly (any tile's hint, or the field itself) is not itself a commitment to
+    // that one format - widen the filter back once a file is actually picked, so nothing is hidden
+    // from the OS file picker if the user changes their mind before clicking Upload.
+    fileInput.addEventListener('change', function () {
+        if (expecting) {
+            expecting.hidden = true;
+        }
+        if (fileInput.files && fileInput.files.length) {
+            fileInput.setAttribute('accept', defaultAccept);
+        }
+    });
 }());

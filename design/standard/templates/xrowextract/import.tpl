@@ -17,36 +17,125 @@
     {include uri='design:xrowextract/tabs.tpl' active='import'}
     <div class="xe-cards">
 
-        {* 1. Upload *}
+        {* 1. Upload: one chooser, four equal formats plus the two single-XML kinds. Each tile offers
+           the same four actions ("just like json, csv, xml") - absorbs the old separate "Try a
+           sample" box and "Start from a template" block. The upload widget itself stays in one
+           place below the tiles, with chunked progress, and reports which kind it detected once a
+           file is chosen (design pass 1 of the File-card refactor; content/wording is pass 2). *}
         <section class="xe-card" id="xe-card-upload" aria-labelledby="xe-card-upload-h">
             <header class="xe-card-head">
                 <span class="xe-step">1</span>
                 <div>
                     <h2 id="xe-card-upload-h">{'File'|i18n('design/standard/extract')}</h2>
-                    <p>{'An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.'|i18n('design/standard/extract')}</p>
+                    <p>{'Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
 
             {if $UploadError}<p class="xe-error">{$UploadError|wash}</p>{/if}
             {if $ParseError}<p class="xe-error">{$ParseError|wash}</p>{/if}
 
-            {if $UploadDiskFree}<p class="xe-help">{'%free free on the server for uploads; no file size limit is enforced beyond that.'|i18n('design/standard/extract',, hash( '%free', $UploadDiskFree ))}</p>{/if}
             {if $HasFile|not}
-            <div class="xe-field">
+            {if $SampleClassGroups|count}
+            <div class="xe-field xe-format-class">
+                <label class="xe-label xe-label-small" for="xe-sample-class">{'Class for these actions'|i18n('design/standard/extract')}</label>
+                <select name="SampleClassID" id="xe-sample-class" class="xe-sample-class">
+                    {foreach $SampleClassGroups as $group}
+                    <optgroup label="{$group.name|wash}">
+                        {foreach $group.classes as $class}
+                        <option value="{$class.id}"{if $class.id|eq( $SampleClassID )} selected="selected"{/if}>{$class.name|wash} ({$class.identifier|wash}) · {if $class.count|eq( 0 )}{'no objects yet'|i18n('design/standard/extract')}{else}{$class.count} {'objects'|i18n('design/standard/extract')}{/if}</option>
+                        {/foreach}
+                    </optgroup>
+                    {/foreach}
+                </select>
+                <p class="xe-help">{'Drives "Try a sample" below; "Download a template" and the class/object XML downloads use the class chosen in step 2 instead.'|i18n('design/standard/extract')}</p>
+            </div>
+            {/if}
+
+            <div class="xe-format-grid">
+                <article class="xe-format-tile xe-format-recommended" aria-labelledby="xe-format-xml-h">
+                    <h3 id="xe-format-xml-h">XML <span class="xe-format-badge">{'recommended'|i18n('design/standard/extract')}</span></h3>
+                    <p class="xe-format-when">{'Exact: keeps column ids and the class name - what a template and a sample both build.'|i18n('design/standard/extract')}</p>
+                    <p class="xe-format-shape"><code>&lt;export&gt;&lt;columns&gt;...&lt;object&gt;&lt;field&gt;</code></p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="TrySample" value="xml">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="xml">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-xml">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="XML" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                </article>
+
+                <article class="xe-format-tile" aria-labelledby="xe-format-csv-h">
+                    <h3 id="xe-format-csv-h">CSV</h3>
+                    <p class="xe-format-when">{'Plain spreadsheet rows; separator and encoding are detected automatically.'|i18n('design/standard/extract')}</p>
+                    <p class="xe-format-shape"><code>title,remote-id,class,language</code></p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="csv">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-csv">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="CSV" data-accept=".csv,text/csv">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                </article>
+
+                <article class="xe-format-tile" aria-labelledby="xe-format-json-h">
+                    <h3 id="xe-format-json-h">JSON</h3>
+                    <p class="xe-format-when">{'One object per row, the same column names as CSV.'|i18n('design/standard/extract')}</p>
+                    <p class="xe-format-shape"><code>[{ldelim}"title": "...", "remote-id": "..."{rdelim}]</code></p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="TrySample" value="json">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <button class="button" type="submit" name="DownloadTemplate" value="json">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-json">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="JSON" data-accept=".json,application/json">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                </article>
+
+                <article class="xe-format-tile xe-format-package" aria-labelledby="xe-format-package-h">
+                    <h3 id="xe-format-package-h">{'Content package'|i18n('design/standard/extract')} <code>.ezpkg</code></h3>
+                    <p class="xe-format-when">{'Classes and content together, installed through the package system.'|i18n('design/standard/extract')}</p>
+                    <p class="xe-format-shape"><code>package.xml, ezcontentclass/, ezcontentobject/, simplefiles/</code></p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="TrySample" value="package">{'Try a sample'|i18n('design/standard/extract')}</button>
+                        <div class="xe-segmented xe-format-variant" role="radiogroup" aria-label="{'Content package: what to include'|i18n('design/standard/extract')|wash}">
+                            <label><input type="radio" name="TemplatePackageVariant" value="both" checked /><span>{'Class + content'|i18n('design/standard/extract')}</span></label>
+                            <label><input type="radio" name="TemplatePackageVariant" value="class" /><span>{'Class only'|i18n('design/standard/extract')}</span></label>
+                            <label><input type="radio" name="TemplatePackageVariant" value="content" /><span>{'Content only'|i18n('design/standard/extract')}</span></label>
+                        </div>
+                        <button class="button" type="submit" name="DownloadTemplate" value="package">{'Download a template'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Content package'|i18n('design/standard/extract')|wash}" data-accept=".ezpkg,.tar.gz,.tgz,application/gzip">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                    {if and( $ClassID, $ClassHasExistingContent|not )}
+                    <p class="xe-note">{'The class chosen in step 2 has no content yet: "class + content"/"content only" would use temporary hidden scratch content instead.'|i18n('design/standard/extract')}</p>
+                    {/if}
+                </article>
+            </div>
+
+            <div class="xe-format-grid xe-format-grid-compact">
+                <article class="xe-format-tile xe-format-tile-compact" aria-labelledby="xe-format-classxml-h">
+                    <h3 id="xe-format-classxml-h">{'Class XML'|i18n('design/standard/extract')}</h3>
+                    <p class="xe-format-when">{'One content-class definition, on its own.'|i18n('design/standard/extract')}</p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="DownloadClassXML">{'Download'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Class XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                </article>
+                <article class="xe-format-tile xe-format-tile-compact" aria-labelledby="xe-format-objectxml-h">
+                    <h3 id="xe-format-objectxml-h">{'Object XML'|i18n('design/standard/extract')}</h3>
+                    <p class="xe-format-when">{'Content objects of a package, on their own.'|i18n('design/standard/extract')}</p>
+                    <div class="xe-format-actions">
+                        <button class="button" type="submit" name="DownloadObjectXML">{'Download'|i18n('design/standard/extract')}</button>
+                        <a class="button" href="#xe-ref-packages">{'Read the reference'|i18n('design/standard/extract')}</a>
+                        <button class="button xe-format-upload-hint" type="button" data-format="{'Object XML'|i18n('design/standard/extract')|wash}" data-accept=".xml,text/xml,application/xml">{'Upload a file of this kind'|i18n('design/standard/extract')}</button>
+                    </div>
+                </article>
+            </div>
+
+            {if $UploadDiskFree}<p class="xe-help">{'%free free on the server for uploads; no file size limit is enforced beyond that.'|i18n('design/standard/extract',, hash( '%free', $UploadDiskFree ))}</p>{/if}
+            <div class="xe-field" id="xe-upload-widget">
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
                 <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
-                {* Every kind of file this page takes, at a glance; the package chip opens its reference section *}
-                <ul class="xe-filetypes" aria-label="{'Files you can import'|i18n('design/standard/extract')|wash}">
-                    <li class="xe-filetype xe-filetype-main"><a href="#xe-ref-xml"><strong>XML</strong></a> <small>{'recommended'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><a href="#xe-ref-csv"><strong>CSV</strong></a></li>
-                    <li class="xe-filetype"><a href="#xe-ref-json"><strong>JSON</strong></a></li>
-                    <li class="xe-filetype xe-filetype-package"><a href="#xe-ref-packages"><strong>{'Content package'|i18n('design/standard/extract')}</strong> <code>.ezpkg</code> <code>.tar.gz</code></a>
-                        <small>{'classes and content together, installed through the package system'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><a href="#xe-ref-packages"><strong>{'Class XML'|i18n('design/standard/extract')}</strong></a> <small>{'one class definition'|i18n('design/standard/extract')}</small></li>
-                    <li class="xe-filetype"><a href="#xe-ref-packages"><strong>{'Object XML'|i18n('design/standard/extract')}</strong></a> <small>{'content objects of a package'|i18n('design/standard/extract')}</small></li>
-                </ul>
-                <p class="xe-help">{'A package is recognised by its contents, not by the file name: it gets a dry run of every class and object it carries (create, update, unchanged, class missing), then the install options. Packages already in the repository are on the Package tab.'|i18n('design/standard/extract')} <a href={'xrowextract/package'|ezurl}>{'Package tab'|i18n('design/standard/extract')}</a></p>
-                <p class="xe-help">{'XML: the shape XrowExtractWriter writes, with its own column ids and class - the most exact, and what "Start from a template" and "Try a sample" build. CSV: separator and encoding are detected automatically (UTF-8 with or without a BOM); you can still change the separator once it is uploaded. JSON: an array of objects, one per row. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help xe-upload-expecting" data-expecting="{'Expecting: %format'|i18n('design/standard/extract')|wash}" hidden></p>
+                <p class="xe-help">{'A package is recognised by its contents, not the file name - the same for a class or object XML. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
                     <input type="hidden" name="UploadID" value="" />
                     <input type="hidden" name="UploadName" value="" />
@@ -60,30 +149,6 @@
                 </div>
                 <input class="defaultbutton" type="submit" name="Upload" value="{'Upload'|i18n('design/standard/extract')}" />
             </div>
-
-            {if $SampleClassGroups|count}
-            <div class="xe-field xe-sample-try">
-                <span class="xe-label">{'Try a sample'|i18n('design/standard/extract')}</span>
-                <p class="xe-help">{'Nothing to import yet? Pick any class and one click builds a small file from the site’s own content for it - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. A class without objects gets the new object only. Applying it writes real content.'|i18n('design/standard/extract')}</p>
-                <label class="xe-label xe-label-small" for="xe-sample-class">{'Class for the sample'|i18n('design/standard/extract')}</label>
-                <select name="SampleClassID" id="xe-sample-class" class="xe-sample-class">
-                    {foreach $SampleClassGroups as $group}
-                    <optgroup label="{$group.name|wash}">
-                        {foreach $group.classes as $class}
-                        <option value="{$class.id}"{if $class.id|eq( $SampleClassID )} selected="selected"{/if}>{$class.name|wash} ({$class.identifier|wash}) · {if $class.count|eq( 0 )}{'no objects yet'|i18n('design/standard/extract')}{else}{$class.count} {'objects'|i18n('design/standard/extract')}{/if}</option>
-                        {/foreach}
-                    </optgroup>
-                    {/foreach}
-                </select>
-                <div class="xe-inline xe-sample-buttons">
-                    <button class="defaultbutton" type="submit" name="TrySample" value="xml">{'Try a sample (XML - recommended)'|i18n('design/standard/extract')}</button>
-                    <button class="button" type="submit" name="TrySample" value="json">{'Try a sample (JSON)'|i18n('design/standard/extract')}</button>
-                    <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample (CSV)'|i18n('design/standard/extract')}</button>
-                    <button class="button" type="submit" name="TrySample" value="package">{'Try a sample (.ezpkg)'|i18n('design/standard/extract')}</button>
-                </div>
-                <p class="xe-help">{'A content package sample is built read-only from up to 3 of the class’s own existing objects (class only for a class with no content yet) and altered on the copy only, so its dry run shows every outcome: unchanged, updated, newly created, and a class the site does not have. Not kept in the package repository unless you choose to.'|i18n('design/standard/extract')}</p>
-            </div>
-            {/if}
             {else}
             <div class="xe-node">
                 <span class="xe-node-text">
@@ -179,39 +244,9 @@
                     <p class="xe-help">{'Used when a row has no parent-remote-id or main-parent-node-id column.'|i18n('design/standard/extract')}</p>
                 </div>
             </div>
-            <div class="xe-field">
-                <span class="xe-label">{'Start from a template'|i18n('design/standard/extract')}</span>
-                <div class="xe-inline">
-                    <select name="TemplateFormat" id="xe-template-format" aria-label="{'File type'|i18n('design/standard/extract')|wash}">
-                        <option value="xml" selected>{'XML (recommended)'|i18n('design/standard/extract')}</option>
-                        <option value="json">JSON</option>
-                        <option value="csv">CSV</option>
-                        <option value="package">{'Content package (.ezpkg)'|i18n('design/standard/extract')}</option>
-                    </select>
-                    <span class="xe-template-package-variant" data-shows-for="package" hidden>
-                        <select name="TemplatePackageVariant" aria-label="{'Content package: what to include'|i18n('design/standard/extract')|wash}">
-                            <option value="both">{'Class + content'|i18n('design/standard/extract')}</option>
-                            <option value="class">{'Class only'|i18n('design/standard/extract')}</option>
-                            <option value="content">{'Content only'|i18n('design/standard/extract')}</option>
-                        </select>
-                    </span>
-                    <input class="button" type="submit" name="DownloadTemplate" value="{'Download a template for this class'|i18n('design/standard/extract')}" />
-                </div>
-                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand. Content package downloads a real, installable .ezpkg instead, built from up to 3 of the class’s own existing objects.'|i18n('design/standard/extract')}</p>
-                {if and( $ClassID, $ClassHasExistingContent|not )}
-                <p class="xe-note">{'This class has no content on this site yet: a "class + content" or "content only" package download would use temporary hidden scratch content instead (removed again immediately after), not real existing objects.'|i18n('design/standard/extract')}</p>
-                {/if}
-            </div>
-            {if $ClassID}
-            <div class="xe-field">
-                <span class="xe-label">{'Class or object XML on their own'|i18n('design/standard/extract')}</span>
-                <div class="xe-inline">
-                    <input class="button" type="submit" name="DownloadClassXML" value="{'Download class definition XML'|i18n('design/standard/extract')}" />
-                    <input class="button" type="submit" name="DownloadObjectXML" value="{'Download object XML'|i18n('design/standard/extract')}" />
-                </div>
-                <p class="xe-help">{'A single content-class definition XML, or a single content-object XML with up to 3 of the class’s own existing objects - both accepted directly by this page, no archive needed.'|i18n('design/standard/extract')}</p>
-            </div>
-            {/if}
+            {* "Start from a template", the class/object XML downloads and the sample class choice all
+               moved into the File card's format tiles above (pass 1 of the File-card redesign) -
+               nothing left to show here for them. *}
         </section>
 
         {if $HasFile}

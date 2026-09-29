@@ -344,6 +344,11 @@ if ( !$ClassID && !empty( $parsed['class'] ) )
         $ClassID = (int)$fromFile->attribute( 'id' );
 }
 $tpl->setVariable( 'ClassID', $ClassID );
+// Whether a "class + content"/"content only" package template can be built from this class's own
+// existing content, or would fall back to temporary hidden scratch content (XrowExtractPackage::
+// buildContentPackage()) - known ahead of the download itself (which always uses this same
+// $ClassID, never the sample box's own class), so the page can say so beforehand.
+$tpl->setVariable( 'ClassHasExistingContent', $ClassID && isset( $countsByClassID[$ClassID] ) ? ( $countsByClassID[$ClassID]['count'] > 0 ) : true );
 $SampleClassID = $ClassID ?: $MostPopulousClassID;
 $tpl->setVariable( 'SampleClassID', $SampleClassID );
 
@@ -434,9 +439,12 @@ $tpl->setVariable( 'SpecialChoices', $SpecialChoices );
 if ( ( $http->hasPostVariable( 'DownloadTemplate' ) || $http->hasPostVariable( 'DownloadClassXML' ) || $http->hasPostVariable( 'DownloadObjectXML' ) ) && $ClassID <= 0 )
     $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'Choose a class first' ) );
 
-$templateFormatIn = $http->hasPostVariable( 'TemplateFormat' ) ? (string)$http->postVariable( 'TemplateFormat' ) : 'xml';
+// "Download a template" is one button per format tile now (File card, pass 1 of the redesign),
+// not a shared format select - DownloadTemplate's own posted value names the format, the same
+// pattern the per-format "Try a sample" buttons already use.
+$templateFormatIn = $http->hasPostVariable( 'DownloadTemplate' ) ? (string)$http->postVariable( 'DownloadTemplate' ) : 'xml';
 // A content-package template: "package" is a fourth format here too, just like xml/json/csv - the
-// class-only/content-only choice sits beside the format select and only matters when this one is
+// class-only/content-only choice sits inside that tile and only matters when its own button is
 // picked (XrowExtractPackage::buildContentPackage(), preferring the class's own existing content).
 if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && $templateFormatIn === 'package' && ( $templateClass = eZContentClass::fetch( $ClassID ) ) )
 {
