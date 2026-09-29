@@ -34,7 +34,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:]' .
+    '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:][remove-after]' .
     '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]',
     '',
     array(
@@ -49,6 +49,7 @@ $options = $script->getOptions(
         'site-access'  => '--install: site access to map templates/overrides to (default: SiteSettings.DefaultAccess)',
         'object-mode'  => '--install: skip, update (default) or new, for an object that already exists (matched by remote id)',
         'class-mode'   => '--install: skip (default), replace or new, for a class that already exists (matched by remote id/identifier)',
+        'remove-after' => '--install: remove the package from the repository once installed (whether or not the install itself was clean) - for a job installing a transient package (a "Try a sample"/"Start from a template" one the web view registered just for this job\'s run), so the repository ends up as if the whole thing had run in the request',
         'node'         => '--export: the node id to export',
         'nodes'        => '--export: several node ids, comma-separated (the whole One class/Site archive selection); an alternative to --node',
         'subtree'      => '--export: the whole subtree below --node/--nodes, not only that node',
@@ -176,6 +177,13 @@ if ( $options['install'] )
         $fail( '--class-mode is skip, replace or new.' );
     $siteAccess = $options['site-access'] ? $options['site-access'] : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
 
+    // The dry run's own classification (create/update/unchanged/class missing), taken just before
+    // installing: XrowExtractPackage::install()'s report only ever lists what it touched as
+    // "created" (it looks every item up again afterwards, by remote id - it has no notion of
+    // whether that item was new or already there), so this is the only place counts split that way
+    // come from. bin/php/job.php reads it straight from the report for the Jobs page.
+    $preInstallCounts = XrowExtractPackage::inspect( $package )['counts'];
+
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 1, 2, 'installing' );
 
@@ -188,9 +196,24 @@ if ( $options['install'] )
         $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
     $cli->output( $report['ok'] ? 'PASS installed' : 'FAIL install did not finish cleanly' );
     if ( $options['output'] )
-        file_put_contents( (string)$options['output'], json_encode( array( 'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    {
+        file_put_contents( (string)$options['output'], json_encode( array(
+            'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report,
+            'package_name' => $package->attribute( 'name' ), 'counts' => $preInstallCounts,
+        ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    }
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 2, 'done' );
+    if ( $options['remove-after'] )
+    {
+        // Whether or not the install itself was clean: a job installing a transient package (a "Try
+        // a sample"/"Start from a template" one the web view registered in the repository just for
+        // this job's run) is the only caller that ever passes this, and that package has no business
+        // staying in the repository either way - see modules/xrowextract/import.php.
+        $stillThere = eZPackage::fetch( $package->attribute( 'name' ) );
+        if ( $stillThere instanceof eZPackage )
+            $stillThere->remove();
+    }
     $script->shutdown( $report['ok'] ? 0 : 1 );
 }
 

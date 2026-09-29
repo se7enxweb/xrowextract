@@ -107,6 +107,13 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'active' => $job['state'] === 'queued' || $job['state'] === 'running',
         'counts' => isset( $job['counts'] ) ? $job['counts'] : null,
         'has_errors_file' => !empty( $job['has_errors_file'] ),
+        // 'package' jobs only (bin/php/job.php): the dry run counts are already in 'counts' above;
+        // these are install()'s own per-item results, for a link straight to what a package job
+        // installed - a class's edit view, an object's node.
+        'package_name' => isset( $job['package_name'] ) ? $job['package_name'] : null,
+        'created_classes' => isset( $job['created_classes'] ) ? $job['created_classes'] : array(),
+        'created_objects' => isset( $job['created_objects'] ) ? $job['created_objects'] : array(),
+        'install_errors' => isset( $job['install_errors'] ) ? $job['install_errors'] : array(),
     );
 }
 
