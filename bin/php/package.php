@@ -206,15 +206,31 @@ if ( $options['install'] )
 
     $installStarted = microtime( true );
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
-    $cli->output( sprintf( '[%s] The package system finished after %.1f s: %d class(es) and %d object(s) created or updated, %d error(s)',
+    // What happened, in the terms of the dry run just before and the chosen handling of existing items
+    // (install()'s own list names every item the package carries, whether it was written or left alone)
+    $c = $preInstallCounts;
+    $objectsExisting = $c['objects_update'] + $c['objects_unchanged'];
+    $existingObjectsDid = array( 'skip' => 'left as they were', 'update' => 'updated', 'new' => 'added again as new copies' );
+    $existingClassesDid = array( 'skip' => 'left as they were', 'replace' => 'replaced', 'new' => 'added again as new classes' );
+    $cli->output( sprintf( '[%s] Done after %.1f s. Classes: %d created, %d already there - %s. Objects: %d created, %d already there - %s%s. %d error(s).',
                            date( 'H:i:s' ), microtime( true ) - $installStarted,
-                           count( $report['created_classes'] ), count( $report['created_objects'] ), count( $report['errors'] ) ) );
+                           $c['classes_create'], $c['classes_update'], $existingClassesDid[$classMode],
+                           $c['objects_create'], $objectsExisting, $existingObjectsDid[$objectMode],
+                           $c['objects_class_missing'] ? sprintf( ', %d not installed (class missing)', $c['objects_class_missing'] ) : '',
+                           count( $report['errors'] ) ) );
     foreach ( $report['errors'] as $error )
         $cli->error( '  ' . $error );
+    // The first 50 of each by name; the whole list is in the job's report
+    $listed = 0;
     foreach ( $report['created_classes'] as $row )
-        $cli->output( sprintf( '  class   %-30s #%d', $row['identifier'], $row['id'] ) );
+        if ( $listed++ < 50 )
+            $cli->output( sprintf( '  class   %-30s #%d', $row['identifier'], $row['id'] ) );
+    $listed = 0;
     foreach ( $report['created_objects'] as $row )
-        $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
+        if ( $listed++ < 50 )
+            $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
+    if ( count( $report['created_objects'] ) > 50 )
+        $cli->output( sprintf( '  ... and %d more object(s): see the job\'s report', count( $report['created_objects'] ) - 50 ) );
     $cli->output( $report['ok'] ? 'PASS installed' : 'FAIL install did not finish cleanly' );
     if ( $options['output'] )
     {

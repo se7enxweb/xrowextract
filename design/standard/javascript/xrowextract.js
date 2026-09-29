@@ -761,11 +761,12 @@
             return;
         }
         var created = parseInt(times.getAttribute('data-created'), 10);
-        var stamp = function (el, value) {
+        // The server's own date format (job_status sends it), so a time filled in live reads like the others
+        var stamp = function (el, value, text) {
             if (el && !el.hasAttribute('datetime')) {
                 var date = new Date(value * 1000);
                 el.setAttribute('datetime', date.toISOString());
-                el.textContent = date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+                el.textContent = text || date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
             }
         };
         if (data.started) {
@@ -773,7 +774,7 @@
             if (startedStep) {
                 startedStep.className = 'xe-time-done';
             }
-            stamp(row.querySelector('[data-role="started"]'), data.started);
+            stamp(row.querySelector('[data-role="started"]'), data.started, data.started_text);
             if (created) {
                 setText(row, 'wait', meta.getAttribute('data-label-wait').replace('%time', duration(data.started - created)));
             }
@@ -786,7 +787,7 @@
             if (data.state === 'failed') {
                 setText(row, 'ended-label', meta.getAttribute('data-label-failed'));
             }
-            stamp(row.querySelector('[data-role="ended"]'), data.ended);
+            stamp(row.querySelector('[data-role="ended"]'), data.ended, data.ended_text);
             if (data.started) {
                 setText(row, 'took', meta.getAttribute('data-label-took').replace('%time', duration(data.ended - data.started)));
             }
@@ -922,6 +923,11 @@
                 link.textContent = downloadLabel;
                 buttons.insertBefore(link, buttons.firstChild);
             }
+        }
+        // A finished job goes on being asked for until its whole log is on the page
+        var logBehind = data.log && data.log.size > data.log.offset;
+        if (data.state !== 'queued' && data.state !== 'running' && logBehind) {
+            return;
         }
         if (data.state !== 'queued' && data.state !== 'running') {
             row.removeAttribute('data-poll');

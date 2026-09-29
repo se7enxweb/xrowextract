@@ -157,6 +157,33 @@ foreach ( XrowExtractJob::forViewer( $login, $allJobs ) as $job )
         'created_objects' => isset( $job['created_objects'] ) ? $job['created_objects'] : array(),
         'install_errors' => isset( $job['install_errors'] ) ? $job['install_errors'] : array(),
     );
+    // A package install: what it installed, as counts, instead of "rows". A job that finished before its
+    // runner recorded them (older jobs) gets them from its own install-report.json.
+    $last = count( $rows ) - 1;
+    if ( $job['type'] === 'package' && in_array( $job['state'], array( 'done', 'failed' ), true ) )
+    {
+        if ( !$rows[$last]['created_classes'] && !$rows[$last]['created_objects'] && $job['output_file']
+             && is_file( $reportPath = XrowExtractJob::path( $job['id'] ) . '/' . $job['output_file'] ) )
+        {
+            $report = json_decode( (string)@file_get_contents( $reportPath ), true );
+            if ( is_array( $report ) && isset( $report['report'] ) )
+            {
+                $rows[$last]['created_classes'] = isset( $report['report']['created_classes'] ) ? (array)$report['report']['created_classes'] : array();
+                $rows[$last]['created_objects'] = isset( $report['report']['created_objects'] ) ? (array)$report['report']['created_objects'] : array();
+                $rows[$last]['install_errors'] = isset( $report['report']['errors'] ) ? (array)$report['report']['errors'] : array();
+                if ( !$rows[$last]['counts'] && isset( $report['counts'] ) )
+                    $rows[$last]['counts'] = $report['counts'];
+            }
+        }
+        $rows[$last]['installed_classes'] = count( $rows[$last]['created_classes'] );
+        $rows[$last]['installed_objects'] = count( $rows[$last]['created_objects'] );
+        $installedTotal = $rows[$last]['installed_classes'] + $rows[$last]['installed_objects'];
+        if ( $job['state'] === 'done' && $installedTotal )
+        {
+            $rows[$last]['progress'] = array( 'done' => $installedTotal, 'total' => $installedTotal, 'phase' => 'done' );
+            $rows[$last]['progress_percent'] = 100;
+        }
+    }
 }
 
 $counts = array( 'total' => count( $rows ), 'done' => 0, 'running' => 0, 'queued' => 0, 'failed' => 0 );

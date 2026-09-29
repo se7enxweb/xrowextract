@@ -4,6 +4,102 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Review and install the package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%classes classes, %objects objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classes:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parent for the package’s objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The package’s top-level objects are placed here; the objects below them keep their own structure.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An object that already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Leave it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add a copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Matched by remote id.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A class that already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keep the site’s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add as new</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Matched by remote id, else by identifier.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A large package: the dry run compares every class and object with the site, which can take a minute. Nothing is written.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Review again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Review the package (dry run)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install %count changes (in the background)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>report</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>(the last 8 MB)</source>
         <translation type="unfinished"></translation>
     </message>

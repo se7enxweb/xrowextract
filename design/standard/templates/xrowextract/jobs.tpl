@@ -91,8 +91,13 @@
                     </ol>
 
                     <div class="xe-job-meta" data-label-failed="{'Failed'|i18n('design/standard/extract')|wash}" data-label-took="{'took %time'|i18n('design/standard/extract')|wash}" data-label-wait="{'after %time in the queue'|i18n('design/standard/extract')|wash}">
+                        {if and( $job.type|eq( 'package' ), is_set( $job.installed_objects ) )}
+                        <span data-role="rows"><strong>{$job.installed_classes}</strong> {'classes'|i18n('design/standard/extract')}, <strong>{$job.installed_objects}</strong> {'objects installed'|i18n('design/standard/extract')}</span>
+                        <span data-role="size">{if $job.size_kb|ne( null )}{'report'|i18n('design/standard/extract')} {$job.size_kb} KB{/if}</span>
+                        {else}
                         <span data-role="rows">{if $job.rows|ne( null )}<strong>{$job.rows}</strong> {'rows'|i18n('design/standard/extract')}{/if}</span>
                         <span data-role="size">{if $job.size_kb|ne( null )}{$job.size_kb} KB{/if}</span>
+                        {/if}
                     </div>
                     {if $job.error}<p class="xe-note xe-note-bad" data-role="error">{$job.error|wash}</p>{/if}
                     {* A package install: what it has written so far, counted in the database, and the latest objects *}

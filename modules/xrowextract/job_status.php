@@ -49,7 +49,7 @@ if ( $logSize > $logOffset )
     if ( $fp )
     {
         fseek( $fp, $logOffset );
-        $logText = (string)fread( $fp, min( 65536, $logSize - $logOffset ) );
+        $logText = (string)fread( $fp, min( 262144, $logSize - $logOffset ) );
         fclose( $fp );
         // Only whole lines (up to the last line break), so a line is never cleaned in two halves; the
         // rest comes with the next poll
@@ -79,6 +79,8 @@ echo json_encode( array(
     'error' => $job['error'],
     'started' => $job['started'],
     'ended' => $job['ended'],
+    'started_text' => $job['started'] ? eZLocale::instance()->formatShortDateTime( (int)$job['started'] ) : '',
+    'ended_text' => $job['ended'] ? eZLocale::instance()->formatShortDateTime( (int)$job['ended'] ) : '',
     'has_file' => $job['state'] === 'done' && $job['output_file'] && is_file( XrowExtractJob::path( $id ) . '/' . $job['output_file'] ),
     'progress' => $progress,
     'install' => $installProgress,

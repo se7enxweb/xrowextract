@@ -2,6 +2,102 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Review and install the package</source>
+        <translation>Paket prüfen und installieren</translation>
+    </message>
+    <message>
+        <source>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</source>
+        <translation>Sehen, was das Paket auf dieser Website anlegen, aktualisieren oder unverändert lassen würde, wählen, wohin es kommt, und es dann installieren.</translation>
+    </message>
+    <message>
+        <source>%classes classes, %objects objects</source>
+        <translation>%classes Klassen, %objects Objekte</translation>
+    </message>
+    <message>
+        <source>Classes:</source>
+        <translation>Klassen:</translation>
+    </message>
+    <message>
+        <source>Parent for the package’s objects</source>
+        <translation>Übergeordneter Knoten für die Objekte des Pakets</translation>
+    </message>
+    <message>
+        <source>The package’s top-level objects are placed here; the objects below them keep their own structure.</source>
+        <translation>Die obersten Objekte des Pakets kommen hierhin; die Objekte darunter behalten ihre eigene Struktur.</translation>
+    </message>
+    <message>
+        <source>An object that already exists</source>
+        <translation>Ein Objekt, das es schon gibt</translation>
+    </message>
+    <message>
+        <source>Update it</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <source>Leave it</source>
+        <translation>Belassen</translation>
+    </message>
+    <message>
+        <source>Add a copy</source>
+        <translation>Als Kopie hinzufügen</translation>
+    </message>
+    <message>
+        <source>Matched by remote id.</source>
+        <translation>Erkannt über die Remote-ID.</translation>
+    </message>
+    <message>
+        <source>A class that already exists</source>
+        <translation>Eine Klasse, die es schon gibt</translation>
+    </message>
+    <message>
+        <source>Keep the site’s</source>
+        <translation>Die der Website behalten</translation>
+    </message>
+    <message>
+        <source>Replace it</source>
+        <translation>Ersetzen</translation>
+    </message>
+    <message>
+        <source>Add as new</source>
+        <translation>Als neue hinzufügen</translation>
+    </message>
+    <message>
+        <source>Matched by remote id, else by identifier.</source>
+        <translation>Erkannt über die Remote-ID, sonst über den Bezeichner.</translation>
+    </message>
+    <message>
+        <source>A large package: the dry run compares every class and object with the site, which can take a minute. Nothing is written.</source>
+        <translation>Ein großes Paket: Der Probelauf vergleicht jede Klasse und jedes Objekt mit der Website, das kann eine Minute dauern. Es wird nichts geschrieben.</translation>
+    </message>
+    <message>
+        <source>Review again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <source>Review the package (dry run)</source>
+        <translation>Paket prüfen (Probelauf)</translation>
+    </message>
+    <message>
+        <source>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</source>
+        <translation>Als Nächstes: das Paket prüfen. Der Probelauf listet jede Klasse und jedes Objekt mit dem, was die Installation tun würde; die Installation selbst läuft dann im Hintergrund, mit Fortschritt und Protokoll auf der Seite Aufträge.</translation>
+    </message>
+    <message>
+        <source>Install %count changes (in the background)</source>
+        <translation>%count Änderungen installieren (im Hintergrund)</translation>
+    </message>
+    <message>
+        <source>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</source>
+        <translation>Das Paket jetzt installieren? Es läuft als Hintergrundauftrag; Fortschritt und Protokoll stehen auf der Seite Aufträge.</translation>
+    </message>
+    <message>
+        <source>objects installed</source>
+        <translation>Objekte installiert</translation>
+    </message>
+    <message>
+        <source>report</source>
+        <translation>Bericht</translation>
+    </message>
+    <message>
         <source>(the last 8 MB)</source>
         <translation>(die letzten 8 MB)</translation>
     </message>
