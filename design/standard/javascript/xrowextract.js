@@ -1096,3 +1096,48 @@
         window.addEventListener('load', restore);
     }
 }());
+
+/**
+ * A submit button carrying data-confirm asks for confirmation before its form submits - used by
+ * "Install this package"/"Install as a background job" on xrowextract/import when the package is a
+ * "Try a sample" one (it writes real content), the same data-confirm attribute convention the Jobs
+ * page's own delete buttons already use, generalised here to any button on any of this module's forms
+ * (the Import page is one single form, not one form per button, so the Jobs-page listener above - scoped
+ * to .xe-job-delete-form - does not reach it).
+ */
+(function () {
+    'use strict';
+    document.querySelectorAll('button[data-confirm], input[data-confirm]').forEach(function (control) {
+        var form = control.form;
+        if (!form) {
+            return;
+        }
+        form.addEventListener('submit', function (event) {
+            var submitter = event.submitter || (document.activeElement === control ? control : null);
+            if (submitter === control && !window.confirm(control.getAttribute('data-confirm'))) {
+                event.preventDefault();
+            }
+        });
+    });
+}());
+
+/**
+ * "Start from a template": the content-package class/content-only choice (data-shows-for="package")
+ * only makes sense once "Content package (.ezpkg)" is picked in the format select next to it - shown
+ * or hidden to match, on load and on every change (no page reload; the value still posts either way,
+ * import.php only reads TemplatePackageVariant when TemplateFormat is actually "package").
+ */
+(function () {
+    'use strict';
+    var select = document.getElementById('xe-template-format');
+    if (!select) {
+        return;
+    }
+    var sync = function () {
+        document.querySelectorAll('[data-shows-for]').forEach(function (el) {
+            el.hidden = el.getAttribute('data-shows-for') !== select.value;
+        });
+    };
+    select.addEventListener('change', sync);
+    sync();
+}());

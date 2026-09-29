@@ -79,19 +79,27 @@
                     <button class="defaultbutton" type="submit" name="TrySample" value="xml">{'Try a sample (XML - recommended)'|i18n('design/standard/extract')}</button>
                     <button class="button" type="submit" name="TrySample" value="json">{'Try a sample (JSON)'|i18n('design/standard/extract')}</button>
                     <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample (CSV)'|i18n('design/standard/extract')}</button>
+                    <button class="button" type="submit" name="TrySample" value="package">{'Try a sample (.ezpkg)'|i18n('design/standard/extract')}</button>
                 </div>
+                <p class="xe-help">{'A content package sample is built read-only from up to 3 of the class’s own existing objects (class only for a class with no content yet) and altered on the copy only, so its dry run shows every outcome: unchanged, updated, newly created, and a class the site does not have. Not kept in the package repository unless you choose to.'|i18n('design/standard/extract')}</p>
             </div>
             {/if}
             {else}
             <div class="xe-node">
                 <span class="xe-node-text">
                     <span class="xe-node-name">{$UploadedName|wash}</span>
-                    <span class="xe-node-meta">{if $UploadedSize} {$UploadedSize} · {/if}{if $FileRowCountKnown}{$FileRowCount} {'rows'|i18n('design/standard/extract')}{else}{'many rows (counted once queued)'|i18n('design/standard/extract')}{/if} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
+                    <span class="xe-node-meta">{if $UploadedSize} {$UploadedSize} · {/if}{if $FileRowCountKnown}{$FileRowCount} {cond( $ImportFormat|eq( 'package' ), 'classes/objects'|i18n('design/standard/extract'), 'rows'|i18n('design/standard/extract') )}{else}{'many rows (counted once queued)'|i18n('design/standard/extract')}{/if}{if $ImportFormat|ne( 'package' )} · {$FileHeader|count} {'columns'|i18n('design/standard/extract')}{/if} · {$ImportFormat|wash}{if $IsSample} · {'sample'|i18n('design/standard/extract')}{/if}</span>
                 </span>
                 <input class="button" type="submit" name="RemoveFile" value="{'Remove'|i18n('design/standard/extract')}" />
             </div>
             {if $IsSample}
             <p class="xe-note">{'This is a sample built from the site’s own content, for trying the importer - not a file you uploaded. Applying it writes real content (see step 4).'|i18n('design/standard/extract')}</p>
+            {if $PackageMode}
+            <div class="xe-toolbar">
+                <span class="xe-spacer"></span>
+                <input class="button" type="submit" name="KeepSamplePackage" value="{'Keep in the repository'|i18n('design/standard/extract')}" />
+            </div>
+            {/if}
             {/if}
             {if $ImportFormat|eq( 'csv' )}
             <div class="xe-field">
@@ -174,19 +182,34 @@
             <div class="xe-field">
                 <span class="xe-label">{'Start from a template'|i18n('design/standard/extract')}</span>
                 <div class="xe-inline">
-                    <select name="TemplateFormat" aria-label="{'File type'|i18n('design/standard/extract')|wash}">
+                    <select name="TemplateFormat" id="xe-template-format" aria-label="{'File type'|i18n('design/standard/extract')|wash}">
                         <option value="xml" selected>{'XML (recommended)'|i18n('design/standard/extract')}</option>
                         <option value="json">JSON</option>
                         <option value="csv">CSV</option>
+                        <option value="package">{'Content package (.ezpkg)'|i18n('design/standard/extract')}</option>
                     </select>
+                    <span class="xe-template-package-variant" data-shows-for="package" hidden>
+                        <select name="TemplatePackageVariant" aria-label="{'Content package: what to include'|i18n('design/standard/extract')|wash}">
+                            <option value="both">{'Class + content'|i18n('design/standard/extract')}</option>
+                            <option value="class">{'Class only'|i18n('design/standard/extract')}</option>
+                            <option value="content">{'Content only'|i18n('design/standard/extract')}</option>
+                        </select>
+                    </span>
                     <input class="button" type="submit" name="DownloadTemplate" value="{'Download a template for this class'|i18n('design/standard/extract')}" />
                 </div>
-                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'An empty file with every column the import understands for the class (the Migration column set): fill in rows and import it. An export with the Migration set is the same file with the rows filled in. XML also carries the column ids and the class itself, so it is the most exact to fill in by hand. Content package downloads a real, installable .ezpkg instead, built from up to 3 of the class’s own existing objects.'|i18n('design/standard/extract')}</p>
+                {if and( $ClassID, $ClassHasExistingContent|not )}
+                <p class="xe-note">{'This class has no content on this site yet: a "class + content" or "content only" package download would use temporary hidden scratch content instead (removed again immediately after), not real existing objects.'|i18n('design/standard/extract')}</p>
+                {/if}
             </div>
             {if $ClassID}
             <div class="xe-field">
-                <a class="button" href={concat( 'xrowextract/package?ClassID=', $ClassID )|ezurl}>{'Content + class package (.ezpkg)'|i18n('design/standard/extract')}</a>
-                <p class="xe-help">{'A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.'|i18n('design/standard/extract')}</p>
+                <span class="xe-label">{'Class or object XML on their own'|i18n('design/standard/extract')}</span>
+                <div class="xe-inline">
+                    <input class="button" type="submit" name="DownloadClassXML" value="{'Download class definition XML'|i18n('design/standard/extract')}" />
+                    <input class="button" type="submit" name="DownloadObjectXML" value="{'Download object XML'|i18n('design/standard/extract')}" />
+                </div>
+                <p class="xe-help">{'A single content-class definition XML, or a single content-object XML with up to 3 of the class’s own existing objects - both accepted directly by this page, no archive needed.'|i18n('design/standard/extract')}</p>
             </div>
             {/if}
         </section>
@@ -259,8 +282,6 @@
         {if $Preview|or( $Applied )}
         {include uri='design:xrowextract/import_result.tpl'}
         {/if}
-
-        {include uri='design:xrowextract/import_package.tpl'}
 
         {* File format reference: complete, technical, with real examples for the reference class *}
         <section class="xe-card" id="xe-card-reference" aria-labelledby="xe-card-reference-h">
