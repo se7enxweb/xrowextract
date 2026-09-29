@@ -711,3 +711,131 @@
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 }());
+
+/*
+ * The Jobs page: every queued or running job is polled every 2 seconds (xrowextract/job_status/<id>,
+ * a small JSON view) and its row updated in place -- state, progress bar, rows, size, a download link
+ * once it is done, or the error once it failed. Without JavaScript the page still shows the state as
+ * of the last full load; reloading it works the same way the polling does.
+ */
+(function () {
+    'use strict';
+
+    var list = document.querySelector('.xe-jobs');
+    if (!list || !window.fetch) {
+        return;
+    }
+    var pollBase = list.getAttribute('data-poll-base');
+    var downloadBase = list.getAttribute('data-download-base');
+    var downloadLabel = list.getAttribute('data-download-label') || 'Download';
+
+    function activeRows() {
+        return Array.prototype.slice.call(list.querySelectorAll('.xe-job[data-poll="1"]'));
+    }
+
+    function setText(row, role, text) {
+        var el = row.querySelector('[data-role="' + role + '"]');
+        if (el) {
+            el.textContent = text;
+        }
+    }
+
+    function applyState(row, data) {
+        row.className = row.className.replace(/\bxe-job-\S+/, 'xe-job-' + data.state);
+        row.setAttribute('data-state', data.state);
+        var badge = row.querySelector('[data-role="state"]');
+        if (badge) {
+            badge.className = 'xe-job-state xe-badge xe-state-' + data.state;
+            badge.textContent = data.state;
+        }
+        if (data.progress) {
+            var percent = data.progress.total > 0 ? Math.max(0, Math.min(100, Math.round(100 * data.progress.done / data.progress.total))) : 0;
+            var bar = row.querySelector('[data-role="progress-bar"]');
+            if (bar) {
+                bar.style.width = percent + '%';
+            }
+            setText(row, 'progress-text', data.progress.done + ' / ' + data.progress.total + (data.progress.phase ? ' · ' + data.progress.phase : ''));
+        }
+        if (data.rows !== null && data.rows !== undefined) {
+            setText(row, 'rows', data.rows + ' rows');
+        }
+        if (data.size !== null && data.size !== undefined) {
+            setText(row, 'size', Math.ceil(data.size / 1024) + ' KB');
+        }
+        if (data.error) {
+            var error = row.querySelector('[data-role="error"]');
+            if (!error) {
+                error = document.createElement('p');
+                error.className = 'xe-note xe-note-bad';
+                error.setAttribute('data-role', 'error');
+                row.appendChild(error);
+            }
+            error.textContent = data.error;
+        }
+        if (data.state === 'done' && data.has_file && downloadBase && !row.querySelector('[data-role="download"]')) {
+            var buttons = row.querySelector('.xe-job-buttons');
+            if (buttons) {
+                var link = document.createElement('a');
+                link.className = 'button';
+                link.setAttribute('data-role', 'download');
+                link.href = downloadBase + '/' + row.getAttribute('data-job-id');
+                link.textContent = downloadLabel;
+                buttons.insertBefore(link, buttons.firstChild);
+            }
+        }
+        if (data.state !== 'queued' && data.state !== 'running') {
+            row.removeAttribute('data-poll');
+            var wrap = row.querySelector('[data-role="progress-wrap"]');
+            if (wrap && data.state !== 'running') {
+                wrap.hidden = true;
+            }
+        }
+    }
+
+    function poll() {
+        var rows = activeRows();
+        if (!rows.length) {
+            window.clearInterval(timer);
+            return;
+        }
+        rows.forEach(function (row) {
+            var id = row.getAttribute('data-job-id');
+            fetch(pollBase + '/' + id, { credentials: 'same-origin' })
+                .then(function (response) { return response.ok ? response.json() : null; })
+                .then(function (data) { if (data && !data.error) { applyState(row, data); } })
+                .catch(function () {});
+        });
+    }
+
+    var timer = window.setInterval(poll, 2000);
+
+    list.addEventListener('submit', function (event) {
+        var form = event.target.closest('.xe-job-delete-form');
+        if (!form) {
+            return;
+        }
+        var button = form.querySelector('button[data-confirm]');
+        if (button && !window.confirm(button.getAttribute('data-confirm'))) {
+            event.preventDefault();
+        }
+    });
+}());
+
+/*
+ * "Run in the background" on the CSV and archive pages: disable the button once clicked so a slow
+ * redirect cannot be doubled into two jobs. The form still submits normally.
+ */
+(function () {
+    'use strict';
+    document.querySelectorAll('input[name="RunInBackground"]').forEach(function (button) {
+        var form = button.form;
+        if (!form) {
+            return;
+        }
+        form.addEventListener('submit', function (event) {
+            if (event.submitter === button || (!event.submitter && document.activeElement === button)) {
+                window.setTimeout(function () { button.disabled = true; }, 0);
+            }
+        });
+    });
+}());

@@ -221,6 +221,44 @@ class XrowExtractFilters
         return array( 'name', $ascending );
     }
 
+    /**
+     * These filters as command line options of ext:xrowextract:csv / archive (the same values, so a background
+     * job exports what the view shows). $lastExport: the time "changed since my last export" starts from.
+     * $withClassParts: false for the archive (no date attributes, no condition).
+     */
+    public function cliArgs( $lastExport = 0, $withClassParts = true )
+    {
+        $v = $this->values;
+        $args = array();
+        if ( $v['date_mode'] !== 'any' )
+        {
+            if ( $withClassParts || in_array( $v['date_field'], array( 'published', 'modified' ), true ) )
+                $args[] = '--date-field=' . $v['date_field'];
+            switch ( $v['date_mode'] )
+            {
+                case 'since':      if ( $v['date_from'] !== '' ) $args[] = '--since=' . $v['date_from']; break;
+                case 'before':     if ( $v['date_to'] !== '' ) $args[] = '--before=' . $v['date_to']; break;
+                case 'between':
+                    if ( $v['date_from'] !== '' ) $args[] = '--since=' . $v['date_from'];
+                    if ( $v['date_to'] !== '' ) $args[] = '--before=' . $v['date_to'];
+                    break;
+                case 'since_last': if ( $lastExport ) $args[] = '--since=' . ( (int)$lastExport + 1 ); break;
+                default:           $args[] = '--date=' . $v['date_mode'];
+            }
+        }
+        if ( $v['section'] )
+            $args[] = '--section=' . $v['section'];
+        if ( $v['state'] && $withClassParts )
+            $args[] = '--state=' . $v['state'];
+        if ( $v['visibility'] !== 'any' )
+            $args[] = '--visibility=' . $v['visibility'];
+        if ( $v['name'] !== '' )
+            $args[] = '--name=' . $v['name'];
+        if ( $withClassParts && $v['where_attribute'] !== '' )
+            $args[] = '--where=' . $v['where_attribute'] . ' ' . $v['where_op'] . ' ' . $v['where_value'];
+        return $args;
+    }
+
     /** The preference that holds the time of the user's last export of a class. */
     public static function lastExportPreference( $classID )
     {

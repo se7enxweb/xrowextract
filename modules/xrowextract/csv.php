@@ -677,6 +677,111 @@ if ( !in_array( $PreviewRows, $previewRowChoices, true ) )
 $tpl->setVariable( 'PreviewRows', $PreviewRows );
 $tpl->setVariable( 'PreviewRowChoices', $previewRowChoices );
 
+// Velocity ends a request after 30s, too short for a large export: "Run in the background" builds
+// the same command line as bin/php/csv.php from this view's already-validated state (never from
+// raw request strings) and starts it detached, so the export keeps going after the page returns.
+$tpl->setVariable( 'BackgroundAvailable', XrowExtractJob::available() );
+$tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( eZUser::currentUser()->attribute( 'login' ), XrowExtractJob::allowAllJobs() ) );
+
+if ( $http->hasPostVariable( 'RunInBackground' ) )
+{
+    $backgroundError = false;
+    if ( $hasPreFilledData )
+        $backgroundError = ezpI18n::tr( 'design/standard/extract', 'A pre filled selection cannot run in the background; download it directly.' );
+    elseif ( !XrowExtractJob::available() )
+        $backgroundError = ezpI18n::tr( 'design/standard/extract', 'Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).' );
+    elseif ( count( $Attributes ) === 0 )
+        $backgroundError = ezpI18n::tr( 'design/standard/extract', 'Add at least one column first.' );
+    elseif ( count( $SelectedLanguages ) === 0 )
+        $backgroundError = ezpI18n::tr( 'design/standard/extract', 'Choose at least one language first.' );
+    else
+    {
+        // The current siteaccess, so a URL alias in the export (below a multi-site root, several
+        // siteaccesses can see the same node under a different path) comes out exactly as this
+        // Download would have written it
+        $currentAccess = eZSiteAccess::current();
+        $jobArgs = array();
+        if ( $currentAccess && !empty( $currentAccess['name'] ) )
+            $jobArgs[] = '--siteaccess=' . $currentAccess['name'];
+        $jobArgs[] = '--class=' . $Class_id;
+        if ( $Scope === 'all' )
+        {
+            $jobArgs[] = '--scope=all';
+        }
+        else
+        {
+            $jobArgs[] = '--node=' . $Subtree;
+            if ( $type === 'list' )
+                $jobArgs[] = '--depth=list';
+        }
+        if ( $FetchMainnodeonly === '1' )
+            $jobArgs[] = '--main-only';
+        if ( $Offset > 0 )
+            $jobArgs[] = '--offset=' . $Offset;
+        if ( $Limit > 0 )
+            $jobArgs[] = '--limit=' . $Limit;
+
+        $columnIDs = array();
+        $names = array();
+        foreach ( $Attributes as $item )
+        {
+            $columnIDs[] = $item['id'];
+            if ( $item['exportname'] !== $item['id'] )
+                // A comma or = in the name would break --names=id=name,id=name; kept readable instead of lost
+                $names[] = $item['id'] . '=' . str_replace( array( ',', '=' ), ' ', $item['exportname'] );
+        }
+        $jobArgs[] = '--columns=' . implode( ',', $columnIDs );
+        if ( $names )
+            $jobArgs[] = '--names=' . implode( ',', $names );
+        $jobArgs[] = '--separator=' . $Separator;
+        $jobArgs[] = '--line-endings=' . $LineSeparator;
+        if ( !$Escape )
+            $jobArgs[] = '--unquoted';
+        $jobArgs[] = '--languages=' . implode( ',', $SelectedLanguages );
+        $jobArgs[] = '--format=' . $OutputFormat;
+        foreach ( $Filters->cliArgs( $LastExport, true ) as $filterArg )
+            $jobArgs[] = $filterArg;
+        if ( $SortField !== 'tree' )
+        {
+            $jobArgs[] = '--sort=' . $SortField;
+            $jobArgs[] = '--order=' . ( $SortAscending ? 'asc' : 'desc' );
+        }
+        $jobExtension = XrowExtractWriter::formats()[$OutputFormat]['extension'];
+
+        $className = $chosenClass ? $chosenClass->attribute( 'name' ) : ( 'class ' . $Class_id );
+        if ( $Scope === 'all' )
+        {
+            $outputName = XrowExtractColumns::fileName( $chosenClass ? $chosenClass->attribute( 'identifier' ) : 'class_' . $Class_id, '_all_export.' . $jobExtension );
+            $what = $className . ' — ' . ezpI18n::tr( 'design/standard/extract', 'whole site' );
+        }
+        else
+        {
+            $jobNode = eZContentObjectTreeNode::fetch( $Subtree );
+            $outputName = XrowExtractColumns::fileName( $jobNode ? $jobNode->attribute( 'name' ) : ( 'node_' . $Subtree ), '_export.' . $jobExtension );
+            $what = $className . ' — ' . ( $jobNode ? $jobNode->attribute( 'name' ) : ( 'node ' . $Subtree ) );
+        }
+
+        $jobID = XrowExtractJob::create( array(
+            'type' => 'csv',
+            'owner' => eZUser::currentUser()->attribute( 'login' ),
+            'what' => $what,
+            'format' => $OutputFormat,
+            'output_file' => $outputName,
+            'args' => $jobArgs,
+        ) );
+        if ( !XrowExtractJob::start( $jobID ) )
+        {
+            XrowExtractJob::update( $jobID, array(
+                'state' => 'failed', 'ended' => time(),
+                'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+            ) );
+        }
+        $http->setSessionVariable( 'eZExtractJobStarted', $jobID );
+        return $module->redirectTo( 'xrowextract/jobs' );
+    }
+    $tpl->setVariable( 'BackgroundError', $backgroundError );
+}
+
 if ( $http->hasPostVariable( 'Download' ) || $isPreview )
 {
     $started = microtime( true );

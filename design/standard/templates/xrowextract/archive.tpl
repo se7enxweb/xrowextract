@@ -291,6 +291,9 @@
         </div>
         <div class="xe-actionbar-buttons">
             <input class="button" type="submit" name="Update" value="{'Update'|i18n('design/standard/extract')}" />
+            {if $BackgroundAvailable}
+            <input class="button" type="submit" name="RunInBackground" value="{'Run in the background'|i18n('design/standard/extract')}" title="{'Start this export as a job and come back to it: see the Jobs tab'|i18n('design/standard/extract')|wash}"{if or( $nodes|count|eq( 0 ), $selected_class_count|eq( 0 ) )} disabled{/if} />
+            {/if}
             <input class="defaultbutton xe-download-archive" type="submit" name="DownloadArchive" data-working="{'Writing …'|i18n('design/standard/extract')|wash}" value="{'Download archive'|i18n('design/standard/extract')}"{if or( $nodes|count|eq( 0 ), $selected_class_count|eq( 0 ) )} disabled{/if} />
         </div>
     </div>

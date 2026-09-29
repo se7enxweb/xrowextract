@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
-    '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][output:][preview;][list-classes][list-columns][user:]',
+    '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][output:][preview;][list-classes][list-columns][user:][progress-file:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export)',
@@ -62,6 +62,7 @@ $options = $script->getOptions(
         'list-classes' => 'List the classes with how many objects each has in the selection',
         'list-columns' => 'List the attributes of --class with datatype and meta information, and the special columns',
         'user'         => 'Export with the read access of this login (default: admin)',
+        'progress-file' => 'Write {"done":n,"total":m,"phase":"<locale>"} to this path after every batch (for a background job)',
     )
 );
 $script->initialize();
@@ -347,6 +348,7 @@ if ( $fh )
     fwrite( $fh, $begin );
 $written = 0;
 $skip = $offset;
+$progressFile = $options['progress-file'] ? (string)$options['progress-file'] : false;
 foreach ( $languages as $locale )
 {
     if ( $written >= $wantRows )
@@ -376,6 +378,8 @@ foreach ( $languages as $locale )
             $written++;
         }
         eZContentObject::clearCache();
+        if ( $progressFile )
+            XrowExtractJob::writeProgress( $progressFile, $written, $wantRows, $locale );
         if ( count( $batch ) < $take )
             break;
     }

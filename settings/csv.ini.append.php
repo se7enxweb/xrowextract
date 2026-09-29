@@ -42,6 +42,15 @@ NeutralizeFormulas=enabled
 # off for everyone.
 AllowPasswordHashExport=enabled
 
+[Jobs]
+# How many days a finished (or failed) background export job is kept before
+# ext:xrowextract:job --clean removes its folder.
+RetentionDays=7
+# The PHP command line binary a background job is run with. Leave empty to
+# detect it (PHP_BINARY, mapped from a PHP-FPM/php-cgi binary to the CLI one
+# next to it, else "php" on the PATH). Set this when detection guesses wrong.
+PhpCli=
+
 # you can place the handler files in your extension
 # just enter the full path to the handler
 

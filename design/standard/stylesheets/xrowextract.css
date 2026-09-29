@@ -477,6 +477,51 @@
 /* Columns an add action just brought in */
 .xe-column.xe-added { background: #ecfdf3; box-shadow: inset 3px 0 0 #12b76a; }
 .xe-column-notice { margin: .6em 0; background: #ecfdf3; color: #05603a; }
+
+/* The Jobs tab badge (queued + running count) */
+.xe-tab-badge {
+    display: inline-block;
+    margin-left: .3em;
+    padding: 0 .5em;
+    border-radius: 999px;
+    background: var(--xe-accent);
+    color: #fff;
+    font-size: .8em;
+    line-height: 1.6;
+}
+
+/* Background export jobs */
+.xe-jobs { margin: 0; padding: 0; list-style: none; border: 1px solid var(--xe-line); border-radius: 6px; overflow: hidden; }
+.xe-job { margin: 0; padding: .8em 1em; border-bottom: 1px solid var(--xe-line); background: #fff; }
+.xe-job:last-child { border-bottom: 0; }
+.xe-job-main { display: flex; flex-wrap: wrap; align-items: center; gap: .6em .9em; }
+.xe-job-type {
+    flex: 0 0 auto;
+    padding: .15em .55em;
+    border-radius: 4px;
+    background: var(--xe-head);
+    color: var(--xe-muted);
+    font-size: .85em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+.xe-job-main .xe-colinfo { flex: 1 1 16em; min-width: 0; }
+.xe-job-state { flex: 0 0 auto; }
+.xe-state-queued { background: var(--xe-head); color: var(--xe-muted); }
+.xe-state-running { background: #eaf1ff; color: #1d4ed8; }
+.xe-state-done { background: #ecfdf3; color: #05603a; }
+.xe-state-failed { background: #fdecea; color: #b42318; }
+.xe-job-progress { display: flex; align-items: center; gap: .7em; margin-top: .55em; }
+.xe-progress { flex: 1 1 auto; height: .5em; border-radius: 999px; background: var(--xe-head); overflow: hidden; }
+.xe-progress-bar { height: 100%; background: var(--xe-accent); border-radius: 999px; transition: width .3s ease; }
+.xe-job-progress-text { flex: 0 0 auto; color: var(--xe-muted); font-size: .85em; white-space: nowrap; }
+.xe-job-meta { display: flex; flex-wrap: wrap; gap: .3em 1em; margin-top: .5em; color: var(--xe-muted); font-size: .88em; }
+.xe-job-meta span:empty { display: none; }
+.xe-job-meta strong { color: var(--xe-text); }
+.xe-job-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: .5em; margin-top: .6em; }
+.xe-job-delete-form { margin: 0; display: inline; }
+.xe-job-delete-form .button { color: #b42318; }
 .xe-column-notice-none { background: #f3f5f8; color: var(--xe-muted); }
 
 /* The sites of the "Sites" set, as toggles */

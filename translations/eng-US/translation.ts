@@ -1735,6 +1735,110 @@
         <source>Click the download button</source>
         <translation>Click the download button</translation>
     </message>
+    <message>
+        <source>Run in the background</source>
+        <translation>Run in the background</translation>
+    </message>
+    <message>
+        <source>Start this export as a job and come back to it: see the Jobs tab</source>
+        <translation>Start this export as a job and come back to it: see the Jobs tab</translation>
+    </message>
+    <message>
+        <source>Job started. It runs in the background; this page updates on its own while it does.</source>
+        <translation>Job started. It runs in the background; this page updates on its own while it does.</translation>
+    </message>
+    <message>
+        <source>All jobs</source>
+        <translation>All jobs</translation>
+    </message>
+    <message>
+        <source>Your jobs</source>
+        <translation>Your jobs</translation>
+    </message>
+    <message>
+        <source>Exports started with "Run in the background", kept for %days days after they finish.</source>
+        <translation>Exports started with "Run in the background", kept for %days days after they finish.</translation>
+    </message>
+    <message>
+        <source>jobs</source>
+        <translation>jobs</translation>
+    </message>
+    <message>
+        <source>No jobs yet. Start one from the "Run in the background" button on the class or site archive page.</source>
+        <translation>No jobs yet. Start one from the "Run in the background" button on the class or site archive page.</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>queued</source>
+        <translation>queued</translation>
+    </message>
+    <message>
+        <source>running</source>
+        <translation>running</translation>
+    </message>
+    <message>
+        <source>done</source>
+        <translation>done</translation>
+    </message>
+    <message>
+        <source>failed</source>
+        <translation>failed</translation>
+    </message>
+    <message>
+        <source>Starting …</source>
+        <translation>Starting …</translation>
+    </message>
+    <message>
+        <source>started</source>
+        <translation>started</translation>
+    </message>
+    <message>
+        <source>ended</source>
+        <translation>ended</translation>
+    </message>
+    <message>
+        <source>Delete this job and its file?</source>
+        <translation>Delete this job and its file?</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <source>Jobs</source>
+        <translation>Jobs</translation>
+    </message>
+    <message>
+        <source>Background exports: started, running and finished</source>
+        <translation>Background exports: started, running and finished</translation>
+    </message>
+    <message>
+        <source>A pre filled selection cannot run in the background; download it directly.</source>
+        <translation>A pre filled selection cannot run in the background; download it directly.</translation>
+    </message>
+    <message>
+        <source>Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
+        <translation>Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).</translation>
+    </message>
+    <message>
+        <source>Add at least one column first.</source>
+        <translation>Add at least one column first.</translation>
+    </message>
+    <message>
+        <source>Choose at least one language first.</source>
+        <translation>Choose at least one language first.</translation>
+    </message>
+    <message>
+        <source>Could not start the background process.</source>
+        <translation>Could not start the background process.</translation>
+    </message>
+    <message>
+        <source>whole site</source>
+        <translation>whole site</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
