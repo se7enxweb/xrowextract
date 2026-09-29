@@ -28,7 +28,8 @@ $script->startup();
 $options = $script->getOptions(
     '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
     '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
-    '[extended-filter:][extended-params:][fetch-alias:][alias-param:][output:][preview;][list-classes][list-columns][user:][progress-file:]',
+    '[extended-filter:][extended-params:][fetch-alias:][alias-param:][preset:][param:][list-presets][show-preset:]' .
+    '[output:][preview;][list-classes][list-columns][user:][progress-file:]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export, unless --fetch-alias names one)',
@@ -67,6 +68,10 @@ $options = $script->getOptions(
         'extended-params' => 'Its params as a JSON object, e.g. {"tag_id":12}',
         'fetch-alias'  => 'Apply a fetchalias.ini named fetch (Module=content, FunctionName tree/list/tree_count/list_count): its node, class, sort, depth, limit/offset, main-only and a simple condition, where they can be read back',
         'alias-param'  => 'Values for the named fetch\'s own Parameter[] entries (besides parent_node_id, which takes --node): key=value,key=value',
+        'preset'       => 'Apply a saved export preset ("user:<id>" or "site:<id>"; --list-presets shows them): its whole definition — node, class, columns, languages, every filter, sort and output setting',
+        'param'        => 'Values for the preset\'s own {placeholder} tokens (and, through it, an extended fetch alias\'s Parameter[] entries): key=value,key=value',
+        'list-presets' => 'List the presets this login may see: your own, shared ones, and the site\'s',
+        'show-preset'  => 'Print one preset\'s resolved definition (its own Extends chain followed, no --param applied) as JSON',
         'output'       => 'File to write (default: <node name>_export.csv, or <class>_all_export.csv for --scope=all); - for stdout',
         'preview'      => 'Print the first rows (default 10) as a table instead of writing a file',
         'list-classes' => 'List the classes with how many objects each has in the selection',
@@ -128,6 +133,89 @@ if ( $options['fetch-alias'] )
         $cli->output( '  fillable with --alias-param: ' . implode( ', ', $aliasFillable ) );
 }
 
+$allowAllPresets = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'all_jobs' );
+$allowAllPresets = $allowAllPresets['accessWord'] !== 'no';
+if ( $options['list-presets'] )
+{
+    foreach ( XrowExtractPreset::fetchVisible( $login, $allowAllPresets ) as $preset )
+        $cli->output( sprintf( '  %-28s %-8s %-32s %s', $preset['ref'], $preset['site'] ? 'site' : ( $preset['shared'] ? 'shared' : 'private' ), $preset['name'], $preset['description'] ) );
+    $script->shutdown( 0 );
+}
+if ( $options['show-preset'] )
+{
+    $resolvedShow = XrowExtractPreset::resolve( $options['show-preset'] );
+    if ( $resolvedShow['error'] !== '' )
+        $fail( "--show-preset: {$resolvedShow['error']}" );
+    $cli->output( 'Extends chain: ' . implode( ' -> ', $resolvedShow['chain'] ) );
+    $cli->output( json_encode( $resolvedShow['definition'], JSON_PRETTY_PRINT ) );
+    if ( $resolvedShow['placeholders'] )
+        $cli->output( 'Placeholders: ' . json_encode( $resolvedShow['placeholders'] ) );
+    $script->shutdown( 0 );
+}
+
+// A saved export preset: its whole definition (node, class, columns, languages, every filter, sort,
+// output setting) — the CLI options below still work; an explicit one is used instead of what the preset
+// says for that specific piece, the same way --fetch-alias's own options already behave.
+$presetDef = array();
+$presetParamOverrides = array();
+if ( $options['preset'] )
+{
+    if ( $options['param'] )
+    {
+        foreach ( explode( ',', $options['param'] ) as $pair )
+        {
+            $pair = trim( $pair );
+            if ( $pair === '' || strpos( $pair, '=' ) === false )
+                continue;
+            list( $pKey, $pValue ) = array_map( 'trim', explode( '=', $pair, 2 ) );
+            if ( $pKey !== '' )
+                $presetParamOverrides[$pKey] = $pValue;
+        }
+    }
+    $resolvedForRun = XrowExtractPreset::resolve( $options['preset'], $options['node'] ? (int)$options['node'] : 0, $presetParamOverrides );
+    if ( $resolvedForRun['error'] !== '' )
+        $fail( "--preset: {$resolvedForRun['error']}" );
+    $filledForRun = XrowExtractPreset::fillPlaceholders( $resolvedForRun['definition'], $resolvedForRun['placeholders'], $presetParamOverrides );
+    $presetDef = $filledForRun['definition'];
+    if ( $filledForRun['unresolved'] )
+        $cli->output( 'Preset placeholders with no value: ' . implode( ', ', $filledForRun['unresolved'] ) );
+    $presetValues = array();
+    if ( isset( $presetDef['subtree'] ) )
+        $presetValues['parent_node_id'] = $presetDef['subtree'];
+    if ( !empty( $presetDef['class_identifier'] ) )
+    {
+        $presetClassForRun = eZContentClass::fetchByIdentifier( $presetDef['class_identifier'] );
+        if ( $presetClassForRun instanceof eZContentClass )
+            $presetValues['class_id'] = (int)$presetClassForRun->attribute( 'id' );
+    }
+    if ( !isset( $presetValues['class_id'] ) && isset( $presetDef['class_id'] ) )
+        $presetValues['class_id'] = (int)$presetDef['class_id'];
+    if ( isset( $presetDef['sort_field'] ) && $presetDef['sort_field'] !== 'tree' )
+    {
+        $presetValues['sort_by'] = array( $presetDef['sort_field'], !isset( $presetDef['sort_ascending'] ) || (bool)$presetDef['sort_ascending'] );
+        if ( !empty( $presetDef['sort_field2'] ) )
+            $presetValues['sort_by'] = array( $presetValues['sort_by'], array( $presetDef['sort_field2'], !isset( $presetDef['sort_ascending2'] ) || (bool)$presetDef['sort_ascending2'] ) );
+    }
+    if ( isset( $presetDef['filters']['depth_mode'] ) && $presetDef['filters']['depth_mode'] !== 'any' )
+    {
+        $presetDepthModeMap = array( 'exact' => 'eq', 'atmost' => 'le', 'atleast' => 'ge' );
+        if ( isset( $presetDepthModeMap[$presetDef['filters']['depth_mode']] ) )
+        {
+            $presetValues['depth'] = (int)$presetDef['filters']['depth_value'];
+            $presetValues['depth_operator'] = $presetDepthModeMap[$presetDef['filters']['depth_mode']];
+        }
+    }
+    if ( isset( $presetDef['limit'] ) )
+        $presetValues['limit'] = (int)$presetDef['limit'];
+    if ( isset( $presetDef['offset'] ) )
+        $presetValues['offset'] = (int)$presetDef['offset'];
+    if ( isset( $presetDef['mainnodeonly'] ) )
+        $presetValues['main_node_only'] = (string)$presetDef['mainnodeonly'] === '1';
+    // An explicit CLI option (already read into $aliasValues by --fetch-alias, if any) still wins over
+    // the preset for the same piece; the preset only fills what neither --fetch-alias nor a plain option gave
+    $aliasValues = array_merge( $presetValues, $aliasValues );
+}
+
 // Selection
 $scope = $options['scope'] === 'all' ? 'all' : 'node';
 if ( $options['scope'] && !in_array( $options['scope'], array( 'node', 'all' ), true ) )
@@ -182,7 +270,9 @@ $limit = isset( $aliasValues['limit'] ) ? $aliasValues['limit'] : max( 0, (int)$
 
 // Languages: all, or the given locales, in the order of the content languages (site default first)
 $contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
-if ( !$options['languages'] || $options['languages'] === 'all' )
+if ( !$options['languages'] && isset( $presetDef['languages'] ) && is_array( $presetDef['languages'] ) && $presetDef['languages'] )
+    $languages = array_values( array_intersect( $contentLanguages, $presetDef['languages'] ) );
+elseif ( !$options['languages'] || $options['languages'] === 'all' )
     $languages = $contentLanguages;
 else
 {
@@ -279,6 +369,12 @@ if ( $options['extended-filter'] )
         $filterValues['extended_params'] = $options['extended-params'];
     }
 }
+// A preset's own filters, used wholesale when no filter option was explicitly given (an explicit one,
+// same as --fetch-alias's own options, is used instead of what the preset says)
+$explicitFilterOption = $options['since'] || $options['before'] || $options['date'] || $options['section']
+                       || $options['state'] || $options['visibility'] || $options['name'] || $options['where'] || $options['extended-filter'];
+if ( !$explicitFilterOption && isset( $presetDef['filters'] ) && is_array( $presetDef['filters'] ) )
+    $filterValues = $presetDef['filters'];
 $filters = new XrowExtractFilters( $filterValues );
 $attributeFilter = false;   // set once the class is known
 
@@ -379,6 +475,21 @@ foreach ( $extras as $id => $column )
     $byId[$id] = $column;
 foreach ( XrowExtractCatalogue::formatColumns( $classID ) as $id => $column )
     $byId[$id] = $column;
+$presetColumns = ( !$options['columns'] && isset( $presetDef['attributes'] ) && is_array( $presetDef['attributes'] ) && $presetDef['attributes'] ) ? $presetDef['attributes'] : false;
+if ( $presetColumns )
+{
+    foreach ( $presetColumns as $presetColumn )
+    {
+        if ( !isset( $presetColumn['id'] ) || !isset( $byId[$presetColumn['id']] ) )
+            continue; // a stale preset column (a renamed/removed attribute): skipped rather than failing the export
+        $columns[] = array( 'id' => $presetColumn['id'], 'name' => isset( $presetColumn['name'] ) ? $presetColumn['name'] : $presetColumn['id'],
+                            'exportname' => isset( $presetColumn['exportname'] ) && $presetColumn['exportname'] !== '' ? $presetColumn['exportname'] : $presetColumn['id'] );
+    }
+    if ( !$columns )
+        $fail( 'The preset\'s own columns no longer exist on this class; pass --columns explicitly.' );
+}
+else
+{
 $wanted = $options['columns'] ? array_filter( array_map( 'trim', explode( ',', $options['columns'] ) ) )
                                : array_map( function ( $c ) { return $c['id']; }, XrowExtractColumns::classColumns( $classID ) );
 if ( $options['sets'] )
@@ -399,6 +510,7 @@ foreach ( $wanted as $id )
         $fail( "Unknown column $id for class " . $class->attribute( 'identifier' ) . '. --list-columns shows them.' );
     $columns[] = $byId[$id];
 }
+}
 if ( $options['names'] )
 {
     foreach ( explode( ',', $options['names'] ) as $pair )
@@ -416,21 +528,25 @@ if ( !$columns )
 if ( count( $languages ) > 1 && !in_array( 'ezcontentobject.language', array_map( function ( $c ) { return $c['id']; }, $columns ), true ) )
     array_unshift( $columns, $extras['ezcontentobject.language'] );
 
-// Format
+// Format: an explicit option wins; else the preset's own, if it has one; else the usual default
 $separators = array( 'comma' => ',', 'semicolon' => ';', 'tab' => "\t", '\t' => "\t", 'pipe' => '|' );
-$separator = $options['separator'] === null || $options['separator'] === false ? ',' : (string)$options['separator'];
+$separatorOption = $options['separator'] !== null && $options['separator'] !== false ? (string)$options['separator']
+                  : ( isset( $presetDef['separator'] ) ? (string)$presetDef['separator'] : '' );
+$separator = $separatorOption === '' ? ',' : $separatorOption;
 $separator = isset( $separators[$separator] ) ? $separators[$separator] : $separator;
 if ( strlen( $separator ) !== 1 || strpbrk( $separator, "\"\r\n" ) !== false )
     $fail( '--separator is one character (not a quote or line break), or comma, semicolon, tab, pipe.' );
 $lines = array( 'win32' => "\r\n", 'crlf' => "\r\n", 'windows' => "\r\n", 'unix' => "\n", 'lf' => "\n", 'mac' => "\r", 'cr' => "\r" );
-$lineKey = $options['line-endings'] ? strtolower( $options['line-endings'] ) : 'unix';
+$lineKey = $options['line-endings'] ? strtolower( $options['line-endings'] )
+         : ( isset( $presetDef['line_separator'] ) ? strtolower( $presetDef['line_separator'] ) : 'unix' );
 if ( !isset( $lines[$lineKey] ) )
     $fail( '--line-endings is win32 (crlf), unix (lf) or mac (cr).' );
 $newLine = $lines[$lineKey];
-$outputFormat = $options['format'] ? $options['format'] : 'csv';
+$outputFormat = $options['format'] ? $options['format'] : ( isset( $presetDef['output_format'] ) ? $presetDef['output_format'] : 'csv' );
 if ( !XrowExtractWriter::isFormat( $outputFormat ) )
     $fail( "Unknown format $outputFormat (--format). Formats: " . implode( ', ', array_keys( XrowExtractWriter::formats() ) ) . '.' );
-$parser = new ParserInterface( $separator, !$options['unquoted'] );
+$unquoted = $options['unquoted'] || ( !$options['separator'] && isset( $presetDef['escape'] ) && !$presetDef['escape'] );
+$parser = new ParserInterface( $separator, !$unquoted );
 
 // Rows, in batches with the object cache cleared
 $previewRows = $options['preview'] !== null && $options['preview'] !== false ? max( 1, (int)( $options['preview'] === true ? 10 : $options['preview'] ) ) : 0;
@@ -479,7 +595,7 @@ if ( $limit )
 if ( $previewRows )
     $wantRows = min( $wantRows, $previewRows );
 
-$writer = new XrowExtractWriter( $previewRows ? 'csv' : $outputFormat, $columns, $separator, !$options['unquoted'], $previewRows ? "\n" : $newLine,
+$writer = new XrowExtractWriter( $previewRows ? 'csv' : $outputFormat, $columns, $separator, !$unquoted, $previewRows ? "\n" : $newLine,
                                  array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ) ) );
 $parser = $writer->parser();
 $file = $options['output'];

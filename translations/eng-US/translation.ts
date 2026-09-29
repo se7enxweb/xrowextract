@@ -2895,6 +2895,126 @@
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
         <translation>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</translation>
     </message>
+    <message>
+        <source>Presets</source>
+        <translation>Presets</translation>
+    </message>
+    <message>
+        <source>Save everything below as a named preset, load one back, or run it directly.</source>
+        <translation>Save everything below as a named preset, load one back, or run it directly.</translation>
+    </message>
+    <message>
+        <source>loaded</source>
+        <translation>loaded</translation>
+    </message>
+    <message>
+        <source>Placeholders with no value: %list.</source>
+        <translation>Placeholders with no value: %list.</translation>
+    </message>
+    <message>
+        <source>Load a preset</source>
+        <translation>Load a preset</translation>
+    </message>
+    <message>
+        <source>Choose one...</source>
+        <translation>Choose one...</translation>
+    </message>
+    <message>
+        <source>Your presets and shared with you</source>
+        <translation>Your presets and shared with you</translation>
+    </message>
+    <message>
+        <source>shared</source>
+        <translation>shared</translation>
+    </message>
+    <message>
+        <source>Site presets</source>
+        <translation>Site presets</translation>
+    </message>
+    <message>
+        <source>Placeholder values, key=value,key=value</source>
+        <translation>Placeholder values, key=value,key=value</translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation>Load</translation>
+    </message>
+    <message>
+        <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
+        <translation>Resolve this preset and start it as a job right away, without loading it into the form first</translation>
+    </message>
+    <message>
+        <source>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</source>
+        <translation>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</translation>
+    </message>
+    <message>
+        <source>extends %ref</source>
+        <translation>extends %ref</translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation>Duplicate</translation>
+    </message>
+    <message>
+        <source>Delete this preset?</source>
+        <translation>Delete this preset?</translation>
+    </message>
+    <message>
+        <source>Duplicate as your own</source>
+        <translation>Duplicate as your own</translation>
+    </message>
+    <message>
+        <source>INI</source>
+        <translation>INI</translation>
+    </message>
+    <message>
+        <source>Defined in xrowextract.ini; edit it there</source>
+        <translation>Defined in xrowextract.ini; edit it there</translation>
+    </message>
+    <message>
+        <source>site</source>
+        <translation>site</translation>
+    </message>
+    <message>
+        <source>Save the current settings as a preset</source>
+        <translation>Save the current settings as a preset</translation>
+    </message>
+    <message>
+        <source>Preset name</source>
+        <translation>Preset name</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Description</translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation>Description (optional)</translation>
+    </message>
+    <message>
+        <source>Shared with everyone</source>
+        <translation>Shared with everyone</translation>
+    </message>
+    <message>
+        <source>Save as preset</source>
+        <translation>Save as preset</translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
+        <translation>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</translation>
+    </message>
+    <message>
+        <source>Started from a saved preset</source>
+        <translation>Started from a saved preset</translation>
+    </message>
+    <message>
+        <source>Name the preset first.</source>
+        <translation>Name the preset first.</translation>
+    </message>
+    <message>
+        <source>Preset "%name" saved.</source>
+        <translation>Preset "%name" saved.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

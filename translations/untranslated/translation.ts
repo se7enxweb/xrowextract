@@ -2895,6 +2895,126 @@
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Presets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save everything below as a named preset, load one back, or run it directly.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Placeholders with no value: %list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Load a preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose one...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your presets and shared with you</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Site presets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Placeholder values, key=value,key=value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Load</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A preset may declare placeholders, for example a node or a date; fill them in here as key=value,key=value, or its own defaults are used.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>extends %ref</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete this preset?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate as your own</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>INI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Defined in xrowextract.ini; edit it there</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>site</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save the current settings as a preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preset name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shared with everyone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save as preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Started from a saved preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name the preset first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preset "%name" saved.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
