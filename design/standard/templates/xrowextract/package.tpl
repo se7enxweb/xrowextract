@@ -27,13 +27,26 @@
             </header>
 
             {if $UploadError}<p class="xe-error">{$UploadError|wash}</p>{/if}
+            {if $RenameNotice}<p class="xe-note">{$RenameNotice|wash}</p>{/if}
 
             <form name="eZPackageUpload" method="post" enctype="multipart/form-data" action={'xrowextract/package'|ezurl}>
             <div class="xe-field">
                 <label class="xe-label" for="xe-package-file">{'Upload an .ezpkg file'|i18n('design/standard/extract')}</label>
                 <input type="file" name="PackageBinaryFile" id="xe-package-file" accept=".ezpkg" />
+                <p class="xe-help">{'It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.'|i18n('design/standard/extract')}</p>
+                {if $UploadDiskFree}<p class="xe-help">{'%free free on the server for uploads.'|i18n('design/standard/extract',, hash( '%free', $UploadDiskFree ))}</p>{/if}
+                <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl} data-file-field="PackageBinaryFile">
+                    <input type="hidden" name="UploadID" value="" />
+                    <input type="hidden" name="UploadName" value="" />
+                    <div class="xe-progress"><div class="xe-progress-bar" style="width: 0%"></div></div>
+                    <p class="xe-upload-status" aria-live="polite"></p>
+                    <div class="xe-inline">
+                        <button class="button xe-upload-pause" type="button" hidden>{'Pause'|i18n('design/standard/extract')}</button>
+                        <button class="button xe-upload-resume" type="button" hidden>{'Resume'|i18n('design/standard/extract')}</button>
+                        <button class="button xe-upload-cancel" type="button" hidden>{'Cancel'|i18n('design/standard/extract')}</button>
+                    </div>
+                </div>
                 <input class="defaultbutton" type="submit" name="UploadPackage" value="{'Upload'|i18n('design/standard/extract')}" />
-                <p class="xe-help">{'It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.'|i18n('design/standard/extract')}</p>
             </div>
             </form>
 
@@ -416,3 +429,4 @@
     {* DESIGN: Content END *}</div></div></div></div></div></div>
 </div>
 <script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>
+<script src={concat( 'javascript/xrowextract-upload.js'|ezdesign( 'no' ), '?v=', $UploadScriptVersion )|wash}></script>
