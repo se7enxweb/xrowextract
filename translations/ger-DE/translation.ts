@@ -2,6 +2,190 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Content package (.ezpkg)</source>
+        <translation>Inhaltspaket (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>Content class definition</source>
+        <translation>Inhaltsklassendefinition</translation>
+    </message>
+    <message>
+        <source>Content object(s)</source>
+        <translation>Inhaltsobjekt(e)</translation>
+    </message>
+    <message>
+        <source>Could not open %name as a package.</source>
+        <translation>Konnte %name nicht als Paket öffnen.</translation>
+    </message>
+    <message>
+        <source>Could not read %name as a package: %reason</source>
+        <translation>Konnte %name nicht als Paket lesen: %reason</translation>
+    </message>
+    <message>
+        <source>Keep both</source>
+        <translation>Beide behalten</translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to.</source>
+        <translation>Worauf ein vom Paket mitgeführtes Design/Template/Override abgebildet würde.</translation>
+    </message>
+    <message>
+        <source>Uses the parent chosen in &quot;Class and matching&quot; above for any top-level object the package carries.</source>
+        <translation>Verwendet den oben unter &quot;Klasse und Zuordnung&quot; gewählten Elternknoten für jedes Objekt oberster Ebene, das das Paket enthält.</translation>
+    </message>
+    <message>
+        <source>Install as a background job</source>
+        <translation>Als Hintergrundjob installieren</translation>
+    </message>
+    <message>
+        <source>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
+        <translation>Hintergrundjobs stehen auf diesem Server nicht zur Verfügung (kein PHP-Kommandozeilenprogramm gefunden, oder exec() ist deaktiviert).</translation>
+    </message>
+    <message>
+        <source>Content packages (.ezpkg)</source>
+        <translation>Inhaltspakete (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A gzip-compressed tar archive (.ezpkg or .tar.gz - the same format, only the extension differs) carrying a content class, one or more content objects, or both; or upload just one class-definition or content-object XML file on its own - either way it is inspected and installed through the same code as package/install and the xrowextract/package page.</source>
+        <translation>Ein gzip-komprimiertes Tar-Archiv (.ezpkg oder .tar.gz - dasselbe Format, nur die Erweiterung unterscheidet sich) mit einer Inhaltsklasse, einem oder mehreren Inhaltsobjekten, oder beidem; oder laden Sie nur eine Klassendefinitions- oder Inhaltsobjekt-XML-Datei für sich hoch - so oder so wird sie über denselben Code wie package/install und die Seite xrowextract/package geprüft und installiert.</translation>
+    </message>
+    <message>
+        <source>A standalone content-class or content-object upload is the same one file, wrapped in a transient package with just that one install item - nothing else in this layout exists for it.</source>
+        <translation>Ein eigenständiger Klassen- oder Objekt-Upload ist dieselbe eine Datei, verpackt in ein transientes Paket mit nur diesem einen Installationselement - vom übrigen Aufbau existiert dafür nichts.</translation>
+    </message>
+    <message>
+        <source>package.xml</source>
+        <translation>package.xml</translation>
+    </message>
+    <message>
+        <source>The id the package is known by in the repository (package/list, xrowextract/package, ext:xrowextract:package). Unique per repository, never shown to a visitor.</source>
+        <translation>Die ID, unter der das Paket im Repository bekannt ist (package/list, xrowextract/package, ext:xrowextract:package). Eindeutig je Repository, einem Besucher nie gezeigt.</translation>
+    </message>
+    <message>
+        <source>Version and release number; informational, not compared against an installed copy automatically.</source>
+        <translation>Versions- und Release-Nummer; informativ, wird nicht automatisch mit einer installierten Kopie verglichen.</translation>
+    </message>
+    <message>
+        <source>One or more &lt;change&gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation>Ein oder mehrere &lt;change&gt;-Einträge: Person, Zeitstempel und der/die Änderungstext(e). Rein informativ.</translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &lt;requires&gt; of type ezpackage is installed first, automatically, by eZPackage::install(); a &lt;requires&gt; of type ezcontentclass is informational only - it is not fetched, only stated (the installing site must already carry that class, for a content-only package).</source>
+        <translation>provides/requires/obsoletes/conflicts. Ein &lt;requires&gt; vom Typ ezpackage wird von eZPackage::install() automatisch zuerst installiert; ein &lt;requires&gt; vom Typ ezcontentclass ist rein informativ - es wird nicht nachgeladen, nur festgehalten (die installierende Website muss diese Klasse bei einem reinen Inhaltspaket bereits besitzen).</translation>
+    </message>
+    <message>
+        <source>The ordered list of install/uninstall items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from and its sub-directory.</source>
+        <translation>Die geordnete Liste der Installations-/Deinstallationselemente: Typ (ezcontentclass, ezcontentobject, ...), die Datei, aus der der Inhalt gelesen wird, und ihr Unterverzeichnis.</translation>
+    </message>
+    <message>
+        <source>The content-class definition XML (ezcontentclass/*.xml)</source>
+        <translation>Die Inhaltsklassen-Definitions-XML (ezcontentclass/*.xml)</translation>
+    </message>
+    <message>
+        <source>Root &lt;content-class&gt;: is-container, always-available and the sort field/order it opens with.</source>
+        <translation>Wurzel &lt;content-class&gt;: is-container, always-available sowie das Sortierfeld/die Sortierreihenfolge, mit der sie beginnt.</translation>
+    </message>
+    <message>
+        <source>&lt;identifier&gt;, &lt;remote-id&gt;: the class identifier and its remote id - remote id is the install-time match key (falls back to identifier when no class has that remote id yet).</source>
+        <translation>&lt;identifier&gt;, &lt;remote-id&gt;: die Klassenkennung und ihre Remote-ID - die Remote-ID ist der Zuordnungsschlüssel bei der Installation (ersatzweise die Kennung, wenn noch keine Klasse diese Remote-ID hat).</translation>
+    </message>
+    <message>
+        <source>&lt;serialized-name-list&gt;, &lt;serialized-description-list&gt;: PHP-serialized per-language maps (one entry per language the class name/description is translated to), not plain text - never hand-write these; build the class in the class editor or copy them from a real export.</source>
+        <translation>&lt;serialized-name-list&gt;, &lt;serialized-description-list&gt;: PHP-serialisierte Zuordnungen je Sprache (ein Eintrag je Sprache, in die Klassenname/-beschreibung übersetzt sind), kein Klartext - diese nie von Hand schreiben; die Klasse im Klasseneditor anlegen oder aus einem echten Export übernehmen.</translation>
+    </message>
+    <message>
+        <source>&lt;remote&gt;&lt;groups&gt;: which content-class groups (Content, Users, Media, ...) the class belongs to, each named by its own remote id.</source>
+        <translation>&lt;remote&gt;&lt;groups&gt;: zu welchen Klassengruppen (Content, Users, Media, ...) die Klasse gehört, jede über ihre eigene Remote-ID benannt.</translation>
+    </message>
+    <message>
+        <source>&lt;attributes&gt;&lt;attribute&gt;: one per class attribute - identifier, type (the datatype string, e.g. ezstring), name (per language), is-required/is-searchable/is-translatable/is-information-collector, category, and a &lt;content&gt; block whose shape is entirely datatype-specific (ezinteger carries min/max/default; ezselection carries the option list and multi/single; ezobjectrelation(list) carries the class/group constraint and selection type; ezimage carries the max file size; and so on) - this is exactly what eZDataType::serializeContentClassAttribute() for that datatype writes, and only that datatype’s own fromString()/unserializeContentClassAttribute() can read it back, so hand-writing an attribute’s &lt;content&gt; reliably means copying it from a real export of the same datatype, not composing it from this reference alone.</source>
+        <translation>&lt;attributes&gt;&lt;attribute&gt;: eines je Klassenattribut - Kennung, Typ (die Datentyp-Zeichenkette, z. B. ezstring), Name (je Sprache), is-required/is-searchable/is-translatable/is-information-collector, Kategorie, und ein &lt;content&gt;-Block, dessen Form vollständig datentypabhängig ist (ezinteger führt min/max/default; ezselection die Optionsliste und multi/single; ezobjectrelation(list) die Klassen-/Gruppeneinschränkung und den Auswahltyp; ezimage die maximale Dateigröße; und so weiter) - das schreibt genau eZDataType::serializeContentClassAttribute() für diesen Datentyp, und nur die eigene fromString()/unserializeContentClassAttribute() dieses Datentyps kann es zurücklesen, weshalb das &lt;content&gt; eines Attributs von Hand zu schreiben zuverlässig heißt, es aus einem echten Export desselben Datentyps zu übernehmen, nicht es allein aus dieser Referenz zusammenzusetzen.</translation>
+    </message>
+    <message>
+        <source>The content-object XML (ezcontentobject/*.xml)</source>
+        <translation>Die Inhaltsobjekt-XML (ezcontentobject/*.xml)</translation>
+    </message>
+    <message>
+        <source>Root &lt;object&gt;: name, remote_id (the install-time match key), class_remote_id/class_identifier, always_available, and the timestamps a package install can optionally restore (published/modified).</source>
+        <translation>Wurzel &lt;object&gt;: name, remote_id (der Zuordnungsschlüssel bei der Installation), class_remote_id/class_identifier, always_available, sowie die Zeitstempel, die eine Paketinstallation optional wiederherstellen kann (published/modified).</translation>
+    </message>
+    <message>
+        <source>&lt;version-list active_version=&quot;n&quot;&gt;: one &lt;version&gt; per version the object carries (almost always just one, the published version); each has its own status and an ordered &lt;object-translation language=&quot;...&quot;&gt; per language.</source>
+        <translation>&lt;version-list active_version=&quot;n&quot;&gt;: eine &lt;version&gt; je Version, die das Objekt trägt (fast immer nur eine, die veröffentlichte Version); jede hat ihren eigenen Status und eine geordnete &lt;object-translation language=&quot;...&quot;&gt; je Sprache.</translation>
+    </message>
+    <message>
+        <source>Inside an &lt;object-translation&gt;, one &lt;attribute identifier=&quot;...&quot; type=&quot;...&quot;&gt; per class attribute, serialized exactly as that datatype’s own serialize() writes it - the shape differs by datatype (see the table below); an attribute the translation does not carry (a non-translatable one, already set on another language) is simply absent.</source>
+        <translation>Innerhalb einer &lt;object-translation&gt; ein &lt;attribute identifier=&quot;...&quot; type=&quot;...&quot;&gt; je Klassenattribut, genau so serialisiert, wie es die eigene serialize()-Methode dieses Datentyps schreibt - die Form unterscheidet sich je Datentyp (siehe Tabelle unten); ein Attribut, das die Übersetzung nicht trägt (ein nicht übersetzbares, bereits bei einer anderen Sprache gesetzt), fehlt schlicht.</translation>
+    </message>
+    <message>
+        <source>&lt;node-assignment-list&gt;: one &lt;node-assignment&gt; per location. A node with no parent-node-remote-id attribute is a &quot;top node&quot; - on install it goes under the parent node chosen at install time (or, for xrowextract/package’s own install, the &quot;Parent for new objects&quot; field above); one that does have it is placed under whichever node in the same package (or already on the installing site) carries that remote id.</source>
+        <translation>&lt;node-assignment-list&gt;: eine &lt;node-assignment&gt; je Ort. Ein Knoten ohne Attribut parent-node-remote-id ist ein &quot;oberster Knoten&quot; - bei der Installation kommt er unter den bei der Installation gewählten Elternknoten (bei der Installation über xrowextract/package unter das obige Feld &quot;Elternknoten für neue Objekte&quot;); einer mit diesem Attribut wird unter dem Knoten platziert, der im selben Paket (oder bereits auf der installierenden Website) diese Remote-ID trägt.</translation>
+    </message>
+    <message>
+        <source>A relation attribute (ezobjectrelation/ezobjectrelationlist) stores the related object’s remote id, not its numeric id - so it resolves correctly even though ids differ between the exporting and installing site; a relation to an object neither carried by the same package nor already on the installing site is left empty, silently.</source>
+        <translation>Ein Beziehungsattribut (ezobjectrelation/ezobjectrelationlist) speichert die Remote-ID des verknüpften Objekts, nicht seine numerische ID - so wird es auch bei unterschiedlichen IDs zwischen exportierender und installierender Website richtig aufgelöst; eine Beziehung zu einem Objekt, das weder im selben Paket enthalten noch bereits auf der installierenden Website vorhanden ist, bleibt stillschweigend leer.</translation>
+    </message>
+    <message>
+        <source>ezimage/ezbinaryfile/ezmedia store the real file under the package’s own simplefiles/, copied back out on install - nothing is fetched from the exporting site at install time.</source>
+        <translation>ezimage/ezbinaryfile/ezmedia speichern die eigentliche Datei unter dem eigenen simplefiles/ des Pakets und kopieren sie bei der Installation wieder heraus - bei der Installation wird nichts von der exportierenden Website nachgeladen.</translation>
+    </message>
+    <message>
+        <source>A real example, from this extension’s own &quot;Package template&quot; sample builder (xrowextract/package) - one attribute of each datatype family it fills a real value for, and the relation from a second sample object to the first:</source>
+        <translation>Ein echtes Beispiel, aus dem eigenen Beispielgenerator &quot;Paketvorlage&quot; dieser Erweiterung (xrowextract/package) - ein Attribut jeder Datentypfamilie, für das ein echter Wert gesetzt wird, und die Beziehung vom zweiten Beispielobjekt zum ersten:</translation>
+    </message>
+    <message>
+        <source>Every importable datatype, with an example</source>
+        <translation>Jeder importierbare Datentyp, mit Beispiel</translation>
+    </message>
+    <message>
+        <source>Serialized as</source>
+        <translation>Serialisiert als</translation>
+    </message>
+    <message>
+        <source>A datatype not listed here still exports and round-trips through package/create and package/install normally (this list only names the ones the sample builder fills a value for); it just has no sample generated for it by the Package template builder.</source>
+        <translation>Ein hier nicht aufgeführter Datentyp exportiert und durchläuft package/create und package/install trotzdem normal (diese Liste nennt nur die, für die der Beispielgenerator einen Wert setzt); für ihn wird vom Paketvorlagen-Generator lediglich kein Beispiel erzeugt.</translation>
+    </message>
+    <message>
+        <source>What happens on install</source>
+        <translation>Was bei der Installation passiert</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a match is skipped, replaced, or kept alongside a new copy (a new identifier), per the class option offered here.</source>
+        <translation>Klassen werden über die Remote-ID zugeordnet, ersatzweise über die Kennung; ein Treffer wird je nach hier angebotener Klassen-Option übersprungen, ersetzt oder zusammen mit einer neuen Kopie (neue Kennung) behalten.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a match is skipped, updated in place (existing content is kept wherever the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation>Objekte werden nur über die Remote-ID zugeordnet; ein Treffer wird übersprungen, an Ort und Stelle aktualisiert (vorhandener Inhalt bleibt dort erhalten, wo das Paket ihn nicht berührt) oder zusammen mit einer neuen Kopie mit frisch erzeugter Remote-ID behalten.</translation>
+    </message>
+    <message>
+        <source>An object whose class is on neither this site nor carried by the same package is refused outright (class missing) rather than half-installed - inspect it first and it is called out exactly as that.</source>
+        <translation>Ein Objekt, dessen Klasse weder auf dieser Website noch im selben Paket vorhanden ist, wird von vornherein abgelehnt (Klasse fehlt), statt halb installiert zu werden - eine vorherige Prüfung weist genau darauf hin.</translation>
+    </message>
+    <message>
+        <source>A language the object carries but this site does not have yet is added automatically, if it is a valid locale; otherwise that one translation (only that one) is skipped.</source>
+        <translation>Eine Sprache, die das Objekt trägt, die diese Website aber noch nicht hat, wird automatisch hinzugefügt, sofern es sich um ein gültiges Gebietsschema handelt; andernfalls wird nur diese eine Übersetzung übersprungen.</translation>
+    </message>
+    <message>
+        <source>A &quot;requires&quot; dependency of type ezpackage is installed first, automatically; of type ezcontentclass it is informational only - a content-only package still fails per-object with class missing if that class is not already there.</source>
+        <translation>Eine &quot;requires&quot;-Abhängigkeit vom Typ ezpackage wird automatisch zuerst installiert; vom Typ ezcontentclass ist sie rein informativ - ein reines Inhaltspaket schlägt trotzdem je Objekt mit &quot;Klasse fehlt&quot; fehl, wenn diese Klasse noch nicht vorhanden ist.</translation>
+    </message>
+    <message>
+        <source>Building one by hand or from the command line</source>
+        <translation>Eines von Hand oder über die Kommandozeile erstellen</translation>
+    </message>
+    <message>
+        <source>A single class or object XML file: export it from package/create (content class / content object export), or take one file out of an existing .ezpkg (tar tzf/tar xzf) - then upload that one file here directly, no archive needed.</source>
+        <translation>Eine einzelne Klassen- oder Objekt-XML-Datei: über package/create exportieren (Export einer Inhaltsklasse/eines Inhaltsobjekts), oder eine Datei aus einem vorhandenen .ezpkg entnehmen (tar tzf/tar xzf) - dann diese eine Datei hier direkt hochladen, kein Archiv nötig.</translation>
+    </message>
+    <message>
+        <source>A full .ezpkg: package/create’s wizard, or ext:xrowextract:package --export --node=&lt;id&gt; [--subtree] [--class=&lt;id&gt;] --file=&lt;out.ezpkg&gt; for a plain node/subtree, or --template --class=&lt;id&gt; --variant=both --file=&lt;out.ezpkg&gt; for a ready-made sample of a class (see the Package page).</source>
+        <translation>Ein vollständiges .ezpkg: der Assistent von package/create, oder ext:xrowextract:package --export --node=&lt;id&gt; [--subtree] [--class=&lt;id&gt;] --file=&lt;out.ezpkg&gt; für einen einfachen Knoten/Teilbaum, oder --template --class=&lt;id&gt; --variant=both --file=&lt;out.ezpkg&gt; für ein fertiges Beispiel einer Klasse (siehe die Seite Paket).</translation>
+    </message>
+    <message>
+        <source>ext:xrowextract:package --inspect=&lt;name&gt; shows exactly what a package carries and what installing it would do, the same dry run this page runs after an upload.</source>
+        <translation>ext:xrowextract:package --inspect=&lt;name&gt; zeigt genau, was ein Paket enthält und was seine Installation bewirken würde - derselbe Probelauf, den diese Seite nach einem Upload durchführt.</translation>
+    </message>
+    <message>
         <source>Other classes</source>
         <translation>Weitere Klassen</translation>
     </message>

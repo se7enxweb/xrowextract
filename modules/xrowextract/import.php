@@ -25,7 +25,8 @@ if ( $http->hasPostVariable( 'NewImport' ) )
     return $module->redirectTo( 'xrowextract/import' );
 }
 
-// A new upload
+// A new upload: a content package (.ezpkg/.tar.gz), a standalone content-class or
+// content-object XML file, or a row file (CSV/XML/JSON), in that checking order
 $uploadError = '';
 if ( $http->hasPostVariable( 'Upload' ) && isset( $_FILES['ImportFile'] ) && $_FILES['ImportFile']['error'] === UPLOAD_ERR_OK )
 {
@@ -39,10 +40,35 @@ if ( $http->hasPostVariable( 'Upload' ) && isset( $_FILES['ImportFile'] ) && $_F
     {
         if ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
             @unlink( $_SESSION[$SESSION_KEY]['path'] );
-        $format = XrowExtractImport::detectFormat( (string)file_get_contents( $stored ) );
-        $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( (string)file_get_contents( $stored ) ) : ',';
-        $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator );
-        return $module->redirectTo( 'xrowextract/import' );
+        $packageKind = XrowExtractPackage::detectUploadKind( $stored, $originalName );
+        if ( $packageKind )
+        {
+            $wrapped = $packageKind === 'package'
+                     ? XrowExtractPackage::importUploadedArchive( $stored )
+                     : XrowExtractPackage::wrapStandaloneXML( $stored, $packageKind, $originalName );
+            // The repository copy (a real eZPackage, or a transient one wrapping the single
+            // class/object file) now carries everything; the raw upload has done its job.
+            @unlink( $stored );
+            if ( !$wrapped['ok'] )
+            {
+                $uploadError = ezpI18n::tr( 'design/standard/extract', 'Could not read %name as a package: %reason', null,
+                                            array( '%name' => $originalName, '%reason' => $wrapped['error'] ) );
+            }
+            else
+            {
+                unset( $_SESSION[$SESSION_KEY] );
+                $_SESSION[$SESSION_KEY] = array( 'name' => $originalName, 'format' => $packageKind, 'kind' => $packageKind,
+                                                 'package_name' => $wrapped['package']->attribute( 'name' ) );
+                return $module->redirectTo( 'xrowextract/import' );
+            }
+        }
+        else
+        {
+            $format = XrowExtractImport::detectFormat( (string)file_get_contents( $stored ) );
+            $separator = $format === 'csv' ? XrowExtractImport::detectSeparator( (string)file_get_contents( $stored ) ) : ',';
+            $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator );
+            return $module->redirectTo( 'xrowextract/import' );
+        }
     }
 }
 elseif ( $http->hasPostVariable( 'Upload' ) )
@@ -50,19 +76,34 @@ elseif ( $http->hasPostVariable( 'Upload' ) )
     $uploadError = ezpI18n::tr( 'design/standard/extract', 'Choose a file first.' );
 }
 
-$hasFile = isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] );
+// A package (or standalone class/object XML) keeps no loose file on disk once uploaded - it
+// already lives in the package repository (see the Upload block above) - so "there is a file"
+// for this session means either a row file on disk, or a package_name in the session.
+$PackageMode = !empty( $_SESSION[$SESSION_KEY]['package_name'] );
+$hasFile = ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) ) || $PackageMode;
 $tpl->setVariable( 'HasFile', $hasFile );
 $tpl->setVariable( 'UploadError', $uploadError );
 
 if ( $http->hasPostVariable( 'RemoveFile' ) && $hasFile )
 {
-    @unlink( $_SESSION[$SESSION_KEY]['path'] );
+    if ( isset( $_SESSION[$SESSION_KEY]['path'] ) )
+        @unlink( $_SESSION[$SESSION_KEY]['path'] );
+    // The package itself is left in the repository (xrowextract/package, or package/list, can
+    // still reach it) - only the session's reference to it is forgotten here, same as the
+    // "Forget" action on the Package page.
     unset( $_SESSION[$SESSION_KEY] );
     return $module->redirectTo( 'xrowextract/import' );
 }
 
 $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'separator' => ',' );
-if ( $hasFile )
+if ( $hasFile && $PackageMode )
+{
+    $tpl->setVariable( 'ImportFormat', $_SESSION[$SESSION_KEY]['format'] );
+    $tpl->setVariable( 'UploadedName', $_SESSION[$SESSION_KEY]['name'] );
+    $tpl->setVariable( 'IsSample', false );
+    $tpl->setVariable( 'SampleKinds', array() );
+}
+elseif ( $hasFile )
 {
     $format = $http->hasPostVariable( 'ImportFormat' ) ? (string)$http->postVariable( 'ImportFormat' ) : $_SESSION[$SESSION_KEY]['format'];
     $format = in_array( $format, array( 'csv', 'json', 'xml' ), true ) ? $format : 'csv';
@@ -352,6 +393,76 @@ if ( $http->hasPostVariable( 'ImportParentNodeSelected' ) )
         $ParentNodeID = (int)$selected[0];
     $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
 }
+
+// A content package, or a standalone class/object XML wrapped as one (see the Upload block):
+// inspect it (dry run, nothing written), install it - reusing the Parent field above for its
+// top-level objects - or queue a large one as a background job (xrowextract/jobs, type "package").
+$Package = false;
+$PackageInspection = false;
+$PackageInstallReport = false;
+$PackageJobID = false;
+$PackageJobError = false;
+if ( $PackageMode )
+{
+    $Package = eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] );
+
+    $PackageSiteAccess = $http->hasPostVariable( 'PackageSiteAccess' ) ? (string)$http->postVariable( 'PackageSiteAccess' ) : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
+    $tpl->setVariable( 'PackageSiteAccess', $PackageSiteAccess );
+    $tpl->setVariable( 'PackageAvailableSiteAccesses', eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' ) );
+    $PackageObjectMode = $http->hasPostVariable( 'PackageObjectMode' ) && in_array( $http->postVariable( 'PackageObjectMode' ), array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true )
+                       ? $http->postVariable( 'PackageObjectMode' ) : XrowExtractPackage::OBJECT_UPDATE;
+    $tpl->setVariable( 'PackageObjectMode', $PackageObjectMode );
+    $PackageClassMode = $http->hasPostVariable( 'PackageClassMode' ) && in_array( $http->postVariable( 'PackageClassMode' ), array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true )
+                      ? $http->postVariable( 'PackageClassMode' ) : XrowExtractPackage::CLASS_SKIP;
+    $tpl->setVariable( 'PackageClassMode', $PackageClassMode );
+
+    if ( $Package instanceof eZPackage )
+    {
+        if ( $http->hasPostVariable( 'InstallPackage' ) )
+        {
+            $PackageInstallReport = XrowExtractPackage::install( $Package, $ParentNodeID, $PackageSiteAccess, $PackageObjectMode, $PackageClassMode );
+            if ( $PackageInstallReport['ok'] )
+                eZContentObject::clearCache();
+        }
+        elseif ( $http->hasPostVariable( 'RunPackageInBackground' ) )
+        {
+            if ( !XrowExtractJob::available() )
+            {
+                $PackageJobError = ezpI18n::tr( 'design/standard/extract', 'Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).' );
+            }
+            else
+            {
+                $jobArgs = array( '--install=' . $Package->attribute( 'name' ), '--parent=' . $ParentNodeID,
+                                  '--site-access=' . $PackageSiteAccess, '--object-mode=' . $PackageObjectMode, '--class-mode=' . $PackageClassMode );
+                $PackageJobID = XrowExtractJob::create( array(
+                    'type' => 'package',
+                    'owner' => eZUser::currentUser()->attribute( 'login' ),
+                    'what' => 'Install package ' . $Package->attribute( 'name' ),
+                    'format' => 'json',
+                    'output_file' => 'report.json',
+                    'args' => $jobArgs,
+                ) );
+                if ( !XrowExtractJob::start( $PackageJobID ) )
+                {
+                    XrowExtractJob::update( $PackageJobID, array(
+                        'state' => 'failed', 'ended' => time(),
+                        'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+                    ) );
+                }
+                return $module->redirectTo( 'xrowextract/jobs' );
+            }
+        }
+        $PackageInspection = XrowExtractPackage::inspect( $Package );
+    }
+}
+$tpl->setVariable( 'PackageMode', $PackageMode );
+$tpl->setVariable( 'PackageKind', $PackageMode ? $_SESSION[$SESSION_KEY]['kind'] : false );
+$tpl->setVariable( 'PackageName', $PackageMode ? $_SESSION[$SESSION_KEY]['package_name'] : '' );
+$tpl->setVariable( 'Package', $Package );
+$tpl->setVariable( 'PackageInspection', $PackageInspection );
+$tpl->setVariable( 'PackageInstallReport', $PackageInstallReport );
+$tpl->setVariable( 'PackageJobError', $PackageJobError );
+$tpl->setVariable( 'PackageJobsAvailable', XrowExtractJob::available() );
 
 // Preview (dry run) and Apply run the same engine; Apply only after a preview was shown for these settings
 $Preview = false;

@@ -14,6 +14,13 @@
  *   php extension/xrowextract/bin/php/package.php --export --node=130 --file=var/tmp/ng_news_130.ezpkg
  *   php extension/xrowextract/bin/php/package.php --export --node=2 --subtree --class=ng_article --file=var/tmp/articles.ezpkg
  *   php extension/xrowextract/bin/php/package.php --template --class=ng_article --variant=both --file=var/tmp/ng_article_template.ezpkg
+ *
+ * --output writes a JSON report alongside the normal text output, for
+ * --inspect and --install: how xrowextract/jobs.php (type "package") runs a
+ * large package inspect/install in the background and reports it, through
+ * bin/php/job.php the same way a csv/archive job does. --progress-file gets
+ * a couple of coarse phase updates (eZPackage::install() has no natural
+ * per-item hook to report finer progress from without patching the kernel).
  */
 
 require_once dirname( __FILE__ ) . '/../../../../autoload.php';
@@ -28,7 +35,7 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[list][inspect:][install:][export][template][parent:][dry-run][site-access:][object-mode:][class-mode:]' .
-    '[node:][subtree][class:][variant:][object-count:][languages:][name:][file:][user:]',
+    '[node:][subtree][class:][variant:][object-count:][languages:][name:][file:][user:][output:][progress-file:]',
     '',
     array(
         'list'         => 'List the packages in the repository that carry a content class or content object',
@@ -50,6 +57,8 @@ $options = $script->getOptions(
         'name'         => '--export: package name (default: a name derived from the node)',
         'file'         => '--export/--template: file to write the .ezpkg to (required)',
         'user'         => 'Run with the access rights of this login (default: admin)',
+        'output'       => '--inspect/--install: also write a JSON report here (for a background job; see bin/php/job.php)',
+        'progress-file' => '--install: write {"done":n,"total":m,"phase":"..."} to this path after each phase (for a background job)',
     )
 );
 $script->initialize();
@@ -97,6 +106,8 @@ if ( $options['inspect'] )
     $c = $inspection['counts'];
     $cli->output( sprintf( 'classes: %d create, %d update  |  objects: %d create, %d update, %d unchanged, %d class missing',
                            $c['classes_create'], $c['classes_update'], $c['objects_create'], $c['objects_update'], $c['objects_unchanged'], $c['objects_class_missing'] ) );
+    if ( $options['output'] )
+        file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'inspect', 'inspection' => $inspection ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
     $script->shutdown( 0 );
 }
 
@@ -112,12 +123,19 @@ if ( $options['install'] )
     if ( !$parentNode instanceof eZContentObjectTreeNode )
         $fail( "No node $parentNodeID (--parent)." );
 
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 2, 'inspecting' );
+
     if ( $options['dry-run'] )
     {
         $inspection = XrowExtractPackage::inspect( $package );
         $c = $inspection['counts'];
         $cli->output( sprintf( 'Dry run for %s: classes: %d create, %d update  |  objects: %d create, %d update, %d unchanged, %d class missing',
                                $package->attribute( 'name' ), $c['classes_create'], $c['classes_update'], $c['objects_create'], $c['objects_update'], $c['objects_unchanged'], $c['objects_class_missing'] ) );
+        if ( $options['output'] )
+            file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'dry-run', 'inspection' => $inspection ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+        if ( $options['progress-file'] )
+            XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 2, 'done' );
         $script->shutdown( 0 );
     }
 
@@ -129,6 +147,9 @@ if ( $options['install'] )
         $fail( '--class-mode is skip, replace or new.' );
     $siteAccess = $options['site-access'] ? $options['site-access'] : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
 
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 1, 2, 'installing' );
+
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
     foreach ( $report['errors'] as $error )
         $cli->error( '  ' . $error );
@@ -137,6 +158,10 @@ if ( $options['install'] )
     foreach ( $report['created_objects'] as $row )
         $cli->output( sprintf( '  object  %-30s #%d%s', $row['name'], $row['id'], $row['node_id'] ? ' node ' . $row['node_id'] : '' ) );
     $cli->output( $report['ok'] ? 'PASS installed' : 'FAIL install did not finish cleanly' );
+    if ( $options['output'] )
+        file_put_contents( (string)$options['output'], json_encode( array( 'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    if ( $options['progress-file'] )
+        XrowExtractJob::writeProgress( (string)$options['progress-file'], 2, 2, 'done' );
     $script->shutdown( $report['ok'] ? 0 : 1 );
 }
 
@@ -161,6 +186,7 @@ if ( $options['export'] )
 
     $packageName = $options['name'] ? $options['name'] : ( 'xrowextract_export_' . preg_replace( '/[^A-Za-z0-9_]+/', '_', $node->attribute( 'name' ) ) . '_' . $nodeID );
     $package = eZPackage::create( $packageName, array( 'summary' => 'Exported below node ' . $nodeID . ' (' . $node->attribute( 'name' ) . ')', 'vendor' => 'xrowextract' ) );
+    XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, below node ' . $nodeID . ' (' . $node->attribute( 'name' ) . ').' );
     $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
     $objectHandler->addNode( $nodeID, (bool)$options['subtree'] );
     $objectHandler->generatePackage( $package, array(
