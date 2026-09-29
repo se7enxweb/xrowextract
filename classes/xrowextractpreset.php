@@ -333,6 +333,35 @@ class XrowExtractPreset
         return array( 'definition' => $fill( $definition ), 'unresolved' => array_values( array_unique( $unresolved ) ) );
     }
 
+    /**
+     * A short, one-line "what this sets" summary for the picker — from the preset's own definition only
+     * (never resolves an Extends chain, so listing many presets stays cheap).
+     */
+    public static function summaryLine( array $preset )
+    {
+        $def = $preset['definition'];
+        $parts = array();
+        if ( $preset['extends'] !== '' )
+            $parts[] = 'extends ' . $preset['extends'];
+        if ( !empty( $def['class_identifier'] ) )
+            $parts[] = 'class ' . $def['class_identifier'];
+        elseif ( isset( $def['class_id'] ) )
+            $parts[] = 'class #' . $def['class_id'];
+        if ( isset( $def['subtree'] ) )
+            $parts[] = 'node ' . $def['subtree'];
+        if ( isset( $def['sort_field'] ) && $def['sort_field'] !== 'tree' )
+            $parts[] = 'sorted by ' . $def['sort_field'];
+        if ( !empty( $def['limit'] ) )
+            $parts[] = 'limit ' . $def['limit'];
+        if ( isset( $def['filters']['visibility'] ) && $def['filters']['visibility'] !== 'any' )
+            $parts[] = $def['filters']['visibility'];
+        if ( !empty( $def['filters']['conditions'] ) && is_array( $def['filters']['conditions'] ) )
+            $parts[] = count( $def['filters']['conditions'] ) . ' condition(s)';
+        if ( isset( $def['output_format'] ) && $def['output_format'] !== 'csv' )
+            $parts[] = strtoupper( $def['output_format'] );
+        return $parts ? implode( ', ', $parts ) : 'no settings of its own';
+    }
+
     /** The preset as a `[Preset_<id>]` xrowextract.ini block, to copy into settings. */
     public static function toIniBlock( array $preset )
     {

@@ -3675,6 +3675,86 @@
         <source>Preset "%name" saved.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Presets: load a preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A preset is a whole export definition — node, class, columns, languages, every filter, sort, output — saved under a name. Unlike a fetchalias.ini named fetch, it also carries the columns, languages and output settings, and can be edited from here. Loading one replaces the settings below with its own.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No presets yet. Set up the export below the way you want it, then use "Save the current settings as a preset" to keep it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy as INI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Advanced</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Placeholder values not shown above, key=value,key=value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Presets: currently loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What the loaded preset set below. Remove one setting, or all of them, without losing the rest of what you have changed since.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove %what</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Presets: save the current settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings below, under a name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
