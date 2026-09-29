@@ -246,7 +246,22 @@ if ( $options['export'] )
     $summaryWhat = count( $nodeIDs ) > 1 ? ( count( $nodeIDs ) . ' selected nodes' ) : ( 'below node ' . $nodeIDs[0] . ' (' . $firstNode->attribute( 'name' ) . ')' );
     $package = eZPackage::create( $packageName, array( 'summary' => 'Exported ' . $summaryWhat, 'vendor' => 'xrowextract' ) );
     XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:package --export, ' . $summaryWhat . '.' );
+    // eZPackage::packageHandler() reuses the SAME eZContentObjectPackageHandler instance for
+    // every 'ezcontentobject' call in the process ($GLOBALS['eZPackageHandlers'], kernel/
+    // classes/ezpackage.php) and its reset() is an inherited no-op (kernel/classes/
+    // ezpackagehandler.php); on a long-running Velocity worker its public arrays would still
+    // carry node/object ids an earlier, unrelated --export run added, and generatePackage()
+    // only ever array_unique()s NodeIDArray, never clears it. This CLI command is normally
+    // one-shot (a fresh process per run), but the background job path
+    // (XrowExtractJob::writeProgress() above) can run it inside a longer-lived worker too, so
+    // it is reset here the same way classes/xrowextractpackage.php resets it for the sample/
+    // template builders.
     $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+    $objectHandler->NodeIDArray = array();
+    $objectHandler->RootNodeIDArray = array();
+    $objectHandler->NodeObjectArray = array();
+    $objectHandler->ObjectArray = array();
+    $objectHandler->RootNodeObjectArray = array();
 
     if ( $classID && $options['subtree'] )
     {
