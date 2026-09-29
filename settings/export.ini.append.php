@@ -24,4 +24,18 @@ SitesParentNodeID=
 #DefaultSiteNodeIDs[]=89
 DefaultSiteNodeIDs[]
 
+[PackageTemplate]
+# Where the "Package template" sample-content builder (xrowextract/package, ext:xrowextract:package
+# --template) creates its throwaway sample objects while it builds a package. They are created for
+# real, exported into the package, then removed again - but for the seconds they exist, they are
+# published content like any other, so this must NOT be a node the public site renders, indexes,
+# caches or lists in a dynamic collection.
+#
+# Empty (default): content.ini [NodeSettings] MediaRootNode - the Media/Images-Files-Multimedia
+# structure, which none of the shipped layouts, search results or the static/content-view cache
+# render for a visitor. It is still a real, permanent node: only use one you are sure carries no
+# public rendering for this installation. Never point this at content.ini [NodeSettings] RootNode
+# (the public site's front page) or any node a layout, menu or dynamic collection reaches.
+ScratchNodeID=
+
 */ ?>

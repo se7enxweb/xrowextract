@@ -52,6 +52,442 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>object(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A content package (.ezpkg): inspect, install, or build a sample one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pick a package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Or choose one already in the repository</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Current package: %name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>full package view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>download .ezpkg</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>full install wizard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Inspection — nothing written</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Summary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Licence</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Installed already</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dependencies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changelog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remote id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Existing object</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install did not finish cleanly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install this package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install-time matching and options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Site access</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Existing objects (matched by remote id)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update in place</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new remote id)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Existing classes (matched by remote id, then identifier)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new identifier)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Package template</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Variant</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Class + content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Build the sample package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Package template reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archive layout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>package.xml: the elements that matter here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Element</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Meaning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shown on the inspect screen and package/view.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version and release number; not compared against an installed copy automatically.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Free text, shown on the inspect screen and package/view.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Annotated example, from a generated sample package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What each datatype gets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a short readable sample sentence or address, numbered per object.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Numbers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a different valid number/flag per object.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>today plus a few days/hours per object.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a real option of the class, chosen by id.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keywords/tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rich text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a short real paragraph.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a real bundled sample image/document, stored in the package.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>class missing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>classes: create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>classes: update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects: class missing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects: create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects: unchanged</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects: update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A package named %packagename already exists in the repository.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The package name %packagename is invalid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The uploaded file is not a valid Exponential package (.ezpkg).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content + class package (.ezpkg)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation type="unfinished"></translation>
     </message>

@@ -52,6 +52,442 @@
         <translation>new</translation>
     </message>
     <message>
+        <source>object(s)</source>
+        <translation>object(s)</translation>
+    </message>
+    <message>
+        <source>Package</source>
+        <translation>Package</translation>
+    </message>
+    <message>
+        <source>A content package (.ezpkg): inspect, install, or build a sample one</source>
+        <translation>A content package (.ezpkg): inspect, install, or build a sample one</translation>
+    </message>
+    <message>
+        <source>Pick a package</source>
+        <translation>Pick a package</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</source>
+        <translation>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg file</source>
+        <translation>Upload an .ezpkg file</translation>
+    </message>
+    <message>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</source>
+        <translation>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</translation>
+    </message>
+    <message>
+        <source>Or choose one already in the repository</source>
+        <translation>Or choose one already in the repository</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation>Open</translation>
+    </message>
+    <message>
+        <source>Current package: %name</source>
+        <translation>Current package: %name</translation>
+    </message>
+    <message>
+        <source>full package view</source>
+        <translation>full package view</translation>
+    </message>
+    <message>
+        <source>download .ezpkg</source>
+        <translation>download .ezpkg</translation>
+    </message>
+    <message>
+        <source>full install wizard</source>
+        <translation>full install wizard</translation>
+    </message>
+    <message>
+        <source>Forget</source>
+        <translation>Forget</translation>
+    </message>
+    <message>
+        <source>Inspection — nothing written</source>
+        <translation>Inspection — nothing written</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <source>Summary</source>
+        <translation>Summary</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation>Description</translation>
+    </message>
+    <message>
+        <source>Licence</source>
+        <translation>Licence</translation>
+    </message>
+    <message>
+        <source>Installed already</source>
+        <translation>Installed already</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>yes</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <source>Dependencies</source>
+        <translation>Dependencies</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Changelog</source>
+        <translation>Changelog</translation>
+    </message>
+    <message>
+        <source>State</source>
+        <translation>State</translation>
+    </message>
+    <message>
+        <source>Remote id</source>
+        <translation>Remote id</translation>
+    </message>
+    <message>
+        <source>Existing object</source>
+        <translation>Existing object</translation>
+    </message>
+    <message>
+        <source>Installed</source>
+        <translation>Installed</translation>
+    </message>
+    <message>
+        <source>Install did not finish cleanly</source>
+        <translation>Install did not finish cleanly</translation>
+    </message>
+    <message>
+        <source>Content objects</source>
+        <translation>Content objects</translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation>Install</translation>
+    </message>
+    <message>
+        <source>Install this package</source>
+        <translation>Install this package</translation>
+    </message>
+    <message>
+        <source>Install-time matching and options</source>
+        <translation>Install-time matching and options</translation>
+    </message>
+    <message>
+        <source>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</source>
+        <translation>Runs through eZPackage::install(), the same convenience method the kernel package/install view is built on.</translation>
+    </message>
+    <message>
+        <source>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</source>
+        <translation>Every top-level object the package carries is placed here (browse.ini [ImportParentNode], the same group xrowextract/import uses).</translation>
+    </message>
+    <message>
+        <source>Site access</source>
+        <translation>Site access</translation>
+    </message>
+    <message>
+        <source>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</source>
+        <translation>Where a design/template/override this package might carry would map to; content packages built by this tool carry none.</translation>
+    </message>
+    <message>
+        <source>Existing objects (matched by remote id)</source>
+        <translation>Existing objects (matched by remote id)</translation>
+    </message>
+    <message>
+        <source>Update in place</source>
+        <translation>Update in place</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new remote id)</source>
+        <translation>Keep both (new copy, new remote id)</translation>
+    </message>
+    <message>
+        <source>Existing classes (matched by remote id, then identifier)</source>
+        <translation>Existing classes (matched by remote id, then identifier)</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Replace</translation>
+    </message>
+    <message>
+        <source>Keep both (new copy, new identifier)</source>
+        <translation>Keep both (new copy, new identifier)</translation>
+    </message>
+    <message>
+        <source>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</source>
+        <translation>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</translation>
+    </message>
+    <message>
+        <source>Package template</source>
+        <translation>Package template</translation>
+    </message>
+    <message>
+        <source>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</source>
+        <translation>Builds a real, installable sample package for a class you choose, through the kernel package handlers.</translation>
+    </message>
+    <message>
+        <source>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</source>
+        <translation>The same class list the CSV/JSON import uses; when none was chosen yet, the class with the most content is preselected.</translation>
+    </message>
+    <message>
+        <source>Variant</source>
+        <translation>Variant</translation>
+    </message>
+    <message>
+        <source>Class only</source>
+        <translation>Class only</translation>
+    </message>
+    <message>
+        <source>Content only</source>
+        <translation>Content only</translation>
+    </message>
+    <message>
+        <source>Class + content</source>
+        <translation>Class + content</translation>
+    </message>
+    <message>
+        <source>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</source>
+        <translation>Content only: the site installing it must already have this class. Class + content: everything needed is in the one package.</translation>
+    </message>
+    <message>
+        <source>Build the sample package</source>
+        <translation>Build the sample package</translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</source>
+        <translation>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</translation>
+    </message>
+    <message>
+        <source>Package template reference</source>
+        <translation>Package template reference</translation>
+    </message>
+    <message>
+        <source>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</source>
+        <translation>What a content package looks like on disk, every element package.xml carries, and how install-time matching works.</translation>
+    </message>
+    <message>
+        <source>Archive layout</source>
+        <translation>Archive layout</translation>
+    </message>
+    <message>
+        <source>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</source>
+        <translation>A &quot;class only&quot; template has only ezcontentclass/. A &quot;content only&quot; template has only ezcontentobject/ and simplefiles/. &quot;Class + content&quot; has all of it.</translation>
+    </message>
+    <message>
+        <source>package.xml: the elements that matter here</source>
+        <translation>package.xml: the elements that matter here</translation>
+    </message>
+    <message>
+        <source>Element</source>
+        <translation>Element</translation>
+    </message>
+    <message>
+        <source>Meaning</source>
+        <translation>Meaning</translation>
+    </message>
+    <message>
+        <source>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</source>
+        <translation>The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.</translation>
+    </message>
+    <message>
+        <source>Shown on the inspect screen and package/view.</source>
+        <translation>Shown on the inspect screen and package/view.</translation>
+    </message>
+    <message>
+        <source>Version and release number; not compared against an installed copy automatically.</source>
+        <translation>Version and release number; not compared against an installed copy automatically.</translation>
+    </message>
+    <message>
+        <source>Free text, shown on the inspect screen and package/view.</source>
+        <translation>Free text, shown on the inspect screen and package/view.</translation>
+    </message>
+    <message>
+        <source>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</source>
+        <translation>One or more &amp;lt;change&amp;gt; entries: person, timestamp, and the change text(s). Purely informational.</translation>
+    </message>
+    <message>
+        <source>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</source>
+        <translation>provides/requires/obsoletes/conflicts. A &quot;requires&quot; of type ezpackage is installed first, automatically, by eZPackage::install(); other types are informational here.</translation>
+    </message>
+    <message>
+        <source>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</source>
+        <translation>The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &amp;lt;uninstall&amp;gt; counterpart.</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</source>
+        <translation>Classes match by remote id, falling back to identifier; a matched class is skipped, replaced, or kept alongside a new copy, per the class option above.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</source>
+        <translation>Objects match by remote id only; a matched object is skipped, updated in place (its existing content is kept where the package does not touch it), or kept alongside a new copy with a freshly generated remote id.</translation>
+    </message>
+    <message>
+        <source>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</source>
+        <translation>Languages: every &amp;lt;object-translation&amp;gt; the object carries is installed; a language not enabled on the installing site is added automatically if valid, otherwise that translation is skipped.</translation>
+    </message>
+    <message>
+        <source>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</source>
+        <translation>Relations (ezobjectrelation/ezobjectrelationlist): stored as the remote id of the related object inside the package, so they resolve correctly even though object ids differ between sites. A relation to an object the package does not itself carry, and that does not already exist on the installing site, is silently left empty.</translation>
+    </message>
+    <message>
+        <source>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</source>
+        <translation>Files (ezimage/ezbinaryfile/ezmedia): the actual file is copied into the simplefiles/ directory owned by that package, and copied back out on install; nothing is fetched from the exporting site at install time.</translation>
+    </message>
+    <message>
+        <source>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</source>
+        <translation>Placement: every top-level object in the package (one with no parent already inside the same package) is created under the parent node chosen at install time; an object whose parent is another object in the same package keeps that relative placement.</translation>
+    </message>
+    <message>
+        <source>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</source>
+        <translation>Site access: only relevant when the package also carries template overrides (a package built by this tool never does); it maps the site access name on the exporting site to one on the installing site.</translation>
+    </message>
+    <message>
+        <source>Annotated example, from a generated sample package</source>
+        <translation>Annotated example, from a generated sample package</translation>
+    </message>
+    <message>
+        <source>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</source>
+        <translation>A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).</translation>
+    </message>
+    <message>
+        <source>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</source>
+        <translation>The remote ids the template builder assigns follow xrowextract-pkgtpl-&amp;lt;class identifier&amp;gt;-&amp;lt;timestamp&amp;gt;-&amp;lt;object number&amp;gt;, so a second sample for the same class never collides with the first on remote id.</translation>
+    </message>
+    <message>
+        <source>What each datatype gets</source>
+        <translation>What each datatype gets</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>a short readable sample sentence or address, numbered per object.</source>
+        <translation>a short readable sample sentence or address, numbered per object.</translation>
+    </message>
+    <message>
+        <source>Numbers</source>
+        <translation>Numbers</translation>
+    </message>
+    <message>
+        <source>a different valid number/flag per object.</source>
+        <translation>a different valid number/flag per object.</translation>
+    </message>
+    <message>
+        <source>today plus a few days/hours per object.</source>
+        <translation>today plus a few days/hours per object.</translation>
+    </message>
+    <message>
+        <source>Choice</source>
+        <translation>Choice</translation>
+    </message>
+    <message>
+        <source>a real option of the class, chosen by id.</source>
+        <translation>a real option of the class, chosen by id.</translation>
+    </message>
+    <message>
+        <source>Keywords/tags</source>
+        <translation>Keywords/tags</translation>
+    </message>
+    <message>
+        <source>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</source>
+        <translation>a couple of sample keywords/tags (eztags creates them if they do not exist yet).</translation>
+    </message>
+    <message>
+        <source>Rich text</source>
+        <translation>Rich text</translation>
+    </message>
+    <message>
+        <source>a short real paragraph.</source>
+        <translation>a short real paragraph.</translation>
+    </message>
+    <message>
+        <source>a real bundled sample image/document, stored in the package.</source>
+        <translation>a real bundled sample image/document, stored in the package.</translation>
+    </message>
+    <message>
+        <source>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</source>
+        <translation>the second and third sample object relate to the first, by remote id, when the class allows relating to its own kind.</translation>
+    </message>
+    <message>
+        <source>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</source>
+        <translation>Any other datatype on the class keeps its class default; the built package still installs, that attribute just has no sample value.</translation>
+    </message>
+    <message>
+        <source>class missing</source>
+        <translation>class missing</translation>
+    </message>
+    <message>
+        <source>classes: create</source>
+        <translation>classes: create</translation>
+    </message>
+    <message>
+        <source>classes: update</source>
+        <translation>classes: update</translation>
+    </message>
+    <message>
+        <source>objects: class missing</source>
+        <translation>objects: class missing</translation>
+    </message>
+    <message>
+        <source>objects: create</source>
+        <translation>objects: create</translation>
+    </message>
+    <message>
+        <source>objects: unchanged</source>
+        <translation>objects: unchanged</translation>
+    </message>
+    <message>
+        <source>objects: update</source>
+        <translation>objects: update</translation>
+    </message>
+    <message>
+        <source>installed</source>
+        <translation>installed</translation>
+    </message>
+    <message>
+        <source>open</source>
+        <translation>open</translation>
+    </message>
+    <message>
+        <source>A package named %packagename already exists in the repository.</source>
+        <translation>A package named %packagename already exists in the repository.</translation>
+    </message>
+    <message>
+        <source>The package name %packagename is invalid.</source>
+        <translation>The package name %packagename is invalid.</translation>
+    </message>
+    <message>
+        <source>The uploaded file is not a valid Exponential package (.ezpkg).</source>
+        <translation>The uploaded file is not a valid Exponential package (.ezpkg).</translation>
+    </message>
+    <message>
+        <source>The uploaded file could not be read.</source>
+        <translation>The uploaded file could not be read.</translation>
+    </message>
+    <message>
+        <source>Content + class package (.ezpkg)</source>
+        <translation>Content + class package (.ezpkg)</translation>
+    </message>
+    <message>
+        <source>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</source>
+        <translation>A richer starting point than a CSV/JSON template: a real, installable package with the class definition and 2-3 sample content objects for it, built on the Package page.</translation>
+    </message>
+    <message>
         <source>Total jobs</source>
         <translation>Total jobs</translation>
     </message>
