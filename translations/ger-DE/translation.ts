@@ -2,6 +2,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Import content file</source>
+        <translation>Inhaltsdatei importieren</translation>
+    </message>
+    <message>
+        <source>Import content package</source>
+        <translation>Inhaltspaket importieren</translation>
+    </message>
+    <message>
         <source>An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.</source>
         <translation>Ein XML-, CSV- oder JSON-Export (beliebiger Spaltensatz), ein Inhaltspaket (.ezpkg) mit Klassen und Inhalten oder eine einzelne Klassen- oder Objekt-XML.</translation>
     </message>

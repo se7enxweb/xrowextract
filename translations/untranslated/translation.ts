@@ -4,6 +4,14 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Import content file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import content package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.</source>
         <translation type="unfinished"></translation>
     </message>

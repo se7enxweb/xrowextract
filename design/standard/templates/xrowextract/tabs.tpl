@@ -16,11 +16,11 @@
         <small>{'Background exports: started, running and finished'|i18n( 'design/standard/extract' )}</small>
     </a>
     <a href={'xrowextract/import'|ezurl}{if $active|eq( 'import' )} class="xe-tab-active" aria-current="page"{/if}>
-        <strong>{'Import'|i18n( 'design/standard/extract' )}</strong>
+        <strong>{'Import content file'|i18n( 'design/standard/extract' )}</strong>
         <small>{'Read an XML, CSV or JSON export or a content package (.ezpkg) back in: create or update objects'|i18n( 'design/standard/extract' )}</small>
     </a>
     <a href={'xrowextract/package'|ezurl}{if $active|eq( 'package' )} class="xe-tab-active" aria-current="page"{/if}>
-        <strong>{'Package'|i18n( 'design/standard/extract' )}</strong>
+        <strong>{'Import content package'|i18n( 'design/standard/extract' )}</strong>
         <small>{'A content package (.ezpkg): inspect, install, or build a sample one'|i18n( 'design/standard/extract' )}</small>
     </a>
 </nav>
