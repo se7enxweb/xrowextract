@@ -158,8 +158,26 @@ if ( $exitCode === 0 && $outputPath && is_file( $outputPath ) )
     XrowExtractJob::fixOwnership( $outputPath );
     $job['state'] = 'done';
     $job['size'] = filesize( $outputPath );
-    if ( preg_match( '/(\d+)\s+rows\b/', $log, $m ) )
+    if ( $job['type'] === 'import' )
+    {
+        // The report bin/php/import.php just wrote is exact; the log line ("N row(s) (of ...)") is not
+        // in the plain "N rows" shape the generic regex below expects
+        $report = json_decode( (string)@file_get_contents( $outputPath ), true );
+        if ( is_array( $report ) )
+        {
+            $job['rows'] = isset( $report['processed_rows'] ) ? (int)$report['processed_rows'] : null;
+            $job['counts'] = isset( $report['counts'] ) ? $report['counts'] : null;
+            if ( !empty( $report['errors_file'] ) && is_file( $dir . '/' . $report['errors_file'] ) )
+            {
+                XrowExtractJob::fixOwnership( $dir . '/' . $report['errors_file'] );
+                $job['has_errors_file'] = true;
+            }
+        }
+    }
+    elseif ( preg_match( '/(\d+)\s+rows\b/', $log, $m ) )
+    {
         $job['rows'] = (int)$m[1];
+    }
 }
 else
 {

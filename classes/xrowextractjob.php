@@ -250,7 +250,8 @@ class XrowExtractJob
     /** bin/php/csv.php or bin/php/archive.php, the scripts a job runs. */
     public static function scriptFor( $type )
     {
-        $file = $type === 'archive' ? 'archive.php' : 'csv.php';
+        $files = array( 'archive' => 'archive.php', 'import' => 'import.php' );
+        $file = isset( $files[$type] ) ? $files[$type] : 'csv.php';
         $path = realpath( dirname( __FILE__ ) . '/../bin/php/' . $file );
         return $path !== false ? $path : dirname( __FILE__ ) . '/../bin/php/' . $file;
     }
