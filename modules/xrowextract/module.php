@@ -9,6 +9,11 @@ $ViewList['csv'] = array( 'script' => 'csv.php',
             			  'post_actions' => array( 'Download', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData' ),
             			  'params' => array() );
 
+$ViewList['archive'] = array( 'script' => 'archive.php',
+                              'functions' => array( 'csv' ),
+                              'default_navigation_part' => 'ezextractnavigationpart',
+                              'params' => array() );
+
 $FunctionList = array();
 $FunctionList['csv'] = array();
 

@@ -18,6 +18,7 @@
 
     <div class="context-attributes">
 
+    {include uri='design:xrowextract/tabs.tpl' active='csv'}
     <div class="xe-cards">
 
         {* 1. What is exported *}

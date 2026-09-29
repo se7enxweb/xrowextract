@@ -2,6 +2,266 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Writing the archive …</source>
+        <translation>Das Archiv wird geschrieben …</translation>
+    </message>
+    <message>
+        <source>Downloaded %name, %size KB, in %seconds s</source>
+        <translation>%name heruntergeladen, %size KB, in %seconds s</translation>
+    </message>
+    <message>
+        <source>Nodes</source>
+        <translation>Knoten</translation>
+    </message>
+    <message>
+        <source>Everything below each node is exported. Start from a set, then add or remove single nodes.</source>
+        <translation>Alles unterhalb jedes Knotens wird exportiert. Beginnen Sie mit einer Zusammenstellung und fügen Sie dann einzelne Knoten hinzu oder entfernen Sie sie.</translation>
+    </message>
+    <message>
+        <source>nodes</source>
+        <translation>Knoten</translation>
+    </message>
+    <message>
+        <source>Sets</source>
+        <translation>Zusammenstellungen</translation>
+    </message>
+    <message>
+        <source>User accounts hold personal data and are only exported when you choose them.</source>
+        <translation>Benutzerkonten enthalten personenbezogene Daten und werden nur exportiert, wenn Sie sie wählen.</translation>
+    </message>
+    <message>
+        <source>Selected nodes</source>
+        <translation>Gewählte Knoten</translation>
+    </message>
+    <message>
+        <source>Browse for nodes</source>
+        <translation>Knoten suchen</translation>
+    </message>
+    <message>
+        <source>No nodes yet. Choose a set, add a node below, or browse.</source>
+        <translation>Noch keine Knoten. Wählen Sie eine Zusammenstellung, fügen Sie unten einen Knoten hinzu oder suchen Sie einen.</translation>
+    </message>
+    <message>
+        <source>inside %name, exported with it</source>
+        <translation>in %name, wird mit exportiert</translation>
+    </message>
+    <message>
+        <source>objects</source>
+        <translation>Objekte</translation>
+    </message>
+    <message>
+        <source>Node %id does not exist or you may not read it.</source>
+        <translation>Knoten %id existiert nicht oder Sie dürfen ihn nicht lesen.</translation>
+    </message>
+    <message>
+        <source>Remove this node</source>
+        <translation>Diesen Knoten entfernen</translation>
+    </message>
+    <message>
+        <source>Add a node</source>
+        <translation>Knoten hinzufügen</translation>
+    </message>
+    <message>
+        <source>Filter by name, class or path</source>
+        <translation>Nach Name, Klasse oder Pfad filtern</translation>
+    </message>
+    <message>
+        <source>Only nodes with content below</source>
+        <translation>Nur Knoten mit Inhalt darunter</translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation>Gewählt</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Every class with objects below the nodes is exported, one CSV file each. Untick what you do not need.</source>
+        <translation>Jede Klasse mit Objekten unterhalb der Knoten wird exportiert, je eine CSV-Datei. Entfernen Sie das Häkchen bei allem, was Sie nicht brauchen.</translation>
+    </message>
+    <message>
+        <source>classes</source>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>The nodes hold no objects you may read.</source>
+        <translation>Die Knoten enthalten keine Objekte, die Sie lesen dürfen.</translation>
+    </message>
+    <message>
+        <source>Filter classes</source>
+        <translation>Klassen filtern</translation>
+    </message>
+    <message>
+        <source>Select all</source>
+        <translation>Alle wählen</translation>
+    </message>
+    <message>
+        <source>Select none</source>
+        <translation>Keine wählen</translation>
+    </message>
+    <message>
+        <source>%columns columns</source>
+        <translation>%columns Spalten</translation>
+    </message>
+    <message>
+        <source>The archive, and how the CSV files in it are written.</source>
+        <translation>Das Archiv und wie die CSV-Dateien darin geschrieben werden.</translation>
+    </message>
+    <message>
+        <source>Archive</source>
+        <translation>Archiv</translation>
+    </message>
+    <message>
+        <source>Needs %program on the server</source>
+        <translation>Braucht %program auf dem Server</translation>
+    </message>
+    <message>
+        <source>ZIP opens everywhere with a double click. Formats that are greyed out need a program the server does not have.</source>
+        <translation>ZIP öffnet sich überall mit einem Doppelklick. Ausgegraute Formate brauchen ein Programm, das der Server nicht hat.</translation>
+    </message>
+    <message>
+        <source>Each file starts with the object id, remote id, main node, parent node, URL alias and dates, then every attribute of its class. manifest.json and README.txt describe the archive.</source>
+        <translation>Jede Datei beginnt mit Objekt-ID, Remote-ID, Hauptknoten, Elternknoten, URL-Alias und Datumsangaben, danach folgt jedes Attribut ihrer Klasse. manifest.json und README.txt beschreiben das Archiv.</translation>
+    </message>
+    <message>
+        <source>files</source>
+        <translation>Dateien</translation>
+    </message>
+    <message>
+        <source>Writing …</source>
+        <translation>Wird geschrieben …</translation>
+    </message>
+    <message>
+        <source>Download archive</source>
+        <translation>Archiv herunterladen</translation>
+    </message>
+    <message>
+        <source>Choose nodes for the site archive</source>
+        <translation>Knoten für das Seitenarchiv wählen</translation>
+    </message>
+    <message>
+        <source>Tick one or more nodes; each is exported with everything below it.</source>
+        <translation>Wählen Sie einen oder mehrere Knoten; jeder wird mit allem darunter exportiert.</translation>
+    </message>
+    <message>
+        <source>Site archive</source>
+        <translation>Seitenarchiv</translation>
+    </message>
+    <message>
+        <source>Exports the content below the chosen nodes as one archive: a CSV file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</source>
+        <translation>Exportiert den Inhalt unterhalb der gewählten Knoten als ein Archiv: eine CSV-Datei je Klasse, mit einem Manifest. Für eine lesbare Sicherung, eine Migration, eine Prüfung oder eine Übergabe.</translation>
+    </message>
+    <message>
+        <source>Choose the nodes</source>
+        <translation>Knoten wählen</translation>
+    </message>
+    <message>
+        <source>A set is the quickest start; the counts show how much is below each node.</source>
+        <translation>Eine Zusammenstellung ist der schnellste Start; die Zahlen zeigen, wie viel unter jedem Knoten liegt.</translation>
+    </message>
+    <message>
+        <source>Check the classes</source>
+        <translation>Klassen prüfen</translation>
+    </message>
+    <message>
+        <source>All classes with content are ticked; untick the ones you do not need.</source>
+        <translation>Alle Klassen mit Inhalt sind gewählt; entfernen Sie das Häkchen bei denen, die Sie nicht brauchen.</translation>
+    </message>
+    <message>
+        <source>Choose the archive format</source>
+        <translation>Archivformat wählen</translation>
+    </message>
+    <message>
+        <source>ZIP for everyone; TAR.XZ or TAR.BZ2 are smaller.</source>
+        <translation>ZIP für alle; TAR.XZ oder TAR.BZ2 sind kleiner.</translation>
+    </message>
+    <message>
+        <source>It is written in seconds for most sites, and not kept on the server.</source>
+        <translation>Für die meisten Seiten ist es in Sekunden geschrieben und bleibt nicht auf dem Server.</translation>
+    </message>
+    <message>
+        <source>In the archive</source>
+        <translation>Im Archiv</translation>
+    </message>
+    <message>
+        <source>One CSV file per class, named by the class identifier.</source>
+        <translation>Eine CSV-Datei je Klasse, benannt nach dem Klassenbezeichner.</translation>
+    </message>
+    <message>
+        <source>One row per object at its main location; an object is written once even when nodes overlap.</source>
+        <translation>Eine Zeile je Objekt an seiner Hauptplatzierung; ein Objekt wird einmal geschrieben, auch wenn sich Knoten überschneiden.</translation>
+    </message>
+    <message>
+        <source>First columns: object id, remote id, main node, parent node, URL alias, published, modified. Then every attribute of the class.</source>
+        <translation>Erste Spalten: Objekt-ID, Remote-ID, Hauptknoten, Elternknoten, URL-Alias, veröffentlicht, geändert. Danach jedes Attribut der Klasse.</translation>
+    </message>
+    <message>
+        <source>manifest.json (machine readable) and README.txt: nodes, classes, rows per file, format.</source>
+        <translation>manifest.json (maschinenlesbar) und README.txt: Knoten, Klassen, Zeilen je Datei, Format.</translation>
+    </message>
+    <message>
+        <source>Password hashes are never part of the archive.</source>
+        <translation>Passwort-Hashes sind nie Teil des Archivs.</translation>
+    </message>
+    <message>
+        <source>Archive formats on this server</source>
+        <translation>Archivformate auf diesem Server</translation>
+    </message>
+    <message>
+        <source>7-Zip and RAR need their programs (7z, rar) on the server; they appear as soon as they are installed.</source>
+        <translation>7-Zip und RAR brauchen ihre Programme (7z, rar) auf dem Server; sie erscheinen, sobald diese installiert sind.</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation>Export</translation>
+    </message>
+    <message>
+        <source>One class</source>
+        <translation>Eine Klasse</translation>
+    </message>
+    <message>
+        <source>A CSV file of one class, columns of your choice</source>
+        <translation>Eine CSV-Datei einer Klasse, mit Spalten Ihrer Wahl</translation>
+    </message>
+    <message>
+        <source>Every class below the chosen nodes, one CSV per class, packed</source>
+        <translation>Jede Klasse unterhalb der gewählten Knoten, je eine CSV, gepackt</translation>
+    </message>
+    <message>
+        <source>Choose at least one node and one class.</source>
+        <translation>Wählen Sie mindestens einen Knoten und eine Klasse.</translation>
+    </message>
+    <message>
+        <source>Content and media</source>
+        <translation>Inhalt und Medien</translation>
+    </message>
+    <message>
+        <source>Content structure</source>
+        <translation>Inhaltsstruktur</translation>
+    </message>
+    <message>
+        <source>Content, media and users</source>
+        <translation>Inhalt, Medien und Benutzer</translation>
+    </message>
+    <message>
+        <source>Media library</source>
+        <translation>Medienbibliothek</translation>
+    </message>
+    <message>
+        <source>The archive could not be written: %reason</source>
+        <translation>Das Archiv konnte nicht geschrieben werden: %reason</translation>
+    </message>
+    <message>
+        <source>User accounts</source>
+        <translation>Benutzerkonten</translation>
+    </message>
+    <message>
         <source>Columns of the file</source>
         <translation>Spalten der Datei</translation>
     </message>

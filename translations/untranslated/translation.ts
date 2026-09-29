@@ -4,6 +4,266 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Writing the archive …</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloaded %name, %size KB, in %seconds s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything below each node is exported. Start from a set, then add or remove single nodes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>User accounts hold personal data and are only exported when you choose them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Selected nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse for nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No nodes yet. Choose a set, add a node below, or browse.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>inside %name, exported with it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Node %id does not exist or you may not read it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove this node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add a node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter by name, class or path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only nodes with content below</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every class with objects below the nodes is exported, one CSV file each. Untick what you do not need.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The nodes hold no objects you may read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filter classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select none</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%columns columns</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The archive, and how the CSV files in it are written.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Needs %program on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ZIP opens everywhere with a double click. Formats that are greyed out need a program the server does not have.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Each file starts with the object id, remote id, main node, parent node, URL alias and dates, then every attribute of its class. manifest.json and README.txt describe the archive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Writing …</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose nodes for the site archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tick one or more nodes; each is exported with everything below it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Site archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exports the content below the chosen nodes as one archive: a CSV file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose the nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A set is the quickest start; the counts show how much is below each node.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Check the classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All classes with content are ticked; untick the ones you do not need.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose the archive format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ZIP for everyone; TAR.XZ or TAR.BZ2 are smaller.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>It is written in seconds for most sites, and not kept on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>In the archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One CSV file per class, named by the class identifier.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One row per object at its main location; an object is written once even when nodes overlap.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>First columns: object id, remote id, main node, parent node, URL alias, published, modified. Then every attribute of the class.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>manifest.json (machine readable) and README.txt: nodes, classes, rows per file, format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password hashes are never part of the archive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archive formats on this server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>7-Zip and RAR need their programs (7z, rar) on the server; they appear as soon as they are installed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>One class</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A CSV file of one class, columns of your choice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every class below the chosen nodes, one CSV per class, packed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose at least one node and one class.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content and media</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content structure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content, media and users</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Media library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The archive could not be written: %reason</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>User accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Columns of the file</source>
         <translation type="unfinished"></translation>
     </message>

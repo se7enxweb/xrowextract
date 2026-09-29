@@ -355,7 +355,7 @@
     'use strict';
 
     var form = document.forms.eZExtract;
-    var list = form && form.querySelector('.xe-columns');
+    var list = form && form.querySelector('ol.xe-columns'); // the column list, not the archive's node list
     if (!list) {
         return;
     }
@@ -512,4 +512,143 @@
         dragged = null;
         clearMarks();
     });
+}());
+
+/*
+ * The site archive page: filter the node picker and the classes, tick all or
+ * none in place with live totals, and download with a progress note.
+ */
+(function () {
+    'use strict';
+
+    var form = document.querySelector('form.xe-archive-form');
+    if (!form) {
+        return;
+    }
+    var picker = form.querySelector('.xe-picker');
+    var download = form.querySelector('.xe-download-archive');
+
+    function applyPickerFilter() {
+        if (!picker) {
+            return;
+        }
+        var needle = (picker.querySelector('.xe-picker-filter').value || '').trim().toLowerCase();
+        var nonEmpty = picker.querySelector('.xe-picker-nonempty').checked;
+        picker.querySelectorAll('.xe-picker-item').forEach(function (item) {
+            var match = (!needle || item.getAttribute('data-search').indexOf(needle) !== -1)
+                && (!nonEmpty || parseInt(item.getAttribute('data-count'), 10) > 1);
+            item.hidden = !match;
+        });
+    }
+    if (picker) {
+        picker.addEventListener('input', applyPickerFilter);
+        picker.addEventListener('change', applyPickerFilter);
+        applyPickerFilter();
+    }
+
+    var boxes = Array.prototype.slice.call(form.querySelectorAll('input[name="ClassIDs[]"]'));
+    function totals() {
+        var on = 0, rows = 0;
+        boxes.forEach(function (box) {
+            if (box.checked) {
+                on++;
+                rows += parseInt(box.getAttribute('data-rows'), 10) || 0;
+            }
+        });
+        form.querySelectorAll('.xe-classes-on').forEach(function (n) { n.textContent = on; });
+        form.querySelectorAll('.xe-rows-on').forEach(function (n) { n.textContent = rows; });
+        if (download) {
+            download.disabled = on === 0 || !form.querySelector('.xe-nodes');
+        }
+    }
+    var classFilter = form.querySelector('.xe-class-filter');
+    if (classFilter) {
+        classFilter.addEventListener('input', function () {
+            var needle = classFilter.value.trim().toLowerCase();
+            form.querySelectorAll('.xe-class-grid li').forEach(function (li) {
+                li.hidden = needle !== '' && li.getAttribute('data-search').indexOf(needle) === -1;
+            });
+        });
+        classFilter.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+            }
+        });
+    }
+    // All / none tick the classes shown (the filter narrows them)
+    [['.xe-classes-all', true], ['.xe-classes-none', false]].forEach(function (pair) {
+        var button = form.querySelector(pair[0]);
+        if (button) {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                boxes.forEach(function (box) {
+                    if (!box.closest('li').hidden) {
+                        box.checked = pair[1];
+                    }
+                });
+                totals();
+            });
+        }
+    });
+    form.addEventListener('change', function (event) {
+        if (event.target.name === 'ClassIDs[]') {
+            totals();
+        }
+    });
+
+    // Download: fetch the archive so the page can say what it is doing; errors come back as the page
+    if (download && window.fetch && window.URLSearchParams && window.Blob) {
+        var bar = form.querySelector('.xe-actionbar');
+        var status = document.createElement('div');
+        status.className = 'xe-actionbar-status';
+        status.setAttribute('aria-live', 'polite');
+        bar.appendChild(status);
+        download.addEventListener('click', function (event) {
+            event.preventDefault();
+            var data = new FormData(form);
+            data.append('DownloadArchive', '1');
+            var label = download.value;
+            var started = Date.now();
+            download.classList.add('xe-working');
+            download.disabled = true;
+            download.value = download.getAttribute('data-working') || '…';
+            status.textContent = form.getAttribute('data-writing') || '';
+            fetch(form.action, { method: 'POST', body: new URLSearchParams(data), credentials: 'same-origin' })
+                .then(function (response) {
+                    var disposition = response.headers.get('Content-Disposition') || '';
+                    var match = /filename="([^"]+)"/.exec(disposition);
+                    if (!response.ok || !match) {
+                        throw new Error('page');
+                    }
+                    return response.blob().then(function (blob) { return { blob: blob, name: match[1] }; });
+                })
+                .then(function (file) {
+                    var url = URL.createObjectURL(file.blob);
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+                    var kb = Math.max(1, Math.round(file.blob.size / 1024));
+                    status.textContent = (form.getAttribute('data-done') || '%name, %size KB, %seconds s')
+                        .replace('%name', file.name).replace('%size', kb).replace('%seconds', ((Date.now() - started) / 1000).toFixed(1));
+                })
+                .catch(function () {
+                    // Show the page with its message (for example a format that failed)
+                    var hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'DownloadArchive';
+                    hidden.value = '1';
+                    form.appendChild(hidden);
+                    form.submit();
+                })
+                .then(function () {
+                    download.classList.remove('xe-working');
+                    download.value = label;
+                    totals();
+                });
+        });
+    }
 }());

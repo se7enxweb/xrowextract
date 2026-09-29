@@ -1,83 +1,6 @@
 <?php
 
-if ( !function_exists( 'xrowExtractNodeName' ) ) {
-/** The name of a node the current user may read, else ''. */
-function xrowExtractNodeName( $nodeID )
-{
-    $node = $nodeID ? eZContentObjectTreeNode::fetch( (int)$nodeID ) : null;
-    return ( $node instanceof eZContentObjectTreeNode && $node->canRead() ) ? $node->attribute( 'name' ) : '';
-}
-
-/**
- * The value of a special (non class attribute) column for one object. Only
- * the columns in $ExtraAttributes exist; each is computed here, nothing from
- * the request decides which class or method is called.
- */
-function xrowExtractExtraValue( $key, eZContentObject $obj, $allowPasswordHash )
-{
-    if ( strpos( $key, 'ezuser.' ) === 0 )
-    {
-        $user = eZUser::fetch( $obj->attribute( 'id' ) );
-        if ( !$user instanceof eZUser )
-        {
-            return '';
-        }
-        switch ( $key )
-        {
-            case 'ezuser.login':         return $user->attribute( 'login' );
-            case 'ezuser.email':         return $user->attribute( 'email' );
-            case 'ezuser.password_hash': return $allowPasswordHash ? $user->attribute( 'password_hash' ) : '';
-            case 'ezuser.is_enabled':
-                return $user->attribute( 'is_enabled' ) ? ezpI18n::tr( 'design/standard/extract', 'enabled' )
-                                                        : ezpI18n::tr( 'design/standard/extract', 'disabled' );
-        }
-        return '';
-    }
-
-    $mainNode = $obj->attribute( 'main_node' );
-    switch ( $key )
-    {
-        case 'ezcontentobject.published':
-        case 'ezcontentobject.modified':
-            $time = (int)$obj->attribute( substr( $key, 16 ) );
-            return $time > 0 ? date( 'Y-m-d', $time ) : '';
-        case 'ezcontentobject.url_alias':
-            return $mainNode ? $mainNode->attribute( 'url_alias' ) : '';
-        case 'ezcontentobject.full_url_alias':
-            if ( !$mainNode )
-            {
-                return '';
-            }
-            // The public site's address (DefaultAccess), not the admin one this view runs in
-            $siteINI = eZINI::instance();
-            $defaultAccess = $siteINI->variable( 'SiteSettings', 'DefaultAccess' );
-            $currentAccess = isset( $GLOBALS['eZCurrentAccess']['name'] ) ? $GLOBALS['eZCurrentAccess']['name'] : '';
-            if ( $defaultAccess && $defaultAccess !== $currentAccess )
-            {
-                $siteINI = eZSiteAccess::getIni( $defaultAccess, 'site.ini' );
-            }
-            $siteURL = rtrim( preg_replace( '#^https?://#', '', $siteINI->variable( 'SiteSettings', 'SiteURL' ) ), '/' );
-            $scheme = eZSys::isSSLNow() ? 'https://' : 'http://';
-            return $scheme . $siteURL . '/' . $mainNode->attribute( 'url_alias' );
-        case 'ezcontentobject.main_parent_name':
-            return xrowExtractNodeName( $obj->attribute( 'main_parent_node_id' ) );
-        case 'ezcontentobject.main_node_id':
-            return $obj->attribute( 'main_node_id' );
-        case 'ezcontentobject.main_parent_node_id':
-            return $obj->attribute( 'main_parent_node_id' );
-        case 'ezcontentobject.parent_nodes':
-            $names = array();
-            foreach ( (array)$obj->attribute( 'parent_nodes' ) as $nodeID )
-            {
-                $name = xrowExtractNodeName( $nodeID );
-                if ( $name !== '' )
-                    $names[] = $name;
-            }
-            return join( " ", $names );
-    }
-    return '';
-}
-
+if ( !function_exists( 'xrowExtractPreview' ) ) {
 /**
  * Read an export back the way a spreadsheet does (same separator and
  * quoting) for the preview table: header, rows with a flag per cell, and
@@ -146,85 +69,13 @@ function xrowExtractPreview( $data, $separator, $escape, $offset, $total, $file,
     );
 }
 
-/** A download file name from a node name: letters, digits, dot, dash and underscore only. */
-function xrowExtractFileName( $name )
-{
-    $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ), '._' );
-    return ( $name === '' ? 'export' : substr( $name, 0, 80 ) ) . '_export.csv';
-}
 }
 
 $csvINI = eZINI::instance( 'csv.ini' );
-$allowPasswordHash = $csvINI->hasVariable( 'General', 'AllowPasswordHashExport' )
-                     && $csvINI->variable( 'General', 'AllowPasswordHashExport' ) === 'enabled';
+$allowPasswordHash = XrowExtractColumns::allowPasswordHash();
 
-// Array of extra node attributes
-$ExtraAttributes = array(
-    'ezuser.login' => array(
-        'id' => 'ezuser.login' ,
-        'exportname' => 'login' ,
-        'name' => 'Login'
-    ) ,
-    'ezuser.email' => array(
-        'id' => 'ezuser.email' ,
-        'exportname' => 'email' ,
-        'name' => 'E-Mail'
-    ) ,
-    'ezuser.password_hash' => array(
-        'id' => 'ezuser.password_hash' ,
-        'exportname' => 'password' ,
-        'name' => 'Password'
-    ) ,
-    'ezuser.is_enabled' => array(
-        'id' => 'ezuser.is_enabled' ,
-        'exportname' => 'user_status' ,
-        'name' => 'User Status'
-    ) ,
-    'ezcontentobject.published' => array(
-        'id' => 'ezcontentobject.published' ,
-        'exportname' => 'published' ,
-        'name' => 'Content Object Published Time'
-    ) ,
-    'ezcontentobject.modified' => array(
-        'id' => 'ezcontentobject.modified' ,
-        'exportname' => 'modified' ,
-        'name' => 'Content Object Modified Time'
-    ) ,
-    'ezcontentobject.url_alias' => array(
-        'id' => 'ezcontentobject.url_alias' ,
-        'exportname' => 'url_alias' ,
-        'name' => 'URL Alias'
-    ) ,
-    'ezcontentobject.full_url_alias' => array(
-        'id' => 'ezcontentobject.full_url_alias' ,
-        'exportname' => 'full_url_alias' ,
-        'name' => 'Absolute URL Alias'
-    ) ,
-    'ezcontentobject.main_parent_name' => array(
-        'id' => 'ezcontentobject.main_parent_name' ,
-        'exportname' => 'parent_name' ,
-        'name' => 'Content Object Main Parent Name'
-    ) ,
-    'ezcontentobject.main_node_id' => array(
-        'id' => 'ezcontentobject.main_node_id' ,
-        'exportname' => 'main_node_id' ,
-        'name' => 'Main Node ID'
-    ) ,
-    'ezcontentobject.main_parent_node_id' => array(
-        'id' => 'ezcontentobject.main_parent_node_id' ,
-        'exportname' => 'main_parent_node_id' ,
-        'name' => 'Main Parent Node ID'
-    ) ,
-    'ezcontentobject.parent_nodes' => array(
-        'id' => 'ezcontentobject.parent_nodes' ,
-        'exportname' => 'parent_nodes' ,
-        'name' => 'Content Object Parent Names'
-    )
-);
-if ( !$allowPasswordHash )
-{
-    unset( $ExtraAttributes['ezuser.password_hash'] );
-}
+// The special columns (object id, user account, dates, locations ...)
+$ExtraAttributes = XrowExtractColumns::extraAttributes( $allowPasswordHash );
 
 // Start module definition
 $module = $Params["Module"];
@@ -600,7 +451,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         {
             return $module->handleError( eZError::KERNEL_NOT_AVAILABLE, 'kernel' );
         }
-        $file = xrowExtractFileName( $node->attribute( 'name' ) );
+        $file = XrowExtractColumns::fileName( $node->attribute( 'name' ) );
 
         $sortBy = $node->sortArray();
         $sortBy = $sortBy[0];
@@ -633,7 +484,7 @@ if ( $http->hasPostVariable( 'Download' ) || $isPreview )
         {
             if ( isset( $ExtraAttributes[$dataelement['id']] ) )
             {
-                $cells[] = $parser->escape( xrowExtractExtraValue( $dataelement['id'], $obj, $allowPasswordHash ) );
+                $cells[] = $parser->escape( XrowExtractColumns::extraValue( $dataelement['id'], $obj, $allowPasswordHash ) );
             }
             elseif ( isset( $datamap[$dataelement['id']] ) && is_object( $datamap[$dataelement['id']] ) )
             {

@@ -4,6 +4,266 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Writing the archive …</source>
+        <translation>Writing the archive …</translation>
+    </message>
+    <message>
+        <source>Downloaded %name, %size KB, in %seconds s</source>
+        <translation>Downloaded %name, %size KB, in %seconds s</translation>
+    </message>
+    <message>
+        <source>Nodes</source>
+        <translation>Nodes</translation>
+    </message>
+    <message>
+        <source>Everything below each node is exported. Start from a set, then add or remove single nodes.</source>
+        <translation>Everything below each node is exported. Start from a set, then add or remove single nodes.</translation>
+    </message>
+    <message>
+        <source>nodes</source>
+        <translation>nodes</translation>
+    </message>
+    <message>
+        <source>Sets</source>
+        <translation>Sets</translation>
+    </message>
+    <message>
+        <source>User accounts hold personal data and are only exported when you choose them.</source>
+        <translation>User accounts hold personal data and are only exported when you choose them.</translation>
+    </message>
+    <message>
+        <source>Selected nodes</source>
+        <translation>Selected nodes</translation>
+    </message>
+    <message>
+        <source>Browse for nodes</source>
+        <translation>Browse for nodes</translation>
+    </message>
+    <message>
+        <source>No nodes yet. Choose a set, add a node below, or browse.</source>
+        <translation>No nodes yet. Choose a set, add a node below, or browse.</translation>
+    </message>
+    <message>
+        <source>inside %name, exported with it</source>
+        <translation>inside %name, exported with it</translation>
+    </message>
+    <message>
+        <source>objects</source>
+        <translation>objects</translation>
+    </message>
+    <message>
+        <source>Node %id does not exist or you may not read it.</source>
+        <translation>Node %id does not exist or you may not read it.</translation>
+    </message>
+    <message>
+        <source>Remove this node</source>
+        <translation>Remove this node</translation>
+    </message>
+    <message>
+        <source>Add a node</source>
+        <translation>Add a node</translation>
+    </message>
+    <message>
+        <source>Filter by name, class or path</source>
+        <translation>Filter by name, class or path</translation>
+    </message>
+    <message>
+        <source>Only nodes with content below</source>
+        <translation>Only nodes with content below</translation>
+    </message>
+    <message>
+        <source>Selected</source>
+        <translation>Selected</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Add</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <translation>Classes</translation>
+    </message>
+    <message>
+        <source>Every class with objects below the nodes is exported, one CSV file each. Untick what you do not need.</source>
+        <translation>Every class with objects below the nodes is exported, one CSV file each. Untick what you do not need.</translation>
+    </message>
+    <message>
+        <source>classes</source>
+        <translation>classes</translation>
+    </message>
+    <message>
+        <source>The nodes hold no objects you may read.</source>
+        <translation>The nodes hold no objects you may read.</translation>
+    </message>
+    <message>
+        <source>Filter classes</source>
+        <translation>Filter classes</translation>
+    </message>
+    <message>
+        <source>Select all</source>
+        <translation>Select all</translation>
+    </message>
+    <message>
+        <source>Select none</source>
+        <translation>Select none</translation>
+    </message>
+    <message>
+        <source>%columns columns</source>
+        <translation>%columns columns</translation>
+    </message>
+    <message>
+        <source>The archive, and how the CSV files in it are written.</source>
+        <translation>The archive, and how the CSV files in it are written.</translation>
+    </message>
+    <message>
+        <source>Archive</source>
+        <translation>Archive</translation>
+    </message>
+    <message>
+        <source>Needs %program on the server</source>
+        <translation>Needs %program on the server</translation>
+    </message>
+    <message>
+        <source>ZIP opens everywhere with a double click. Formats that are greyed out need a program the server does not have.</source>
+        <translation>ZIP opens everywhere with a double click. Formats that are greyed out need a program the server does not have.</translation>
+    </message>
+    <message>
+        <source>Each file starts with the object id, remote id, main node, parent node, URL alias and dates, then every attribute of its class. manifest.json and README.txt describe the archive.</source>
+        <translation>Each file starts with the object id, remote id, main node, parent node, URL alias and dates, then every attribute of its class. manifest.json and README.txt describe the archive.</translation>
+    </message>
+    <message>
+        <source>files</source>
+        <translation>files</translation>
+    </message>
+    <message>
+        <source>Writing …</source>
+        <translation>Writing …</translation>
+    </message>
+    <message>
+        <source>Download archive</source>
+        <translation>Download archive</translation>
+    </message>
+    <message>
+        <source>Choose nodes for the site archive</source>
+        <translation>Choose nodes for the site archive</translation>
+    </message>
+    <message>
+        <source>Tick one or more nodes; each is exported with everything below it.</source>
+        <translation>Tick one or more nodes; each is exported with everything below it.</translation>
+    </message>
+    <message>
+        <source>Site archive</source>
+        <translation>Site archive</translation>
+    </message>
+    <message>
+        <source>Exports the content below the chosen nodes as one archive: a CSV file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</source>
+        <translation>Exports the content below the chosen nodes as one archive: a CSV file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</translation>
+    </message>
+    <message>
+        <source>Choose the nodes</source>
+        <translation>Choose the nodes</translation>
+    </message>
+    <message>
+        <source>A set is the quickest start; the counts show how much is below each node.</source>
+        <translation>A set is the quickest start; the counts show how much is below each node.</translation>
+    </message>
+    <message>
+        <source>Check the classes</source>
+        <translation>Check the classes</translation>
+    </message>
+    <message>
+        <source>All classes with content are ticked; untick the ones you do not need.</source>
+        <translation>All classes with content are ticked; untick the ones you do not need.</translation>
+    </message>
+    <message>
+        <source>Choose the archive format</source>
+        <translation>Choose the archive format</translation>
+    </message>
+    <message>
+        <source>ZIP for everyone; TAR.XZ or TAR.BZ2 are smaller.</source>
+        <translation>ZIP for everyone; TAR.XZ or TAR.BZ2 are smaller.</translation>
+    </message>
+    <message>
+        <source>It is written in seconds for most sites, and not kept on the server.</source>
+        <translation>It is written in seconds for most sites, and not kept on the server.</translation>
+    </message>
+    <message>
+        <source>In the archive</source>
+        <translation>In the archive</translation>
+    </message>
+    <message>
+        <source>One CSV file per class, named by the class identifier.</source>
+        <translation>One CSV file per class, named by the class identifier.</translation>
+    </message>
+    <message>
+        <source>One row per object at its main location; an object is written once even when nodes overlap.</source>
+        <translation>One row per object at its main location; an object is written once even when nodes overlap.</translation>
+    </message>
+    <message>
+        <source>First columns: object id, remote id, main node, parent node, URL alias, published, modified. Then every attribute of the class.</source>
+        <translation>First columns: object id, remote id, main node, parent node, URL alias, published, modified. Then every attribute of the class.</translation>
+    </message>
+    <message>
+        <source>manifest.json (machine readable) and README.txt: nodes, classes, rows per file, format.</source>
+        <translation>manifest.json (machine readable) and README.txt: nodes, classes, rows per file, format.</translation>
+    </message>
+    <message>
+        <source>Password hashes are never part of the archive.</source>
+        <translation>Password hashes are never part of the archive.</translation>
+    </message>
+    <message>
+        <source>Archive formats on this server</source>
+        <translation>Archive formats on this server</translation>
+    </message>
+    <message>
+        <source>7-Zip and RAR need their programs (7z, rar) on the server; they appear as soon as they are installed.</source>
+        <translation>7-Zip and RAR need their programs (7z, rar) on the server; they appear as soon as they are installed.</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation>Export</translation>
+    </message>
+    <message>
+        <source>One class</source>
+        <translation>One class</translation>
+    </message>
+    <message>
+        <source>A CSV file of one class, columns of your choice</source>
+        <translation>A CSV file of one class, columns of your choice</translation>
+    </message>
+    <message>
+        <source>Every class below the chosen nodes, one CSV per class, packed</source>
+        <translation>Every class below the chosen nodes, one CSV per class, packed</translation>
+    </message>
+    <message>
+        <source>Choose at least one node and one class.</source>
+        <translation>Choose at least one node and one class.</translation>
+    </message>
+    <message>
+        <source>Content and media</source>
+        <translation>Content and media</translation>
+    </message>
+    <message>
+        <source>Content structure</source>
+        <translation>Content structure</translation>
+    </message>
+    <message>
+        <source>Content, media and users</source>
+        <translation>Content, media and users</translation>
+    </message>
+    <message>
+        <source>Media library</source>
+        <translation>Media library</translation>
+    </message>
+    <message>
+        <source>The archive could not be written: %reason</source>
+        <translation>The archive could not be written: %reason</translation>
+    </message>
+    <message>
+        <source>User accounts</source>
+        <translation>User accounts</translation>
+    </message>
+    <message>
         <source>Columns of the file</source>
         <translation>Columns of the file</translation>
     </message>

@@ -24,3 +24,17 @@ Settings (csv.ini, [General])
 
 NeutralizeFormulas=enabled         cells starting with = + - @ get a leading '
 AllowPasswordHashExport=disabled   offer the user password hash as a column
+
+Site archive (xrowextract/archive)
+
+The content below one or more nodes as one archive: a CSV file for every
+class (object id, remote id, main node, parent node, URL alias, dates,
+then every attribute of the class), manifest.json and README.txt.
+Ready-made node sets (content and media, content, media, users,
+everything), single nodes added from a list with counts or the browse
+page, classes ticked or unticked (all with content are ticked). ZIP,
+TAR.GZ, TAR.BZ2 and TAR.XZ; 7-Zip and RAR when their programs (7z,
+rar) are installed. Objects are read with the user's read access, at
+their main location, and written once. Password hashes are never
+exported. The archive is written to a private folder in the cache
+directory and removed after the download.

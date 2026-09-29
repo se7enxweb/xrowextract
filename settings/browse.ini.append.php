@@ -9,4 +9,10 @@ TopLevelNodes[]
 TopLevelNodes[]=users
 TopLevelNodes[]=
 
+# Nodes for the site archive (xrowextract/archive)
+[ExtractionArchiveNode]
+StartNode=content
+SelectionType=multiple
+ReturnType=NodeID
+
 */ ?>
