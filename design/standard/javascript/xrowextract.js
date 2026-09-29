@@ -922,7 +922,8 @@
 
 /**
  * Sections that remember whether they are open (<details class="xe-remember" data-preference-url=...>):
- * opening or closing one stores 1 or 0 in the user's eZ preference, so the next page load shows it the same way.
+ * opening or closing one stores "open" or "closed" in the user's eZ preference (words, not 1/0: an unset
+ * preference is false in the template, and false|ne( '0' ) is false), so the next page load shows it the same way.
  */
 (function () {
     'use strict';
@@ -933,7 +934,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('details.xe-remember[data-preference-url]'), function (details) {
         details.addEventListener('toggle', function () {
             var url = details.getAttribute('data-preference-url');
-            fetch(url + '/' + (details.open ? '1' : '0'), { credentials: 'same-origin', redirect: 'manual' }).catch(function () {});
+            fetch(url + '/' + (details.open ? 'open' : 'closed'), { credentials: 'same-origin', redirect: 'manual' }).catch(function () {});
         });
     });
 }());
