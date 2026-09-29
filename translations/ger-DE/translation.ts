@@ -2,6 +2,1278 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Edit</source>
+        <translation>Bearbeiten</translation>
+    </message>
+    <message>
+        <source>Manifest only</source>
+        <translation>Nur das Manifest</translation>
+    </message>
+    <message>
+        <source>The typed column manifest of this export (manifest.json): the id, datatype, format and language of every column, the row count and the checksum</source>
+        <translation>Das typisierte Spaltenmanifest dieses Exports (manifest.json): Kennung, Datentyp, Format und Sprache jeder Spalte, Zeilenzahl und Prüfsumme</translation>
+    </message>
+    <message>
+        <source>Download with manifest (.zip)</source>
+        <translation>Mit Manifest herunterladen (.zip)</translation>
+    </message>
+    <message>
+        <source>The file and its typed column manifest in one zip: the importer reads it back with every column mapped exactly</source>
+        <translation>Die Datei und ihr typisiertes Spaltenmanifest in einem Zip: der Import liest sie mit exakt zugeordneten Spalten wieder ein</translation>
+    </message>
+    <message>
+        <source>The file has a typed column manifest: %exact of %all columns are mapped exactly from it, not guessed from their names.</source>
+        <translation>Die Datei hat ein typisiertes Spaltenmanifest: %exact von %all Spalten werden daraus exakt zugeordnet, nicht aus ihren Namen geraten.</translation>
+    </message>
+    <message>
+        <source>The file was changed after the export (its checksum differs from the manifest).</source>
+        <translation>Die Datei wurde nach dem Export verändert (ihre Prüfsumme weicht vom Manifest ab).</translation>
+    </message>
+    <message>
+        <source>The typed column manifest of the file: datatype, format and language of every column, row count and checksum</source>
+        <translation>Das typisierte Spaltenmanifest der Datei: Datentyp, Format und Sprache jeder Spalte, Zeilenzahl und Prüfsumme</translation>
+    </message>
+    <message>
+        <source>Download manifest</source>
+        <translation>Manifest herunterladen</translation>
+    </message>
+    <message>
+        <source>Could not read %name: %reason</source>
+        <translation>%name konnte nicht gelesen werden: %reason</translation>
+    </message>
+    <message>
+        <source>Schedules</source>
+        <translation>Zeitpläne</translation>
+    </message>
+    <message>
+        <source>Destinations</source>
+        <translation>Ziele</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Verlauf</translation>
+    </message>
+    <message>
+        <source>Exports and imports that run on their own, their destinations and history</source>
+        <translation>Exporte und Importe, die von selbst laufen, ihre Ziele und ihr Verlauf</translation>
+    </message>
+    <message>
+        <source>Failed scheduled runs you have not seen yet</source>
+        <translation>Fehlgeschlagene geplante Läufe, die Sie noch nicht gesehen haben</translation>
+    </message>
+    <message>
+        <source>%count scheduled run(s) failed, were skipped or could not be delivered since you last looked.</source>
+        <translation>Seit Ihrem letzten Blick sind %count geplante Läufe fehlgeschlagen, wurden übersprungen oder konnten nicht zugestellt werden.</translation>
+    </message>
+    <message>
+        <source>Open the history</source>
+        <translation>Verlauf öffnen</translation>
+    </message>
+    <message>
+        <source>Started by a schedule</source>
+        <translation>Von einem Zeitplan gestartet</translation>
+    </message>
+    <message>
+        <source>skipped</source>
+        <translation>übersprungen</translation>
+    </message>
+    <message>
+        <source>delta</source>
+        <translation>Änderungen</translation>
+    </message>
+    <message>
+        <source>full</source>
+        <translation>vollständig</translation>
+    </message>
+    <message>
+        <source>%count warning(s)</source>
+        <translation>%count Warnung(en)</translation>
+    </message>
+    <message>
+        <source>delivered</source>
+        <translation>zugestellt</translation>
+    </message>
+    <message>
+        <source>partly delivered</source>
+        <translation>teilweise zugestellt</translation>
+    </message>
+    <message>
+        <source>not delivered</source>
+        <translation>nicht zugestellt</translation>
+    </message>
+    <message>
+        <source>Exports and imports that run on their own: a saved preset, a site archive, a package export or an import from a folder or a destination.</source>
+        <translation>Exporte und Importe, die von selbst laufen: eine gespeicherte Vorlage, ein Website-Archiv, ein Paketexport oder ein Import aus einem Ordner oder einem Ziel.</translation>
+    </message>
+    <message>
+        <source>Add a destination</source>
+        <translation>Ein Ziel anlegen</translation>
+    </message>
+    <message>
+        <source>SFTP, FTP/FTPS, a local or NAS folder, S3, WebDAV or an HTTP upload; test the connection first.</source>
+        <translation>SFTP, FTP/FTPS, ein lokaler oder NAS-Ordner, S3, WebDAV oder ein HTTP-Upload; testen Sie zuerst die Verbindung.</translation>
+    </message>
+    <message>
+        <source>Create a schedule</source>
+        <translation>Einen Zeitplan anlegen</translation>
+    </message>
+    <message>
+        <source>What runs, when, full or only the changes, where the file goes and who hears about it.</source>
+        <translation>Was läuft, wann, vollständig oder nur die Änderungen, wohin die Datei geht und wer davon erfährt.</translation>
+    </message>
+    <message>
+        <source>Follow the history</source>
+        <translation>Den Verlauf verfolgen</translation>
+    </message>
+    <message>
+        <source>Every run with its rows, size, checksum, delivery and warnings; failures also as a badge on the Jobs tab.</source>
+        <translation>Jeder Lauf mit Zeilen, Größe, Prüfsumme, Zustellung und Warnungen; Fehler zusätzlich als Zähler am Tab Jobs.</translation>
+    </message>
+    <message>
+        <source>A schedule runs with the read access of its owner.</source>
+        <translation>Ein Zeitplan läuft mit den Leserechten seines Besitzers.</translation>
+    </message>
+    <message>
+        <source>What a schedule refers to and that no longer exists (a node, a class, an attribute) is skipped with a warning; the rest is still exported.</source>
+        <translation>Worauf sich ein Zeitplan bezieht und was nicht mehr existiert (ein Knoten, eine Klasse, ein Attribut), wird mit einer Warnung übersprungen; der Rest wird trotzdem exportiert.</translation>
+    </message>
+    <message>
+        <source>Every export has a typed column manifest (manifest.json): the importer uses it to map every column exactly.</source>
+        <translation>Jeder Export hat ein typisiertes Spaltenmanifest (manifest.json): der Import ordnet damit jede Spalte exakt zu.</translation>
+    </message>
+    <message>
+        <source>Passwords and keys of destinations are stored encrypted and are never shown again.</source>
+        <translation>Passwörter und Schlüssel der Ziele werden verschlüsselt gespeichert und nie wieder angezeigt.</translation>
+    </message>
+    <message>
+        <source>Policies: xrowextract/schedule, xrowextract/destinations, xrowextract/history; with xrowextract/all_jobs you see those of everyone.</source>
+        <translation>Richtlinien: xrowextract/schedule, xrowextract/destinations, xrowextract/history; mit xrowextract/all_jobs sehen Sie die aller Benutzer.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:schedule, ext:xrowextract:destination, ext:xrowextract:history.</source>
+        <translation>Kommandozeile: ext:xrowextract:schedule, ext:xrowextract:destination, ext:xrowextract:history.</translation>
+    </message>
+    <message>
+        <source>The schedule was not saved:</source>
+        <translation>Der Zeitplan wurde nicht gespeichert:</translation>
+    </message>
+    <message>
+        <source>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled): schedules cannot run.</source>
+        <translation>Hintergrundjobs sind auf diesem Server nicht verfügbar (kein PHP-Kommandozeilenprogramm gefunden oder exec() deaktiviert): Zeitpläne können nicht laufen.</translation>
+    </message>
+    <message>
+        <source>Change the schedule</source>
+        <translation>Zeitplan ändern</translation>
+    </message>
+    <message>
+        <source>New schedule</source>
+        <translation>Neuer Zeitplan</translation>
+    </message>
+    <message>
+        <source>What runs, and under which name.</source>
+        <translation>Was läuft, und unter welchem Namen.</translation>
+    </message>
+    <message>
+        <source>Enabled: runs on its own</source>
+        <translation>Aktiv: läuft von selbst</translation>
+    </message>
+    <message>
+        <source>What it runs</source>
+        <translation>Was er ausführt</translation>
+    </message>
+    <message>
+        <source>Saved preset</source>
+        <translation>Gespeicherte Vorlage</translation>
+    </message>
+    <message>
+        <source>Import from a location</source>
+        <translation>Import von einem Ort</translation>
+    </message>
+    <message>
+        <source>Preset</source>
+        <translation>Vorlage</translation>
+    </message>
+    <message>
+        <source>Choose a preset</source>
+        <translation>Vorlage wählen</translation>
+    </message>
+    <message>
+        <source>No presets yet: save one on the One class tab first.</source>
+        <translation>Noch keine Vorlagen: speichern Sie zuerst eine auf dem Tab Eine Klasse.</translation>
+    </message>
+    <message>
+        <source>Placeholder values</source>
+        <translation>Platzhalterwerte</translation>
+    </message>
+    <message>
+        <source>One name=value per line; the defaults of the preset are used for any left out.</source>
+        <translation>Ein name=wert pro Zeile; für fehlende gelten die Vorgaben der Vorlage.</translation>
+    </message>
+    <message>
+        <source>The class of the preset</source>
+        <translation>Die Klasse der Vorlage</translation>
+    </message>
+    <message>
+        <source>Only needed for a preset that leaves the class open.</source>
+        <translation>Nur nötig für eine Vorlage, die die Klasse offen lässt.</translation>
+    </message>
+    <message>
+        <source>Node set</source>
+        <translation>Knotenauswahl</translation>
+    </message>
+    <message>
+        <source>Or node ids</source>
+        <translation>Oder Knoten-IDs</translation>
+    </message>
+    <message>
+        <source>Comma separated; used instead of the set when given.</source>
+        <translation>Durch Kommas getrennt; wenn angegeben, statt der Auswahl verwendet.</translation>
+    </message>
+    <message>
+        <source>Class identifiers, comma separated; empty: every class with objects.</source>
+        <translation>Klassenkennungen, durch Kommas getrennt; leer: jede Klasse mit Objekten.</translation>
+    </message>
+    <message>
+        <source>Plain text of rich text too</source>
+        <translation>Auch den reinen Text von Rich-Text</translation>
+    </message>
+    <message>
+        <source>None ticked: every language.</source>
+        <translation>Keine angekreuzt: alle Sprachen.</translation>
+    </message>
+    <message>
+        <source>With its whole subtree</source>
+        <translation>Mit dem ganzen Teilbaum</translation>
+    </message>
+    <message>
+        <source>Only this class</source>
+        <translation>Nur diese Klasse</translation>
+    </message>
+    <message>
+        <source>Every class</source>
+        <translation>Jede Klasse</translation>
+    </message>
+    <message>
+        <source>A package is always exported in full; a delta run is not available for packages.</source>
+        <translation>Ein Paket wird immer vollständig exportiert; nur Änderungen gibt es für Pakete nicht.</translation>
+    </message>
+    <message>
+        <source>Read the file from</source>
+        <translation>Die Datei lesen aus</translation>
+    </message>
+    <message>
+        <source>A folder on this server</source>
+        <translation>Einem Ordner auf diesem Server</translation>
+    </message>
+    <message>
+        <source>A destination</source>
+        <translation>Einem Ziel</translation>
+    </message>
+    <message>
+        <source>File on this server</source>
+        <translation>Datei auf diesem Server</translation>
+    </message>
+    <message>
+        <source>Allowed below: %roots</source>
+        <translation>Erlaubt unterhalb von: %roots</translation>
+    </message>
+    <message>
+        <source>No folder is allowed yet: xrowextract.ini [Destinations] LocalPathRoots[].</source>
+        <translation>Noch kein Ordner erlaubt: xrowextract.ini [Destinations] LocalPathRoots[].</translation>
+    </message>
+    <message>
+        <source>Destination</source>
+        <translation>Ziel</translation>
+    </message>
+    <message>
+        <source>Choose a destination</source>
+        <translation>Ziel wählen</translation>
+    </message>
+    <message>
+        <source>File there</source>
+        <translation>Datei dort</translation>
+    </message>
+    <message>
+        <source>From the file (manifest or class column)</source>
+        <translation>Aus der Datei (Manifest oder Klassenspalte)</translation>
+    </message>
+    <message>
+        <source>Parent node for new objects</source>
+        <translation>Elternknoten für neue Objekte</translation>
+    </message>
+    <message>
+        <source>Object id</source>
+        <translation>Objekt-ID</translation>
+    </message>
+    <message>
+        <source>None: always create</source>
+        <translation>Keine: immer neu anlegen</translation>
+    </message>
+    <message>
+        <source>Language of rows without one</source>
+        <translation>Sprache für Zeilen ohne Sprache</translation>
+    </message>
+    <message>
+        <source>The site default</source>
+        <translation>Die Standardsprache der Website</translation>
+    </message>
+    <message>
+        <source>Every run does a dry run first; the import is applied only when the dry run found no errors. Both reports are kept with the job.</source>
+        <translation>Jeder Lauf macht zuerst einen Probelauf; der Import wird nur ausgeführt, wenn der Probelauf keine Fehler fand. Beide Berichte bleiben beim Job.</translation>
+    </message>
+    <message>
+        <source>When it runs</source>
+        <translation>Wann er läuft</translation>
+    </message>
+    <message>
+        <source>In the time zone of the server. The cronjob part &quot;xrowextract&quot; starts it, or system cron with the line shown below the list.</source>
+        <translation>In der Zeitzone des Servers. Der Cronjob-Teil &quot;xrowextract&quot; startet ihn, oder System-Cron mit der Zeile unter der Liste.</translation>
+    </message>
+    <message>
+        <source>Hourly</source>
+        <translation>Stündlich</translation>
+    </message>
+    <message>
+        <source>Daily</source>
+        <translation>Täglich</translation>
+    </message>
+    <message>
+        <source>Weekly</source>
+        <translation>Wöchentlich</translation>
+    </message>
+    <message>
+        <source>Monthly</source>
+        <translation>Monatlich</translation>
+    </message>
+    <message>
+        <source>Cron expression</source>
+        <translation>Cron-Ausdruck</translation>
+    </message>
+    <message>
+        <source>At minute</source>
+        <translation>In Minute</translation>
+    </message>
+    <message>
+        <source>At</source>
+        <translation>Um</translation>
+    </message>
+    <message>
+        <source>On</source>
+        <translation>Am</translation>
+    </message>
+    <message>
+        <source>On day</source>
+        <translation>Am Tag</translation>
+    </message>
+    <message>
+        <source>Sunday</source>
+        <translation>Sonntag</translation>
+    </message>
+    <message>
+        <source>Monday</source>
+        <translation>Montag</translation>
+    </message>
+    <message>
+        <source>Tuesday</source>
+        <translation>Dienstag</translation>
+    </message>
+    <message>
+        <source>Wednesday</source>
+        <translation>Mittwoch</translation>
+    </message>
+    <message>
+        <source>Thursday</source>
+        <translation>Donnerstag</translation>
+    </message>
+    <message>
+        <source>Friday</source>
+        <translation>Freitag</translation>
+    </message>
+    <message>
+        <source>Saturday</source>
+        <translation>Samstag</translation>
+    </message>
+    <message>
+        <source>A month without that day (31 in April) is skipped, as in cron.</source>
+        <translation>Ein Monat ohne diesen Tag (31. im April) wird übersprungen, wie bei cron.</translation>
+    </message>
+    <message>
+        <source>Five fields: minute, hour, day of month, month, day of week (0 or 7 is Sunday). Ranges 1-5, lists 1,15, steps */15.</source>
+        <translation>Fünf Felder: Minute, Stunde, Tag des Monats, Monat, Wochentag (0 oder 7 ist Sonntag). Bereiche 1-5, Listen 1,15, Schritte */15.</translation>
+    </message>
+    <message>
+        <source>Each run exports</source>
+        <translation>Jeder Lauf exportiert</translation>
+    </message>
+    <message>
+        <source>Everything (full)</source>
+        <translation>Alles (vollständig)</translation>
+    </message>
+    <message>
+        <source>Only what changed since the last successful run (delta)</source>
+        <translation>Nur, was sich seit dem letzten erfolgreichen Lauf geändert hat (Änderungen)</translation>
+    </message>
+    <message>
+        <source>A delta run filters by modification date (it replaces a date filter of the preset); the first run is always full. &quot;Run now&quot; can still start a full run by hand.</source>
+        <translation>Ein Änderungslauf filtert nach dem Änderungsdatum (er ersetzt einen Datumsfilter der Vorlage); der erste Lauf ist immer vollständig. Mit &quot;Jetzt ausführen&quot; lässt sich trotzdem ein vollständiger Lauf starten.</translation>
+    </message>
+    <message>
+        <source>Delivery and notifications</source>
+        <translation>Zustellung und Benachrichtigungen</translation>
+    </message>
+    <message>
+        <source>Where the finished file goes, who hears about it, and how long it is kept.</source>
+        <translation>Wohin die fertige Datei geht, wer davon erfährt und wie lange sie aufbewahrt wird.</translation>
+    </message>
+    <message>
+        <source>Deliver to</source>
+        <translation>Zustellen an</translation>
+    </message>
+    <message>
+        <source>Add one</source>
+        <translation>Eins anlegen</translation>
+    </message>
+    <message>
+        <source>The file and its manifest; retried with a growing pause when a delivery fails. The job folder keeps its copy either way.</source>
+        <translation>Die Datei und ihr Manifest; bei einem Fehler mit wachsender Pause erneut versucht. Der Job-Ordner behält seine Kopie in jedem Fall.</translation>
+    </message>
+    <message>
+        <source>E-mail on failure, also to</source>
+        <translation>E-Mail bei Fehlern, auch an</translation>
+    </message>
+    <message>
+        <source>You (the owner) always get failures.</source>
+        <translation>Sie (der Besitzer) erhalten Fehler immer.</translation>
+    </message>
+    <message>
+        <source>E-mail on success too</source>
+        <translation>Auch bei Erfolg eine E-Mail</translation>
+    </message>
+    <message>
+        <source>Also to</source>
+        <translation>Auch an</translation>
+    </message>
+    <message>
+        <source>Webhook (POST of the result as JSON)</source>
+        <translation>Webhook (POST des Ergebnisses als JSON)</translation>
+    </message>
+    <message>
+        <source>Show failures as a notice and a badge on the Jobs tab</source>
+        <translation>Fehler als Hinweis und Zähler am Tab Jobs zeigen</translation>
+    </message>
+    <message>
+        <source>Keep</source>
+        <translation>Aufbewahren</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>Tage</translation>
+    </message>
+    <message>
+        <source>history</source>
+        <translation>Verlauf</translation>
+    </message>
+    <message>
+        <source>Empty: the defaults of csv.ini [Jobs] RetentionDays and xrowextract.ini [History] RetentionDays.</source>
+        <translation>Leer: die Vorgaben von csv.ini [Jobs] RetentionDays und xrowextract.ini [History] RetentionDays.</translation>
+    </message>
+    <message>
+        <source>Save schedule</source>
+        <translation>Zeitplan speichern</translation>
+    </message>
+    <message>
+        <source>All schedules</source>
+        <translation>Alle Zeitpläne</translation>
+    </message>
+    <message>
+        <source>Your schedules</source>
+        <translation>Ihre Zeitpläne</translation>
+    </message>
+    <message>
+        <source>Every run is a background job on the Jobs tab and a row in the History.</source>
+        <translation>Jeder Lauf ist ein Hintergrundjob auf dem Tab Jobs und eine Zeile im Verlauf.</translation>
+    </message>
+    <message>
+        <source>No schedules yet. A schedule runs a saved preset, a site archive, a package export or an import on its own.</source>
+        <translation>Noch keine Zeitpläne. Ein Zeitplan führt eine gespeicherte Vorlage, ein Website-Archiv, einen Paketexport oder einen Import von selbst aus.</translation>
+    </message>
+    <message>
+        <source>Owner: %name (%login)</source>
+        <translation>Besitzer: %name (%login)</translation>
+    </message>
+    <message>
+        <source>Delivers to</source>
+        <translation>Stellt zu an</translation>
+    </message>
+    <message>
+        <source>Last run</source>
+        <translation>Letzter Lauf</translation>
+    </message>
+    <message>
+        <source>Next runs</source>
+        <translation>Nächste Läufe</translation>
+    </message>
+    <message>
+        <source>Run it from system cron instead</source>
+        <translation>Stattdessen mit System-Cron ausführen</translation>
+    </message>
+    <message>
+        <source>Only what changed since the last successful run</source>
+        <translation>Nur, was sich seit dem letzten erfolgreichen Lauf geändert hat</translation>
+    </message>
+    <message>
+        <source>Run changes only</source>
+        <translation>Nur Änderungen ausführen</translation>
+    </message>
+    <message>
+        <source>Disable</source>
+        <translation>Deaktivieren</translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation>Aktivieren</translation>
+    </message>
+    <message>
+        <source>Delete this schedule? Its history is kept.</source>
+        <translation>Diesen Zeitplan löschen? Sein Verlauf bleibt erhalten.</translation>
+    </message>
+    <message>
+        <source>How schedules are started</source>
+        <translation>Wie Zeitpläne gestartet werden</translation>
+    </message>
+    <message>
+        <source>Either line in the crontab of the user the site runs as; both can be used together (a run is never started twice at once).</source>
+        <translation>Eine der beiden Zeilen in die Crontab des Benutzers, unter dem die Website läuft; beide gehen auch zusammen (ein Lauf wird nie doppelt gleichzeitig gestartet).</translation>
+    </message>
+    <message>
+        <source>The cronjob part, every few minutes: starts every due schedule and cleans up old files and history.</source>
+        <translation>Der Cronjob-Teil, alle paar Minuten: startet jeden fälligen Zeitplan und räumt alte Dateien und Verlauf auf.</translation>
+    </message>
+    <message>
+        <source>Or one line per schedule (shown with each schedule above): system cron decides when it runs.</source>
+        <translation>Oder eine Zeile je Zeitplan (bei jedem Zeitplan oben): System-Cron entscheidet, wann er läuft.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:schedule --list, --run=&lt;id&gt;, --enable=&lt;id&gt;, --disable=&lt;id&gt;, --cron, --crontab.</source>
+        <translation>Kommandozeile: ext:xrowextract:schedule --list, --run=&lt;id&gt;, --enable=&lt;id&gt;, --disable=&lt;id&gt;, --cron, --crontab.</translation>
+    </message>
+    <message>
+        <source>Schedule saved. Next run: %time</source>
+        <translation>Zeitplan gespeichert. Nächster Lauf: %time</translation>
+    </message>
+    <message>
+        <source>Every hour at minute %minute</source>
+        <translation>Jede Stunde in Minute %minute</translation>
+    </message>
+    <message>
+        <source>Every day at %time</source>
+        <translation>Jeden Tag um %time</translation>
+    </message>
+    <message>
+        <source>Every %day at %time</source>
+        <translation>Jeden %day um %time</translation>
+    </message>
+    <message>
+        <source>Every month on day %day at %time</source>
+        <translation>Jeden Monat am Tag %day um %time</translation>
+    </message>
+    <message>
+        <source>Cron expression %expression</source>
+        <translation>Cron-Ausdruck %expression</translation>
+    </message>
+    <message>
+        <source>A schedule needs a name.</source>
+        <translation>Ein Zeitplan braucht einen Namen.</translation>
+    </message>
+    <message>
+        <source>Choose what the schedule runs.</source>
+        <translation>Wählen Sie, was der Zeitplan ausführt.</translation>
+    </message>
+    <message>
+        <source>The cron expression is not valid: five fields, minute hour day-of-month month day-of-week.</source>
+        <translation>Der Cron-Ausdruck ist ungültig: fünf Felder, Minute Stunde Monatstag Monat Wochentag.</translation>
+    </message>
+    <message>
+        <source>Choose a saved preset.</source>
+        <translation>Wählen Sie eine gespeicherte Vorlage.</translation>
+    </message>
+    <message>
+        <source>This preset does not name a class: choose the class to export.</source>
+        <translation>Diese Vorlage nennt keine Klasse: wählen Sie die zu exportierende Klasse.</translation>
+    </message>
+    <message>
+        <source>Choose a node set or node ids for the site archive.</source>
+        <translation>Wählen Sie für das Website-Archiv eine Knotenauswahl oder Knoten-IDs.</translation>
+    </message>
+    <message>
+        <source>Unknown archive format.</source>
+        <translation>Unbekanntes Archivformat.</translation>
+    </message>
+    <message>
+        <source>Unknown file format.</source>
+        <translation>Unbekanntes Dateiformat.</translation>
+    </message>
+    <message>
+        <source>Choose the node to export as a package.</source>
+        <translation>Wählen Sie den Knoten, der als Paket exportiert wird.</translation>
+    </message>
+    <message>
+        <source>Choose the destination to read the file from.</source>
+        <translation>Wählen Sie das Ziel, aus dem die Datei gelesen wird.</translation>
+    </message>
+    <message>
+        <source>Enter the path of the file at the destination.</source>
+        <translation>Geben Sie den Pfad der Datei beim Ziel an.</translation>
+    </message>
+    <message>
+        <source>The schedule tables could not be created (see the debug log).</source>
+        <translation>Die Tabellen für Zeitpläne konnten nicht angelegt werden (siehe Debug-Log).</translation>
+    </message>
+    <message>
+        <source>The destination was not saved:</source>
+        <translation>Das Ziel wurde nicht gespeichert:</translation>
+    </message>
+    <message>
+        <source>The PHP sodium extension is not available: passwords and keys cannot be stored.</source>
+        <translation>Die PHP-Erweiterung sodium fehlt: Passwörter und Schlüssel können nicht gespeichert werden.</translation>
+    </message>
+    <message>
+        <source>Change the destination</source>
+        <translation>Ziel ändern</translation>
+    </message>
+    <message>
+        <source>New destination</source>
+        <translation>Neues Ziel</translation>
+    </message>
+    <message>
+        <source>Passwords and keys are stored encrypted and never shown again: leave a field empty to keep what is stored.</source>
+        <translation>Passwörter und Schlüssel werden verschlüsselt gespeichert und nie wieder angezeigt: lassen Sie ein Feld leer, um den gespeicherten Wert zu behalten.</translation>
+    </message>
+    <message>
+        <source>This kind of destination is not available on this server: %reason</source>
+        <translation>Diese Art von Ziel ist auf diesem Server nicht verfügbar: %reason</translation>
+    </message>
+    <message>
+        <source>Plain FTP sends the user, the password and the file unencrypted. Choose FTPS whenever the server offers it, or use SFTP.</source>
+        <translation>Einfaches FTP überträgt Benutzer, Passwort und Datei unverschlüsselt. Wählen Sie FTPS, wann immer der Server es anbietet, oder nehmen Sie SFTP.</translation>
+    </message>
+    <message>
+        <source>The folder must be below: %roots</source>
+        <translation>Der Ordner muss unterhalb liegen von: %roots</translation>
+    </message>
+    <message>
+        <source>No folder is allowed yet: set xrowextract.ini [Destinations] LocalPathRoots[] first.</source>
+        <translation>Noch kein Ordner erlaubt: setzen Sie zuerst xrowextract.ini [Destinations] LocalPathRoots[].</translation>
+    </message>
+    <message>
+        <source>Credentials</source>
+        <translation>Zugangsdaten</translation>
+    </message>
+    <message>
+        <source>set</source>
+        <translation>gesetzt</translation>
+    </message>
+    <message>
+        <source>not set</source>
+        <translation>nicht gesetzt</translation>
+    </message>
+    <message>
+        <source>Paste a new one to replace it</source>
+        <translation>Neuen einfügen, um ihn zu ersetzen</translation>
+    </message>
+    <message>
+        <source>Paste it here</source>
+        <translation>Hier einfügen</translation>
+    </message>
+    <message>
+        <source>Type a new one to replace it</source>
+        <translation>Neues eingeben, um es zu ersetzen</translation>
+    </message>
+    <message>
+        <source>Set it</source>
+        <translation>Setzen</translation>
+    </message>
+    <message>
+        <source>Clear it</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <source>Save destination</source>
+        <translation>Ziel speichern</translation>
+    </message>
+    <message>
+        <source>Where scheduled exports deliver their files, and where a scheduled import can read one from.</source>
+        <translation>Wohin geplante Exporte ihre Dateien zustellen und woher ein geplanter Import eine lesen kann.</translation>
+    </message>
+    <message>
+        <source>New destination of the kind</source>
+        <translation>Neues Ziel der Art</translation>
+    </message>
+    <message>
+        <source>not available here</source>
+        <translation>hier nicht verfügbar</translation>
+    </message>
+    <message>
+        <source>No destinations yet.</source>
+        <translation>Noch keine Ziele.</translation>
+    </message>
+    <message>
+        <source>The connection is not encrypted</source>
+        <translation>Die Verbindung ist nicht verschlüsselt</translation>
+    </message>
+    <message>
+        <source>unencrypted</source>
+        <translation>unverschlüsselt</translation>
+    </message>
+    <message>
+        <source>test ok</source>
+        <translation>Test in Ordnung</translation>
+    </message>
+    <message>
+        <source>test failed</source>
+        <translation>Test fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>never tested</source>
+        <translation>nie getestet</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>keine</translation>
+    </message>
+    <message>
+        <source>Host key</source>
+        <translation>Host-Schlüssel</translation>
+    </message>
+    <message>
+        <source>trusted</source>
+        <translation>vertraut</translation>
+    </message>
+    <message>
+        <source>not trusted yet</source>
+        <translation>noch nicht vertraut</translation>
+    </message>
+    <message>
+        <source>Used by</source>
+        <translation>Verwendet von</translation>
+    </message>
+    <message>
+        <source>Not available on this server: %reason</source>
+        <translation>Auf diesem Server nicht verfügbar: %reason</translation>
+    </message>
+    <message>
+        <source>Compare the fingerprint with the one the server administrator gives you, then trust it:</source>
+        <translation>Vergleichen Sie den Fingerabdruck mit dem, den Ihnen der Serveradministrator nennt, und vertrauen Sie ihm dann:</translation>
+    </message>
+    <message>
+        <source>Trust this host key</source>
+        <translation>Diesem Host-Schlüssel vertrauen</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>Verbindung testen</translation>
+    </message>
+    <message>
+        <source>Schedules still deliver here. Delete this destination anyway?</source>
+        <translation>Zeitpläne stellen noch hierhin zu. Dieses Ziel trotzdem löschen?</translation>
+    </message>
+    <message>
+        <source>Delete this destination and its stored credentials?</source>
+        <translation>Dieses Ziel und seine gespeicherten Zugangsdaten löschen?</translation>
+    </message>
+    <message>
+        <source>Destination saved. Test the connection to be sure.</source>
+        <translation>Ziel gespeichert. Testen Sie die Verbindung, um sicherzugehen.</translation>
+    </message>
+    <message>
+        <source>Host key trusted.</source>
+        <translation>Dem Host-Schlüssel wird vertraut.</translation>
+    </message>
+    <message>
+        <source>The server no longer offers a host key with that fingerprint: nothing was trusted.</source>
+        <translation>Der Server bietet keinen Host-Schlüssel mit diesem Fingerabdruck mehr an: nichts wurde als vertraut übernommen.</translation>
+    </message>
+    <message>
+        <source>A destination needs a name.</source>
+        <translation>Ein Ziel braucht einen Namen.</translation>
+    </message>
+    <message>
+        <source>Choose the kind of destination.</source>
+        <translation>Wählen Sie die Art des Ziels.</translation>
+    </message>
+    <message>
+        <source>The destination table could not be created (see the debug log).</source>
+        <translation>Die Tabelle für Ziele konnte nicht angelegt werden (siehe Debug-Log).</translation>
+    </message>
+    <message>
+        <source>SFTP</source>
+        <translation>SFTP</translation>
+    </message>
+    <message>
+        <source>FTP / FTPS</source>
+        <translation>FTP / FTPS</translation>
+    </message>
+    <message>
+        <source>Local or NAS folder</source>
+        <translation>Lokaler oder NAS-Ordner</translation>
+    </message>
+    <message>
+        <source>S3 compatible (AWS, MinIO, Wasabi)</source>
+        <translation>S3-kompatibel (AWS, MinIO, Wasabi)</translation>
+    </message>
+    <message>
+        <source>WebDAV</source>
+        <translation>WebDAV</translation>
+    </message>
+    <message>
+        <source>HTTP POST (webhook upload)</source>
+        <translation>HTTP POST (Webhook-Upload)</translation>
+    </message>
+    <message>
+        <source>Folder</source>
+        <translation>Ordner</translation>
+    </message>
+    <message>
+        <source>File field name</source>
+        <translation>Name des Dateifelds</translation>
+    </message>
+    <message>
+        <source>Folder URL</source>
+        <translation>Ordner-URL</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Benutzer</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Host</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Encryption</source>
+        <translation>Verschlüsselung</translation>
+    </message>
+    <message>
+        <source>FTPS, explicit (AUTH TLS)</source>
+        <translation>FTPS, explizit (AUTH TLS)</translation>
+    </message>
+    <message>
+        <source>FTPS, implicit (port 990)</source>
+        <translation>FTPS, implizit (Port 990)</translation>
+    </message>
+    <message>
+        <source>None: plain FTP, unencrypted</source>
+        <translation>Keine: einfaches FTP, unverschlüsselt</translation>
+    </message>
+    <message>
+        <source>Endpoint URL</source>
+        <translation>Endpunkt-URL</translation>
+    </message>
+    <message>
+        <source>Region</source>
+        <translation>Region</translation>
+    </message>
+    <message>
+        <source>Bucket</source>
+        <translation>Bucket</translation>
+    </message>
+    <message>
+        <source>Key prefix (folder)</source>
+        <translation>Schlüsselpräfix (Ordner)</translation>
+    </message>
+    <message>
+        <source>Access key ID</source>
+        <translation>Zugriffsschlüssel-ID</translation>
+    </message>
+    <message>
+        <source>Path-style URLs (MinIO)</source>
+        <translation>Pfad-URLs (MinIO)</translation>
+    </message>
+    <message>
+        <source>Sign in with</source>
+        <translation>Anmelden mit</translation>
+    </message>
+    <message>
+        <source>Private key</source>
+        <translation>Privater Schlüssel</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <source>Bearer token</source>
+        <translation>Bearer-Token</translation>
+    </message>
+    <message>
+        <source>HMAC signing key</source>
+        <translation>HMAC-Signaturschlüssel</translation>
+    </message>
+    <message>
+        <source>Secret access key</source>
+        <translation>Geheimer Zugriffsschlüssel</translation>
+    </message>
+    <message>
+        <source>Private key (OpenSSH format, without a passphrase)</source>
+        <translation>Privater Schlüssel (OpenSSH-Format, ohne Passphrase)</translation>
+    </message>
+    <message>
+        <source>Show the failed runs</source>
+        <translation>Fehlgeschlagene Läufe zeigen</translation>
+    </message>
+    <message>
+        <source>Mark as seen</source>
+        <translation>Als gesehen markieren</translation>
+    </message>
+    <message>
+        <source>Export history</source>
+        <translation>Exportverlauf</translation>
+    </message>
+    <message>
+        <source>Your export history</source>
+        <translation>Ihr Exportverlauf</translation>
+    </message>
+    <message>
+        <source>Every run, kept %days days (a schedule can keep its own longer or shorter).</source>
+        <translation>Jeder Lauf, %days Tage aufbewahrt (ein Zeitplan kann seine länger oder kürzer aufbewahren).</translation>
+    </message>
+    <message>
+        <source>Total runs</source>
+        <translation>Läufe insgesamt</translation>
+    </message>
+    <message>
+        <source>With warnings</source>
+        <translation>Mit Warnungen</translation>
+    </message>
+    <message>
+        <source>Skipped</source>
+        <translation>Übersprungen</translation>
+    </message>
+    <message>
+        <source>Result</source>
+        <translation>Ergebnis</translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <source>Kind</source>
+        <translation>Art</translation>
+    </message>
+    <message>
+        <source>Schedule</source>
+        <translation>Zeitplan</translation>
+    </message>
+    <message>
+        <source>Started by</source>
+        <translation>Gestartet durch</translation>
+    </message>
+    <message>
+        <source>System cron</source>
+        <translation>System-Cron</translation>
+    </message>
+    <message>
+        <source>By hand</source>
+        <translation>Von Hand</translation>
+    </message>
+    <message>
+        <source>Command line</source>
+        <translation>Kommandozeile</translation>
+    </message>
+    <message>
+        <source>Direct download</source>
+        <translation>Direkter Download</translation>
+    </message>
+    <message>
+        <source>Delivery</source>
+        <translation>Zustellung</translation>
+    </message>
+    <message>
+        <source>Delivered</source>
+        <translation>Zugestellt</translation>
+    </message>
+    <message>
+        <source>Partly delivered</source>
+        <translation>Teilweise zugestellt</translation>
+    </message>
+    <message>
+        <source>Not delivered</source>
+        <translation>Nicht zugestellt</translation>
+    </message>
+    <message>
+        <source>from</source>
+        <translation>von</translation>
+    </message>
+    <message>
+        <source>to</source>
+        <translation>bis</translation>
+    </message>
+    <message>
+        <source>User (login)</source>
+        <translation>Benutzer (Login)</translation>
+    </message>
+    <message>
+        <source>Filter</source>
+        <translation>Filtern</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <source>%count run(s)</source>
+        <translation>%count Lauf/Läufe</translation>
+    </message>
+    <message>
+        <source>No runs match.</source>
+        <translation>Keine passenden Läufe.</translation>
+    </message>
+    <message>
+        <source>done, with warnings</source>
+        <translation>fertig, mit Warnungen</translation>
+    </message>
+    <message>
+        <source>Delivery details</source>
+        <translation>Zustellung im Einzelnen</translation>
+    </message>
+    <message>
+        <source>%count attempt(s)</source>
+        <translation>%count Versuch(e)</translation>
+    </message>
+    <message>
+        <source>Show the job</source>
+        <translation>Den Job zeigen</translation>
+    </message>
+    <message>
+        <source>Pages</source>
+        <translation>Seiten</translation>
+    </message>
+    <message>
+        <source>Newer</source>
+        <translation>Neuer</translation>
+    </message>
+    <message>
+        <source>Page %page of %pages</source>
+        <translation>Seite %page von %pages</translation>
+    </message>
+    <message>
+        <source>Older</source>
+        <translation>Älter</translation>
+    </message>
+    <message>
+        <source>This is a sample package built read-only from this site’s own content, for trying the importer - not a file you uploaded. It is not kept in the package repository and is removed again automatically unless you keep it. Installing it writes real content.</source>
+        <translation>Dies ist ein Beispielpaket, nur lesend aus den eigenen Inhalten dieser Website gebaut, zum Ausprobieren des Imports - keine Datei, die Sie hochgeladen haben. Es wird nicht im Paket-Repository behalten und automatisch wieder entfernt, wenn Sie es nicht behalten. Beim Installieren werden echte Inhalte geschrieben.</translation>
+    </message>
+    <message>
+        <source>Class(es)</source>
+        <translation>Klasse(n)</translation>
+    </message>
+    <message>
+        <source>new objects go under</source>
+        <translation>neue Objekte kommen unter</translation>
+    </message>
+    <message>
+        <source>language(s)</source>
+        <translation>Sprache(n)</translation>
+    </message>
+    <message>
+        <source>matched by</source>
+        <translation>zugeordnet über</translation>
+    </message>
+    <message>
+        <source>Attribute changes</source>
+        <translation>Attributänderungen</translation>
+    </message>
+    <message>
+        <source>+ %id (%type)</source>
+        <translation>+ %id (%type)</translation>
+    </message>
+    <message>
+        <source>- %id (%type)</source>
+        <translation>- %id (%type)</translation>
+    </message>
+    <message>
+        <source>~ %id: %old -&gt; %new</source>
+        <translation>~ %id: %old -&gt; %new</translation>
+    </message>
+    <message>
+        <source>no attribute changes</source>
+        <translation>keine Attributänderungen</translation>
+    </message>
+    <message>
+        <source>Matched existing object</source>
+        <translation>Zugeordnetes vorhandenes Objekt</translation>
+    </message>
+    <message>
+        <source>Placement</source>
+        <translation>Platzierung</translation>
+    </message>
+    <message>
+        <source>Field changes</source>
+        <translation>Feldänderungen</translation>
+    </message>
+    <message>
+        <source>current</source>
+        <translation>aktuell</translation>
+    </message>
+    <message>
+        <source>no field changes among the comparable datatypes</source>
+        <translation>keine Feldänderungen bei den vergleichbaren Datentypen</translation>
+    </message>
+    <message>
+        <source>Files this package carries</source>
+        <translation>Dateien in diesem Paket</translation>
+    </message>
+    <message>
+        <source>Path</source>
+        <translation>Pfad</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>Größe</translation>
+    </message>
+    <message>
+        <source>bytes</source>
+        <translation>Bytes</translation>
+    </message>
+    <message>
+        <source>This is a sample package: installing it writes real content to the site. Continue?</source>
+        <translation>Dies ist ein Beispielpaket: beim Installieren werden echte Inhalte in die Website geschrieben. Fortfahren?</translation>
+    </message>
+    <message>
+        <source>An Exponential content package (.ezpkg) is a portable archive: a content class, content objects, or both, that installs the same way anywhere. This page adds inspecting and installing one, and building a rich sample of one, to the same tools CSV/JSON import uses.</source>
+        <translation>Ein Exponential-Inhaltspaket (.ezpkg) ist ein portables Archiv: eine Inhaltsklasse, Inhaltsobjekte oder beides, das sich überall gleich installiert. Diese Seite ergänzt die Werkzeuge des CSV/JSON-Imports um das Prüfen und Installieren eines Pakets und das Bauen eines umfangreichen Beispiels.</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository (package/list also lists every package, not only content ones).</source>
+        <translation>Laden Sie ein .ezpkg hoch oder wählen Sie eines aus dem Repository (package/list listet alle Pakete, nicht nur Inhaltspakete).</translation>
+    </message>
+    <message>
+        <source>Read the inspection</source>
+        <translation>Die Prüfung lesen</translation>
+    </message>
+    <message>
+        <source>Every class and object it carries, and what installing it would do: create, update, unchanged, or class missing. Nothing is written yet.</source>
+        <translation>Jede enthaltene Klasse und jedes Objekt, und was das Installieren bewirken würde: anlegen, aktualisieren, unverändert oder Klasse fehlt. Noch wird nichts geschrieben.</translation>
+    </message>
+    <message>
+        <source>Choose where and how</source>
+        <translation>Wo und wie wählen</translation>
+    </message>
+    <message>
+        <source>Parent node for the content, the site access its templates/overrides map to, and how to handle a class or object that already exists.</source>
+        <translation>Elternknoten für die Inhalte, der Siteaccess für Templates/Overrides, und wie mit einer vorhandenen Klasse oder einem vorhandenen Objekt umgegangen wird.</translation>
+    </message>
+    <message>
+        <source>Runs through the same kernel package installer package/install uses; what was created is listed with links.</source>
+        <translation>Läuft über denselben Paket-Installer des Kernels wie package/install; was angelegt wurde, wird mit Links aufgeführt.</translation>
+    </message>
+    <message>
+        <source>What is inside an .ezpkg</source>
+        <translation>Was in einem .ezpkg steckt</translation>
+    </message>
+    <message>
+        <source>package.xml: name, summary, description, version, licence, dependencies, changelog, and the list of install items.</source>
+        <translation>package.xml: Name, Zusammenfassung, Beschreibung, Version, Lizenz, Abhängigkeiten, Änderungsprotokoll und die Liste der Installationsteile.</translation>
+    </message>
+    <message>
+        <source>ezcontentclass/*.xml: one content class, every attribute with its datatype and settings.</source>
+        <translation>ezcontentclass/*.xml: eine Inhaltsklasse, jedes Attribut mit Datentyp und Einstellungen.</translation>
+    </message>
+    <message>
+        <source>ezcontentobject/*.xml: one or more content objects, one XML file per object once there are many.</source>
+        <translation>ezcontentobject/*.xml: ein oder mehrere Inhaltsobjekte, bei vielen eine XML-Datei je Objekt.</translation>
+    </message>
+    <message>
+        <source>The Package template reference below has the full layout and an annotated real example.</source>
+        <translation>Die Referenz Paketvorlage unten zeigt den vollständigen Aufbau und ein kommentiertes echtes Beispiel.</translation>
+    </message>
+    <message>
+        <source>Matching on install</source>
+        <translation>Zuordnung beim Installieren</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, then by identifier.</source>
+        <translation>Klassen werden über die Remote-ID, dann über die Kennung zugeordnet.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only.</source>
+        <translation>Objekte werden nur über die Remote-ID zugeordnet.</translation>
+    </message>
+    <message>
+        <source>An object whose class is not on this site, and not carried by the same package, is refused (class missing) rather than half-installed.</source>
+        <translation>Ein Objekt, dessen Klasse es auf dieser Website nicht gibt und die nicht im selben Paket steckt, wird abgelehnt (Klasse fehlt), statt halb installiert zu werden.</translation>
+    </message>
+    <message>
+        <source>Existing class or object</source>
+        <translation>Vorhandene Klasse oder vorhandenes Objekt</translation>
+    </message>
+    <message>
+        <source>Classes: skip (default), replace, or keep both (a new copy with a new identifier).</source>
+        <translation>Klassen: überspringen (Standard), ersetzen oder beide behalten (eine neue Kopie mit neuer Kennung).</translation>
+    </message>
+    <message>
+        <source>Objects: skip, update in place (default), or keep both (a new copy with a new remote id).</source>
+        <translation>Objekte: überspringen, an Ort und Stelle aktualisieren (Standard) oder beide behalten (eine neue Kopie mit neuer Remote-ID).</translation>
+    </message>
+    <message>
+        <source>Builds a real sample package for a class you choose: the class definition, 2-3 real content objects with a valid value for every datatype the importer understands (several languages, relations, an image and a file where the class has them), or both. It is built through the kernel package handlers, so it installs like any other package.</source>
+        <translation>Baut ein echtes Beispielpaket für eine gewählte Klasse: die Klassendefinition, 2-3 echte Inhaltsobjekte mit gültigen Werten für jeden Datentyp, den der Import versteht (mehrere Sprachen, Relationen, ein Bild und eine Datei, wo die Klasse sie hat), oder beides. Es wird über die Paket-Handler des Kernels gebaut und installiert sich wie jedes andere Paket.</translation>
+    </message>
+    <message>
+        <source>Your permissions apply: reading the package, creating below the chosen parent, editing a matched object.</source>
+        <translation>Ihre Rechte gelten: das Paket lesen, unter dem gewählten Elternknoten anlegen, ein zugeordnetes Objekt bearbeiten.</translation>
+    </message>
+    <message>
+        <source>Inspect first: installing writes content objects and possibly a content class immediately, there is no separate preview/apply step.</source>
+        <translation>Zuerst prüfen: das Installieren schreibt sofort Inhaltsobjekte und eventuell eine Inhaltsklasse, es gibt keinen getrennten Vorschau-/Ausführen-Schritt.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:package --inspect / --install / --export / --template.</source>
+        <translation>Kommandozeile: ext:xrowextract:package --inspect / --install / --export / --template.</translation>
+    </message>
+    <message>
+        <source>The full package system (upload, create, export, install wizard, uninstall) is still at package/list, for packages of any kind.</source>
+        <translation>Das vollständige Paketsystem (hochladen, anlegen, exportieren, Installationsassistent, deinstallieren) gibt es weiterhin unter package/list, für Pakete jeder Art.</translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree.</source>
+        <translation>2-3 echte Inhaltsobjekte werden angelegt, ins Paket exportiert und wieder entfernt; nichts aus diesem Schritt bleibt im Inhaltsbaum.</translation>
+    </message>
+    <message>
+        <source>They are created below %path, hidden the moment a folder there is possible - never the public front page.</source>
+        <translation>Sie werden unter %path angelegt, versteckt, sobald dort ein Ordner möglich ist - nie auf der öffentlichen Startseite.</translation>
+    </message>
+    <message>
+        <source>The result opens below for inspection.</source>
+        <translation>Das Ergebnis öffnet sich unten zur Prüfung.</translation>
+    </message>
+    <message>
+        <source>Where the sample content is created</source>
+        <translation>Wo die Beispielinhalte angelegt werden</translation>
+    </message>
+    <message>
+        <source>Currently: %path</source>
+        <translation>Derzeit: %path</translation>
+    </message>
+    <message>
+        <source>The sample objects are real, published content while a build runs - they need a real place to live. That place is never the public front page: export.ini [PackageTemplate] ScratchNodeID if set, otherwise content.ini [NodeSettings] MediaRootNode (the Media/Images-Files-Multimedia structure, which no shipped layout, search result or the static/content-view cache renders for a visitor).</source>
+        <translation>Die Beispielobjekte sind, während ein Build läuft, echte veröffentlichte Inhalte - sie brauchen einen echten Ort. Dieser Ort ist nie die öffentliche Startseite: export.ini [PackageTemplate] ScratchNodeID, wenn gesetzt, sonst content.ini [NodeSettings] MediaRootNode (die Struktur Medien/Bilder-Dateien-Multimedia, die kein mitgeliefertes Layout, kein Suchergebnis und kein Static-/Content-View-Cache für Besucher darstellt).</translation>
+    </message>
+    <message>
+        <source>When a &quot;folder&quot; class exists and can be created there, the objects go inside a temporary folder that is explicitly hidden the moment it is created, one extra safety layer on top of the location itself; otherwise they go directly below the scratch node.</source>
+        <translation>Gibt es eine Klasse &quot;folder&quot;, die dort angelegt werden kann, kommen die Objekte in einen temporären Ordner, der sofort beim Anlegen ausdrücklich versteckt wird, eine zusätzliche Sicherheitsebene über dem Ort selbst; sonst kommen sie direkt unter den Arbeitsknoten.</translation>
+    </message>
+    <message>
+        <source>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</source>
+        <translation>Das Entfernen ist endgültig (kein Papierkorb) und nimmt den ganzen temporären Ordner - mit allem darin - in einem Aufruf mit; nichts bleibt im Suchindex oder in der URL-Alias-Tabelle.</translation>
+    </message>
+    <message>
         <source>Export as package</source>
         <translation>Als Paket exportieren</translation>
     </message>
