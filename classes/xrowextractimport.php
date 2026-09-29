@@ -119,6 +119,19 @@ class XrowExtractImport
         return $target;
     }
 
+    /** A generated file (a sample) written into the upload dir as if it had been uploaded. */
+    public static function storeGenerated( $text, $suggestedName )
+    {
+        $dir = self::uploadDir();
+        $ext = preg_match( '/\.([A-Za-z0-9]{1,8})$/', (string)$suggestedName, $m ) ? '.' . strtolower( $m[1] ) : '';
+        $name = 'sample_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . $ext;
+        $target = $dir . '/' . $name;
+        if ( file_put_contents( $target, $text ) === false )
+            return false;
+        @chmod( $target, 0600 );
+        return $target;
+    }
+
     // --------------------------------------------------------------- parse
 
     /** UTF-8 text with a leading BOM removed. */
@@ -129,11 +142,17 @@ class XrowExtractImport
         return $text;
     }
 
-    /** 'json' when the first non-blank byte is '[' or '{', else 'csv'. */
+    /** 'xml' for a '<', 'json' for a '[' or '{', else 'csv' - the first non-blank byte. */
     public static function detectFormat( $text )
     {
         $trimmed = ltrim( self::stripBOM( (string)$text ) );
-        return ( $trimmed !== '' && ( $trimmed[0] === '[' || $trimmed[0] === '{' ) ) ? 'json' : 'csv';
+        if ( $trimmed === '' )
+            return 'csv';
+        if ( $trimmed[0] === '<' )
+            return 'xml';
+        if ( $trimmed[0] === '[' || $trimmed[0] === '{' )
+            return 'json';
+        return 'csv';
     }
 
     /** The separator most likely used in a CSV sample: whichever of , ; tab | appears most in the header line. */
@@ -203,12 +222,83 @@ class XrowExtractImport
         return array( 'header' => $header, 'rows' => $rows );
     }
 
+    /**
+     * header, rows, and columnIDs (the file column key => the export's column id, e.g.
+     * "authors-ids" => "authors:ids") from the XML XrowExtractWriter writes:
+     *   <export class="..." created="..."><columns><column name="key" id="id">Name</column>...</columns>
+     *   <object><field name="key">value</field>...</object>...</export>
+     * Refuses a DOCTYPE outright (never written by this project, and the classic XXE vector) before
+     * the parser ever sees it, and parses with LIBXML_NONET and no DTD loading regardless.
+     */
+    public static function parseXML( $text )
+    {
+        $text = self::stripBOM( (string)$text );
+        if ( strlen( $text ) > 20 * 1024 * 1024 )
+            return array( 'header' => array(), 'rows' => array(), 'error' => 'The file is larger than 20 MB.' );
+        if ( preg_match( '/<!DOCTYPE/i', $text ) )
+            return array( 'header' => array(), 'rows' => array(),
+                          'error' => 'This file declares a DOCTYPE. That is refused: XrowExtractWriter never writes one, and a DOCTYPE can smuggle in external entities.' );
+        $useErrors = libxml_use_internal_errors( true );
+        $doc = new DOMDocument();
+        $ok = $text !== '' && @$doc->loadXML( $text, LIBXML_NONET | LIBXML_NOBLANKS );
+        $xmlErrors = libxml_get_errors();
+        libxml_clear_errors();
+        libxml_use_internal_errors( $useErrors );
+        if ( !$ok || !$doc->documentElement || $doc->documentElement->nodeName !== 'export' )
+        {
+            $detail = $xmlErrors ? trim( $xmlErrors[0]->message ) : 'not a well-formed <export> document';
+            return array( 'header' => array(), 'rows' => array(), 'error' => "Malformed XML: $detail" );
+        }
+        $root = $doc->documentElement;
+        $classIdentifier = $root->hasAttribute( 'class' ) ? $root->getAttribute( 'class' ) : null;
+        $columnIDs = array();
+        $header = array();
+        foreach ( $root->childNodes as $child )
+        {
+            if ( $child->nodeType !== XML_ELEMENT_NODE || $child->nodeName !== 'columns' )
+                continue;
+            foreach ( $child->childNodes as $columnNode )
+            {
+                if ( $columnNode->nodeType !== XML_ELEMENT_NODE || $columnNode->nodeName !== 'column' )
+                    continue;
+                $key = $columnNode->getAttribute( 'name' );
+                if ( $key === '' )
+                    continue;
+                $header[] = $key;
+                $columnIDs[$key] = $columnNode->hasAttribute( 'id' ) && $columnNode->getAttribute( 'id' ) !== '' ? $columnNode->getAttribute( 'id' ) : $key;
+            }
+            break;
+        }
+        $rows = array();
+        foreach ( $root->childNodes as $child )
+        {
+            if ( $child->nodeType !== XML_ELEMENT_NODE || $child->nodeName !== 'object' )
+                continue;
+            $row = array();
+            foreach ( $child->childNodes as $fieldNode )
+            {
+                if ( $fieldNode->nodeType !== XML_ELEMENT_NODE || $fieldNode->nodeName !== 'field' )
+                    continue;
+                $key = $fieldNode->getAttribute( 'name' );
+                if ( $key === '' )
+                    continue;
+                if ( !in_array( $key, $header, true ) )
+                    $header[] = $key; // tolerant: a field the <columns> block did not list
+                $row[$key] = $fieldNode->textContent;
+            }
+            $rows[] = $row;
+        }
+        return array( 'header' => $header, 'rows' => $rows, 'columnIDs' => $columnIDs, 'class' => $classIdentifier );
+    }
+
     /** Parses an uploaded file, format and separator auto-detected unless given. */
     public static function parseFile( $path, $format = null, $separator = null )
     {
         $text = (string)file_get_contents( $path );
         $text = XrowBaseHandler::utf8( $text );
         $format = $format ?: self::detectFormat( $text );
+        if ( $format === 'xml' )
+            return array_merge( self::parseXML( $text ), array( 'format' => 'xml', 'separator' => ',' ) );
         if ( $format === 'json' )
             return array_merge( self::parseJSON( $text ), array( 'format' => 'json', 'separator' => ',' ) );
         $separator = $separator ?: self::detectSeparator( $text );
@@ -230,11 +320,15 @@ class XrowExtractImport
      * A best guess at what a file column maps to: an attribute (with an optional
      * format), a special column, or 'ignore' when nothing matches. $classID may
      * be 0 when the class is not chosen yet (a 'class' column decides it row by
-     * row); attribute columns are then left unmapped until it is.
+     * row); attribute columns are then left unmapped until it is. $columnIDs (a
+     * file column name => the export's column id, e.g. "authors-ids" =>
+     * "authors:ids") comes from an XML file's own <columns> block - when given,
+     * it settles a column's target exactly, without guessing from its name.
      */
-    public static function suggestMapping( array $header, $classID )
+    public static function suggestMapping( array $header, $classID, array $columnIDs = null )
     {
         $specials = self::specialColumnsByExportName( false );
+        $knownSpecialIDs = array_flip( $specials );
         $attrByID = array();
         $datatypeByID = array();
         $formatColumns = array();
@@ -250,6 +344,36 @@ class XrowExtractImport
         $mapping = array();
         foreach ( $header as $name )
         {
+            $id = $columnIDs !== null && isset( $columnIDs[$name] ) ? $columnIDs[$name] : null;
+            if ( $id !== null )
+            {
+                // Exact, from the file's own column id - no name guessing
+                $target = 'ignore';
+                $reason = '';
+                if ( isset( $knownSpecialIDs[$id] ) )
+                {
+                    $target = 'special:' . $id;
+                }
+                elseif ( strpos( $id, ':' ) !== false )
+                {
+                    $target = ( $classID && isset( $formatColumns[$id] ) ) ? 'attrfmt:' . $id : 'ignore';
+                    $reason = $target === 'ignore' ? ( $classID ? "no attribute format $id on this class" : 'choose a class first' ) : '';
+                }
+                elseif ( $classID && isset( $attrByID[$id] ) && self::columnIsImportable( $datatypeByID[$id], null ) )
+                {
+                    $target = 'attr:' . $id;
+                }
+                elseif ( $classID && isset( $attrByID[$id] ) )
+                {
+                    $reason = "the $id attribute is a {$datatypeByID[$id]}: " . self::unsupportedReason( $datatypeByID[$id] );
+                }
+                else
+                {
+                    $reason = $classID ? "no attribute $id on this class" : 'choose a class first, or map a "class" column';
+                }
+                $mapping[] = array( 'column' => $name, 'target' => $target, 'reason' => $reason );
+                continue;
+            }
             $key = str_replace( '-', '_', trim( $name ) );
             $target = 'ignore';
             $reason = '';
@@ -630,7 +754,7 @@ class XrowExtractImport
         $number = (int)( isset( $options['startNumber'] ) ? $options['startNumber'] : 1 );
         foreach ( $rows as $row )
         {
-            $rowResult = array( 'number' => $number++, 'action' => 'skip', 'reason' => '', 'object_id' => null, 'changes' => array() );
+            $rowResult = array( 'number' => $number++, 'action' => 'skip', 'reason' => '', 'object_id' => null, 'node_id' => null, 'changes' => array() );
 
             // Which class, from a "class" column if mapped, else the fallback
             $classIdentifier = null;
@@ -921,6 +1045,11 @@ class XrowExtractImport
                             }
                         }
                     }
+                    // The main node, for the result panel's "open it" link - fetched fresh (see above)
+                    eZContentObject::clearCache( array( $objectID ) );
+                    $forNode = eZContentObject::fetch( $objectID );
+                    $rowResult['node_id'] = ( $forNode instanceof eZContentObject && (int)$forNode->attribute( 'main_node_id' ) )
+                        ? (int)$forNode->attribute( 'main_node_id' ) : null;
                 }
                 catch ( Exception $e )
                 {
@@ -936,8 +1065,267 @@ class XrowExtractImport
         return array( 'rows' => $result, 'counts' => $counts, 'ezoe' => $usedEzoe );
     }
 
+    // ------------------------------------------------------- sample & docs
+
+    /** Up to $limit real, readable, published objects of a class - for the sample and the documentation examples. */
+    public static function realObjects( $classID, $limit = 2 )
+    {
+        $objects = array();
+        foreach ( (array)eZContentObject::fetchSameClassList( (int)$classID, true, 0, max( 10, $limit * 3 ) ) as $object )
+        {
+            if ( !$object instanceof eZContentObject || (int)$object->attribute( 'status' ) !== eZContentObject::STATUS_PUBLISHED || !$object->canRead() )
+                continue;
+            $objects[] = $object;
+            if ( count( $objects ) >= $limit )
+                break;
+        }
+        return $objects;
+    }
+
+    /** The Migration column set of a class, resolved - the same columns "Download a template" writes. */
+    public static function migrationColumns( $classID )
+    {
+        return XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $classID ), $classID, XrowExtractColumns::extraAttributes( false ) );
+    }
+
+    /** The first base (no format) ezstring/eztext attribute of a class: what the sample edits and titles. */
+    public static function titleColumn( $classID )
+    {
+        $info = self::classInfo( $classID );
+        if ( !$info )
+            return null;
+        foreach ( $info['attributes'] as $identifier => $attribute )
+        {
+            if ( in_array( $attribute['datatype'], array( 'ezstring', 'eztext' ), true ) )
+                return $identifier;
+        }
+        return null;
+    }
+
+    /** A small, valid placeholder for a required attribute the sample's new object fills in. */
+    public static function placeholderValue( $datatype, eZContentClassAttribute $classAttribute = null )
+    {
+        switch ( $datatype )
+        {
+            case 'ezstring':
+            case 'eztext':      return 'Sample text';
+            case 'ezinteger':   return '1';
+            case 'ezfloat':     return '1';
+            case 'ezboolean':   return '0';
+            case 'ezdate':      return date( 'Y-m-d' );
+            case 'ezdatetime':  return date( 'Y-m-d H:i:s' );
+            case 'ezemail':     return 'sample@example.com';
+            case 'ezurl':       return 'https://example.com';
+            case 'ezidentifier':
+            case 'ezkeyword':   return 'sample';
+            case 'ezxmltext':   return '<p>Sample text.</p>';
+            case 'ezselection':
+                $content = $classAttribute instanceof eZContentClassAttribute ? $classAttribute->content() : array();
+                return isset( $content['options'][0]['name'] ) ? $content['options'][0]['name'] : '';
+        }
+        return '';
+    }
+
+    /**
+     * A CSV/JSON/XML sample file built from the site's own content, to try the importer without first
+     * having to build a file: one existing object of the class with a visible edit (an "update" row), a
+     * second existing object unchanged, one brand new object (a "create" row, placed under $parentNodeID),
+     * and - when the class has an importable date attribute - one row with a deliberately bad date (an
+     * "error" row). Uses the real export code (XrowExtractColumns/XrowExtractCatalogue/XrowExtractWriter)
+     * throughout, so every value is exactly what a real export of this class would write.
+     */
+    public static function buildSample( $classID, $parentNodeID, $language, $format )
+    {
+        $classID = (int)$classID;
+        $class = eZContentClass::fetch( $classID );
+        if ( !$class instanceof eZContentClass )
+            return array( 'ok' => false, 'error' => 'no such class' );
+        $columns = self::migrationColumns( $classID );
+        if ( !$columns )
+            return array( 'ok' => false, 'error' => 'this class has no columns to sample' );
+        $info = self::classInfo( $classID );
+
+        $extras = XrowExtractColumns::extraAttributes( false );
+        $allowHash = XrowExtractColumns::allowPasswordHash();
+        $writer = new XrowExtractWriter( $format, $columns, ',', true, "\n", array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ), 'sample' => '1' ) );
+        $parser = $writer->parser();
+
+        $titleIdentifier = self::titleColumn( $classID );
+        $objects = self::realObjects( $classID, 2 );
+        $rows = array();
+        XrowExtractColumns::$language = null;
+        foreach ( $objects as $i => $object )
+        {
+            $locale = in_array( $language, $object->availableLanguages(), true ) ? $language : $object->attribute( 'initial_language_code' );
+            XrowExtractColumns::$language = $locale;
+            $cells = XrowExtractColumns::rowCells( $columns, $object, $parser, $extras, $allowHash );
+            if ( $i === 0 && $titleIdentifier )
+            {
+                foreach ( $columns as $ci => $column )
+                {
+                    if ( $column['id'] === $titleIdentifier )
+                        $cells[$ci] = trim( (string)$cells[$ci] ) !== '' ? $cells[$ci] . ' (edited)' : 'Sample edit (edited)';
+                }
+            }
+            $rows[] = array( 'cells' => $cells, 'kind' => $i === 0 ? 'update' : 'unchanged' );
+        }
+        XrowExtractColumns::$language = null;
+
+        // A brand new object: every special column filled sensibly, the title-ish attribute named "Sample
+        // <class>", every other required base-importable attribute given a small placeholder
+        $parentNode = $parentNodeID ? eZContentObjectTreeNode::fetch( (int)$parentNodeID ) : null;
+        $sampleSuffix = substr( md5( uniqid( '', true ) ), 0, 6 );
+        $newRemoteID = 'xrowextract-sample-' . $class->attribute( 'identifier' ) . '-' . $sampleSuffix;
+        $classAttributesByID = array();
+        foreach ( eZContentClassAttribute::fetchListByClassID( $classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $ca )
+            $classAttributesByID[$ca->attribute( 'identifier' )] = $ca;
+        $createCells = array();
+        foreach ( $columns as $column )
+        {
+            $id = $column['id'];
+            $value = '';
+            switch ( $id )
+            {
+                case 'ezcontentobject.remote_id':        $value = $newRemoteID; break;
+                case 'ezcontentobject.class_identifier':  $value = $class->attribute( 'identifier' ); break;
+                case 'ezcontentobject.language':
+                case 'ezcontentobject.initial_language':  $value = $language; break;
+                case 'ezcontentobject.always_available':  $value = '1'; break;
+                case 'node.parent_remote_id':
+                    // node.parent_remote_id is the parent NODE's own remote id (what
+                    // eZContentObjectTreeNode::fetchByRemoteID() looks up), not its object's
+                    $value = $parentNode instanceof eZContentObjectTreeNode ? $parentNode->attribute( 'remote_id' ) : '';
+                    break;
+            }
+            if ( $value === '' && strpos( $id, ':' ) === false && strpos( $id, '.' ) === false && isset( $info['attributes'][$id] ) )
+            {
+                if ( $id === $titleIdentifier )
+                    $value = 'Sample ' . $class->attribute( 'name' );
+                elseif ( isset( $classAttributesByID[$id] ) && (bool)$classAttributesByID[$id]->attribute( 'is_required' )
+                        && self::columnIsImportable( $info['attributes'][$id]['datatype'], null ) )
+                    $value = self::placeholderValue( $info['attributes'][$id]['datatype'], $classAttributesByID[$id] );
+            }
+            $createCells[] = $parser->escape( $value );
+        }
+        $rows[] = array( 'cells' => $createCells, 'kind' => 'create' );
+
+        // An error row (only when there is a date attribute to break): the same shape, a fresh remote id,
+        // an unparsable date - the dry run then shows exactly how an error looks
+        $errorColumnIndex = null;
+        foreach ( $columns as $ci => $column )
+        {
+            if ( isset( $info['attributes'][$column['id']] ) && in_array( $info['attributes'][$column['id']]['datatype'], array( 'ezdate', 'ezdatetime' ), true ) )
+            {
+                $errorColumnIndex = $ci;
+                break;
+            }
+        }
+        if ( $errorColumnIndex !== null )
+        {
+            $errorCells = $createCells;
+            foreach ( $columns as $ci => $column )
+            {
+                if ( $column['id'] === 'ezcontentobject.remote_id' )
+                    $errorCells[$ci] = $parser->escape( $newRemoteID . '-error' );
+            }
+            $errorCells[$errorColumnIndex] = $parser->escape( 'not-a-date' );
+            $rows[] = array( 'cells' => $errorCells, 'kind' => 'error' );
+        }
+
+        $text = $writer->begin();
+        foreach ( $rows as $row )
+            $text .= $writer->row( $row['cells'] );
+        $text .= $writer->end();
+
+        $kinds = array();
+        foreach ( $rows as $row )
+            $kinds[] = $row['kind'];
+
+        return array(
+            'ok' => true,
+            'text' => $text,
+            'filename' => XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_sample.' . $writer->extension(), 'sample' ),
+            'format' => $format,
+            'classIdentifier' => $class->attribute( 'identifier' ),
+            'kinds' => $kinds,
+        );
+    }
+
+    /**
+     * A small file of real rows for the file format reference (no synthetic rows - genuine site content,
+     * exactly as a real export would write it). Null when the class has no readable published objects.
+     */
+    public static function referenceExampleRows( $classID, $format, $limit = 2 )
+    {
+        $classID = (int)$classID;
+        $class = eZContentClass::fetch( $classID );
+        if ( !$class instanceof eZContentClass )
+            return null;
+        $columns = self::migrationColumns( $classID );
+        if ( !$columns )
+            return null;
+        $objects = self::realObjects( $classID, $limit );
+        if ( !$objects )
+            return array( 'ok' => true, 'text' => '', 'filename' => '', 'format' => $format, 'columns' => $columns, 'rowCount' => 0 );
+        $extras = XrowExtractColumns::extraAttributes( false );
+        $allowHash = XrowExtractColumns::allowPasswordHash();
+        $writer = new XrowExtractWriter( $format, $columns, ',', true, "\n", array( 'class' => $class->attribute( 'identifier' ), 'created' => date( 'c' ) ) );
+        $parser = $writer->parser();
+        $text = $writer->begin();
+        XrowExtractColumns::$language = null;
+        foreach ( $objects as $object )
+        {
+            XrowExtractColumns::$language = $object->attribute( 'initial_language_code' );
+            $text .= $writer->row( XrowExtractColumns::rowCells( $columns, $object, $parser, $extras, $allowHash ) );
+        }
+        XrowExtractColumns::$language = null;
+        $text .= $writer->end();
+        return array(
+            'ok' => true, 'text' => $text, 'format' => $format, 'columns' => $columns, 'rowCount' => count( $objects ),
+            'filename' => XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_example.' . $writer->extension(), 'example' ),
+        );
+    }
+
+    /**
+     * For a class, one real example value per datatype it actually uses (its first object, first
+     * matching attribute) - the file format reference shows these instead of made-up values wherever it
+     * can. datatype => array('identifier' => the attribute, 'value' => the real cell text, or null when
+     * the class has the datatype but the value is empty).
+     */
+    public static function datatypeExamples( $classID )
+    {
+        $classID = (int)$classID;
+        $info = self::classInfo( $classID );
+        $examples = array();
+        if ( !$info )
+            return $examples;
+        $columns = self::migrationColumns( $classID );
+        $objects = self::realObjects( $classID, 1 );
+        $cellsByColumnID = array();
+        if ( $objects && $columns )
+        {
+            $extras = XrowExtractColumns::extraAttributes( false );
+            $parser = new ParserInterface( ',', true, true );
+            $object = $objects[0];
+            XrowExtractColumns::$language = $object->attribute( 'initial_language_code' );
+            $cells = XrowExtractColumns::rowCells( $columns, $object, $parser, $extras, XrowExtractColumns::allowPasswordHash() );
+            XrowExtractColumns::$language = null;
+            foreach ( $columns as $i => $column )
+                $cellsByColumnID[$column['id']] = isset( $cells[$i] ) ? $cells[$i] : '';
+        }
+        foreach ( $info['attributes'] as $identifier => $attribute )
+        {
+            $datatype = $attribute['datatype'];
+            if ( isset( $examples[$datatype] ) )
+                continue;
+            $value = isset( $cellsByColumnID[$identifier] ) ? trim( (string)$cellsByColumnID[$identifier] ) : '';
+            $examples[$datatype] = array( 'identifier' => $identifier, 'value' => $value !== '' ? $value : null );
+        }
+        return $examples;
+    }
+
     /** Class info cached per run: identifier and attribute meta by identifier (datatype, class attribute id, selection options). */
-    protected static function classInfo( $classID )
+    public static function classInfo( $classID )
     {
         $class = eZContentClass::fetch( $classID );
         if ( !$class instanceof eZContentClass )
@@ -958,7 +1346,7 @@ class XrowExtractImport
         return array( 'identifier' => $class->attribute( 'identifier' ), 'attributes' => $attributes );
     }
 
-    protected static function columnIsImportable( $datatype, $format )
+    public static function columnIsImportable( $datatype, $format )
     {
         if ( $format === null )
             return in_array( $datatype, self::baseImportableDatatypes(), true );
