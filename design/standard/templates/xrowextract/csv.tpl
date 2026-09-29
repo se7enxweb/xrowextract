@@ -293,6 +293,8 @@
 
     {* DESIGN: Content END *}</div></div></div>
 
+    {if $BackgroundError}<p class="xe-error" role="alert">{$BackgroundError|wash}</p>{/if}
+
     <div class="controlbar xe-actionbar">
         <div class="xe-actionbar-summary" aria-live="polite">
             <strong>{$export_rows}</strong> {'rows'|i18n('design/standard/extract')} ·
@@ -301,6 +303,9 @@
         </div>
         <div class="xe-actionbar-buttons">
             <input class="button" name="Preview" type="submit" value="{'Preview'|i18n('design/standard/extract')}" title="{'See the rows as a spreadsheet will show them, before downloading'|i18n('design/standard/extract')|wash}" />
+            {if and( $BackgroundAvailable, $has_prefilledata|not )}
+            <input class="button" name="RunInBackground" type="submit" value="{'Run in the background'|i18n('design/standard/extract')}" title="{'Start this export as a job and come back to it: see the Jobs tab'|i18n('design/standard/extract')|wash}" />
+            {/if}
             <input class="defaultbutton" name="Download" type="submit" value="{'Download CSV'|i18n('design/standard/extract')}" />
         </div>
     </div>
