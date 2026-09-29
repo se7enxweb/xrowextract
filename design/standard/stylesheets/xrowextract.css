@@ -141,8 +141,12 @@
     --xe-accent: #2563eb;
     --xe-accent-bg: #eaf1ff;
 }
-.xe-cards { display: grid; gap: 1em; margin: .5em 0 1em; }
+/* minmax(0, 1fr) and min-width: 0: a grid column's minimum is otherwise its content's width, so
+   one long unwrapped line (an example file, a wide table) widened every card past the window */
+.xe-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1em; margin: .5em 0 1em; }
 .xe-card {
+    min-width: 0;
+    max-width: 100%;
     border: 1px solid var(--xe-line);
     border-radius: 8px;
     background: #fff;
@@ -601,7 +605,12 @@ li.xe-badge { margin: 0; }
 .xe-example {
     margin: .6em 0; padding: .8em 1em; border-radius: 6px; background: var(--xe-head);
     font-size: .82em; line-height: 1.5; overflow-x: auto; white-space: pre; max-height: 22em; overflow-y: auto;
+    max-width: 100%; box-sizing: border-box;
 }
+/* The reference's wide tables scroll inside the card instead of widening it */
+#xe-card-reference details { min-width: 0; }
+#xe-card-reference .xe-table { display: block; max-width: 100%; overflow-x: auto; }
+#xe-card-reference .xe-table td code, #xe-card-reference .xe-table td { overflow-wrap: anywhere; }
 #xe-card-reference details { margin: .8em 0; padding: .6em 0; border-top: 1px solid var(--xe-line); }
 #xe-card-reference summary { cursor: pointer; font-weight: bold; }
 #xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }
