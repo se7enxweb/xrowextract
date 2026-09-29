@@ -344,6 +344,11 @@ if ( !$ClassID && !empty( $parsed['class'] ) )
         $ClassID = (int)$fromFile->attribute( 'id' );
 }
 $tpl->setVariable( 'ClassID', $ClassID );
+// Whether a "class + content"/"content only" package template can be built from this class's own
+// existing content, or would fall back to temporary hidden scratch content (XrowExtractPackage::
+// buildContentPackage()) - known ahead of the download itself (which always uses this same
+// $ClassID, never the sample box's own class), so the page can say so beforehand.
+$tpl->setVariable( 'ClassHasExistingContent', $ClassID && isset( $countsByClassID[$ClassID] ) ? ( $countsByClassID[$ClassID]['count'] > 0 ) : true );
 $SampleClassID = $ClassID ?: $MostPopulousClassID;
 $tpl->setVariable( 'SampleClassID', $SampleClassID );
 
