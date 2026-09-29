@@ -4,6 +4,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Install package %name below %parent</source>
+        <translation>Install package %name below %parent</translation>
+    </message>
+    <message>
         <source>The package could not be read: %reason</source>
         <translation>The package could not be read: %reason</translation>
     </message>

@@ -138,8 +138,40 @@ if ( $http->hasPostVariable( 'ImportParentNodeSelected' ) )
 // ---------------------------------------------------------------- install
 
 $installReport = false;
-if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
+if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage && XrowExtractJob::available() )
 {
+    // Installing can take minutes (every class and object through the kernel's package handlers), so it
+    // runs as a background job (bin/php/package.php --install, job type "package") and the page goes
+    // straight to the Jobs view, which follows its progress and keeps its report - the request is not held
+    // for the length of the install.
+    $installArgs = array(
+        '--install=' . $package->attribute( 'name' ),
+        '--parent=' . (int)$ParentNodeID,
+        '--site-access=' . $SiteAccess,
+        '--object-mode=' . $ObjectMode,
+        '--class-mode=' . $ClassMode,
+    );
+    $parentForName = eZContentObjectTreeNode::fetch( (int)$ParentNodeID );
+    $installJobID = XrowExtractJob::create( array(
+        'type' => 'package', 'owner' => eZUser::currentUser()->attribute( 'login' ),
+        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name below %parent', false,
+                               array( '%name' => $package->attribute( 'name' ),
+                                      '%parent' => $parentForName instanceof eZContentObjectTreeNode ? $parentForName->attribute( 'name' ) : ( 'node ' . (int)$ParentNodeID ) ) ),
+        'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,
+    ) );
+    if ( !XrowExtractJob::start( $installJobID ) )
+    {
+        XrowExtractJob::update( $installJobID, array(
+            'state' => 'failed', 'ended' => time(),
+            'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+        ) );
+    }
+    $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
+{
+    // No background jobs on this installation (XrowExtractJob::available() is false): install in the request
     $installReport = XrowExtractPackage::install( $package, $ParentNodeID, $SiteAccess, $ObjectMode, $ClassMode );
     if ( $installReport['ok'] )
     {
