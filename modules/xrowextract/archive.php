@@ -117,26 +117,36 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
     }
     else
     {
+        // Only the build is caught: cleanExit() may end the request by throwing, and must not be taken for an error
+        $result = false;
         try
         {
             $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']] );
-            $types = array( 'zip' => 'application/zip', 'tar.gz' => 'application/gzip', 'tar.bz2' => 'application/x-bzip2',
-                            'tar.xz' => 'application/x-xz', '7z' => 'application/x-7z-compressed', 'rar' => 'application/vnd.rar' );
-            header( 'Cache-Control: private, no-store, max-age=0' );
-            header( 'Pragma: no-cache' );
-            header( 'X-Content-Type-Options: nosniff' );
-            header( 'Content-Type: ' . $types[$state['format']] );
-            header( 'Content-Length: ' . filesize( $result['path'] ) );
-            header( 'Content-Disposition: attachment; filename="' . $result['name'] . '"' );
-            while ( @ob_end_clean() );
-            readfile( $result['path'] );
-            XrowExtractArchive::removeWork( $result['work'] );
-            eZExecution::cleanExit();
         }
         catch ( Exception $e )
         {
             eZDebug::writeError( $e->getMessage(), 'xrowextract/archive' );
             $error = ezpI18n::tr( 'design/standard/extract', 'The archive could not be written: %reason', null, array( '%reason' => $e->getMessage() ) );
+        }
+        if ( $result )
+        {
+            $types = array( 'zip' => 'application/zip', 'tar.gz' => 'application/gzip', 'tar.bz2' => 'application/x-bzip2',
+                            'tar.xz' => 'application/x-xz', '7z' => 'application/x-7z-compressed', 'rar' => 'application/vnd.rar' );
+            $size = filesize( $result['path'] );
+            header( 'Cache-Control: private, no-store, max-age=0' );
+            header( 'Pragma: no-cache' );
+            header( 'X-Content-Type-Options: nosniff' );
+            header( 'Content-Type: ' . $types[$state['format']] );
+            header( 'Content-Length: ' . $size );
+            header( 'Content-Disposition: attachment; filename="' . $result['name'] . '"' );
+            while ( @ob_end_clean() );
+            $fh = fopen( $result['path'], 'rb' );
+            while ( $fh && !feof( $fh ) )
+                echo fread( $fh, 1048576 );
+            if ( $fh )
+                fclose( $fh );
+            XrowExtractArchive::removeWork( $result['work'] );
+            eZExecution::cleanExit();
         }
     }
 }
