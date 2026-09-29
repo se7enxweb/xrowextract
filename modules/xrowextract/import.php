@@ -28,6 +28,11 @@ $forgetFile = function () use ( &$SESSION_KEY )
         XrowExtractUpload::delete( $current['upload_id'] );
     elseif ( isset( $current['path'] ) && is_file( $current['path'] ) )
         @unlink( $current['path'] );
+    elseif ( !empty( $current['package_name'] ) )
+        // A package (or standalone class/object XML wrapped as one) has no loose file on disk -
+        // an unkept "Try a sample" one is removed from the repository right away; an uploaded or
+        // installed one is left there (xrowextract/package, or package/list, can still reach it).
+        XrowExtractPackage::forgetUnkeptSamplePackage( $current );
     unset( $_SESSION[$SESSION_KEY] );
 };
 
@@ -195,10 +200,18 @@ if ( $http->hasPostVariable( 'RemoveFile' ) && $hasFile )
 $parsed = array( 'header' => array(), 'rows' => array(), 'format' => 'csv', 'separator' => ',' );
 if ( $hasFile && $PackageMode )
 {
-    $tpl->setVariable( 'ImportFormat', $_SESSION[$SESSION_KEY]['format'] );
+    $tpl->setVariable( 'ImportFormat', 'package' );
     $tpl->setVariable( 'UploadedName', $_SESSION[$SESSION_KEY]['name'] );
-    $tpl->setVariable( 'IsSample', false );
-    $tpl->setVariable( 'SampleKinds', array() );
+    $tpl->setVariable( 'IsSample', !empty( $_SESSION[$SESSION_KEY]['sample'] ) );
+    $tpl->setVariable( 'SampleKinds', isset( $_SESSION[$SESSION_KEY]['kinds'] ) ? $_SESSION[$SESSION_KEY]['kinds'] : array() );
+    // "N rows" in the meta line for a package: classes + objects it carries - a cheap parse-only
+    // inspect(), the same one Preview will redo once the user clicks it for the full dry run.
+    $earlyPackage = eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] );
+    if ( $earlyPackage instanceof eZPackage )
+    {
+        $earlyInspection = XrowExtractPackage::inspect( $earlyPackage );
+        $parsed['total_rows'] = count( $earlyInspection['classes'] ) + count( $earlyInspection['objects'] );
+    }
 }
 elseif ( $hasFile )
 {
@@ -418,15 +431,54 @@ foreach ( $specialColumnIDs as $id )
 $tpl->setVariable( 'SpecialChoices', $SpecialChoices );
 
 // Browse for a parent node (same pattern as the csv view's BrowseSubtree)
-if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID <= 0 )
+if ( ( $http->hasPostVariable( 'DownloadTemplate' ) || $http->hasPostVariable( 'DownloadClassXML' ) || $http->hasPostVariable( 'DownloadObjectXML' ) ) && $ClassID <= 0 )
     $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'Choose a class first' ) );
-// A template: an empty file with the columns of the Migration set for the chosen class (fill it, import it)
-if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $templateClass = eZContentClass::fetch( $ClassID ) ) )
+
+$templateFormatIn = $http->hasPostVariable( 'TemplateFormat' ) ? (string)$http->postVariable( 'TemplateFormat' ) : 'xml';
+// A content-package template: "package" is a fourth format here too, just like xml/json/csv - the
+// class-only/content-only choice sits beside the format select and only matters when this one is
+// picked (XrowExtractPackage::buildContentPackage(), preferring the class's own existing content).
+if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && $templateFormatIn === 'package' && ( $templateClass = eZContentClass::fetch( $ClassID ) ) )
+{
+    $templateVariantIn = $http->hasPostVariable( 'TemplatePackageVariant' ) ? (string)$http->postVariable( 'TemplatePackageVariant' ) : 'both';
+    $templateVariant = in_array( $templateVariantIn, array( 'both', 'class', 'content' ), true ) ? $templateVariantIn : 'both';
+    $build = XrowExtractPackage::buildContentPackage( $ClassID, $templateVariant );
+    if ( !$build['ok'] )
+    {
+        $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'The template package could not be built: %reason', null, array( '%reason' => implode( ' ', $build['errors'] ) ) ) );
+    }
+    else
+    {
+        XrowExtractImport::streamPackageDownload( $build['package'], $templateClass->attribute( 'identifier' ) . '_template_' . $templateVariant . '.ezpkg' );
+    }
+}
+// A single content-class definition XML, or a single content-object XML, on their own - the Import
+// page accepts those directly too (detectUploadKind()), no archive needed.
+if ( $http->hasPostVariable( 'DownloadClassXML' ) && $ClassID > 0 && ( $classXMLClass = eZContentClass::fetch( $ClassID ) ) )
+{
+    $build = XrowExtractPackage::buildContentPackage( $ClassID, 'class' );
+    $bytes = $build['ok'] ? XrowExtractPackage::singleItemXMLBytes( $build['package'], 'ezcontentclass' ) : false;
+    if ( $bytes === false )
+        $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'The class definition XML could not be built.' ) );
+    else
+        XrowExtractImport::streamXMLDownload( $bytes, $classXMLClass->attribute( 'identifier' ) . '_class.xml' );
+}
+if ( $http->hasPostVariable( 'DownloadObjectXML' ) && $ClassID > 0 && ( $objectXMLClass = eZContentClass::fetch( $ClassID ) ) )
+{
+    $build = XrowExtractPackage::buildContentPackage( $ClassID, 'content' );
+    $bytes = ( $build['ok'] && $build['object_count'] > 0 ) ? XrowExtractPackage::singleItemXMLBytes( $build['package'], 'ezcontentobject' ) : false;
+    if ( $bytes === false )
+        $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'No content object XML could be built (the class may have no content on this site yet).' ) );
+    else
+        XrowExtractImport::streamXMLDownload( $bytes, $objectXMLClass->attribute( 'identifier' ) . '_objects.xml' );
+}
+
+// A row-format template: an empty file with the columns of the Migration set for the chosen class
+if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && in_array( $templateFormatIn, array( 'xml', 'json', 'csv' ), true ) && ( $templateClass = eZContentClass::fetch( $ClassID ) ) )
 {
     $templateColumns = XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $ClassID ), $ClassID,
                                                              XrowExtractColumns::extraAttributes( false ) );
-    $templateFormatIn = $http->hasPostVariable( 'TemplateFormat' ) ? (string)$http->postVariable( 'TemplateFormat' ) : 'xml';
-    $templateFormat = in_array( $templateFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $templateFormatIn : 'xml';
+    $templateFormat = $templateFormatIn;
     $templateWriter = new XrowExtractWriter( $templateFormat, $templateColumns, ',', true, "\r\n", array( 'class' => $templateClass->attribute( 'identifier' ) ) );
     $templateData = $templateWriter->begin() . $templateWriter->end();
     header( 'Cache-Control: private, no-store, max-age=0' );
@@ -439,17 +491,36 @@ if ( $http->hasPostVariable( 'DownloadTemplate' ) && $ClassID > 0 && ( $template
     eZExecution::cleanExit();
 }
 
-// Try a sample: a file built from the site's own content, loaded exactly as if it had been uploaded
+// Try a sample: a file built from the site's own content, loaded exactly as if it had been uploaded.
+// "package" is a fourth format here, just like xml/json/csv (the owner's own words): the sample is a
+// real content package built read-only from up to 3 existing objects of the class
+// (XrowExtractPackage::buildSamplePackage()), altered on the copy so its dry run shows every outcome.
 if ( $http->hasPostVariable( 'TrySample' ) )
 {
     $sampleFormatIn = (string)$http->postVariable( 'TrySample' );
     // The sample box's own class choice: any class of the system
     if ( $http->hasPostVariable( 'SampleClassID' ) && isset( $countsByClassID[(int)$http->postVariable( 'SampleClassID' )] ) )
         $SampleClassID = (int)$http->postVariable( 'SampleClassID' );
-    $sampleFormat = in_array( $sampleFormatIn, array( 'xml', 'json', 'csv' ), true ) ? $sampleFormatIn : 'xml';
+    $sampleFormat = in_array( $sampleFormatIn, array( 'xml', 'json', 'csv', 'package' ), true ) ? $sampleFormatIn : 'xml';
     if ( !$SampleClassID )
     {
         $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'There is no class to sample from (the site has no classes with content, or none you may read).' ) );
+    }
+    elseif ( $sampleFormat === 'package' )
+    {
+        $sample = XrowExtractPackage::buildSamplePackage( $SampleClassID );
+        if ( !$sample['ok'] )
+        {
+            $tpl->setVariable( 'UploadError', ezpI18n::tr( 'design/standard/extract', 'The sample package could not be built: %reason', null, array( '%reason' => implode( ' ', $sample['errors'] ) ) ) );
+        }
+        else
+        {
+            $forgetFile();
+            $_SESSION[$SESSION_KEY] = array( 'name' => $sample['package']->attribute( 'name' ) . '.ezpkg', 'format' => 'package', 'kind' => 'package',
+                                             'package_name' => $sample['package']->attribute( 'name' ), 'sample' => true,
+                                             'kinds' => array( 'create', 'update', 'unchanged', 'class_missing' ), 'classID' => $SampleClassID );
+            return $module->redirectTo( 'xrowextract/import' );
+        }
     }
     else
     {
@@ -468,10 +539,9 @@ if ( $http->hasPostVariable( 'TrySample' ) )
             }
             else
             {
-                if ( isset( $_SESSION[$SESSION_KEY]['path'] ) && is_file( $_SESSION[$SESSION_KEY]['path'] ) )
-                    @unlink( $_SESSION[$SESSION_KEY]['path'] );
+                $forgetFile();
                 $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $sampleName, 'format' => $sample['format'], 'separator' => ',',
-                                                 'sample' => true, 'kinds' => $sample['kinds'], 'classID' => $SampleClassID );
+                                                 'sample' => true, 'kinds' => $sample['kinds'], 'classID' => $SampleClassID, 'source' => 'plain' );
                 return $module->redirectTo( 'xrowextract/import' );
             }
         }
@@ -549,82 +619,76 @@ $NeedsQueue = $hasFile && !$PackageMode && ( $parsed['total_rows'] === null || $
 $tpl->setVariable( 'NeedsQueue', $NeedsQueue );
 $tpl->setVariable( 'QueueThresholdRows', $QueueThresholdRows );
 
-// A content package, or a standalone class/object XML wrapped as one (see the Upload block):
-// inspect it (dry run, nothing written), install it - reusing the Parent field above for its
-// top-level objects - or queue a large one as a background job (xrowextract/jobs, type "package").
-$Package = false;
-$PackageInspection = false;
-$PackageInstallReport = false;
-$PackageJobID = false;
-$PackageJobError = false;
-if ( $PackageMode )
+// A content package, or a standalone class/object XML wrapped as one (see the Upload block): its
+// dry run and its "Apply" both go through the same block as XML/CSV/JSON rows below, reusing the
+// Parent field above for its top-level objects. Existing-object/existing-class handling uses the
+// same safe defaults the Package page starts from (update existing objects by remote id, skip an
+// existing class) - the Package tab is still where those are changed for a one-off install.
+$Package = $PackageMode ? eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] ) : false;
+if ( $Package instanceof eZPackage && $http->hasPostVariable( 'KeepSamplePackage' ) )
 {
-    $Package = eZPackage::fetch( $_SESSION[$SESSION_KEY]['package_name'] );
-
-    $PackageSiteAccess = $http->hasPostVariable( 'PackageSiteAccess' ) ? (string)$http->postVariable( 'PackageSiteAccess' ) : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
-    $tpl->setVariable( 'PackageSiteAccess', $PackageSiteAccess );
-    $tpl->setVariable( 'PackageAvailableSiteAccesses', eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' ) );
-    $PackageObjectMode = $http->hasPostVariable( 'PackageObjectMode' ) && in_array( $http->postVariable( 'PackageObjectMode' ), array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true )
-                       ? $http->postVariable( 'PackageObjectMode' ) : XrowExtractPackage::OBJECT_UPDATE;
-    $tpl->setVariable( 'PackageObjectMode', $PackageObjectMode );
-    $PackageClassMode = $http->hasPostVariable( 'PackageClassMode' ) && in_array( $http->postVariable( 'PackageClassMode' ), array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true )
-                      ? $http->postVariable( 'PackageClassMode' ) : XrowExtractPackage::CLASS_SKIP;
-    $tpl->setVariable( 'PackageClassMode', $PackageClassMode );
-
-    if ( $Package instanceof eZPackage )
-    {
-        if ( $http->hasPostVariable( 'InstallPackage' ) )
-        {
-            $PackageInstallReport = XrowExtractPackage::install( $Package, $ParentNodeID, $PackageSiteAccess, $PackageObjectMode, $PackageClassMode );
-            if ( $PackageInstallReport['ok'] )
-                eZContentObject::clearCache();
-        }
-        elseif ( $http->hasPostVariable( 'RunPackageInBackground' ) )
-        {
-            if ( !XrowExtractJob::available() )
-            {
-                $PackageJobError = ezpI18n::tr( 'design/standard/extract', 'Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).' );
-            }
-            else
-            {
-                $jobArgs = array( '--install=' . $Package->attribute( 'name' ), '--parent=' . $ParentNodeID,
-                                  '--site-access=' . $PackageSiteAccess, '--object-mode=' . $PackageObjectMode, '--class-mode=' . $PackageClassMode );
-                $PackageJobID = XrowExtractJob::create( array(
-                    'type' => 'package',
-                    'owner' => eZUser::currentUser()->attribute( 'login' ),
-                    'what' => 'Install package ' . $Package->attribute( 'name' ),
-                    'format' => 'json',
-                    'output_file' => 'report.json',
-                    'args' => $jobArgs,
-                ) );
-                if ( !XrowExtractJob::start( $PackageJobID ) )
-                {
-                    XrowExtractJob::update( $PackageJobID, array(
-                        'state' => 'failed', 'ended' => time(),
-                        'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
-                    ) );
-                }
-                return $module->redirectTo( 'xrowextract/jobs' );
-            }
-        }
-        $PackageInspection = XrowExtractPackage::inspect( $Package );
-    }
+    XrowExtractPackage::keepSamplePackage( $Package );
+    unset( $_SESSION[$SESSION_KEY]['sample'] );
 }
 $tpl->setVariable( 'PackageMode', $PackageMode );
 $tpl->setVariable( 'PackageKind', $PackageMode ? $_SESSION[$SESSION_KEY]['kind'] : false );
 $tpl->setVariable( 'PackageName', $PackageMode ? $_SESSION[$SESSION_KEY]['package_name'] : '' );
-$tpl->setVariable( 'Package', $Package );
-$tpl->setVariable( 'PackageInspection', $PackageInspection );
-$tpl->setVariable( 'PackageInstallReport', $PackageInstallReport );
-$tpl->setVariable( 'PackageJobError', $PackageJobError );
-$tpl->setVariable( 'PackageJobsAvailable', XrowExtractJob::available() );
+$tpl->setVariable( 'IsPackageSample', $PackageMode && !empty( $_SESSION[$SESSION_KEY]['sample'] ) );
 
 // Preview (dry run) and Apply run the same engine; Apply only after a preview was shown for these settings
 $Preview = false;
 $Applied = false;
 $QueuedJobID = null;
 
-if ( $hasFile && $NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) && XrowExtractJob::available() )
+/** Publishes a row-shaped $result (XrowExtractImport::run()'s own shape, or
+ * XrowExtractPackage::inspectionToResultRows()'s) to the template: ResultClasses,
+ * Result, Preview/Applied, ApplyCount - the same for a row import and a package. */
+$publishResult = function ( array $result, $apply ) use ( $tpl, $ContentLanguages, $Language )
+{
+    $resultClasses = array();
+    foreach ( $result['rows'] as $row )
+    {
+        if ( empty( $row['class_id'] ) )
+            continue;
+        $id = (int)$row['class_id'];
+        if ( !isset( $resultClasses[$id] ) )
+            $resultClasses[$id] = array( 'id' => $id, 'identifier' => $row['class_identifier'], 'name' => $row['class_name'], 'rows' => 0,
+                                         'create' => 0, 'update' => 0, 'unchanged' => 0, 'error' => 0 );
+        $resultClasses[$id]['rows']++;
+        if ( isset( $resultClasses[$id][$row['action']] ) )
+            $resultClasses[$id][$row['action']]++;
+    }
+    $tpl->setVariable( 'ResultClasses', array_values( $resultClasses ) );
+    $tpl->setVariable( 'ResultLanguageName', isset( $ContentLanguages[$Language]['name'] ) ? $ContentLanguages[$Language]['name'] : (string)$Language );
+    $tpl->setVariable( 'Result', $result );
+    $tpl->setVariable( 'Preview', !$apply );
+    $tpl->setVariable( 'Applied', $apply );
+    $tpl->setVariable( 'ApplyCount', $result['counts']['create'] + $result['counts']['update'] );
+};
+
+if ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
+{
+    // A content package's dry run/apply: the same Preview/Apply buttons and the same row-shaped
+    // display as XML/CSV/JSON ("just like json, csv, xml"), through inspectionToResultRows(). Apply
+    // installs it for real (XrowExtractPackage::install(), the site's default siteaccess, updating an
+    // existing object by remote id and skipping an existing class - the Package tab's own install
+    // form is still where those two are changed for a one-off).
+    $apply = $http->hasPostVariable( 'Apply' );
+    if ( $apply && $Package instanceof eZPackage )
+    {
+        $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
+                                                       XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::CLASS_SKIP );
+        if ( $installReport['ok'] )
+            eZContentObject::clearCache();
+        $tpl->setVariable( 'PackageInstallErrors', $installReport['errors'] );
+    }
+    $inspection = $Package instanceof eZPackage ? XrowExtractPackage::inspect( $Package, $ParentNodeID ) : array( 'classes' => array(), 'objects' => array() );
+    $result = XrowExtractPackage::inspectionToResultRows( $inspection );
+    $publishResult( $result, $apply );
+    if ( $apply )
+        $forgetFile();
+}
+elseif ( $hasFile && $NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) && XrowExtractJob::available() )
 {
     $apply = $http->hasPostVariable( 'Apply' );
     $args = array( '--file=' . $_SESSION[$SESSION_KEY]['path'] );
@@ -673,26 +737,7 @@ elseif ( $hasFile && !$NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $h
         'apply'        => $apply,
         'totalRows'    => $parsed['total_rows'],
     ) );
-    // Which classes the file's rows go into, with their counts per action (a "class" column can mix several)
-    $resultClasses = array();
-    foreach ( $result['rows'] as $row )
-    {
-        if ( empty( $row['class_id'] ) )
-            continue;
-        $id = (int)$row['class_id'];
-        if ( !isset( $resultClasses[$id] ) )
-            $resultClasses[$id] = array( 'id' => $id, 'identifier' => $row['class_identifier'], 'name' => $row['class_name'], 'rows' => 0,
-                                         'create' => 0, 'update' => 0, 'unchanged' => 0, 'error' => 0 );
-        $resultClasses[$id]['rows']++;
-        if ( isset( $resultClasses[$id][$row['action']] ) )
-            $resultClasses[$id][$row['action']]++;
-    }
-    $tpl->setVariable( 'ResultClasses', array_values( $resultClasses ) );
-    $tpl->setVariable( 'ResultLanguageName', isset( $ContentLanguages[$Language]['name'] ) ? $ContentLanguages[$Language]['name'] : (string)$Language );
-    $tpl->setVariable( 'Result', $result );
-    $tpl->setVariable( 'Preview', !$apply );
-    $tpl->setVariable( 'Applied', $apply );
-    $tpl->setVariable( 'ApplyCount', $result['counts']['create'] + $result['counts']['update'] );
+    $publishResult( $result, $apply );
     if ( $apply )
     {
         // Done: the file has served its purpose

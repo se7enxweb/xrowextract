@@ -343,9 +343,11 @@ class XrowExtractPackage
     /**
      * The dry run: every content class and content object install item, matched
      * against what already exists on this site by remote id (classes fall back
-     * to identifier). Nothing is written.
+     * to identifier). Nothing is written. $parentNodeID (the parent chosen in
+     * the install form, when known) is only used to describe where a new
+     * top-level object would land - it changes nothing about matching.
      */
-    public static function inspect( eZPackage $package )
+    public static function inspect( eZPackage $package, $parentNodeID = false )
     {
         $classes = array();
         $objects = array();
@@ -370,8 +372,27 @@ class XrowExtractPackage
 
         foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
         {
-            foreach ( self::inspectObjectItem( $package, $item, $classRemoteIDsInPackage, $classIdentifiersInPackage ) as $row )
+            foreach ( self::inspectObjectItem( $package, $item, $classRemoteIDsInPackage, $classIdentifiersInPackage, $parentNodeID ) as $row )
                 $objects[] = $row;
+        }
+
+        $classIdentifiers = array();
+        foreach ( $classes as $c )
+            if ( $c['identifier'] )
+                $classIdentifiers[$c['identifier']] = true;
+        foreach ( $objects as $o )
+            if ( $o['class_identifier'] )
+                $classIdentifiers[$o['class_identifier']] = true;
+        $languagesUsed = array();
+        foreach ( $objects as $o )
+            foreach ( $o['languages'] as $l )
+                $languagesUsed[$l] = true;
+        $parentInfo = null;
+        if ( $parentNodeID )
+        {
+            $parentNode = eZContentObjectTreeNode::fetch( (int)$parentNodeID );
+            if ( $parentNode instanceof eZContentObjectTreeNode )
+                $parentInfo = array( 'node_id' => (int)$parentNodeID, 'path' => $parentNode->attribute( 'path_identification_string' ) );
         }
 
         return array(
@@ -379,6 +400,13 @@ class XrowExtractPackage
             'classes' => $classes,
             'objects' => $objects,
             'errors'  => $errors,
+            'files'   => self::packageFiles( $package ),
+            'summary' => array(
+                'classes'            => array_keys( $classIdentifiers ),
+                'new_objects_parent' => $parentInfo,
+                'languages'          => array_keys( $languagesUsed ),
+                'match_mode'         => 'remote id',
+            ),
             'counts'  => array(
                 'classes_create' => count( array_filter( $classes, function ( $c ) { return $c['state'] === 'create'; } ) ),
                 'classes_update' => count( array_filter( $classes, function ( $c ) { return $c['state'] === 'update'; } ) ),
@@ -388,6 +416,108 @@ class XrowExtractPackage
                 'objects_class_missing' => count( array_filter( $objects, function ( $o ) { return $o['state'] === 'class_missing'; } ) ),
             ),
         );
+    }
+
+    /**
+     * Reshapes inspect()'s output into exactly the array XrowExtractImport::run()
+     * returns ('rows' with number/action/object_name/object_id/node_id/
+     * class_identifier/changes/reason, plus 'counts'), so a package's dry run
+     * renders through the same design:xrowextract/import_result.tpl as an
+     * XML/CSV/JSON row import - "just like json, csv, xml", per the owner. One
+     * row per content-class item (action 'create'/'update', its attribute diff
+     * as 'changes'), then one row per content-object item ('class_missing' maps
+     * to 'error', its reason explaining why; field-level changes as 'changes').
+     */
+    public static function inspectionToResultRows( array $inspection )
+    {
+        $rows = array();
+        $number = 0;
+        // A class's own row never buckets under $ResultClasses (import.php only buckets rows that
+        // carry a class_id): class_identifier is still shown on the row itself, just not counted as
+        // one of "the classes rows import into" the way an object row is.
+        foreach ( $inspection['classes'] as $classRow )
+        {
+            $number++;
+            $changes = array();
+            if ( $classRow['diff'] )
+            {
+                foreach ( $classRow['diff']['added'] as $added )
+                    $changes[] = array( 'field' => $added['identifier'], 'old' => '', 'new' => $added['datatype'] . ' (' . ezpI18n::tr( 'design/standard/extract', 'new attribute' ) . ')' );
+                foreach ( $classRow['diff']['removed'] as $removed )
+                    $changes[] = array( 'field' => $removed['identifier'], 'old' => $removed['datatype'] . ' (' . ezpI18n::tr( 'design/standard/extract', 'removed' ) . ')', 'new' => '' );
+                foreach ( $classRow['diff']['changed'] as $changed )
+                    $changes[] = array( 'field' => $changed['identifier'], 'old' => $changed['old_datatype'], 'new' => $changed['new_datatype'] );
+            }
+            $rows[] = array(
+                'number' => $number,
+                'action' => $classRow['state'],
+                'object_name' => ezpI18n::tr( 'design/standard/extract', 'Class: %name', null, array( '%name' => $classRow['name'] !== '' ? $classRow['name'] : $classRow['identifier'] ) ),
+                'object_id' => $classRow['existing_id'],
+                'node_id' => null,
+                'class_id' => null,
+                'class_identifier' => $classRow['identifier'],
+                'class_name' => $classRow['name'],
+                'changes' => $changes,
+                'reason' => '',
+            );
+        }
+        $classIDCache = array();
+        foreach ( $inspection['objects'] as $objectRow )
+        {
+            $number++;
+            $action = $objectRow['state'] === 'class_missing' ? 'error' : $objectRow['state'];
+            $changes = array();
+            foreach ( $objectRow['field_changes'] as $fieldChange )
+                $changes[] = array( 'field' => $fieldChange['identifier'], 'old' => $fieldChange['old'], 'new' => $fieldChange['new'] );
+            $identifier = $objectRow['class_identifier'];
+            if ( $identifier !== '' && !array_key_exists( $identifier, $classIDCache ) )
+            {
+                $liveClass = eZContentClass::fetchByIdentifier( $identifier );
+                $classIDCache[$identifier] = $liveClass instanceof eZContentClass ? array( (int)$liveClass->attribute( 'id' ), $liveClass->attribute( 'name' ) ) : array( null, $identifier );
+            }
+            $rows[] = array(
+                'number' => $number,
+                'action' => $action,
+                'object_name' => $objectRow['name'],
+                'object_id' => $objectRow['existing_id'],
+                'node_id' => $objectRow['placement'] ? $objectRow['placement']['node_id'] : null,
+                'class_id' => $identifier !== '' ? $classIDCache[$identifier][0] : null,
+                'class_identifier' => $identifier,
+                'class_name' => $identifier !== '' ? $classIDCache[$identifier][1] : '',
+                'changes' => $changes,
+                'reason' => $objectRow['state'] === 'class_missing'
+                          ? ezpI18n::tr( 'design/standard/extract', 'Class %class does not exist on this site.', null, array( '%class' => $objectRow['class_identifier'] ) )
+                          : '',
+            );
+        }
+        $counts = array( 'create' => 0, 'update' => 0, 'unchanged' => 0, 'error' => 0, 'skip' => 0 );
+        foreach ( $rows as $row )
+            if ( isset( $counts[$row['action']] ) )
+                $counts[$row['action']]++;
+        return array( 'rows' => $rows, 'counts' => $counts, 'ezoe' => true );
+    }
+
+    /** Every file a package carries outside its XML install items (simplefiles/, images/), with sizes. */
+    public static function packageFiles( eZPackage $package )
+    {
+        $out = array();
+        $base = $package->path();
+        foreach ( array( 'simplefiles', 'images' ) as $sub )
+        {
+            $dir = $base . '/' . $sub;
+            if ( !is_dir( $dir ) )
+                continue;
+            $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ) );
+            foreach ( $iterator as $file )
+            {
+                if ( !$file->isFile() )
+                    continue;
+                $relative = ltrim( str_replace( $dir, '', $file->getPathname() ), '/' );
+                $out[] = array( 'path' => $sub . '/' . $relative, 'size' => $file->getSize() );
+            }
+        }
+        usort( $out, function ( $a, $b ) { return strcasecmp( $a['path'], $b['path'] ); } );
+        return $out;
     }
 
     protected static function inspectClassItem( eZPackage $package, array $item )
@@ -444,11 +574,42 @@ class XrowExtractPackage
             'existing_id' => $existing instanceof eZContentClass ? (int)$existing->attribute( 'id' ) : null,
             'attributes'  => $attributeRows,
             'attribute_count' => count( $attributeRows ),
+            'diff'        => $existing instanceof eZContentClass ? self::classAttributeDiff( $attributeRows, $existing ) : null,
         );
     }
 
+    /** Attributes added, removed or changed datatype, package vs. the installed class of the same identifier/remote id. */
+    protected static function classAttributeDiff( array $packageAttributeRows, eZContentClass $existingClass )
+    {
+        $existingRows = array();
+        foreach ( eZContentClassAttribute::fetchListByClassID( (int)$existingClass->attribute( 'id' ), eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
+            $existingRows[$attribute->attribute( 'identifier' )] = $attribute->attribute( 'data_type_string' );
+
+        $packageRows = array();
+        foreach ( $packageAttributeRows as $row )
+            if ( $row['identifier'] !== '' )
+                $packageRows[$row['identifier']] = $row['datatype'];
+
+        $added = array();
+        $changed = array();
+        foreach ( $packageRows as $identifier => $datatype )
+        {
+            if ( !isset( $existingRows[$identifier] ) )
+                $added[] = array( 'identifier' => $identifier, 'datatype' => $datatype );
+            elseif ( $existingRows[$identifier] !== $datatype )
+                $changed[] = array( 'identifier' => $identifier, 'old_datatype' => $existingRows[$identifier], 'new_datatype' => $datatype );
+        }
+        $removed = array();
+        foreach ( $existingRows as $identifier => $datatype )
+            if ( !isset( $packageRows[$identifier] ) )
+                $removed[] = array( 'identifier' => $identifier, 'datatype' => $datatype );
+
+        return array( 'added' => $added, 'removed' => $removed, 'changed' => $changed,
+                      'has_changes' => (bool)( $added || $removed || $changed ) );
+    }
+
     /** One install item can carry many content objects (inline or one XML file per object). */
-    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage )
+    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false )
     {
         $rows = array();
         foreach ( self::objectDOMNodes( $package, $item ) as $objectNode )
@@ -492,6 +653,36 @@ class XrowExtractPackage
                 }
             }
 
+            $existingInfo = null;
+            $existingNode = null;
+            if ( $existing instanceof eZContentObject )
+            {
+                $existingNode = $existing->attribute( 'main_node' );
+                $existingInfo = array(
+                    'id'    => (int)$existing->attribute( 'id' ),
+                    'name'  => $existing->name(),
+                    'class_identifier' => $existing->attribute( 'class_identifier' ),
+                    'node_id' => $existingNode instanceof eZContentObjectTreeNode ? (int)$existingNode->attribute( 'node_id' ) : null,
+                    'path'    => $existingNode instanceof eZContentObjectTreeNode ? $existingNode->attribute( 'path_identification_string' ) : null,
+                );
+            }
+
+            $placement = null;
+            if ( $state === 'create' && $parentNodeID )
+            {
+                $parentNode = eZContentObjectTreeNode::fetch( (int)$parentNodeID );
+                if ( $parentNode instanceof eZContentObjectTreeNode )
+                    $placement = array( 'node_id' => (int)$parentNodeID, 'path' => $parentNode->attribute( 'path_identification_string' ), 'reason' => 'new' );
+            }
+            elseif ( in_array( $state, array( 'update', 'unchanged' ), true ) && $existingInfo && $existingInfo['node_id'] )
+            {
+                $placement = array( 'node_id' => $existingInfo['node_id'], 'path' => $existingInfo['path'], 'reason' => 'current' );
+            }
+
+            $fieldChanges = ( $state === 'update' && $existing instanceof eZContentObject )
+                          ? self::objectFieldChanges( $objectNode, $existing )
+                          : array();
+
             $rows[] = array(
                 'name'             => $name,
                 'remote_id'        => $remoteID,
@@ -499,9 +690,114 @@ class XrowExtractPackage
                 'languages'        => $languages,
                 'state'            => $state,
                 'existing_id'      => $existing instanceof eZContentObject ? (int)$existing->attribute( 'id' ) : null,
+                'existing'         => $existingInfo,
+                'placement'        => $placement,
+                'field_changes'    => $fieldChanges,
             );
         }
         return $rows;
+    }
+
+    /**
+     * The class attribute datatypes this class can compare old (live) vs new
+     * (package) value for by reading the exact field
+     * eZDataType::serializeContentObjectAttribute()'s default implementation
+     * writes for a datatype with no custom serializer (kernel/classes/
+     * ezdatatype.php): identifier => array( eZContentObjectAttribute field
+     * to read the live value from, package XML child element name to read
+     * the new value from ). A datatype not listed here (ezxmltext, ezimage,
+     * ezobjectrelation(list), ezselection, eztags, ezdate(time)... - each
+     * has its own custom serializer) is not compared field by field; the
+     * object as a whole is still reported as 'update'.
+     */
+    protected static function diffableAttributeFields()
+    {
+        return array(
+            'ezstring'     => array( 'source' => 'data_text',  'xml' => 'text' ),
+            'eztext'       => array( 'source' => 'data_text',  'xml' => 'text' ),
+            'ezinteger'    => array( 'source' => 'data_int',   'xml' => 'value' ),
+            'ezfloat'      => array( 'source' => 'data_float', 'xml' => 'value' ),
+            'ezboolean'    => array( 'source' => 'data_int',   'xml' => 'value', 'bool' => true ),
+            'ezemail'      => array( 'source' => 'data_text',  'xml' => 'email' ),
+            'ezidentifier' => array( 'source' => 'data_text',  'xml' => 'identifier' ),
+        );
+    }
+
+    /** Old (live) -> new (package) value per attribute, for the datatypes diffableAttributeFields() covers; only attributes that actually differ are returned. */
+    protected static function objectFieldChanges( DOMElement $objectNode, eZContentObject $existing )
+    {
+        $changes = array();
+        $map = self::diffableAttributeFields();
+        $versionListNode = $objectNode->getElementsByTagName( 'version-list' )->item( 0 );
+        if ( !$versionListNode )
+            return $changes;
+        $seen = array();
+        foreach ( $versionListNode->getElementsByTagName( 'object-translation' ) as $translationNode )
+        {
+            $language = $translationNode->getAttribute( 'language' );
+            $dataMap = $existing->fetchDataMap( false, $language ?: false );
+            foreach ( $translationNode->getElementsByTagNameNS( 'http://ez.no/object/', 'attribute' ) as $attrNode )
+            {
+                $identifier = $attrNode->getAttributeNS( 'http://ez.no/ezobject', 'identifier' );
+                $datatype = $attrNode->getAttribute( 'type' );
+                if ( $identifier === '' || !isset( $map[$datatype] ) || !isset( $dataMap[$identifier] ) )
+                    continue;
+                $spec = $map[$datatype];
+                $childNode = $attrNode->getElementsByTagName( $spec['xml'] )->item( 0 );
+                $newRaw = $childNode ? $childNode->textContent : '';
+                $oldRaw = (string)$dataMap[$identifier]->attribute( $spec['source'] );
+                $old = !empty( $spec['bool'] ) ? ( $oldRaw ? 'yes' : 'no' ) : $oldRaw;
+                $new = !empty( $spec['bool'] ) ? ( $newRaw ? 'yes' : 'no' ) : $newRaw;
+                $key = $identifier . '|' . $language;
+                if ( $old !== $new && !isset( $seen[$key] ) )
+                {
+                    $seen[$key] = true;
+                    $changes[] = array( 'identifier' => $identifier, 'datatype' => $datatype, 'language' => $language, 'old' => $old, 'new' => $new );
+                }
+            }
+        }
+        return $changes;
+    }
+
+    /**
+     * For buildSamplePackage()'s 'update' demo object: edits the first attribute value
+     * objectFieldChanges() knows how to compare (see diffableAttributeFields()), so the
+     * dry run's field-level old -> new has something real to show, not only the object's
+     * outer name/modified date. A class with none of those datatypes is left as is - the
+     * object still shows as 'update' (via its modified date), just with no field diff row.
+     */
+    protected static function mutateOneDiffableAttributeValue( DOMElement $objectNode )
+    {
+        $map = self::diffableAttributeFields();
+        $versionListNode = $objectNode->getElementsByTagName( 'version-list' )->item( 0 );
+        if ( !$versionListNode )
+            return false;
+        foreach ( $versionListNode->getElementsByTagName( 'object-translation' ) as $translationNode )
+        {
+            foreach ( $translationNode->getElementsByTagNameNS( 'http://ez.no/object/', 'attribute' ) as $attrNode )
+            {
+                $datatype = $attrNode->getAttribute( 'type' );
+                if ( !isset( $map[$datatype] ) )
+                    continue;
+                $childNode = $attrNode->getElementsByTagName( $map[$datatype]['xml'] )->item( 0 );
+                if ( !$childNode )
+                    continue;
+                $old = $childNode->textContent;
+                if ( !empty( $map[$datatype]['bool'] ) )
+                    $new = ( $old === '1' ) ? '0' : '1';
+                elseif ( $datatype === 'ezinteger' )
+                    $new = (string)( (int)$old + 1 );
+                elseif ( $datatype === 'ezfloat' )
+                    $new = sprintf( '%.2f', (float)$old + 1 );
+                else
+                    $new = $old . ' (sample, edited)';
+                while ( $childNode->firstChild )
+                    $childNode->removeChild( $childNode->firstChild );
+                $childNode->appendChild( $childNode->ownerDocument->createTextNode( $new ) );
+                return true;
+            }
+        }
+        return false;
     }
 
     /** DOM nodes for every content object an install item carries, inline or in separate files. */
@@ -640,6 +936,323 @@ class XrowExtractPackage
             $report['errors'][] = 'One or more package items failed to install; see the debug log for the exact item. Items that did install are listed above.';
 
         return $report;
+    }
+
+    // ------------------------------------------------------------ read-only packages from existing content
+    //
+    // "Try a sample" and "Start from a template" on xrowextract/import both build a real package
+    // through the same kernel handlers (eZContentClassPackageHandler, eZContentObjectPackageHandler)
+    // as package/create - but read-only, from content that already exists on this site, instead of
+    // creating (and then removing) scratch objects the way the older Package-page template builder
+    // below does. addNode()/generatePackage() only read and serialize; nothing here writes to the
+    // content tree. A class with no content yet still falls back to the scratch-object builder
+    // below, flagged in the result so the caller can say so on the page.
+
+    const SAMPLE_PACKAGE_PREFIX = 'xrowextract_sample_';
+    const SAMPLE_PACKAGE_KEEP_MARKER = '.xrowextract_keep';
+    /** How long an unwanted "Try a sample" package is left in the repository before cleanup removes it. */
+    const SAMPLE_PACKAGE_MAX_AGE = 21600; // 6 hours
+
+    /**
+     * Builds a real, installable sample content package for xrowextract/import's
+     * "Try a sample content package" button: the class definition plus up to 3
+     * existing content objects of it, read straight off this site through
+     * eZContentClassPackageHandler/eZContentObjectPackageHandler - nothing is
+     * created, changed or removed on the live site. The package is then
+     * altered in place (a fresh copy on disk, never the live objects) so its
+     * dry run demonstrates every outcome the inspection screen can show:
+     * one object left exactly as exported (unchanged), one with an edited
+     * name and an older modified date (update), one given a brand new remote
+     * id (create), and one given a class identifier that does not exist
+     * (class missing). A class with no content yet gets the class definition
+     * only, noted in the result.
+     *
+     * The package is named with the SAMPLE_PACKAGE_PREFIX and left out of
+     * the ordinary "keep forever" repository convention: cleanupOldSamplePackages()
+     * removes it again after SAMPLE_PACKAGE_MAX_AGE unless keepSamplePackage()
+     * was called for it first ("Keep in the repository" on the page).
+     */
+    public static function buildSamplePackage( $classID )
+    {
+        $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'object_count' => 0, 'outcomes' => array(), 'note' => '' );
+        $class = ctype_digit( (string)$classID ) ? eZContentClass::fetch( (int)$classID ) : eZContentClass::fetchByIdentifier( $classID );
+        if ( !$class instanceof eZContentClass )
+        {
+            $result['errors'][] = "No such class: $classID";
+            return $result;
+        }
+        $classID = (int)$class->attribute( 'id' );
+        $classIdentifier = $class->attribute( 'identifier' );
+
+        $objects = eZContentObject::fetchSameClassList( $classID, true, 0, 3 );
+        $objects = is_array( $objects ) ? $objects : array();
+
+        $packageName = self::uniquePackageName( self::SAMPLE_PACKAGE_PREFIX . $classIdentifier );
+        $package = eZPackage::create( $packageName, array(
+            'summary' => "Sample content package for '$classIdentifier', built read-only from this site's own content.",
+            'vendor'  => 'xrowextract',
+        ) );
+        self::attachAboutDocument( $package, "Try-a-sample package for class '$classIdentifier'. Built read-only from this site's own content by xrowextract/import; not a file anyone uploaded. Safe to remove." );
+
+        if ( !$objects )
+        {
+            eZContentClassPackageHandler::addClass( $package, $classID );
+            $result['note'] = "Class '$classIdentifier' has no content on this site yet; the sample carries the class definition only.";
+        }
+        else
+        {
+            self::exportExistingObjectsIntoPackage( $package, $class, $objects, true );
+            $result['outcomes'] = self::mutateSampleOutcomes( $package, $classIdentifier, $result['errors'] );
+        }
+
+        $package->setAttribute( 'is_active', true );
+        $package->store();
+
+        $result['ok'] = true;
+        $result['package'] = $package;
+        $result['object_count'] = count( $objects );
+        return $result;
+    }
+
+    /**
+     * addNode()+generatePackage() for a list of existing eZContentObject
+     * instances: read-only, the same call package/create makes for real
+     * nodes. $includeClasses also adds the class item(s) the objects belong
+     * to (eZContentObjectPackageHandler::generatePackage() does this itself
+     * when true).
+     */
+    protected static function exportExistingObjectsIntoPackage( eZPackage $package, eZContentClass $class, array $objects, $includeClasses )
+    {
+        $nodeIDs = array();
+        foreach ( $objects as $object )
+        {
+            $mainNode = $object instanceof eZContentObject ? $object->attribute( 'main_node' ) : null;
+            if ( $mainNode instanceof eZContentObjectTreeNode )
+                $nodeIDs[] = (int)$mainNode->attribute( 'node_id' );
+        }
+        if ( !$nodeIDs )
+            return false;
+
+        $languages = array_keys( XrowExtractColumns::contentLanguages() );
+        if ( !$languages )
+            $languages = array( 'eng-US' );
+
+        $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+        foreach ( $nodeIDs as $nodeID )
+            $objectHandler->addNode( $nodeID, false );
+        // language_array is the *allow-list* eZContentObjectVersion::serialize() checks each of an
+        // object's own translations against (kernel/classes/ezcontentobjectversion.php) - every
+        // configured site language, not a guess, so no real translation the objects happen to have
+        // is silently dropped from the export.
+        $objectHandler->generatePackage( $package, array(
+            'include_classes'   => $includeClasses,
+            'include_templates' => false,
+            'site_access_array' => array(),
+            'versions'          => 'current',
+            'language_array'    => $languages,
+            'node_assignment'   => 'selected',
+            'related_objects'   => 'selected',
+            'embed_objects'     => 'selected',
+        ) );
+        return true;
+    }
+
+    /**
+     * Alters a just-exported object item on disk (never the live objects) so
+     * its dry run shows every outcome: object 0 stays untouched (unchanged),
+     * object 1 (if there is one) gets an edited name and an older modified
+     * date (update), a fresh clone gets a brand new remote id (create), and
+     * another fresh clone gets a class identifier that exists nowhere
+     * (class_missing). Returns the outcomes produced, for the page to list.
+     */
+    protected static function mutateSampleOutcomes( eZPackage $package, $classIdentifier, array &$errors )
+    {
+        $items = self::installItemsOfType( $package, 'ezcontentobject' );
+        if ( !$items )
+        {
+            $errors[] = 'Could not find the exported object item to build the sample outcomes from.';
+            return array();
+        }
+        $item = $items[0];
+        if ( empty( $item['filename'] ) )
+            return array();
+        $subdirectory = isset( $item['sub-directory'] ) ? $item['sub-directory'] : false;
+        $filePath = $package->path() . '/' . ( $subdirectory ? $subdirectory . '/' . $item['filename'] . '.xml' : $item['filename'] . '.xml' );
+        $dom = $package->fetchDOMFromFile( $filePath );
+        if ( !$dom )
+        {
+            $errors[] = "Could not re-read the exported object file ($filePath) to build the sample outcomes.";
+            return array();
+        }
+        $objectListNode = $dom->getElementsByTagName( 'object-list' )->item( 0 );
+        if ( !$objectListNode )
+            return array(); // >=100 objects would use object-files-list instead; never reached with at most 3
+
+        $objectNodes = iterator_to_array( $objectListNode->getElementsByTagName( 'object' ) );
+        $n = count( $objectNodes );
+        if ( $n === 0 )
+            return array();
+
+        $originalNames = array();
+        foreach ( $objectNodes as $i => $node )
+            $originalNames[$i] = $node->getAttribute( 'name' );
+
+        // Built from pristine copies before anything is edited in place, so the 'create'/'class_missing'
+        // clones never pick up the 'update' edit made to object 1 below.
+        $createSourceIndex = $n >= 3 ? 2 : ( $n - 1 );
+        $createClone = $objectNodes[$createSourceIndex]->cloneNode( true );
+        $createRemoteID = 'xrowextract-sample-create-' . substr( md5( uniqid( '', true ) ), 0, 10 );
+        $createClone->setAttribute( 'remote_id', $createRemoteID );
+        $createClone->setAttribute( 'name', $originalNames[$createSourceIndex] . ' (sample, new)' );
+
+        $missingClone = $objectNodes[0]->cloneNode( true );
+        $missingRemoteID = 'xrowextract-sample-missing-' . substr( md5( uniqid( '', true ) ), 0, 10 );
+        $missingClone->setAttribute( 'remote_id', $missingRemoteID );
+        $missingClone->setAttribute( 'class_remote_id', 'xrowextract-sample-missing-class-remote-id' );
+        $missingClone->setAttributeNS( 'http://ez.no/ezobject', 'ezremote:class_identifier', $classIdentifier . '_sample_missing_demo' );
+        $missingClone->setAttribute( 'name', $originalNames[0] . ' (sample, missing class demo)' );
+
+        $outcomes = array();
+        if ( $n >= 2 )
+        {
+            $node = $objectNodes[1];
+            $node->setAttribute( 'name', $originalNames[1] . ' (sample, edited)' );
+            $node->setAttributeNS( 'http://ez.no/ezobject', 'ezremote:modified', eZDateUtils::rfc1123Date( time() - 172800 ) );
+            // Also edit one real attribute value where the class has a datatype objectFieldChanges()
+            // can compare, so the update demo shows a field-level old -> new, not only a changed name.
+            self::mutateOneDiffableAttributeValue( $node );
+            $outcomes[] = array( 'outcome' => 'update', 'name' => $originalNames[1] );
+        }
+        $outcomes[] = array( 'outcome' => 'unchanged', 'name' => $originalNames[0] );
+
+        $objectListNode->appendChild( $createClone );
+        $outcomes[] = array( 'outcome' => 'create', 'name' => $originalNames[$createSourceIndex] . ' (sample, new)' );
+        $objectListNode->appendChild( $missingClone );
+        $outcomes[] = array( 'outcome' => 'class_missing', 'name' => $originalNames[0] . ' (sample, missing class demo)' );
+
+        $package->storeDOM( $filePath, $dom );
+        return $outcomes;
+    }
+
+    /** Marks a "Try a sample" package as one the user chose to keep, exempting it from cleanupOldSamplePackages(). */
+    public static function keepSamplePackage( eZPackage $package )
+    {
+        @file_put_contents( $package->path() . '/' . self::SAMPLE_PACKAGE_KEEP_MARKER, (string)time() );
+    }
+
+    /** If $sessionEntry names a "Try a sample" package that was never kept, removes it from the repository right away (leaving before cleanupOldSamplePackages() gets to it). */
+    public static function forgetUnkeptSamplePackage( array $sessionEntry )
+    {
+        if ( empty( $sessionEntry['is_sample'] ) || empty( $sessionEntry['package_name'] ) )
+            return;
+        $package = eZPackage::fetch( $sessionEntry['package_name'] );
+        if ( !$package instanceof eZPackage )
+            return;
+        if ( is_file( $package->path() . '/' . self::SAMPLE_PACKAGE_KEEP_MARKER ) )
+            return;
+        $package->remove();
+    }
+
+    /**
+     * Removes any "Try a sample" package older than SAMPLE_PACKAGE_MAX_AGE
+     * that was never kept, so trying a few samples in a row does not
+     * accumulate packages in the repository forever. Called once per
+     * xrowextract/import request, the same pattern as
+     * XrowExtractImport::cleanupOldUploads().
+     */
+    public static function cleanupOldSamplePackages()
+    {
+        $removed = 0;
+        foreach ( eZPackage::fetchPackages() as $package )
+        {
+            $name = $package->attribute( 'name' );
+            if ( strpos( $name, self::SAMPLE_PACKAGE_PREFIX ) !== 0 )
+                continue;
+            $path = $package->path();
+            if ( is_file( $path . '/' . self::SAMPLE_PACKAGE_KEEP_MARKER ) )
+                continue;
+            $packageXML = $path . '/package.xml';
+            $age = is_file( $packageXML ) ? ( time() - filemtime( $packageXML ) ) : PHP_INT_MAX;
+            if ( $age < self::SAMPLE_PACKAGE_MAX_AGE )
+                continue;
+            $package->remove();
+            $removed++;
+        }
+        return $removed;
+    }
+
+    /**
+     * Builds a real .ezpkg for "Start from a template" on xrowextract/import:
+     * class only, content only, or class + content, for one class - preferring
+     * up to 3 real existing objects (read-only, same as buildSamplePackage())
+     * over the older scratch-object builder below. Falls back to
+     * buildTemplatePackage()'s scratch-content approach only when the class
+     * has no existing content and the variant needs some, flagged with
+     * 'used_scratch' => true so the page can say so.
+     */
+    public static function buildContentPackage( $classID, $variant, array $options = array() )
+    {
+        $variant = in_array( $variant, array( 'class', 'content', 'both' ), true ) ? $variant : 'both';
+        $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'used_scratch' => false, 'object_count' => 0 );
+        $class = ctype_digit( (string)$classID ) ? eZContentClass::fetch( (int)$classID ) : eZContentClass::fetchByIdentifier( $classID );
+        if ( !$class instanceof eZContentClass )
+        {
+            $result['errors'][] = "No such class: $classID";
+            return $result;
+        }
+        $classID = (int)$class->attribute( 'id' );
+        $classIdentifier = $class->attribute( 'identifier' );
+
+        if ( $variant === 'class' )
+        {
+            $package = eZPackage::create( self::uniquePackageName( 'xrowextract_template_' . $classIdentifier . '_class' ), array(
+                'summary' => "Content-package template for '$classIdentifier': the content class only.",
+                'vendor'  => 'xrowextract',
+            ) );
+            self::attachAboutDocument( $package, "Class-only template for '$classIdentifier'. Built by the xrowextract Import page." );
+            eZContentClassPackageHandler::addClass( $package, $classID );
+            $package->setAttribute( 'is_active', true );
+            $package->store();
+            $result['ok'] = true;
+            $result['package'] = $package;
+            return $result;
+        }
+
+        $objects = eZContentObject::fetchSameClassList( $classID, true, 0, 3 );
+        $objects = is_array( $objects ) ? $objects : array();
+        if ( $objects )
+        {
+            $packageName = self::uniquePackageName( 'xrowextract_template_' . $classIdentifier . '_' . $variant );
+            $package = eZPackage::create( $packageName, array(
+                'summary' => "Content-package template for '$classIdentifier': " . ( $variant === 'both' ? 'the content class and existing sample content' : 'existing sample content (the class must already exist on the installing site)' ),
+                'vendor'  => 'xrowextract',
+            ) );
+            self::attachAboutDocument( $package, "Template for '$classIdentifier' ($variant), built from " . count( $objects ) . " existing object(s) already on this site - read-only, nothing created or changed. By the xrowextract Import page." );
+            self::exportExistingObjectsIntoPackage( $package, $class, $objects, $variant === 'both' );
+            $package->setAttribute( 'is_active', true );
+            $package->store();
+            $result['ok'] = true;
+            $result['package'] = $package;
+            $result['object_count'] = count( $objects );
+            return $result;
+        }
+
+        // No existing content for this class: fall back to the scratch-object builder, flagged.
+        $fallback = self::buildTemplatePackage( $classID, $variant, $options );
+        $fallback['used_scratch'] = $fallback['ok'];
+        return $fallback;
+    }
+
+    /** The raw bytes of the single XML file a class-only or content-only package carries, for "Download class/object XML" on their own (no archive). */
+    public static function singleItemXMLBytes( eZPackage $package, $type )
+    {
+        $items = self::installItemsOfType( $package, $type );
+        if ( !$items || empty( $items[0]['filename'] ) )
+            return false;
+        $item = $items[0];
+        $subdirectory = isset( $item['sub-directory'] ) ? $item['sub-directory'] : false;
+        $filePath = $package->path() . '/' . ( $subdirectory ? $subdirectory . '/' . $item['filename'] . '.xml' : $item['filename'] . '.xml' );
+        return is_file( $filePath ) ? @file_get_contents( $filePath ) : false;
     }
 
     // ------------------------------------------------------------ template / sample package builder

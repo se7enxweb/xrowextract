@@ -132,6 +132,36 @@ class XrowExtractImport
         return $target;
     }
 
+    /** Streams a built eZPackage as a .ezpkg download and exits; the temporary archive file is removed again straight after. */
+    public static function streamPackageDownload( eZPackage $package, $downloadName )
+    {
+        $archivePath = self::uploadDir() . '/pkgdl_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
+        $package->exportToArchive( $archivePath );
+        $data = (string)@file_get_contents( $archivePath );
+        @unlink( $archivePath );
+        header( 'Cache-Control: private, no-store, max-age=0' );
+        header( 'X-Content-Type-Options: nosniff' );
+        header( 'Content-Type: application/gzip' );
+        header( 'Content-Length: ' . strlen( $data ) );
+        header( 'Content-Disposition: attachment; filename="' . preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $downloadName ) . '"' );
+        while ( @ob_end_clean() );
+        echo $data;
+        eZExecution::cleanExit();
+    }
+
+    /** Streams a raw content-class or content-object XML file as a download and exits. */
+    public static function streamXMLDownload( $xmlBytes, $downloadName )
+    {
+        header( 'Cache-Control: private, no-store, max-age=0' );
+        header( 'X-Content-Type-Options: nosniff' );
+        header( 'Content-Type: application/xml; charset=utf-8' );
+        header( 'Content-Length: ' . strlen( $xmlBytes ) );
+        header( 'Content-Disposition: attachment; filename="' . preg_replace( '/[^A-Za-z0-9_.-]+/', '_', $downloadName ) . '"' );
+        while ( @ob_end_clean() );
+        echo $xmlBytes;
+        eZExecution::cleanExit();
+    }
+
     // --------------------------------------------------------------- parse
 
     /** UTF-8 text with a leading BOM removed. */

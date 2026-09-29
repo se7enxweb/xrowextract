@@ -86,12 +86,9 @@ else
 $tpl->setVariable( 'PackageName', $packageName );
 $tpl->setVariable( 'Package', $package instanceof eZPackage ? $package : false );
 
-$inspection = false;
-if ( $package instanceof eZPackage )
-    $inspection = XrowExtractPackage::inspect( $package );
-$tpl->setVariable( 'Inspection', $inspection );
-
 // ---------------------------------------------------------------- install options
+// (ParentNodeID is resolved before the first inspect() call below, so the dry run can describe
+// where a new top-level object would land under the parent currently chosen on the page)
 
 $ParentNodeID = $http->hasPostVariable( 'ParentNodeID' ) ? (int)$http->postVariable( 'ParentNodeID' ) : 0;
 if ( !$ParentNodeID )
@@ -103,6 +100,11 @@ $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
 $parentNode = $ParentNodeID ? eZContentObjectTreeNode::fetch( $ParentNodeID ) : null;
 $tpl->setVariable( 'ParentNode', ( $parentNode instanceof eZContentObjectTreeNode && $parentNode->canRead() )
     ? array( 'name' => $parentNode->attribute( 'name' ), 'path' => $parentNode->attribute( 'path_identification_string' ), 'node_id' => $ParentNodeID ) : false );
+
+$inspection = false;
+if ( $package instanceof eZPackage )
+    $inspection = XrowExtractPackage::inspect( $package, $ParentNodeID );
+$tpl->setVariable( 'Inspection', $inspection );
 
 $availableSiteAccesses = eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );
 $tpl->setVariable( 'AvailableSiteAccesses', $availableSiteAccesses );
@@ -147,7 +149,7 @@ if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
     if ( $installReport['ok'] )
     {
         eZContentObject::clearCache();
-        $inspection = XrowExtractPackage::inspect( $package );
+        $inspection = XrowExtractPackage::inspect( $package, $ParentNodeID );
         $tpl->setVariable( 'Inspection', $inspection );
     }
 }
