@@ -47,7 +47,7 @@
                     </optgroup>
                     {/foreach}
                 </select>
-                <p class="xe-help">{'Drives "Try a sample" below; "Download a template" and the class/object XML downloads use the class chosen in step 2 instead.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'Drives every action below, and stays in sync with "Class" in step 2.'|i18n('design/standard/extract')}</p>
             </div>
             {/if}
 
@@ -55,7 +55,7 @@
                 <article class="xe-format-tile xe-format-recommended" aria-labelledby="xe-format-xml-h">
                     <h3 id="xe-format-xml-h">XML <span class="xe-format-badge">{'recommended'|i18n('design/standard/extract')}</span></h3>
                     <p class="xe-format-when">{'Exact: keeps column ids and the class name - what a template and a sample both build.'|i18n('design/standard/extract')}</p>
-                    <p class="xe-format-shape"><code>&lt;export&gt;&lt;columns&gt;...&lt;object&gt;&lt;field&gt;</code></p>
+                    <p class="xe-format-shape"><code>&lt;export&gt;&lt;object&gt;&lt;field&gt;</code></p>
                     <div class="xe-format-actions">
                         <button class="button" type="submit" name="TrySample" value="xml">{'Try a sample'|i18n('design/standard/extract')}</button>
                         <button class="button" type="submit" name="DownloadTemplate" value="xml">{'Download a template'|i18n('design/standard/extract')}</button>
@@ -67,7 +67,7 @@
                 <article class="xe-format-tile" aria-labelledby="xe-format-csv-h">
                     <h3 id="xe-format-csv-h">CSV</h3>
                     <p class="xe-format-when">{'Plain spreadsheet rows; separator and encoding are detected automatically.'|i18n('design/standard/extract')}</p>
-                    <p class="xe-format-shape"><code>title,remote-id,class,language</code></p>
+                    <p class="xe-format-shape"><code>title,remote-id,class</code></p>
                     <div class="xe-format-actions">
                         <button class="button" type="submit" name="TrySample" value="csv">{'Try a sample'|i18n('design/standard/extract')}</button>
                         <button class="button" type="submit" name="DownloadTemplate" value="csv">{'Download a template'|i18n('design/standard/extract')}</button>
@@ -79,7 +79,7 @@
                 <article class="xe-format-tile" aria-labelledby="xe-format-json-h">
                     <h3 id="xe-format-json-h">JSON</h3>
                     <p class="xe-format-when">{'One object per row, the same column names as CSV.'|i18n('design/standard/extract')}</p>
-                    <p class="xe-format-shape"><code>[{ldelim}"title": "...", "remote-id": "..."{rdelim}]</code></p>
+                    <p class="xe-format-shape"><code>[{ldelim}"title": "..."{rdelim}]</code></p>
                     <div class="xe-format-actions">
                         <button class="button" type="submit" name="TrySample" value="json">{'Try a sample'|i18n('design/standard/extract')}</button>
                         <button class="button" type="submit" name="DownloadTemplate" value="json">{'Download a template'|i18n('design/standard/extract')}</button>
@@ -91,7 +91,7 @@
                 <article class="xe-format-tile xe-format-package" aria-labelledby="xe-format-package-h">
                     <h3 id="xe-format-package-h">{'Content package'|i18n('design/standard/extract')} <code>.ezpkg</code></h3>
                     <p class="xe-format-when">{'Classes and content together, installed through the package system.'|i18n('design/standard/extract')}</p>
-                    <p class="xe-format-shape"><code>package.xml, ezcontentclass/, ezcontentobject/, simplefiles/</code></p>
+                    <p class="xe-format-shape"><code>package.xml + class/object XML</code></p>
                     <div class="xe-format-actions">
                         <button class="button" type="submit" name="TrySample" value="package">{'Try a sample'|i18n('design/standard/extract')}</button>
                         <div class="xe-segmented xe-format-variant" role="radiogroup" aria-label="{'Content package: what to include'|i18n('design/standard/extract')|wash}">
@@ -135,7 +135,7 @@
                 <label class="xe-label" for="xe-file">{'Choose a file'|i18n('design/standard/extract')}</label>
                 <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
                 <p class="xe-help xe-upload-expecting" data-expecting="{'Expecting: %format'|i18n('design/standard/extract')|wash}" hidden></p>
-                <p class="xe-help">{'A package is recognised by its contents, not the file name - the same for a class or object XML. No file size limit: a large file uploads in chunks, with a progress bar, and imports as a background job.'|i18n('design/standard/extract')}</p>
+                <p class="xe-help">{'Detected by content, not the file name. No size limit: large files upload in chunks and can run in the background.'|i18n('design/standard/extract')}</p>
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
                     <input type="hidden" name="UploadID" value="" />
                     <input type="hidden" name="UploadName" value="" />

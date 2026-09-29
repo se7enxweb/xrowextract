@@ -330,7 +330,14 @@ foreach ( $ClassChoices as $choice )
     }
 }
 
-$ClassID = $http->hasPostVariable( 'ClassID' ) ? (int)$http->postVariable( 'ClassID' ) : 0;
+// The File card's "Class for these actions" select and "Class and matching"'s own Class select are
+// kept in sync client-side (xrowextract.js), so either one drives every tile action (sample,
+// template, class/object XML) and step 2's own matching alike - one class choice, not two. Whichever
+// was actually posted wins; the File-card one takes priority so a visitor without JavaScript, who
+// only touched that one, still gets what they chose reflected everywhere, not just there.
+$ClassID = $http->hasPostVariable( 'SampleClassID' ) && (int)$http->postVariable( 'SampleClassID' )
+         ? (int)$http->postVariable( 'SampleClassID' )
+         : ( $http->hasPostVariable( 'ClassID' ) ? (int)$http->postVariable( 'ClassID' ) : 0 );
 if ( !$ClassID && !empty( $_SESSION[$SESSION_KEY]['classID'] ) )
 {
     // Right after "Try a sample"'s own redirect, no ClassID is posted yet; the class it was built for
