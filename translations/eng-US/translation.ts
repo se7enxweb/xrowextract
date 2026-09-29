@@ -4,6 +4,66 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</source>
+        <translation>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</translation>
+    </message>
+    <message>
+        <source>Class for these actions</source>
+        <translation>Class for these actions</translation>
+    </message>
+    <message>
+        <source>Drives every action below, and stays in sync with &quot;Class&quot; in step 2.</source>
+        <translation>Drives every action below, and stays in sync with &quot;Class&quot; in step 2.</translation>
+    </message>
+    <message>
+        <source>Exact: keeps column ids and the class name - what a template and a sample both build.</source>
+        <translation>Exact: keeps column ids and the class name - what a template and a sample both build.</translation>
+    </message>
+    <message>
+        <source>Download a template</source>
+        <translation>Download a template</translation>
+    </message>
+    <message>
+        <source>Read the reference</source>
+        <translation>Read the reference</translation>
+    </message>
+    <message>
+        <source>Upload a file of this kind</source>
+        <translation>Upload a file of this kind</translation>
+    </message>
+    <message>
+        <source>Plain spreadsheet rows; separator and encoding are detected automatically.</source>
+        <translation>Plain spreadsheet rows; separator and encoding are detected automatically.</translation>
+    </message>
+    <message>
+        <source>One object per row, the same column names as CSV.</source>
+        <translation>One object per row, the same column names as CSV.</translation>
+    </message>
+    <message>
+        <source>Classes and content together, installed through the package system.</source>
+        <translation>Classes and content together, installed through the package system.</translation>
+    </message>
+    <message>
+        <source>The class chosen in step 2 has no content yet: &quot;class + content&quot;/&quot;content only&quot; would use temporary hidden scratch content instead.</source>
+        <translation>The class chosen in step 2 has no content yet: &quot;class + content&quot;/&quot;content only&quot; would use temporary hidden scratch content instead.</translation>
+    </message>
+    <message>
+        <source>One content-class definition, on its own.</source>
+        <translation>One content-class definition, on its own.</translation>
+    </message>
+    <message>
+        <source>Content objects of a package, on their own.</source>
+        <translation>Content objects of a package, on their own.</translation>
+    </message>
+    <message>
+        <source>Expecting: %format</source>
+        <translation>Expecting: %format</translation>
+    </message>
+    <message>
+        <source>Detected by content, not the file name. No size limit: large files upload in chunks and can run in the background.</source>
+        <translation>Detected by content, not the file name. No size limit: large files upload in chunks and can run in the background.</translation>
+    </message>
+    <message>
         <source>Try a sample (.ezpkg)</source>
         <translation>Try a sample (.ezpkg)</translation>
     </message>

@@ -2,6 +2,66 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</source>
+        <translation>Wählen Sie unten ein Format, um ein Beispiel auszuprobieren, eine Vorlage zu erhalten, die Referenz zu lesen oder eine Datei dieser Art hochzuladen.</translation>
+    </message>
+    <message>
+        <source>Class for these actions</source>
+        <translation>Klasse für diese Aktionen</translation>
+    </message>
+    <message>
+        <source>Drives every action below, and stays in sync with &quot;Class&quot; in step 2.</source>
+        <translation>Bestimmt jede Aktion unten und bleibt mit &quot;Klasse&quot; in Schritt 2 synchron.</translation>
+    </message>
+    <message>
+        <source>Exact: keeps column ids and the class name - what a template and a sample both build.</source>
+        <translation>Exakt: behält Spalten-IDs und den Klassennamen bei - das erstellen sowohl eine Vorlage als auch ein Beispiel.</translation>
+    </message>
+    <message>
+        <source>Download a template</source>
+        <translation>Vorlage herunterladen</translation>
+    </message>
+    <message>
+        <source>Read the reference</source>
+        <translation>Referenz lesen</translation>
+    </message>
+    <message>
+        <source>Upload a file of this kind</source>
+        <translation>Datei dieser Art hochladen</translation>
+    </message>
+    <message>
+        <source>Plain spreadsheet rows; separator and encoding are detected automatically.</source>
+        <translation>Einfache Tabellenzeilen; Trennzeichen und Kodierung werden automatisch erkannt.</translation>
+    </message>
+    <message>
+        <source>One object per row, the same column names as CSV.</source>
+        <translation>Ein Objekt je Zeile, dieselben Spaltennamen wie bei CSV.</translation>
+    </message>
+    <message>
+        <source>Classes and content together, installed through the package system.</source>
+        <translation>Klassen und Inhalt zusammen, installiert über das Paketsystem.</translation>
+    </message>
+    <message>
+        <source>The class chosen in step 2 has no content yet: &quot;class + content&quot;/&quot;content only&quot; would use temporary hidden scratch content instead.</source>
+        <translation>Die in Schritt 2 gewählte Klasse hat noch keinen Inhalt: &quot;Klasse + Inhalt&quot;/&quot;Nur Inhalt&quot; würde stattdessen vorübergehenden, versteckten Test-Inhalt verwenden.</translation>
+    </message>
+    <message>
+        <source>One content-class definition, on its own.</source>
+        <translation>Eine einzelne Inhaltsklassendefinition, für sich allein.</translation>
+    </message>
+    <message>
+        <source>Content objects of a package, on their own.</source>
+        <translation>Inhaltsobjekte eines Pakets, für sich allein.</translation>
+    </message>
+    <message>
+        <source>Expecting: %format</source>
+        <translation>Erwartet: %format</translation>
+    </message>
+    <message>
+        <source>Detected by content, not the file name. No size limit: large files upload in chunks and can run in the background.</source>
+        <translation>Wird am Inhalt erkannt, nicht am Dateinamen. Keine Größenbeschränkung: große Dateien werden in Teilen hochgeladen und können im Hintergrund laufen.</translation>
+    </message>
+    <message>
         <source>Try a sample (.ezpkg)</source>
         <translation>Beispiel ausprobieren (.ezpkg)</translation>
     </message>
