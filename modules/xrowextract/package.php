@@ -204,6 +204,9 @@ if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
 }
 $tpl->setVariable( 'TemplateError', $templateError );
 
+$scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/package.tpl' );
 $Result['path'] = array(

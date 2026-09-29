@@ -683,3 +683,7 @@ li.xe-badge { margin: 0; }
 #xe-card-reference details { margin: .8em 0; padding: .6em 0; border-top: 1px solid var(--xe-line); }
 #xe-card-reference summary { cursor: pointer; font-weight: bold; }
 #xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }
+
+/* The section a reload returned to: a short outline so the eye finds its place again */
+.xe-returned { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 4px; transition: outline-color 1.2s ease; }
+@media (prefers-reduced-motion: reduce) { .xe-returned { transition: none; } }

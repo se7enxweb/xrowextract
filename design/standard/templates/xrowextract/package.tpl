@@ -415,3 +415,4 @@
 
     {* DESIGN: Content END *}</div></div></div></div></div></div>
 </div>
+<script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>
