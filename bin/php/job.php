@@ -153,7 +153,11 @@ if ( $job['type'] === 'archive' )
 }
 
 $outputPath = $job['output_file'] ? $dir . '/' . $job['output_file'] : null;
-if ( $exitCode === 0 && $outputPath && is_file( $outputPath ) )
+// A package install can finish with some items rejected and still exit 1 (package.php's own 'ok'
+// covers every item, continue-on-error is always on) - exactly the "a few bad rows" case
+// bin/php/import.php already treats as a completed job with a report to read, not a failed one (see
+// its own comment), so a package job's report is read whenever it exists, not only on exit 0.
+if ( ( $exitCode === 0 || $job['type'] === 'package' ) && $outputPath && is_file( $outputPath ) )
 {
     XrowExtractJob::fixOwnership( $outputPath );
     $job['state'] = 'done';
@@ -172,6 +176,28 @@ if ( $exitCode === 0 && $outputPath && is_file( $outputPath ) )
                 XrowExtractJob::fixOwnership( $dir . '/' . $report['errors_file'] );
                 $job['has_errors_file'] = true;
             }
+        }
+    }
+    elseif ( $job['type'] === 'package' )
+    {
+        // bin/php/package.php --install writes install-report.json: 'counts' is the dry run's own
+        // create/update/unchanged/class-missing split, taken just before installing (install()'s own
+        // 'report' only ever lists what it touched as "created classes"/"created objects" - it looks
+        // each one up again afterwards by remote id, with no notion of whether that particular one was
+        // new or already there). The Jobs page reads both: counts for the summary line, 'report' for
+        // the per-class/per-object links (a class id, or an object's node id when it has one).
+        $report = json_decode( (string)@file_get_contents( $outputPath ), true );
+        if ( is_array( $report ) )
+        {
+            $job['counts'] = isset( $report['counts'] ) ? $report['counts'] : null;
+            $job['package_name'] = isset( $report['package_name'] ) ? $report['package_name'] : null;
+            $job['created_classes'] = isset( $report['report']['created_classes'] ) ? $report['report']['created_classes'] : array();
+            $job['created_objects'] = isset( $report['report']['created_objects'] ) ? $report['report']['created_objects'] : array();
+            if ( !empty( $report['report']['errors'] ) )
+                $job['install_errors'] = $report['report']['errors'];
+            // A partial failure (install_errors set, report.ok false) is still shown as 'done': the
+            // items that did install (counts, created_classes/created_objects) are real and worth
+            // reading, exactly as a few bad import rows do not fail the whole import job.
         }
     }
     elseif ( preg_match( '/(\d+)\s+rows\b/', $log, $m ) )

@@ -122,6 +122,42 @@
                         <li class="xe-badge xe-badge-error"><strong>{$job.counts.error}</strong> {'error'|i18n('design/standard/extract')}</li>
                     </ul>
                     {/if}
+                    {if $job.type|eq( 'package' )|and( $job.counts )}
+                    <ul class="xe-stats xe-job-counts">
+                        <li class="xe-badge xe-badge-create"><strong>{$job.counts.classes_create}</strong> {'classes: create'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-update"><strong>{$job.counts.classes_update}</strong> {'classes: update'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-create"><strong>{$job.counts.objects_create}</strong> {'objects: create'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-update"><strong>{$job.counts.objects_update}</strong> {'objects: update'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-unchanged"><strong>{$job.counts.objects_unchanged}</strong> {'objects: unchanged'|i18n('design/standard/extract')}</li>
+                        <li class="xe-badge xe-badge-error"><strong>{$job.counts.objects_class_missing}</strong> {'objects: class missing'|i18n('design/standard/extract')}</li>
+                    </ul>
+                    {/if}
+                    {if $job.type|eq( 'package' )|and( or( $job.created_classes|count, $job.created_objects|count ) )}
+                    <details class="xe-job-package-detail">
+                        <summary>{'What was installed'|i18n('design/standard/extract')}</summary>
+                        {if $job.created_classes|count}
+                        <ul class="xe-job-package-list">
+                            {foreach $job.created_classes as $createdClass}
+                            <li><code>{$createdClass.identifier|wash}</code> — {$createdClass.name|wash} (<a href={concat( 'class/view/', $createdClass.id )|ezurl} target="_blank" rel="noopener">#{$createdClass.id}</a>)</li>
+                            {/foreach}
+                        </ul>
+                        {/if}
+                        {if $job.created_objects|count}
+                        <ul class="xe-job-package-list">
+                            {foreach $job.created_objects as $createdObject}
+                            <li>{$createdObject.name|wash} — {if $createdObject.node_id}<a href={concat( 'content/view/full/', $createdObject.node_id )|ezurl} target="_blank" rel="noopener">{'open'|i18n('design/standard/extract')}</a>{else}#{$createdObject.id}{/if}</li>
+                            {/foreach}
+                        </ul>
+                        {/if}
+                    </details>
+                    {/if}
+                    {if $job.install_errors|count}
+                    <ul class="xe-stats xe-note xe-note-bad">
+                        {foreach $job.install_errors as $installError}
+                        <li>{$installError|wash}</li>
+                        {/foreach}
+                    </ul>
+                    {/if}
 
                     <div class="xe-job-buttons">
                         {if $job.state|eq( 'done' )}

@@ -136,7 +136,7 @@
                 <input type="file" name="ImportFile" id="xe-file" accept=".xml,.csv,.json,.ezpkg,.tar.gz,.tgz,text/xml,application/xml,text/csv,application/json,application/gzip" />
                 <p class="xe-help xe-upload-expecting" data-expecting="{'Expecting: %format'|i18n('design/standard/extract')|wash}" hidden></p>
                 <p class="xe-help">{'Detected by content, not the file name. No size limit: large files upload in chunks and can run in the background.'|i18n('design/standard/extract')}</p>
-                <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl}>
+                <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl} data-file-field="ImportFile">
                     <input type="hidden" name="UploadID" value="" />
                     <input type="hidden" name="UploadName" value="" />
                     <div class="xe-progress"><div class="xe-progress-bar" style="width: 0%"></div></div>

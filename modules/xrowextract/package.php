@@ -16,37 +16,93 @@ $http = eZHTTPTool::instance();
 $tpl = eZTemplate::factory();
 
 $SESSION_KEY = 'XROWEXTRACT_PACKAGE_NAME';
+$RENAME_NOTICE_KEY = 'XROWEXTRACT_PACKAGE_RENAME_NOTICE';
 
 // ---------------------------------------------------------------- upload
+//
+// Two ways in, same as the import page: a chunked upload (design/standard/javascript/
+// xrowextract-upload.js) adopted by its UploadID - the default for anything above a small size,
+// since one huge multipart POST is exactly what a slow-arriving body needs on Velocity, where the
+// read loop that is still waiting for the rest of a large body is a live worker a size/idle check
+// elsewhere can race - and the plain whole-file POST any browser (or a script) still falls back to
+// without JavaScript. Either way the stored file goes through the same archive safety scan and
+// import as before.
+
+// A closure kept in a local variable, not a named function: this script runs again for every
+// request a long-running Velocity worker serves in the same process, and a bare `function
+// xrowExtractPackageFinishUpload(){}` declared at the top level here would fatal ("cannot
+// redeclare") on the second one. $forgetFile above (xrowextract/import.php) sets the pattern.
+$finishUpload = function ( $stored, $ownedByUpload, $uploadID ) use ( $module, $SESSION_KEY, $RENAME_NOTICE_KEY )
+{
+    $result = XrowExtractPackage::importUploadedArchive( $stored );
+    if ( $ownedByUpload )
+        XrowExtractUpload::delete( $uploadID );
+    else
+        @unlink( $stored );
+    if ( $result['ok'] )
+    {
+        $_SESSION[$SESSION_KEY] = $result['package']->attribute( 'name' );
+        if ( $result['renamed'] )
+        {
+            $_SESSION[$RENAME_NOTICE_KEY] = ezpI18n::tr( 'design/standard/extract',
+                'The package’s own name ("%from") is not a valid identifier; it was imported as "%to".', false,
+                array( '%from' => $result['renamed_from'], '%to' => $result['renamed_to'] ) );
+        }
+        return $module->redirectTo( 'xrowextract/package' );
+    }
+    return ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', false, array( '%reason' => $result['error'] ) );
+};
 
 $uploadError = '';
-if ( $http->hasPostVariable( 'UploadPackage' ) )
+if ( $http->hasPostVariable( 'UploadPackage' ) && $http->hasPostVariable( 'UploadID' ) && (string)$http->postVariable( 'UploadID' ) !== '' )
+{
+    $uploadID = (string)$http->postVariable( 'UploadID' );
+    $stored = XrowExtractUpload::path( $uploadID );
+    if ( $stored === false )
+    {
+        $uploadError = ezpI18n::tr( 'design/standard/extract', 'The upload could not be found; it may have expired. Choose the file again.' );
+    }
+    else
+    {
+        $outcome = $finishUpload( $stored, true, $uploadID );
+        if ( is_string( $outcome ) )
+            $uploadError = $outcome;
+        else
+            return $outcome;
+    }
+}
+elseif ( $http->hasPostVariable( 'UploadPackage' ) )
 {
     if ( eZHTTPFile::canFetch( 'PackageBinaryFile' ) )
     {
         $file = eZHTTPFile::fetch( 'PackageBinaryFile' );
-        // The upload is first copied into the private upload folder under a name with its own
-        // extension, then goes through the same path as the import page: the archive safety scan
-        // (no symlinks, hard links, special entries or paths leaving the folder) before anything is
-        // unpacked, and every kernel/archive exception turned into a message. Passing the web
-        // server's raw temporary file straight to eZPackage::import() skipped the scan, and on
-        // Velocity the archive reader could not open that temporary file: an uncaught
-        // ezcBaseFilePermissionException, a 500.
-        $stored = $file ? XrowExtractImport::storeUpload( $file->attribute( 'filename' ), $file->attribute( 'original_filename' ) ) : false;
-        if ( $stored )
+        list( $hasRoom, $roomMessage ) = $file ? XrowExtractUpload::hasRoomFor( (int)$file->attribute( 'filesize' ) ) : array( true, '' );
+        if ( !$hasRoom )
         {
-            $result = XrowExtractPackage::importUploadedArchive( $stored );
-            @unlink( $stored );
-            if ( $result['ok'] )
-            {
-                $_SESSION[$SESSION_KEY] = $result['package']->attribute( 'name' );
-                return $module->redirectTo( 'xrowextract/package' );
-            }
-            $uploadError = ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', false, array( '%reason' => $result['error'] ) );
+            $uploadError = $roomMessage;
         }
         else
         {
-            $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be read.' );
+            // The upload is first copied into the private upload folder under a name with its own
+            // extension, then goes through the same path as the import page: the archive safety scan
+            // (no symlinks, hard links, special entries or paths leaving the folder) before anything is
+            // unpacked, and every kernel/archive exception turned into a message. Passing the web
+            // server's raw temporary file straight to eZPackage::import() skipped the scan, and on
+            // Velocity the archive reader could not open that temporary file: an uncaught
+            // ezcBaseFilePermissionException, a 500.
+            $stored = $file ? XrowExtractImport::storeUpload( $file->attribute( 'filename' ), $file->attribute( 'original_filename' ) ) : false;
+            if ( $stored )
+            {
+                $outcome = $finishUpload( $stored, false, null );
+                if ( is_string( $outcome ) )
+                    $uploadError = $outcome;
+                else
+                    return $outcome;
+            }
+            else
+            {
+                $uploadError = ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be read.' );
+            }
         }
     }
     else
@@ -55,6 +111,13 @@ if ( $http->hasPostVariable( 'UploadPackage' ) )
     }
 }
 $tpl->setVariable( 'UploadError', $uploadError );
+$renameNotice = isset( $_SESSION[$RENAME_NOTICE_KEY] ) ? (string)$_SESSION[$RENAME_NOTICE_KEY] : '';
+unset( $_SESSION[$RENAME_NOTICE_KEY] );
+$tpl->setVariable( 'RenameNotice', $renameNotice );
+$diskFree = XrowExtractUpload::freeDiskSpace();
+$tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? XrowExtractUpload::humanSize( $diskFree ) : false );
+$uploadJsFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-upload.js';
+$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ), 0, 12 ) : '0' );
 
 // ---------------------------------------------------------------- pick the current package
 

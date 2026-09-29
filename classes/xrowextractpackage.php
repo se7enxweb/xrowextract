@@ -151,7 +151,12 @@ class XrowExtractPackage
     /**
      * Imports an uploaded .ezpkg/.tar.gz into the local package repository,
      * after scanArchiveEntries() has refused a path-traversal/symlink
-     * archive. Returns array( 'ok', 'package' => eZPackage|null, 'error' ).
+     * archive. Returns array( 'ok', 'package' => eZPackage|null, 'error',
+     * 'renamed' => bool, 'renamed_from', 'renamed_to' ) - the last three
+     * from renamedArchiveCopyIfNeeded() (see there): an older or hand-built
+     * .ezpkg whose own package.xml name is not a valid kernel identifier
+     * (capitals, spaces...) is imported anyway, under a corrected name, with
+     * enough returned for the caller to say so, instead of being refused.
      */
     public static function importUploadedArchive( $storedPath )
     {
@@ -162,7 +167,10 @@ class XrowExtractPackage
             $storedPath = $real;
         $scan = self::scanArchiveEntries( $storedPath );
         if ( !$scan['ok'] )
-            return array( 'ok' => false, 'package' => null, 'error' => $scan['error'] );
+            return array( 'ok' => false, 'package' => null, 'error' => $scan['error'], 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+
+        $renameInfo = self::renamedArchiveCopyIfNeeded( $storedPath );
+        $importPath = $renameInfo['path'];
 
         $packageName = '';
         try
@@ -183,21 +191,139 @@ class XrowExtractPackage
             // eZPackage::import() throw a PHP 8 TypeError deep inside kernel/classes/
             // ezpackage.php (getElementsByTagName() on null), not return false - caught
             // here so a malformed upload is refused cleanly instead of a fatal error page.
-            $imported = self::withNativeFileStreams( function () use ( $storedPath, &$packageName ) {
-                return eZPackage::import( $storedPath, $packageName, true, 'local', false );
+            $imported = self::withNativeFileStreams( function () use ( $importPath, &$packageName ) {
+                return eZPackage::import( $importPath, $packageName, true, 'local', false );
             } );
         }
         catch ( \Throwable $e )
         {
-            return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg): ' . $e->getMessage() );
+            if ( $renameInfo['renamed'] )
+                @unlink( $importPath );
+            return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg): ' . $e->getMessage(), 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
         }
+        if ( $renameInfo['renamed'] )
+            @unlink( $importPath ); // the corrected copy has done its job either way, imported or not
         if ( $imported instanceof eZPackage )
-            return array( 'ok' => true, 'package' => $imported, 'error' => null );
+            return array( 'ok' => true, 'package' => $imported, 'error' => null, 'renamed' => $renameInfo['renamed'], 'renamed_from' => $renameInfo['from'], 'renamed_to' => $renameInfo['to'] );
         if ( $imported === eZPackage::STATUS_ALREADY_EXISTS )
-            return array( 'ok' => false, 'package' => null, 'error' => "a package named '$packageName' already exists in the repository" );
+            return array( 'ok' => false, 'package' => null, 'error' => "a package named '$packageName' already exists in the repository", 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
         if ( $imported === eZPackage::STATUS_INVALID_NAME )
-            return array( 'ok' => false, 'package' => null, 'error' => "the package name '$packageName' is invalid" );
-        return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg)' );
+            return array( 'ok' => false, 'package' => null, 'error' => "the package name '$packageName' is invalid", 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+        return array( 'ok' => false, 'package' => null, 'error' => 'not a valid Exponential package (.ezpkg)', 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+    }
+
+    /**
+     * If the uploaded archive's own package name (its package.xml <name>) is not a valid kernel
+     * identifier - eZPackage::isValidName() refuses capitals, spaces and punctuation, true of some
+     * hand-built or older .ezpkg files - returns a private corrected copy of the archive with only
+     * that <name> rewritten to validPackageName()'s transform, every other byte untouched, so
+     * eZPackage::import() (which otherwise answers STATUS_INVALID_NAME and refuses the whole
+     * upload) accepts it. Mirrors exactly what eZPackage::exportToArchive() itself does to build an
+     * archive (ezcArchive, TAR_USTAR, through the compress.zlib:// wrapper) - no re-implementation
+     * of archive writing.
+     *
+     * Returns array( 'path' => original or corrected path, 'renamed' => bool, 'from' => the name
+     * found in package.xml (or null if it could not be read at all), 'to' => the corrected name, or
+     * null ). A 'path' equal to $storedPath (renamed false) is the normal, unmodified case; the
+     * caller only has to @unlink() the result when 'renamed' is true.
+     */
+    protected static function renamedArchiveCopyIfNeeded( $storedPath )
+    {
+        $result = array( 'path' => $storedPath, 'renamed' => false, 'from' => null, 'to' => null );
+        try
+        {
+            $archive = ezcArchive::open( "compress.zlib://$storedPath", ezcArchive::TAR_GNU, new ezcArchiveOptions( array( 'readOnly' => true ) ) );
+        }
+        catch ( \Throwable $e )
+        {
+            return $result; // not a readable archive at all; eZPackage::import() will say so itself
+        }
+
+        $peekDir = eZPackage::temporaryImportPath() . '/rename-peek-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 );
+        eZDir::mkdir( $peekDir, false, true );
+        foreach ( $archive as $entry )
+        {
+            if ( $entry->getPath() === eZPackage::definitionFilename() )
+            {
+                $archive->extractCurrent( $peekDir );
+                break;
+            }
+        }
+        $name = self::readPackageNameFromXML( $peekDir . '/' . eZPackage::definitionFilename() );
+        eZDir::recursiveDelete( $peekDir );
+
+        if ( $name === null || eZPackage::isValidName( $name ) )
+        {
+            $result['from'] = $name;
+            return $result;
+        }
+        $result['from'] = $name;
+        $newName = self::validPackageName( $name );
+
+        $extractDir = eZPackage::temporaryImportPath() . '/rename-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 );
+        eZDir::mkdir( $extractDir, false, true );
+        try
+        {
+            $archive->extract( $extractDir );
+            $defPath = $extractDir . '/' . eZPackage::definitionFilename();
+            $dom = new DOMDocument();
+            if ( !is_file( $defPath ) || !@$dom->load( $defPath ) )
+            {
+                eZDir::recursiveDelete( $extractDir );
+                return $result;
+            }
+            $nameNode = $dom->getElementsByTagName( 'name' )->item( 0 );
+            if ( !$nameNode )
+            {
+                eZDir::recursiveDelete( $extractDir );
+                return $result;
+            }
+            while ( $nameNode->firstChild )
+                $nameNode->removeChild( $nameNode->firstChild );
+            $nameNode->appendChild( $dom->createTextNode( $newName ) );
+            $dom->save( $defPath );
+
+            $tempArchiveFile = eZPackage::temporaryExportPath() . '/rename-archive-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 ) . '.tmp';
+            eZDir::mkdir( dirname( $tempArchiveFile ), false, true );
+            $writer = ezcArchive::open( $tempArchiveFile, ezcArchive::TAR_USTAR );
+            $writer->truncate();
+            $fileList = array();
+            eZDir::recursiveList( $extractDir, $extractDir, $fileList );
+            $prefix = $extractDir . '/';
+            foreach ( $fileList as $fileInfo )
+            {
+                $entryPath = $fileInfo['type'] === 'dir' ? $fileInfo['path'] . '/' . $fileInfo['name'] . '/' : $fileInfo['path'] . '/' . $fileInfo['name'];
+                $writer->append( array( $entryPath ), $prefix );
+            }
+            $writer->close();
+
+            $correctedPath = XrowExtractImport::uploadDir() . '/renamed_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
+            copy( $tempArchiveFile, "compress.zlib://$correctedPath" );
+            @unlink( $tempArchiveFile );
+            eZDir::recursiveDelete( $extractDir );
+
+            $result['path'] = $correctedPath;
+            $result['renamed'] = true;
+            $result['to'] = $newName;
+            return $result;
+        }
+        catch ( \Throwable $e )
+        {
+            eZDir::recursiveDelete( $extractDir );
+            return array( 'path' => $storedPath, 'renamed' => false, 'from' => $name, 'to' => null ); // fall through; import() will refuse it as before
+        }
+    }
+
+    /** The <name> package.xml's root element carries, or null if the file cannot be read as one. */
+    protected static function readPackageNameFromXML( $path )
+    {
+        if ( !is_file( $path ) )
+            return null;
+        $dom = new DOMDocument();
+        if ( !@$dom->load( $path ) )
+            return null;
+        $nameNode = $dom->getElementsByTagName( 'name' )->item( 0 );
+        return $nameNode ? trim( $nameNode->textContent ) : null;
     }
 
     /**
