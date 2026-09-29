@@ -1043,11 +1043,27 @@
         }
         var wanted = button ? note.top : note.sectionTop;
         window.scrollTo(0, Math.max(0, window.pageYOffset + anchor.getBoundingClientRect().top - wanted));
-        var outline = section || (button && button.closest('section, .xe-card, fieldset'));
-        if (outline) {
-            outline.classList.add('xe-returned');
-            window.setTimeout(function () { outline.classList.remove('xe-returned'); }, 1800);
+        // Highlight the block the reader was working in - the button's own field group, which is always on
+        // screen next to the button - not the whole card: a tall card's outline starts above the window and
+        // reads as the section above. The card only gets a quiet edge mark.
+        var group = button ? (button.closest('.xe-field, fieldset, .xe-toolbar') || button.parentNode) : null;
+        var card = (button || section) ? (button || section).closest('section, .xe-card') : null;
+        var marks = [];
+        if (group && group !== card) {
+            marks.push([group, 'xe-returned']);
+        } else if (card) {
+            marks.push([card, 'xe-returned']);
         }
+        if (card && group && group !== card) {
+            marks.push([card, 'xe-returned-card']);
+        }
+        // Next frame, after the scroll, so the pulse starts where the reader is looking
+        window.requestAnimationFrame(function () {
+            marks.forEach(function (m) { m[0].classList.add(m[1]); });
+            window.setTimeout(function () {
+                marks.forEach(function (m) { m[0].classList.remove(m[1]); });
+            }, 2600);
+        });
         if (button && button.focus) {
             try { button.focus({ preventScroll: true }); } catch (e) { button.focus(); }
         }

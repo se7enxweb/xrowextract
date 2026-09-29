@@ -684,6 +684,18 @@ li.xe-badge { margin: 0; }
 #xe-card-reference summary { cursor: pointer; font-weight: bold; }
 #xe-card-reference ul.xe-typelist small { display: inline; margin-left: .5em; color: var(--xe-muted); }
 
-/* The section a reload returned to: a short outline so the eye finds its place again */
-.xe-returned { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 4px; transition: outline-color 1.2s ease; }
-@media (prefers-reduced-motion: reduce) { .xe-returned { transition: none; } }
+/* The block a reload returned to: a clear pulse (outline and a soft tint that fade out) so the eye finds its
+   place again; its card gets a quiet left edge mark only */
+@keyframes xe-returned-pulse {
+    0%   { outline-color: rgba(37, 99, 235, .9); background-color: rgba(37, 99, 235, .14); }
+    60%  { outline-color: rgba(37, 99, 235, .7); background-color: rgba(37, 99, 235, .08); }
+    100% { outline-color: rgba(37, 99, 235, 0);  background-color: rgba(37, 99, 235, 0); }
+}
+.xe-returned {
+    outline: 3px solid rgba(37, 99, 235, 0); outline-offset: 5px; border-radius: 6px;
+    animation: xe-returned-pulse 2.6s ease-out 1;
+}
+.xe-returned-card { box-shadow: inset 4px 0 0 var(--xe-accent); }
+@media (prefers-reduced-motion: reduce) {
+    .xe-returned { animation: none; outline-color: rgba(37, 99, 235, .8); background-color: rgba(37, 99, 235, .1); }
+}
