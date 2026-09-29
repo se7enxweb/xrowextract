@@ -2,6 +2,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>What was installed</source>
+        <translation>Was installiert wurde</translation>
+    </message>
+    <message>
         <source>created</source>
         <translation>angelegt</translation>
     </message>

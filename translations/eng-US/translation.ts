@@ -4,6 +4,10 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>What was installed</source>
+        <translation>What was installed</translation>
+    </message>
+    <message>
         <source>created</source>
         <translation>created</translation>
     </message>
