@@ -1357,6 +1357,55 @@ if ( $http->hasPostVariable( 'RunInBackground' ) || $AutoRunPresetInBackground )
     $tpl->setVariable( 'BackgroundError', $backgroundError );
 }
 
+// Export as package (.ezpkg): the class chosen here, below the node/subtree (or the whole site)
+// chosen here, as a real content package - always a background job (xrowextract/jobs, type
+// "package") since a class-wide export can be as large as the class itself; bin/php/package.php
+// --export does the actual work, the same code path ext:xrowextract:package/xrowextract/package use.
+if ( $http->hasPostVariable( 'ExportAsPackage' ) )
+{
+    if ( !XrowExtractJob::available() )
+    {
+        $tpl->setVariable( 'BackgroundError', ezpI18n::tr( 'design/standard/extract', 'Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).' ) );
+    }
+    else
+    {
+        $exportArgs = array( '--export' );
+        if ( $Scope === 'all' )
+        {
+            $exportContentINI = eZSiteAccess::getIni( eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
+            $rootNodeID = (int)$exportContentINI->variable( 'NodeSettings', 'RootNode' );
+            $exportArgs[] = '--node=' . $rootNodeID;
+            $exportArgs[] = '--subtree';
+        }
+        else
+        {
+            // "list" (single level) is exported the same as the full subtree for a package - a
+            // package has no notion of "one level only", unlike a row export's own depth option
+            $exportArgs[] = '--node=' . $Subtree;
+            $exportArgs[] = '--subtree';
+        }
+        if ( $Class_id )
+            $exportArgs[] = '--class=' . $Class_id;
+
+        $className = $chosenClass ? $chosenClass->attribute( 'name' ) : ( 'class ' . $Class_id );
+        $exportWhat = $className . ' — ' . ( $Scope === 'all' ? ezpI18n::tr( 'design/standard/extract', 'whole site' ) : ( ( $exportNode = eZContentObjectTreeNode::fetch( $Subtree ) ) ? $exportNode->attribute( 'name' ) : ( 'node ' . $Subtree ) ) );
+        $exportJobID = XrowExtractJob::create( array(
+            'type' => 'package', 'owner' => eZUser::currentUser()->attribute( 'login' ),
+            'what' => 'Export as package: ' . $exportWhat,
+            'format' => 'ezpkg', 'output_file' => 'export.ezpkg', 'args' => $exportArgs,
+        ) );
+        if ( !XrowExtractJob::start( $exportJobID ) )
+        {
+            XrowExtractJob::update( $exportJobID, array(
+                'state' => 'failed', 'ended' => time(),
+                'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+            ) );
+        }
+        $http->setSessionVariable( 'eZExtractJobStarted', $exportJobID );
+        return $module->redirectTo( 'xrowextract/jobs' );
+    }
+}
+
 if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoad )
 {
     $started = microtime( true );

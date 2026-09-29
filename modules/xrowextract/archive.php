@@ -273,6 +273,44 @@ if ( $http->hasPostVariable( 'RunInBackground' ) )
     }
 }
 
+// Export as package (.ezpkg): the selected nodes (each with its whole subtree), as one real content
+// package - every class found under them, not narrowed to the class selection above (a package has
+// no per-class filter across several nodes; "One class" export does narrow to one class, see csv.php).
+// Always a background job, the same reasons as "Run in the background" above.
+if ( $http->hasPostVariable( 'ExportAsPackage' ) )
+{
+    if ( !$roots )
+    {
+        $error = ezpI18n::tr( 'design/standard/extract', 'Choose at least one node.' );
+    }
+    elseif ( !XrowExtractJob::available() )
+    {
+        $error = ezpI18n::tr( 'design/standard/extract', 'Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).' );
+    }
+    else
+    {
+        $exportArgs = array( '--export', '--nodes=' . implode( ',', $state['nodes'] ), '--subtree' );
+        $rootNames = array();
+        foreach ( $roots as $root )
+            $rootNames[] = $root->attribute( 'name' );
+        $exportWhat = implode( ', ', array_slice( $rootNames, 0, 4 ) ) . ( count( $rootNames ) > 4 ? ' …' : '' );
+        $exportJobID = XrowExtractJob::create( array(
+            'type' => 'package', 'owner' => eZUser::currentUser()->attribute( 'login' ),
+            'what' => 'Export as package: ' . $exportWhat,
+            'format' => 'ezpkg', 'output_file' => 'export.ezpkg', 'args' => $exportArgs,
+        ) );
+        if ( !XrowExtractJob::start( $exportJobID ) )
+        {
+            XrowExtractJob::update( $exportJobID, array(
+                'state' => 'failed', 'ended' => time(),
+                'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+            ) );
+        }
+        $http->setSessionVariable( 'eZExtractJobStarted', $exportJobID );
+        return $module->redirectTo( 'xrowextract/jobs' );
+    }
+}
+
 // Nodes to pick from: the roots of the installation and the first levels of the content and media trees
 $suggestions = array();
 $selectedIDs = array_flip( $state['nodes'] );

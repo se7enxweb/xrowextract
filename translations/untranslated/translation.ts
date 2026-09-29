@@ -4,6 +4,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Export as package</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This class, below the node chosen above, as a real content package (.ezpkg) - installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The selected nodes, each with its whole subtree, as a real content package (.ezpkg) - every class found there, installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Try a sample: %format</source>
         <translation type="unfinished"></translation>
     </message>

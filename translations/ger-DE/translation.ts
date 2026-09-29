@@ -2,6 +2,18 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>Export as package</source>
+        <translation>Als Paket exportieren</translation>
+    </message>
+    <message>
+        <source>This class, below the node chosen above, as a real content package (.ezpkg) - installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.</source>
+        <translation>Diese Klasse, unterhalb des oben gewählten Knotens, als echtes Inhaltspaket (.ezpkg) - installierbar auf einer anderen Website über xrowextract/import oder xrowextract/package. Läuft immer als Hintergrundjob; siehe den Tab Jobs.</translation>
+    </message>
+    <message>
+        <source>The selected nodes, each with its whole subtree, as a real content package (.ezpkg) - every class found there, installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.</source>
+        <translation>Die ausgewählten Knoten, jeweils mit ihrem gesamten Teilbaum, als echtes Inhaltspaket (.ezpkg) - jede dort gefundene Klasse, installierbar auf einer anderen Website über xrowextract/import oder xrowextract/package. Läuft immer als Hintergrundjob; siehe den Tab Jobs.</translation>
+    </message>
+    <message>
         <source>Try a sample: %format</source>
         <translation>Beispiel ausprobieren: %format</translation>
     </message>
