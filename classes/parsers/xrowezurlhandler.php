@@ -2,7 +2,8 @@
 
 class XroweZURLHandler extends XrowBaseHandler
 {
-	public function exportAttribute( &$attribute )
+	/** @param eZContentObjectAttribute $attribute */
+	public function exportAttribute( &$attribute ): string
 	{
 		$csvINI = eZINI::instance( 'csv.ini' );
 		$ini_option = $csvINI->variable( 'General', 'StripURLText' );

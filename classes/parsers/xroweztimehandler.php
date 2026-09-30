@@ -1,7 +1,8 @@
 <?php
 class XroweZTimeHandler extends XrowBaseHandler
 {
-    public function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute( &$attribute ): string
     {
         $content = $attribute->content();
         if ( !is_object( $content ) || !$attribute->hasContent() )

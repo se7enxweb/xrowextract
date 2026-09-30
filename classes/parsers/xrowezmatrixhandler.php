@@ -2,7 +2,8 @@
 
 class XroweZMatrixExportHandler extends XrowBaseHandler
 {
-    function exportAttribute(&$attribute)
+    /** @param eZContentObjectAttribute $attribute */
+    function exportAttribute(&$attribute): string
     {
         $content = $attribute->content();
         $rows = is_object( $content ) ? $content->attribute( 'rows' ) : array();

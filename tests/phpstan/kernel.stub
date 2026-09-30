@@ -54,3 +54,17 @@ class eZPackage
      */
     static function import( $archiveName, &$packageName, $dbAvailable = true, $repositoryID = false, $skipExisting = false ) {}
 }
+
+class eZContentObject extends eZPersistentObject
+{
+    /**
+     * $lang is a locale such as eng-GB, or false for the object's current
+     * language (kernel/classes/ezcontentobject.php passes it on to
+     * versionLanguageName(), which looks the locale up).
+     *
+     * @param int|false $version
+     * @param string|false|null $lang
+     * @return string|false
+     */
+    function name( $version = false , $lang = false ) {}
+}

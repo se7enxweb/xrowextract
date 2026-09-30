@@ -8,13 +8,24 @@
 class ParserInterface
 {
     //holds the lookup map for the handler mapings
+    /** @var array<string, array{handler: XrowBaseHandler, exportable: bool}> */
     public $handlerMap=array();
+    /** @var list<string> csv.ini [General] ExportableDatatypes[] */
     public $exportableDatatypes;
+    /** @var string */
     public $separationChar = ",";
+    /** @var bool */
     public $escape = true;
+    /** @var bool */
     public $neutralizeFormulas = true;
+    /** @var bool */
     public $raw = false;
 
+    /**
+     * @param string|null $separationChar null: a comma
+     * @param bool|null $escape null: on (quoted cells)
+     * @param bool $raw
+     */
     public function __construct( $separationChar = null, $escape = null, $raw = false )
     {
         $this->raw = (bool)$raw;
@@ -57,6 +68,7 @@ class ParserInterface
         }
     }
 
+    /** @return list<string> */
     public function getExportableDatatypes()
     {
         return $this->exportableDatatypes;
@@ -66,8 +78,10 @@ class ParserInterface
      * One attribute as one CSV cell (escaped by its handler), without a separator.
      * A datatype with no handler gives an empty cell, so every row keeps the
      * header's columns.
+     *
+     * @param eZContentObjectAttribute $attribute
      */
-    public function exportValue( $attribute )
+    public function exportValue( $attribute ): string
     {
         $handler = isset( $this->handlerMap[$attribute->DataTypeString]['handler'] )
                  ? $this->handlerMap[$attribute->DataTypeString]['handler'] : null;
@@ -78,13 +92,18 @@ class ParserInterface
         return $this->escape( '' );
     }
 
-    /** Kept for callers of the old API: the cell followed by the separator. */
-    public function exportAttribute( &$attribute )
+    /**
+     * Kept for callers of the old API: the cell followed by the separator.
+     *
+     * @param eZContentObjectAttribute $attribute
+     */
+    public function exportAttribute( &$attribute ): string
     {
         return $this->exportValue( $attribute ) . $this->separationChar;
     }
 
-    public function escape( $text )
+    /** @param mixed $text */
+    public function escape( $text ): string
     {
         $handler = new XrowBaseHandler();
         $handler->separationChar = $this->separationChar;

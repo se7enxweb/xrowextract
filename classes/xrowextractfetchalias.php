@@ -11,6 +11,9 @@
  * fetchalias.ini; this class also reads a named siteaccess's copy (eZSiteAccess::getIni()) so the picker
  * can offer the default siteaccess's aliases too, labelled, the way {fetch_alias ...} cannot from a
  * template.
+ *
+ * @phpstan-type FetchAlias array{name: string, function: string, constant: array<string, mixed>, parameter: array<string, mixed>, summary: string}
+ * @phpstan-type AliasGroup array{siteaccess: string, default: bool, label: string, aliases: list<FetchAlias>}
  */
 class XrowExtractFetchAlias
 {
@@ -21,12 +24,17 @@ class XrowExtractFetchAlias
     const ARRAY_KEYS = array( 'sort_by', 'class_filter_array', 'group_by', 'limitation' );
 
     /** Kernel comparison operators (Constant[attribute_filter]) mapped to our own condition-row op keys. */
+    /** @var array<string, string> */
     protected static $opMap = array( '=' => 'eq', '!=' => 'ne', '>' => 'gt', '<' => 'lt', '>=' => 'gte', '<=' => 'lte',
                                      'like' => 'like', 'not_like' => 'not_like', 'in' => 'in', 'not_in' => 'not_in',
                                      'between' => 'between', 'not_between' => 'not_between' );
 
-    /** The Module=content, tree/list/tree_count/list_count aliases of one fetchalias.ini: name => definition. */
-    protected static function readAliases( eZINI $ini )
+    /**
+     * The Module=content, tree/list/tree_count/list_count aliases of one fetchalias.ini: name => definition.
+     *
+     * @return array<string, FetchAlias>
+     */
+    protected static function readAliases( eZINI $ini ): array
     {
         $out = array();
         foreach ( $ini->groups() as $name => $vars )
@@ -44,7 +52,12 @@ class XrowExtractFetchAlias
         return $out;
     }
 
-    protected static function summarize( $function, array $constant, array $parameter )
+    /**
+     * @param string $function
+     * @param array<string, mixed> $constant
+     * @param array<string, mixed> $parameter
+     */
+    protected static function summarize( $function, array $constant, array $parameter ): string
     {
         $parts = array( $function );
         foreach ( $constant as $key => $value )
@@ -57,8 +70,10 @@ class XrowExtractFetchAlias
     /**
      * The picker's choices: one group for the current siteaccess, one for the default siteaccess (only
      * when it differs), each labelled and holding its own usable aliases.
+     *
+     * @return list<AliasGroup>
      */
-    public static function choices()
+    public static function choices(): array
     {
         $siteINI = eZINI::instance();
         $currentName = false;
@@ -80,22 +95,38 @@ class XrowExtractFetchAlias
         return $groups;
     }
 
-    /** One alias's definition by name, from a siteaccess's fetchalias.ini ('' or false: the current one). */
-    public static function find( $name, $siteaccess = '' )
+    /**
+     * One alias's definition by name, from a siteaccess's fetchalias.ini ('' or false: the current one).
+     *
+     * @param string $name
+     * @param string|false $siteaccess
+     * @return FetchAlias|false
+     */
+    public static function find( $name, $siteaccess = '' ): array|false
     {
         $ini = $siteaccess ? eZSiteAccess::getIni( $siteaccess, 'fetchalias.ini' ) : eZINI::instance( 'fetchalias.ini' );
         $aliases = self::readAliases( $ini );
         return isset( $aliases[$name] ) ? $aliases[$name] : false;
     }
 
-    /** The alias's own Parameter[] keys the caller may fill in (besides parent_node_id, filled from the view). */
-    public static function fillableParameters( array $alias )
+    /**
+     * The alias's own Parameter[] keys the caller may fill in (besides parent_node_id, filled from the view).
+     *
+     * @param FetchAlias $alias
+     * @return list<string>
+     */
+    public static function fillableParameters( array $alias ): array
     {
         return array_values( array_diff( array_keys( $alias['parameter'] ), array( 'parent_node_id' ) ) );
     }
 
-    /** A Constant value split the way eZFunctionHandler::executeAlias() splits an array parameter (';', \; escaped). */
-    protected static function splitConstant( $value )
+    /**
+     * A Constant value split the way eZFunctionHandler::executeAlias() splits an array parameter (';', \; escaped).
+     *
+     * @param mixed $value
+     * @return list<string>
+     */
+    protected static function splitConstant( $value ): array
     {
         $parts = preg_split( '/((?<=\\\\\\\\)|(?<!\\\\));/', (string)$value );
         if ( !is_array( $parts ) ) // a PCRE failure (backtrack limit)
@@ -104,13 +135,19 @@ class XrowExtractFetchAlias
         return array_map( function ( $part ) { return str_replace( '\\;', ';', $part ); }, $parts );
     }
 
-    protected static function truthy( $value )
+    /** @param mixed $value */
+    protected static function truthy( $value ): bool
     {
         return in_array( strtolower( trim( (string)$value ) ), array( '1', 'true', 'yes', 'on' ), true );
     }
 
-    /** A Constant[attribute_filter] of the simple form "field;op;value" (one condition, no and/or), or false. */
-    protected static function parseSimpleAttributeFilter( $value )
+    /**
+     * A Constant[attribute_filter] of the simple form "field;op;value" (one condition, no and/or), or false.
+     *
+     * @param mixed $value
+     * @return array{field: string, op: string, value: string}|false
+     */
+    protected static function parseSimpleAttributeFilter( $value ): array|false
     {
         $parts = self::splitConstant( $value );
         if ( count( $parts ) !== 3 || $parts[0] === '' || $parts[1] === '' )
@@ -138,8 +175,13 @@ class XrowExtractFetchAlias
      * declare as a Parameter, are ignored (an alias only exposes what it itself declares as fillable).
      * Parameter[parent_node_id] falls back to $nodeID (the node currently chosen in the view / --node)
      * when $paramOverrides carries no override for it.
+     *
+     * @param FetchAlias $alias
+     * @param int|string $nodeID
+     * @param array<string, mixed> $paramOverrides
+     * @return array{applied: list<string>, unknown: list<string>, values: array<string, mixed>}
      */
-    public static function apply( array $alias, $nodeID, array $paramOverrides = array() )
+    public static function apply( array $alias, $nodeID, array $paramOverrides = array() ): array
     {
         $applied = array();
         $unknown = array();

@@ -12,16 +12,21 @@ class XrowExtractSchema
 {
     const TABLES = array( 'xrowextract_schedule', 'xrowextract_destination', 'xrowextract_history' );
 
+    /** @var bool|null true once every table was seen */
     protected static $ready = null;
 
     /** The .dba file (the canonical definition). */
-    public static function dbaPath()
+    public static function dbaPath(): string
     {
         return dirname( __FILE__ ) . '/../share/db_schema.dba';
     }
 
-    /** The tables of this database, lower case. */
-    protected static function existingTables( eZDBInterface $db )
+    /**
+     * The tables of this database, lower case.
+     *
+     * @return list<string>
+     */
+    protected static function existingTables( eZDBInterface $db ): array
     {
         $list = $db->relationList();
         if ( !is_array( $list ) || !$list )
@@ -35,7 +40,7 @@ class XrowExtractSchema
      *
      * @phpstan-impure
      */
-    public static function exists()
+    public static function exists(): bool
     {
         if ( self::$ready === true )
             return true;
@@ -50,7 +55,7 @@ class XrowExtractSchema
     }
 
     /** Creates whatever table is missing. True when all of them exist afterwards. */
-    public static function ensure()
+    public static function ensure(): bool
     {
         if ( self::exists() )
             return true;
@@ -87,8 +92,12 @@ class XrowExtractSchema
         return true;
     }
 
-    /** The schema.sql fallback for an engine without a schema handler: only the statements of $tables. */
-    protected static function runSQLFile( eZDBInterface $db, array $tables )
+    /**
+     * The schema.sql fallback for an engine without a schema handler: only the statements of $tables.
+     *
+     * @param list<string> $tables
+     */
+    protected static function runSQLFile( eZDBInterface $db, array $tables ): bool
     {
         $engine = $db->databaseName();
         $file = dirname( __FILE__ ) . '/../sql/' . $engine . '/schema.sql';

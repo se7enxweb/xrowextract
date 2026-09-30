@@ -2,7 +2,8 @@
 
 class XroweZenhancedobjectrelationHandler extends XrowBaseHandler
 {
-    public function exportAttribute(&$attribute)
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute(&$attribute): string
     {
         $content = $attribute->content();
         $id_list = isset( $content['id_list'] ) ? (array)$content['id_list'] : array();

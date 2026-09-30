@@ -15,9 +15,11 @@
  */
 class XrowExtractFilters
 {
-    public $values = array();
+    /** @var array<string, mixed> the normalized values, keyed as defaults() */
+    public array $values = array();
 
-    public static function defaults()
+    /** @return array<string, mixed> */
+    public static function defaults(): array
     {
         return array( 'date_field' => 'modified', 'date_mode' => 'any', 'date_from' => '', 'date_to' => '',
                       'section' => 0, 'state' => 0, 'visibility' => 'any', 'name' => '',
@@ -33,8 +35,12 @@ class XrowExtractFilters
                       'fetch_alias' => '', 'fetch_alias_siteaccess' => '' );
     }
 
-    /** The date modes: id => label. */
-    public static function dateModes()
+    /**
+     * The date modes: id => label.
+     *
+     * @return array<int|string, string> the day counts are integer keys
+     */
+    public static function dateModes(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array( 'any' => $t( 'Any time' ), 'today' => $t( 'Today' ), '7' => $t( 'Last 7 days' ), '30' => $t( 'Last 30 days' ),
@@ -43,16 +49,24 @@ class XrowExtractFilters
                       'since_last' => $t( 'Changed since my last export' ) );
     }
 
-    /** The friendly condition operators (the first version's set). */
-    public static function operators()
+    /**
+     * The friendly condition operators (the first version's set).
+     *
+     * @return array<string, string>
+     */
+    public static function operators(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array( 'contains' => $t( 'contains' ), 'starts' => $t( 'starts with' ), 'eq' => $t( 'is' ), 'ne' => $t( 'is not' ),
                       'gt' => $t( 'greater than' ), 'lt' => $t( 'less than' ), 'empty' => $t( 'is empty' ), 'filled' => $t( 'is not empty' ) );
     }
 
-    /** Every condition-row operator: the friendly set plus the kernel's own (>=, <=, in, not in, between, like pattern). */
-    public static function conditionOperators()
+    /**
+     * Every condition-row operator: the friendly set plus the kernel's own (>=, <=, in, not in, between, like pattern).
+     *
+     * @return array<string, string>
+     */
+    public static function conditionOperators(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array_merge( self::operators(), array(
@@ -63,26 +77,42 @@ class XrowExtractFilters
         ) );
     }
 
-    /** Operators that need two values (Filter[...][value] and [value2]). */
-    public static function twoValueOperators()
+    /**
+     * Operators that need two values (Filter[...][value] and [value2]).
+     *
+     * @return list<string>
+     */
+    public static function twoValueOperators(): array
     {
         return array( 'between', 'not_between' );
     }
 
-    /** Operators that take a comma separated list of values. */
-    public static function listOperators()
+    /**
+     * Operators that take a comma separated list of values.
+     *
+     * @return list<string>
+     */
+    public static function listOperators(): array
     {
         return array( 'in', 'not_in' );
     }
 
-    /** Operators that need no value at all. */
-    public static function noValueOperators()
+    /**
+     * Operators that need no value at all.
+     *
+     * @return list<string>
+     */
+    public static function noValueOperators(): array
     {
         return array( 'empty', 'filled' );
     }
 
-    /** Datatypes a condition or a date field can use. */
-    public static function filterableDatatypes()
+    /**
+     * Datatypes a condition or a date field can use.
+     *
+     * @return list<string>
+     */
+    public static function filterableDatatypes(): array
     {
         return array( 'ezstring', 'eztext', 'ezinteger', 'ezfloat', 'ezboolean', 'ezemail', 'ezidentifier', 'ezisbn', 'ezdate', 'ezdatetime', 'ezselection' );
     }
@@ -92,8 +122,10 @@ class XrowExtractFilters
      * fields (createAttributeFilterSQLStrings()), minus the ones that already have their own control
      * (date_field/date_mode, section, state, visibility, name). id => (name, kind, ops).
      * kind: string | int | date | state — decides how a typed value is read and which operators apply.
+     *
+     * @return array<string, array{name: string, kind: string, ops: list<string>}>
      */
-    public static function objectFields()
+    public static function objectFields(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         $all = array_keys( self::conditionOperators() );
@@ -116,20 +148,29 @@ class XrowExtractFilters
         );
     }
 
-    /** The exact / at most / at least depth choices, keyed as used by $v['depth_mode']. */
-    public static function depthModes()
+    /**
+     * The exact / at most / at least depth choices, keyed as used by $v['depth_mode'].
+     *
+     * @return array<string, string>
+     */
+    public static function depthModes(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array( 'any' => $t( 'Any depth' ), 'exact' => $t( 'Exactly' ), 'atmost' => $t( 'At most' ), 'atleast' => $t( 'At least' ) );
     }
 
-    /** depth_mode => the kernel's DepthOperator. */
-    protected static function depthOperatorFor( $mode )
+    /**
+     * depth_mode => the kernel's DepthOperator.
+     *
+     * @param mixed $mode
+     */
+    protected static function depthOperatorFor( $mode ): string|false
     {
         $map = array( 'exact' => 'eq', 'atmost' => 'le', 'atleast' => 'ge' );
         return isset( $map[$mode] ) ? $map[$mode] : false;
     }
 
+    /** @param array<string, mixed> $values e.g. a session's or a job's filter values; unknown keys are ignored */
     public function __construct( array $values = array() )
     {
         $this->values = array_merge( self::defaults(), array_intersect_key( $values, self::defaults() ) );
@@ -138,7 +179,7 @@ class XrowExtractFilters
         $this->normalize();
     }
 
-    protected function normalize()
+    protected function normalize(): void
     {
         $v =& $this->values;
         if ( !array_key_exists( (string)$v['date_mode'], self::dateModes() ) )
@@ -202,8 +243,11 @@ class XrowExtractFilters
     /**
      * A date as a timestamp: Y-m-d, Y-m-d H:i, ISO 8601, "today", "yesterday", or relative like "7d", "2w",
      * "3m", "1y" (that long ago); false when it cannot be read.
+     *
+     * @param mixed $text
+     * @param bool $endOfDay
      */
-    public static function timestamp( $text, $endOfDay = false )
+    public static function timestamp( $text, $endOfDay = false ): int|false
     {
         $text = trim( (string)$text );
         if ( $text === '' )
@@ -223,8 +267,12 @@ class XrowExtractFilters
         return $time;
     }
 
-    /** The date field's AttributeFilter key: published, modified, or class/attribute for a date attribute. */
-    protected function dateKey( $classIdentifier )
+    /**
+     * The date field's AttributeFilter key: published, modified, or class/attribute for a date attribute.
+     *
+     * @param string|false $classIdentifier
+     */
+    protected function dateKey( $classIdentifier ): string|false
     {
         $field = $this->values['date_field'];
         if ( $field === 'published' || $field === 'modified' )
@@ -243,8 +291,13 @@ class XrowExtractFilters
      * is active, in which case the join for the *whole* filter becomes 'or'. That is a real limit of the
      * fetch, not a simplification on our part; conditionsJoinAffectsEverything() below reports it so a
      * caller can tell the user when it applies.
+     *
+     * @param string|false $classIdentifier
+     * @param int|string|null $lastExport
+     * @param int|null $now
+     * @return array<mixed>|false the join ('and' or 'or') first, then (key, op, value) parts
      */
-    public function attributeFilter( $classIdentifier = false, $lastExport = null, $now = null )
+    public function attributeFilter( $classIdentifier = false, $lastExport = null, $now = null ): array|false
     {
         $now = $now === null ? time() : $now;
         $v = $this->values;
@@ -297,8 +350,12 @@ class XrowExtractFilters
         return array_merge( array( $join ), $parts );
     }
 
-    /** The condition rows this filter set applies: the legacy single condition (if set) then conditions[]. */
-    public function allConditions()
+    /**
+     * The condition rows this filter set applies: the legacy single condition (if set) then conditions[].
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function allConditions(): array
     {
         $v = $this->values;
         $rows = array();
@@ -313,7 +370,7 @@ class XrowExtractFilters
     }
 
     /** True when "any" (or) is chosen and there is more than one active filter, so the join covers everything. */
-    public function conditionsJoinAffectsEverything()
+    public function conditionsJoinAffectsEverything(): bool
     {
         if ( $this->values['conditions_join'] !== 'or' )
             return false;
@@ -322,8 +379,14 @@ class XrowExtractFilters
         return $active > 1;
     }
 
-    /** One condition row as an AttributeFilter part (field, op, value[, value2]), or false. */
-    protected function conditionPart( array $c, $classIdentifier )
+    /**
+     * One condition row as an AttributeFilter part (field, op, value[, value2]), or false.
+     *
+     * @param array<string, mixed> $c
+     * @param string|false $classIdentifier
+     * @return array<mixed>|false
+     */
+    protected function conditionPart( array $c, $classIdentifier ): array|false
     {
         $field = trim( (string)$c['field'] );
         $op = array_key_exists( $c['op'], self::conditionOperators() ) ? $c['op'] : 'contains';
@@ -349,8 +412,13 @@ class XrowExtractFilters
         return $part;
     }
 
-    /** The same (key, op, value) part with its operator inverted (the row's "not" checkbox). */
-    protected static function negatePart( array $part )
+    /**
+     * The same (key, op, value) part with its operator inverted (the row's "not" checkbox).
+     *
+     * @param array<mixed> $part
+     * @return array<mixed>
+     */
+    protected static function negatePart( array $part ): array
     {
         $inverse = array( '=' => '!=', '!=' => '=', '>' => '<=', '<' => '>=', '>=' => '<', '<=' => '>',
                           'like' => 'not_like', 'not_like' => 'like', 'in' => 'not_in', 'not_in' => 'in',
@@ -360,8 +428,17 @@ class XrowExtractFilters
         return $part;
     }
 
-    /** One (key, op, value) or (key, op, array(...)) AttributeFilter part, or false when the row has no usable value. */
-    protected static function buildPart( $key, $op, array $c, $kind, $lowercaseText )
+    /**
+     * One (key, op, value) or (key, op, array(...)) AttributeFilter part, or false when the row has no usable value.
+     *
+     * @param string $key
+     * @param string $op
+     * @param array<string, mixed> $c
+     * @param string $kind
+     * @param bool $lowercaseText
+     * @return array<mixed>|false
+     */
+    protected static function buildPart( $key, $op, array $c, $kind, $lowercaseText ): array|false
     {
         $raw = trim( (string)$c['value'] );
         $raw2 = trim( (string)( isset( $c['value2'] ) ? $c['value2'] : '' ) );
@@ -409,14 +486,18 @@ class XrowExtractFilters
         return false;
     }
 
-    /** Text for a LIKE filter: the kernel reads * as the wildcard, so a * in the text is taken out. */
-    protected static function likeText( $text )
+    /**
+     * Text for a LIKE filter: the kernel reads * as the wildcard, so a * in the text is taken out.
+     *
+     * @param string $text
+     */
+    protected static function likeText( $text ): string
     {
         return str_replace( '*', '', $text );
     }
 
     /** How many filters are set (for the card's badge). */
-    public function activeCount()
+    public function activeCount(): int
     {
         $v = $this->values;
         return ( $v['date_mode'] !== 'any' ? 1 : 0 ) + ( $v['section'] ? 1 : 0 ) + ( $v['state'] ? 1 : 0 )
@@ -428,8 +509,13 @@ class XrowExtractFilters
              + ( $v['fetch_alias'] !== '' ? 1 : 0 );
     }
 
-    /** The class attributes a date field or a condition can use: identifier => (name, datatype). */
-    public static function classFields( $classID )
+    /**
+     * The class attributes a date field or a condition can use: identifier => (name, datatype).
+     *
+     * @param int|string $classID
+     * @return array<string, array{identifier: string, name: string, datatype: string, is_date: bool}>
+     */
+    public static function classFields( $classID ): array
     {
         $fields = array();
         foreach ( eZContentClassAttribute::fetchListByClassID( (int)$classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
@@ -442,8 +528,12 @@ class XrowExtractFilters
         return $fields;
     }
 
-    /** The registered extendedattributefilter.ini filters, minus the one used internally for the language filter. id => "id (Class::method)". */
-    public static function extendedFilters()
+    /**
+     * The registered extendedattributefilter.ini filters, minus the one used internally for the language filter. id => "id (Class::method)".
+     *
+     * @return array<string, string>
+     */
+    public static function extendedFilters(): array
     {
         $ini = eZINI::instance( 'extendedattributefilter.ini' );
         $result = array();
@@ -459,8 +549,12 @@ class XrowExtractFilters
         return $result;
     }
 
-    /** The chosen extended filter's params, decoded from the JSON typed in the view (empty when there is none). */
-    public function extendedParamsArray()
+    /**
+     * The chosen extended filter's params, decoded from the JSON typed in the view (empty when there is none).
+     *
+     * @return array<mixed>
+     */
+    public function extendedParamsArray(): array
     {
         if ( $this->values['extended_params'] === '' )
             return array();
@@ -468,8 +562,12 @@ class XrowExtractFilters
         return is_array( $decoded ) ? $decoded : array();
     }
 
-    /** The sort fields: tree (the node's own sorting), name, published, modified, priority; then class attributes. */
-    public static function sortFields()
+    /**
+     * The sort fields: tree (the node's own sorting), name, published, modified, priority; then class attributes.
+     *
+     * @return array<string, string>
+     */
+    public static function sortFields(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array( 'tree' => $t( 'Tree order (as the node sorts)' ), 'name' => $t( 'Name' ), 'published' => $t( 'Published' ),
@@ -479,6 +577,13 @@ class XrowExtractFilters
     /**
      * The kernel SortBy for a sort choice: $field one of sortFields() or a class attribute identifier;
      * $default the node's own sorting (used for "tree"). An attribute that is not sortable falls back to name.
+     *
+     * @param string $field
+     * @param mixed $ascending
+     * @param int|string $classID
+     * @param string|false $classIdentifier
+     * @param mixed $default the node's own SortBy
+     * @return mixed a kernel SortBy: $default, or array( field, ascending[, class/attribute] )
      */
     public static function sortParam( $field, $ascending, $classID, $classIdentifier, $default )
     {
@@ -500,14 +605,24 @@ class XrowExtractFilters
      * A primary sort and an optional secondary sort combined into one kernel SortBy: a single (field, asc)
      * pair when there is no secondary sort, or two pairs (the kernel sorts by the first, then the second)
      * when there is.
+     *
+     * @param mixed $primary a kernel SortBy pair
+     * @param mixed $secondary a kernel SortBy pair, or null
+     * @return mixed
      */
     public static function combineSort( $primary, $secondary )
     {
         return $secondary === null ? $primary : array( $primary, $secondary );
     }
 
-    /** The depth/depthOperator pair for the fetch: $defaultDepth/$defaultDepthOperator unless a depth mode is set. */
-    public function depthParams( $defaultDepth, $defaultDepthOperator )
+    /**
+     * The depth/depthOperator pair for the fetch: $defaultDepth/$defaultDepthOperator unless a depth mode is set.
+     *
+     * @param mixed $defaultDepth
+     * @param mixed $defaultDepthOperator
+     * @return array{mixed, mixed}
+     */
+    public function depthParams( $defaultDepth, $defaultDepthOperator ): array
     {
         $v = $this->values;
         if ( $v['depth_mode'] === 'any' )
@@ -519,8 +634,12 @@ class XrowExtractFilters
      * These filters as command line options of ext:xrowextract:csv / archive (the same values, so a background
      * job exports what the view shows). $lastExport: the time "changed since my last export" starts from.
      * $withClassParts: false for the archive (no date attributes, no condition, no extended filter).
+     *
+     * @param int|string|null $lastExport
+     * @param bool $withClassParts
+     * @return list<string>
      */
-    public function cliArgs( $lastExport = 0, $withClassParts = true )
+    public function cliArgs( $lastExport = 0, $withClassParts = true ): array
     {
         $v = $this->values;
         $args = array();
@@ -579,8 +698,12 @@ class XrowExtractFilters
         return $args;
     }
 
-    /** The preference that holds the time of the user's last export of a class. */
-    public static function lastExportPreference( $classID )
+    /**
+     * The preference that holds the time of the user's last export of a class.
+     *
+     * @param int|string $classID
+     */
+    public static function lastExportPreference( $classID ): string
     {
         return 'admin_xrowextract_last_export_' . (int)$classID;
     }
@@ -589,8 +712,17 @@ class XrowExtractFilters
      * The resolved fetch parameters as the literal `fetch( 'content', 'tree', hash( ... ) )` a template
      * author would write, so the "Fetch parameters" box can be copied straight into a .tpl. $sortBy: the
      * kernel SortBy already resolved by sortParam()/combineSort(), or null for the node's own order.
+     *
+     * @param int|string $parentNodeID
+     * @param int|string $classID
+     * @param mixed $depth
+     * @param mixed $depthOperator
+     * @param mixed $mainNodeOnly
+     * @param array<mixed>|false $attributeFilter
+     * @param mixed $extendedAttributeFilter
+     * @param mixed $sortBy
      */
-    public static function fetchLiteral( $parentNodeID, $classID, $depth, $depthOperator, $mainNodeOnly, $attributeFilter, $extendedAttributeFilter, $sortBy = null )
+    public static function fetchLiteral( $parentNodeID, $classID, $depth, $depthOperator, $mainNodeOnly, $attributeFilter, $extendedAttributeFilter, $sortBy = null ): string
     {
         $pairs = array( 'parent_node_id' => (int)$parentNodeID, 'class_id' => (int)$classID );
         if ( $sortBy !== null )
@@ -608,8 +740,12 @@ class XrowExtractFilters
         return "fetch( 'content', 'tree', " . self::hashLiteral( $pairs ) . " )";
     }
 
-    /** array('k'=>v, ...) as the eZ TPL hash(...) literal a template would use. */
-    public static function hashLiteral( array $pairs )
+    /**
+     * array('k'=>v, ...) as the eZ TPL hash(...) literal a template would use.
+     *
+     * @param array<mixed> $pairs
+     */
+    public static function hashLiteral( array $pairs ): string
     {
         $parts = array();
         foreach ( $pairs as $key => $value )
@@ -617,8 +753,12 @@ class XrowExtractFilters
         return 'hash( ' . implode( ', ', $parts ) . ' )';
     }
 
-    /** A PHP array()/scalar literal for a value, for hashLiteral() and CLI/debug output. */
-    protected static function phpLiteral( $value )
+    /**
+     * A PHP array()/scalar literal for a value, for hashLiteral() and CLI/debug output.
+     *
+     * @param mixed $value
+     */
+    protected static function phpLiteral( $value ): string
     {
         if ( is_array( $value ) )
         {

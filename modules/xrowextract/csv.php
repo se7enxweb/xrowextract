@@ -5,8 +5,17 @@ if ( !function_exists( 'xrowExtractPreview' ) ) {
  * Read an export back the way a spreadsheet does (same separator and
  * quoting) for the preview table: header, rows with a flag per cell, and
  * what the preview shows about the whole file.
+ *
+ * @param string $data the export (its first rows)
+ * @param string $separator
+ * @param mixed $escape
+ * @param int|string $offset
+ * @param int|string $total
+ * @param string|null $file
+ * @param float $seconds
+ * @return array<string, mixed>
  */
-function xrowExtractPreview( $data, $separator, $escape, $offset, $total, $file, $seconds )
+function xrowExtractPreview( $data, $separator, $escape, $offset, $total, $file, $seconds ): array
 {
     $fh = fopen( 'php://temp', 'r+' );
     fwrite( $fh, $data );

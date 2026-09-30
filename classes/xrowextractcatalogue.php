@@ -12,8 +12,12 @@
  */
 class XrowExtractCatalogue
 {
-    /** Special column groups, in the order the picker shows them. */
-    public static function groups()
+    /**
+     * Special column groups, in the order the picker shows them.
+     *
+     * @return array<string, string>
+     */
+    public static function groups(): array
     {
         return array(
             'object'    => ezpI18n::tr( 'design/standard/extract', 'Object' ),
@@ -24,8 +28,12 @@ class XrowExtractCatalogue
         );
     }
 
-    /** The group of every special column id (the ones XrowExtractColumns defines and the ones below). */
-    public static function groupOf( $id )
+    /**
+     * The group of every special column id (the ones XrowExtractColumns defines and the ones below).
+     *
+     * @param string $id
+     */
+    public static function groupOf( $id ): string
     {
         if ( strpos( $id, 'ezuser.' ) === 0 || $id === 'ezcontentobject.owner_login' || $id === 'ezcontentobject.owner_email' )
             return 'user';
@@ -39,8 +47,12 @@ class XrowExtractCatalogue
         return 'object';
     }
 
-    /** The special columns added by the catalogue: id => (exportname, name, cell). */
-    public static function extraColumns()
+    /**
+     * The special columns added by the catalogue: id => (exportname, name, cell).
+     *
+     * @return array<string, array{string, string, string}>
+     */
+    public static function extraColumns(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array(
@@ -72,7 +84,12 @@ class XrowExtractCatalogue
         );
     }
 
-    /** The value of a catalogue special column, or null when $key is not one of them. */
+    /**
+     * The value of a catalogue special column, or null when $key is not one of them.
+     *
+     * @param string $key
+     * @return mixed text, or a number as the kernel holds it; null for a key that is not the catalogue's
+     */
     public static function extraValue( $key, eZContentObject $obj )
     {
         switch ( $key )
@@ -142,8 +159,13 @@ class XrowExtractCatalogue
         return '';
     }
 
-    /** The formats of a datatype: format => label. */
-    public static function formatsFor( $datatype )
+    /**
+     * The formats of a datatype: format => label.
+     *
+     * @param string $datatype
+     * @return array<string, string>
+     */
+    public static function formatsFor( $datatype ): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         $relations = array( 'ids' => $t( 'object ids' ), 'remote_ids' => $t( 'remote ids' ), 'urls' => $t( 'URL aliases' ) );
@@ -176,8 +198,13 @@ class XrowExtractCatalogue
         return array();
     }
 
-    /** Every attribute format of a class as a column: id "identifier:format". */
-    public static function formatColumns( $classID )
+    /**
+     * Every attribute format of a class as a column: id "identifier:format".
+     *
+     * @param int|string $classID
+     * @return array<string, array{id: string, name: string, exportname: string, format: string, datatype: string}>
+     */
+    public static function formatColumns( $classID ): array
     {
         $columns = array();
         foreach ( eZContentClassAttribute::fetchListByClassID( (int)$classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
@@ -197,14 +224,22 @@ class XrowExtractCatalogue
         return $columns;
     }
 
-    /** Plain text from HTML: no tags, entities decoded, white space collapsed. */
-    protected static function plainText( $html )
+    /**
+     * Plain text from HTML: no tags, entities decoded, white space collapsed.
+     *
+     * @param mixed $html
+     */
+    protected static function plainText( $html ): string
     {
         return trim( preg_replace( '/\s+/u', ' ', html_entity_decode( strip_tags( preg_replace( '#<(br|/p|/li|/h\d|/td|/tr)[^>]*>#i', ' ', (string)$html ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
     }
 
-    /** The objects an attribute relates to (relation datatypes). */
-    protected static function relatedObjects( eZContentObjectAttribute $attribute )
+    /**
+     * The objects an attribute relates to (relation datatypes).
+     *
+     * @return list<eZContentObject>
+     */
+    protected static function relatedObjects( eZContentObjectAttribute $attribute ): array
     {
         $content = $attribute->content();
         $ids = array();
@@ -232,8 +267,12 @@ class XrowExtractCatalogue
         return $objects;
     }
 
-    /** One attribute in one of its formats, as text. */
-    public static function formatValue( eZContentObjectAttribute $attribute, $format )
+    /**
+     * One attribute in one of its formats, as text (false when json_encode() fails).
+     *
+     * @param string $format
+     */
+    public static function formatValue( eZContentObjectAttribute $attribute, $format ): string|false
     {
         $datatype = $attribute->attribute( 'data_type_string' );
         $content = $attribute->content();
@@ -344,8 +383,10 @@ class XrowExtractCatalogue
     /**
      * Column sets: id => (name, description, column ids). "@attributes" stands for every class attribute,
      * "@metadata" for the SEO formats of the class's meta data attributes.
+     *
+     * @return array<string, array{string, string, list<string>}>
      */
-    public static function columnSets()
+    public static function columnSets(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array(
@@ -367,8 +408,15 @@ class XrowExtractCatalogue
         );
     }
 
-    /** Column ids of a class resolved to column entries (class attributes, attribute formats, special columns). */
-    public static function resolveColumns( array $ids, $classID, array $extras )
+    /**
+     * Column ids of a class resolved to column entries (class attributes, attribute formats, special columns).
+     *
+     * @param array<string> $ids
+     * @param int|string $classID
+     * @param array<string, array<string, mixed>> $extras the special columns, by id
+     * @return list<array<string, mixed>>
+     */
+    public static function resolveColumns( array $ids, $classID, array $extras ): array
     {
         $byID = array();
         foreach ( XrowExtractColumns::classColumns( $classID ) as $column )
@@ -383,8 +431,14 @@ class XrowExtractCatalogue
         return $columns;
     }
 
-    /** The column ids of a set for a class, placeholders expanded. */
-    public static function setColumnIDs( $setID, $classID )
+    /**
+     * The column ids of a set for a class, placeholders expanded.
+     *
+     * @param string $setID
+     * @param int|string $classID
+     * @return list<string>
+     */
+    public static function setColumnIDs( $setID, $classID ): array
     {
         $sets = self::columnSets();
         if ( !isset( $sets[$setID] ) )

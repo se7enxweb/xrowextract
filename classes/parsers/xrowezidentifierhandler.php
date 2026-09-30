@@ -2,7 +2,8 @@
 
 class XroweZIdentifierHandler extends XrowBaseHandler
 {
-    function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    function exportAttribute( &$attribute ): string
     {
         return $this->escape( $attribute->content() );
     }

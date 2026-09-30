@@ -12,16 +12,28 @@
  */
 class XrowExtractWriter
 {
+    /** @var string csv, json, xml or ezpkg */
     protected $format;
+    /** @var list<array<string, mixed>> */
     protected $columns;
+    /** @var list<string> the column names in the file */
     protected $keys;
+    /** @var string */
     protected $separator;
+    /** @var bool */
     protected $escape;
+    /** @var string */
     protected $newLine;
+    /** @var array<string, mixed> */
     protected $meta;
-    protected $rows = 0;
+    protected int $rows = 0;
+    /** @var ParserInterface */
     protected $parser;
-    /** The typed column manifest to embed (XML: a <manifest> element; JSON: an envelope), or null. */
+    /**
+     * The typed column manifest to embed (XML: a <manifest> element; JSON: an envelope), or null.
+     *
+     * @var array<string, mixed>|null
+     */
     protected $manifest = null;
 
     /**
@@ -30,8 +42,10 @@ class XrowExtractWriter
      * writer is ever constructed, in both bin/php/csv.php and modules/xrowextract/csv.php (see
      * XrowExtractPackage::exportNodeIDsIntoPackage()). It is listed here only so it validates and shows
      * up in the File format choice exactly like the row formats do, from the same one list.
+     *
+     * @return array<string, array{id: string, name: string, extension: string, type: string, is_package?: bool}>
      */
-    public static function formats()
+    public static function formats(): array
     {
         return array(
             'csv'   => array( 'id' => 'csv',   'name' => 'CSV',   'extension' => 'csv',   'type' => 'text/csv' ),
@@ -41,7 +55,8 @@ class XrowExtractWriter
         );
     }
 
-    public static function isFormat( $format )
+    /** @param mixed $format */
+    public static function isFormat( $format ): bool
     {
         return is_string( $format ) && array_key_exists( $format, self::formats() );
     }
@@ -49,17 +64,28 @@ class XrowExtractWriter
     /**
      * The formats written a row at a time (everything but the content package): what the files inside a site
      * archive can be. A package of the archive's nodes is its own action ("Export as package").
+     *
+     * @return array<string, array{id: string, name: string, extension: string, type: string, is_package?: bool}>
      */
-    public static function rowFormats()
+    public static function rowFormats(): array
     {
         return array_filter( self::formats(), function ( $format ) { return empty( $format['is_package'] ); } );
     }
 
-    public static function isRowFormat( $format )
+    /** @param mixed $format */
+    public static function isRowFormat( $format ): bool
     {
         return is_string( $format ) && array_key_exists( $format, self::rowFormats() );
     }
 
+    /**
+     * @param mixed $format one of formats() (else csv)
+     * @param array<array<string, mixed>> $columns
+     * @param string $separator
+     * @param bool $escape
+     * @param string $newLine
+     * @param array<string, mixed> $meta attributes of the XML root; 'manifest': the manifest to embed
+     */
     public function __construct( $format, array $columns, $separator = ',', $escape = true, $newLine = "\n", array $meta = array() )
     {
         $this->format = self::isFormat( $format ) ? $format : 'csv';
@@ -91,42 +117,43 @@ class XrowExtractWriter
     }
 
     /** How many rows have been written so far. */
-    public function rowCount()
+    public function rowCount(): int
     {
         return $this->rows;
     }
 
     /** Whether a manifest is embedded in this file. */
-    public function embedsManifest()
+    public function embedsManifest(): bool
     {
         return $this->manifest !== null;
     }
 
     /** The parser to build rows with (raw for JSON and XML). */
-    public function parser()
+    public function parser(): ParserInterface
     {
         return $this->parser;
     }
 
-    public function format()
+    public function format(): string
     {
         return $this->format;
     }
 
-    public function extension()
+    public function extension(): string
     {
         $formats = self::formats();
         return $formats[$this->format]['extension'];
     }
 
-    public function contentType( $charset = 'utf-8' )
+    /** @param string $charset */
+    public function contentType( $charset = 'utf-8' ): string
     {
         $formats = self::formats();
         return $formats[$this->format]['type'] . '; charset=' . $charset;
     }
 
     /** The start of the file: the CSV header, the JSON array, the XML root with a column list. */
-    public function begin()
+    public function begin(): string
     {
         switch ( $this->format )
         {
@@ -178,8 +205,12 @@ class XrowExtractWriter
         return implode( $this->separator, $cells ) . $this->newLine;
     }
 
-    /** One row from the cells rowCells() built with parser(). */
-    public function row( array $cells )
+    /**
+     * One row from the cells rowCells() built with parser().
+     *
+     * @param array<int, string> $cells
+     */
+    public function row( array $cells ): string
     {
         $this->rows++;
         switch ( $this->format )
@@ -199,7 +230,7 @@ class XrowExtractWriter
     }
 
     /** The end of the file. */
-    public function end()
+    public function end(): string
     {
         switch ( $this->format )
         {
@@ -215,8 +246,12 @@ class XrowExtractWriter
         return '';
     }
 
-    /** Text for XML: escaped, and without characters XML 1.0 does not allow. */
-    protected static function xml( $text )
+    /**
+     * Text for XML: escaped, and without characters XML 1.0 does not allow.
+     *
+     * @param mixed $text
+     */
+    protected static function xml( $text ): string
     {
         $text = preg_replace( '/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', (string)$text );
         return htmlspecialchars( $text === null ? '' : $text, ENT_XML1 | ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );

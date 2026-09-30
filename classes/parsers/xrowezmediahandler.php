@@ -1,7 +1,8 @@
 <?php
 class XroweZMediaExportHandler extends XrowBaseHandler
 {
-       function exportAttribute( &$attribute )
+       /** @param eZContentObjectAttribute $attribute */
+       function exportAttribute( &$attribute ): string
        {
             $content = $attribute->content();
             if ( is_object( $content ) )

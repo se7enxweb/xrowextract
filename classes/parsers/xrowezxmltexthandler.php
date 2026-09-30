@@ -1,7 +1,8 @@
 <?php
 class XroweZXMLTextHandler extends XrowBaseHandler
 {
-        public function exportAttribute( &$attribute )
+        /** @param eZContentObjectAttribute $attribute */
+        public function exportAttribute( &$attribute ): string
         {
             $content = $attribute->content();
             $contentHTML = $content->outputHandler( $content->XMLData, 'html' )->outputText();

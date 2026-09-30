@@ -4,7 +4,8 @@ class XroweZBooleanHandler extends XrowBaseHandler
     public $encloseChar = "'";
     public $separationChar = ',';
 
-    public function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute( &$attribute ): string
     {
         if ( $attribute->content() )
             return $this->escape( '1' );

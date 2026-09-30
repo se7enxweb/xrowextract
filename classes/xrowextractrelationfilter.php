@@ -16,7 +16,13 @@
  */
 class XrowExtractRelationFilter
 {
-    public function createSqlParts( $params )
+    /**
+     * Called by the kernel for the ExtendedAttributeFilter of a fetch.
+     *
+     * @param array<string, mixed> $params
+     * @return array{tables: string, joins: string, columns: string}
+     */
+    public function createSqlParts( $params ): array
     {
         $parts = array( 'tables' => '', 'joins' => '', 'columns' => '' );
         if ( !empty( $params['unrelated'] ) )
@@ -42,7 +48,8 @@ class XrowExtractRelationFilter
         return $parts;
     }
 
-    protected static function truthy( $value )
+    /** @param mixed $value */
+    protected static function truthy( $value ): bool
     {
         return in_array( strtolower( trim( (string)$value ) ), array( '1', 'true', 'yes', 'on' ), true );
     }

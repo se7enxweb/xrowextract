@@ -9,7 +9,8 @@
  */
 class xrowextractInfo
 {
-    static function info()
+    /** @return array<string, string> */
+    static function info(): array
     {
         return array(
             'Name' => "Exponential xrowextract extension",

@@ -23,7 +23,13 @@
  */
 class XrowExtractTranslationFilter
 {
-    public function createSqlParts( $params )
+    /**
+     * Called by the kernel for the ExtendedAttributeFilter of a fetch.
+     *
+     * @param array<string, mixed> $params
+     * @return array{tables: string, joins: string, columns: string}
+     */
+    public function createSqlParts( $params ): array
     {
         $parts = array( 'tables' => '', 'joins' => '', 'columns' => '' );
         $language = isset( $params['language'] ) ? eZContentLanguage::fetchByLocale( $params['language'] ) : false;
@@ -61,8 +67,13 @@ class XrowExtractTranslationFilter
         return $parts;
     }
 
-    /** The subtree parameter for a language alone, to merge into fetch or count parameters. */
-    public static function params( $locale )
+    /**
+     * The subtree parameter for a language alone, to merge into fetch or count parameters.
+     *
+     * @param string $locale
+     * @return array{id: string, params: array<string, mixed>}
+     */
+    public static function params( $locale ): array
     {
         return self::chainedParams( $locale );
     }
@@ -70,8 +81,13 @@ class XrowExtractTranslationFilter
     /**
      * The subtree parameter for a language, optionally chained with a second extended attribute filter
      * ($chainID: an id of extendedattributefilter.ini, '' for none; $chainParams: its params).
+     *
+     * @param string $locale
+     * @param string $chainID
+     * @param array<string, mixed> $chainParams
+     * @return array{id: string, params: array<string, mixed>}
      */
-    public static function chainedParams( $locale, $chainID = '', array $chainParams = array() )
+    public static function chainedParams( $locale, $chainID = '', array $chainParams = array() ): array
     {
         $params = array( 'language' => $locale );
         if ( $chainID !== '' )

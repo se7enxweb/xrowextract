@@ -2,7 +2,8 @@
 
 class XroweZPriceHandler extends XrowBaseHandler
 {
-    public function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute( &$attribute ): string
     {
         $locale = eZLocale::instance();
         $price = $attribute->content();

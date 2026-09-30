@@ -2,7 +2,8 @@
 
 class XroweZObjectRelationListHandler extends XrowBaseHandler
 {
-    public function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute( &$attribute ): string
     {
         $content = $attribute->content();
         $names = array();

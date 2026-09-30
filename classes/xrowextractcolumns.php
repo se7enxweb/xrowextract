@@ -7,7 +7,11 @@
  */
 class XrowExtractColumns
 {
-    /** The language rows are written in (a locale such as eng-US), or null for the object's own language order. */
+    /**
+     * The language rows are written in (a locale such as eng-US), or null for the object's own language order.
+     *
+     * @var string|null
+     */
     public static $language = null;
 
     /**
@@ -15,8 +19,11 @@ class XrowExtractColumns
      * requests one worker serves (a static variable or property would carry what one request found, such
      * as a user's name or the request's http/https, into every later one). On the command line and under
      * Apache it lives as long as the process, like a static. Returned by reference.
+     *
+     * @param string $name
+     * @return array<mixed>
      */
-    public static function &requestCache( $name )
+    public static function &requestCache( $name ): array
     {
         if ( !isset( $GLOBALS['xrowExtractRequestCache'][$name] ) || !is_array( $GLOBALS['xrowExtractRequestCache'][$name] ) )
             $GLOBALS['xrowExtractRequestCache'][$name] = array();
@@ -28,8 +35,10 @@ class XrowExtractColumns
      * number from 1 to 2147483647, the range of the int columns the kernel keeps them in; 0 for anything
      * else. (int) alone turns "99999999999999999999" into PHP_INT_MAX, which PostgreSQL refuses for an int
      * column: the query fails and the kernel's fetch code then fails on the missing result.
+     *
+     * @param mixed $value
      */
-    public static function dbID( $value )
+    public static function dbID( $value ): int
     {
         if ( is_int( $value ) )
             return $value > 0 && $value <= 2147483647 ? $value : 0;
@@ -39,8 +48,13 @@ class XrowExtractColumns
         return $value !== '' && strlen( $value ) <= 10 && ctype_digit( $value ) && (int)$value <= 2147483647 ? (int)$value : 0;
     }
 
-    /** The special columns. Only these exist; each value is computed in extraValue(). */
-    public static function extraAttributes( $allowPasswordHash = null )
+    /**
+     * The special columns. Only these exist; each value is computed in extraValue().
+     *
+     * @param bool|null $allowPasswordHash null: whether the current user may (allowPasswordHash())
+     * @return array<string, array{exportname: string, name: string, id: string, group: string}>
+     */
+    public static function extraAttributes( $allowPasswordHash = null ): array
     {
         if ( $allowPasswordHash === null )
             $allowPasswordHash = self::allowPasswordHash();
@@ -78,8 +92,12 @@ class XrowExtractColumns
         return $list;
     }
 
-    /** The columns that identify an object in an archive, before its attributes. */
-    public static function identityColumns()
+    /**
+     * The columns that identify an object in an archive, before its attributes.
+     *
+     * @return list<array{exportname: string, name: string, id: string, group: string}>
+     */
+    public static function identityColumns(): array
     {
         $extras = self::extraAttributes( false );
         $columns = array();
@@ -90,8 +108,13 @@ class XrowExtractColumns
         return $columns;
     }
 
-    /** Every attribute of a class as a column, in class order, named by its identifier. */
-    public static function classColumns( $classID )
+    /**
+     * Every attribute of a class as a column, in class order, named by its identifier.
+     *
+     * @param int|string $classID
+     * @return list<array{id: string, name: string, exportname: string}>
+     */
+    public static function classColumns( $classID ): array
     {
         $columns = array();
         foreach ( eZContentClassAttribute::fetchListByClassID( (int)$classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $classattribute )
@@ -105,8 +128,12 @@ class XrowExtractColumns
         return $columns;
     }
 
-    /** What a cell holds for a datatype, as the export handlers write it; false when no handler exports it. */
-    public static function cellDescription( $datatype )
+    /**
+     * What a cell holds for a datatype, as the export handlers write it; false when no handler exports it.
+     *
+     * @param string $datatype
+     */
+    public static function cellDescription( $datatype ): string|false
     {
         $exportable = (array)eZINI::instance( 'csv.ini' )->variable( 'General', 'ExportableDatatypes' );
         if ( !in_array( $datatype, $exportable, true ) )
@@ -125,8 +152,12 @@ class XrowExtractColumns
         return ezpI18n::tr( 'design/standard/extract', isset( $cells[$datatype] ) ? $cells[$datatype] : 'value' );
     }
 
-    /** Whether a datatype is registered on this installation (its extension active), without trying to load it. */
-    public static function datatypeInstalled( $datatype )
+    /**
+     * Whether a datatype is registered on this installation (its extension active), without trying to load it.
+     *
+     * @param string $datatype
+     */
+    public static function datatypeInstalled( $datatype ): bool
     {
         // Per request: the datatypes are the siteaccess's (content.ini), and one Velocity worker serves several
         $allowed =& self::requestCache( 'allowed_datatypes' );
@@ -135,7 +166,12 @@ class XrowExtractColumns
         return isset( $allowed[$datatype] );
     }
 
-    /** The translated name of a datatype, or its identifier when it is not installed. */
+    /**
+     * The translated name of a datatype, or its identifier when it is not installed.
+     *
+     * @param string $datatype
+     * @return string
+     */
     public static function datatypeName( $datatype )
     {
         // Only a registered datatype is created: eZDataType::create() of one whose extension is not active
@@ -150,8 +186,11 @@ class XrowExtractColumns
     /**
      * Meta information for every column id of a class (its attributes, keyed by identifier) and for the
      * special columns (keyed by their id): what the view shows beside a column.
+     *
+     * @param int|string $classID
+     * @return array<string, array<string, mixed>>
      */
-    public static function attributeMeta( $classID )
+    public static function attributeMeta( $classID ): array
     {
         $meta = array();
         foreach ( eZContentClassAttribute::fetchListByClassID( (int)$classID, eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
@@ -204,7 +243,7 @@ class XrowExtractColumns
      * Whether the current user may export password hashes: the policy xrowextract/password_hash
      * (administrators have it), unless csv.ini AllowPasswordHashExport=disabled switches it off.
      */
-    public static function allowPasswordHash()
+    public static function allowPasswordHash(): bool
     {
         $csvINI = eZINI::instance( 'csv.ini' );
         if ( $csvINI->hasVariable( 'General', 'AllowPasswordHashExport' )
@@ -214,15 +253,25 @@ class XrowExtractColumns
         return $access['accessWord'] !== 'no';
     }
 
-    /** The name of a password hash type (md5_password, bcrypt ...), or "type <n>" for one the kernel does not name. */
+    /**
+     * The name of a password hash type (md5_password, bcrypt ...), or "type <n>" for one the kernel does not name.
+     *
+     * @param int|string $type
+     * @return string
+     */
     public static function passwordHashTypeName( $type )
     {
         $name = eZUser::passwordHashTypeName( (int)$type );
         return $name ? $name : 'type ' . (int)$type;
     }
 
-    /** The header cells of a column list. */
-    public static function headerCells( array $columns, ParserInterface $parser )
+    /**
+     * The header cells of a column list.
+     *
+     * @param array<array<string, mixed>> $columns
+     * @return list<string>
+     */
+    public static function headerCells( array $columns, ParserInterface $parser ): array
     {
         $cells = array();
         foreach ( $columns as $column )
@@ -230,8 +279,15 @@ class XrowExtractColumns
         return $cells;
     }
 
-    /** One object as CSV cells, in the order of $columns. */
-    public static function rowCells( array $columns, eZContentObject $obj, ParserInterface $parser, array $extras, $allowPasswordHash )
+    /**
+     * One object as CSV cells, in the order of $columns.
+     *
+     * @param array<array<string, mixed>> $columns
+     * @param array<string, mixed> $extras the special columns (extraAttributes()), by id
+     * @param bool $allowPasswordHash
+     * @return list<string>
+     */
+    public static function rowCells( array $columns, eZContentObject $obj, ParserInterface $parser, array $extras, $allowPasswordHash ): array
     {
         $datamap = self::$language ? $obj->fetchDataMap( false, self::$language ) : $obj->attribute( 'data_map' );
         $cells = array();
@@ -254,15 +310,26 @@ class XrowExtractColumns
         return $cells;
     }
 
-    /** The name of a node the current user may read, else ''. */
+    /**
+     * The name of a node the current user may read, else ''.
+     *
+     * @param int|string|null $nodeID
+     * @return string
+     */
     public static function nodeName( $nodeID )
     {
         $node = $nodeID ? eZContentObjectTreeNode::fetch( (int)$nodeID ) : null;
         return ( $node instanceof eZContentObjectTreeNode && $node->canRead() ) ? $node->attribute( 'name' ) : '';
     }
 
-    /** A file name from a name: letters, digits, dot, dash and underscore only. */
-    public static function fileName( $name, $suffix = '_export.csv', $fallback = 'export' )
+    /**
+     * A file name from a name: letters, digits, dot, dash and underscore only.
+     *
+     * @param mixed $name
+     * @param string $suffix
+     * @param string $fallback
+     */
+    public static function fileName( $name, $suffix = '_export.csv', $fallback = 'export' ): string
     {
         $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ), '._' );
         return ( $name === '' ? $fallback : substr( $name, 0, 80 ) ) . $suffix;
@@ -271,8 +338,10 @@ class XrowExtractColumns
     /**
      * The content languages: locale => (locale, name, default), the public site's default language
      * (ContentObjectLocale of DefaultAccess) first, then by name.
+     *
+     * @return array<string, array{locale: string, name: string, default: bool}>
      */
-    public static function contentLanguages()
+    public static function contentLanguages(): array
     {
         $default = self::publicSiteINI()->variable( 'RegionalSettings', 'ContentObjectLocale' );
         $languages = array();
@@ -288,7 +357,7 @@ class XrowExtractColumns
     }
 
     /** The public site's site.ini (DefaultAccess), not the admin one the view runs in. */
-    public static function publicSiteINI()
+    public static function publicSiteINI(): eZINI
     {
         $siteINI = eZINI::instance();
         $defaultAccess = $siteINI->variable( 'SiteSettings', 'DefaultAccess' );
@@ -299,14 +368,14 @@ class XrowExtractColumns
     }
 
     /** The public site's scheme and host only: stored files (images) are served from there, not from a siteaccess path. */
-    public static function publicHostURL()
+    public static function publicHostURL(): string
     {
         $url = self::publicSiteURL();
         return preg_match( '#^(https?://[^/]+)#', $url, $m ) ? $m[1] : $url;
     }
 
     /** The public site's address (DefaultAccess), not the admin one the view runs in. */
-    public static function publicSiteURL()
+    public static function publicSiteURL(): string
     {
         // Per request: the scheme is the request's own
         $cache =& self::requestCache( 'public_site_url' );
@@ -322,6 +391,10 @@ class XrowExtractColumns
     /**
      * The value of a special column for one object. Nothing from the request
      * decides which class or method is called.
+     *
+     * @param string $key
+     * @param bool $allowPasswordHash
+     * @return mixed a string, or a number or id as the kernel holds it
      */
     public static function extraValue( $key, eZContentObject $obj, $allowPasswordHash )
     {

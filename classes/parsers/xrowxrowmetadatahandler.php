@@ -6,7 +6,8 @@
  */
 class XrowxrowmetadataHandler extends XrowBaseHandler
 {
-    public function exportAttribute( &$attribute )
+    /** @param eZContentObjectAttribute $attribute */
+    public function exportAttribute( &$attribute ): string
     {
         $meta = $attribute->content();
         return $this->escape( is_object( $meta ) && isset( $meta->title ) ? self::utf8( $meta->title ) : '' );
