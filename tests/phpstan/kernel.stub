@@ -1,0 +1,56 @@
+<?php
+/**
+ * Corrections to kernel PHPDoc that states a narrower type than the kernel
+ * accepts. Only the PHPDoc is replaced; the kernel's code is what it is. Each
+ * entry names the kernel code that shows the wider type is intended.
+ */
+
+class eZTemplate
+{
+    /**
+     * Template variables hold any value: arrays, objects, numbers and booleans
+     * are what every view passes (lib/eztemplate/classes/eztemplate.php stores
+     * $val as it is).
+     *
+     * @param string $var
+     * @param mixed $val
+     * @param string $namespace
+     * @param bool $scopeSafe
+     * @return void
+     */
+    function setVariable( $var, $val, $namespace = '', $scopeSafe = false ) {}
+}
+
+class eZPersistentObject
+{
+    /**
+     * $field_filters null means every field (eZPersistentObject::fetchObjectList()
+     * tests it with is_array() and the kernel itself passes null throughout).
+     *
+     * @param array $def
+     * @param array|null $field_filters
+     * @param array|null $conds
+     * @param bool $asObject
+     * @param array|null $grouping
+     * @param array|null $custom_fields
+     * @return eZPersistentObject|array|null
+     */
+    public static function fetchObject( $def, $field_filters, $conds, $asObject = true, $grouping = null, $custom_fields = null ) {}
+}
+
+class eZPackage
+{
+    /**
+     * $repositoryID is a repository id such as 'local', or false for the
+     * default one (kernel/classes/ezpackage.php passes it on to
+     * eZPackage::fetch() and repositoryPath(), which take the id).
+     *
+     * @param string $archiveName
+     * @param string $packageName
+     * @param bool $dbAvailable
+     * @param string|false $repositoryID
+     * @param bool $skipExisting
+     * @return eZPackage|int|false
+     */
+    static function import( $archiveName, &$packageName, $dbAvailable = true, $repositoryID = false, $skipExisting = false ) {}
+}

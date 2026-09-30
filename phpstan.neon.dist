@@ -21,6 +21,10 @@ parameters:
         - cronjobs
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
+    # Kernel PHPDoc that is narrower than what the kernel accepts, corrected
+    # (each entry says why); the kernel's code itself is not changed.
+    stubFiles:
+        - tests/phpstan/kernel.stub
     tmpDir: var/phpstan
     # The kernel's PHPDoc types are hints, not guarantees: eZContentObject::fetch()
     # and eZContentObjectTreeNode::fetch() say they return an object and return

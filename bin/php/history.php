@@ -65,10 +65,11 @@ $rowArray = function ( XrowExtractHistory $h )
 if ( $options['show'] )
 {
     $row = eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => (int)$options['show'] ) );
-    if ( !$row )
+    if ( !$row instanceof XrowExtractHistory )
     {
         $cli->error( 'No history row ' . (int)$options['show'] . '.' );
         $script->shutdown( 1 );
+        exit( 1 );
     }
     $cli->output( json_encode( $rowArray( $row ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
     $script->shutdown( 0 );

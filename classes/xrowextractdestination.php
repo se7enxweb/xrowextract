@@ -124,7 +124,8 @@ class XrowExtractDestination extends eZPersistentObject
     {
         if ( !XrowExtractSchema::exists() )
             return null;
-        return eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => (int)$id ) );
+        $object = eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => (int)$id ) );
+        return $object instanceof self ? $object : null;
     }
 
     public static function fetchList()

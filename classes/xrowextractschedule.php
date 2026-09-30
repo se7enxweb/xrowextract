@@ -137,7 +137,8 @@ class XrowExtractSchedule extends eZPersistentObject
     {
         if ( !XrowExtractSchema::exists() )
             return null;
-        return eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => (int)$id ) );
+        $object = eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => (int)$id ) );
+        return $object instanceof self ? $object : null;
     }
 
     /** Every schedule (or only $login's), by name. */
