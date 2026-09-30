@@ -11,14 +11,15 @@
 
 <ol class="xe-side-steps">
     <li>{'Pick a package'|i18n( 'design/standard/extract' )}
-        <small>{'Upload an .ezpkg, or choose one already in the repository (package/list also lists every package, not only content ones).'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Read the inspection'|i18n( 'design/standard/extract' )}
-        <small>{'Every class and object it carries, and what installing it would do: create, update, unchanged, or class missing. Nothing is written yet.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Choose where and how'|i18n( 'design/standard/extract' )}
-        <small>{'Parent node for the content, the site access its templates/overrides map to, and how to handle a class or object that already exists.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Upload an .ezpkg, or choose one already in the repository: Open shows it here, Open in Import reviews and installs it on the Import page instead. Next to the current package: its full package view, browse its files, compare, download .ezpkg, the full install wizard, Open in Import and Forget.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Inspection — nothing written'|i18n( 'design/standard/extract' )}
+        <small>{'What the package carries and what installing it would do: create, update, unchanged, or class missing; Check again; the datatype check; Compare with this site or another package. Filter its objects by what the install would do, by class, and by name or remote id, a page at a time.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Install'|i18n( 'design/standard/extract' )}
-        <small>{'Runs through the same kernel package installer package/install uses; what was created is listed with links.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Parent for new objects, site access, and how an existing object or class is handled; Install this package runs as a background job on the Jobs page, with its progress, log and links to what it installed.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Package template'|i18n( 'design/standard/extract' )}
+        <small>{'A class and a variant (class only, content only, class + content); Build the sample package opens the result here for inspection.'|i18n( 'design/standard/extract' )}</small></li>
 </ol>
+<p class="xe-side-lead">{'Also on the page: Package contents (the package’s files, with Browse all files), Installs of this package (who installed it, when, how, the result, and Export these again), and the Package template reference.'|i18n( 'design/standard/extract' )}</p>
 
 <details open>
     <summary>{'What is inside an .ezpkg'|i18n( 'design/standard/extract' )}</summary>
@@ -57,7 +58,9 @@
     <ul>
         <li>{'Your permissions apply: reading the package, creating below the chosen parent, editing a matched object.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Inspect first: installing writes content objects and possibly a content class immediately, there is no separate preview/apply step.'|i18n( 'design/standard/extract' )}</li>
-        <li>{'Command line: ext:xrowextract:package --inspect / --install / --export / --template.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'The datatype check lists every datatype the package uses that this site does not have (an extension not installed or not enabled); installing is still possible, but those values are left out, so the check, the Import review and the install job’s log all say so.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Every install is kept in the install history (the Jobs page, and Installs of this package here): who, when, with which options, and the result, after the job itself is removed.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Command line: ext:xrowextract:package --inspect / --install / --export / --template / --compare.'|i18n( 'design/standard/extract' )}</li>
         <li>{'The full package system (upload, create, export, install wizard, uninstall) is still at package/list, for packages of any kind.'|i18n( 'design/standard/extract' )}</li>
     </ul>
 </details>

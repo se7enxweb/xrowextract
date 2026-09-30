@@ -2,6 +2,9 @@ Unreleased
 
 -  Added a typed column manifest to every export (sidecar, XML/JSON header); the importer maps columns exactly from it
 -  Added scheduled exports and imports, delivery destinations with encrypted credentials, and an export history
+-  Added a datatype check, object filters and a compare view (with the site, or with another package) for content packages
+-  Added an install history of content packages (Jobs page, Package tab, History), "Export these again" and "Open in Import"
+-  Added the filter options of ext:xrowextract:csv and --preset to ext:xrowextract:package --export, and --compare
 
 Version 2.4
 

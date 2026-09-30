@@ -17,6 +17,7 @@
     <li>{'Download the file'|i18n( 'design/standard/extract' )}
         <small>{'When the job is done; you can leave and come back.'|i18n( 'design/standard/extract' )}</small></li>
 </ol>
+<p class="xe-side-lead">{'Below the jobs: the Install history - every package install, who, when, how and with what result, filtered by package, kept after the job is removed; a finished install offers Open the package and Export these again (its installed objects as a new package).'|i18n( 'design/standard/extract' )}</p>
 
 <details open>
     <summary>{'Good to know'|i18n( 'design/standard/extract' )}</summary>
