@@ -501,10 +501,9 @@ class XrowExtractPackage
         }
         $inspection = self::inspect( $package, $parentNodeID );
         $inspection['checked_at'] = time();
-        if ( !is_dir( $dir ) )
-            eZDir::mkdir( $dir, false, true );
+        self::ensureCacheDir( $dir );
         $tmp = $file . '.' . getmypid() . '.tmp';
-        if ( @file_put_contents( $tmp, json_encode( $inspection ) ) !== false )
+        if ( @file_put_contents( $tmp, json_encode( $inspection, JSON_INVALID_UTF8_SUBSTITUTE ) ) !== false )
         {
             @rename( $tmp, $file );
             if ( class_exists( 'XrowExtractJob' ) )
@@ -519,6 +518,22 @@ class XrowExtractPackage
     {
         foreach ( (array)glob( eZSys::cacheDirectory() . '/xrowextract/inspect/' . self::inspectionCachePrefix( $packageName ) . '*.json' ) as $file )
             @unlink( $file );
+    }
+
+    /**
+     * Creates a cache folder below var/<site>/cache/xrowextract and, when this process is root (Velocity,
+     * a root command line), hands it and its parent back to the var directory's owner: a folder root
+     * created first would otherwise keep PHP-FPM from ever writing a cached dry run or comparison there.
+     */
+    protected static function ensureCacheDir( $dir )
+    {
+        if ( !is_dir( $dir ) )
+            eZDir::mkdir( $dir, false, true );
+        if ( class_exists( 'XrowExtractJob' ) )
+        {
+            XrowExtractJob::fixOwnership( dirname( $dir ) );
+            XrowExtractJob::fixOwnership( $dir );
+        }
     }
 
     protected static function inspectionCachePrefix( $packageName )
