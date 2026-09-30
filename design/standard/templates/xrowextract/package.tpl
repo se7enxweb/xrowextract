@@ -197,7 +197,7 @@
                         <td>{$objectRow.name|wash}</td>
                         <td><code>{$objectRow.class_identifier|wash}</code></td>
                         <td>{$objectRow.languages|implode( ', ' )|wash}</td>
-                        <td>{if $objectRow.existing_id}<a href={concat( 'content/view/full/', $objectRow.existing_id )|ezurl} target="_blank" rel="noopener">#{$objectRow.existing_id}</a>{else}—{/if}</td>
+                        <td>{if $objectRow.existing_id}{if $objectRow.existing.node_id}<a href={concat( 'content/view/full/', $objectRow.existing.node_id )|ezurl} target="_blank" rel="noopener">#{$objectRow.existing_id}</a>{else}#{$objectRow.existing_id}{/if}{else}—{/if}</td>
                     </tr>
                     {/foreach}
                     </tbody>
@@ -387,6 +387,7 @@
 
             <details>
                 <summary>{'package.xml: the elements that matter here'|i18n('design/standard/extract')}</summary>
+                <div class="xe-scroll" tabindex="0">
                 <table class="xe-table" style="width: 100%">
                     <thead><tr><th>{'Element'|i18n('design/standard/extract')}</th><th>{'Meaning'|i18n('design/standard/extract')}</th></tr></thead>
                     <tbody>
@@ -399,6 +400,7 @@
                     <tr><td><code>&lt;install&gt;</code></td><td>{'The ordered list of install items: type (ezcontentclass, ezcontentobject, ...), the file it reads its content from, and whether it also has an &lt;uninstall&gt; counterpart.'|i18n('design/standard/extract')}</td></tr>
                     </tbody>
                 </table>
+                </div>
             </details>
 
             <details>

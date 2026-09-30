@@ -3,6 +3,7 @@
    modules/xrowextract/browse.php adds 'index'). Included by design:xrowextract/browse.tpl (the
    full paginated page) and design:xrowextract/package_files_preview.tpl (the short preview
    embedded on the Import page and the Package tab) alike - the one place this markup is written. *}
+<div class="xe-scroll" tabindex="0">
 <table class="xe-files-table">
     <thead>
         <tr>
@@ -28,3 +29,4 @@
     {/foreach}
     </tbody>
 </table>
+</div>
