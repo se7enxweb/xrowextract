@@ -98,6 +98,8 @@ class XrowExtractFetchAlias
     protected static function splitConstant( $value )
     {
         $parts = preg_split( '/((?<=\\\\\\\\)|(?<!\\\\));/', (string)$value );
+        if ( !is_array( $parts ) ) // a PCRE failure (backtrack limit)
+            return array();
         $parts = array_values( array_diff( $parts, array( '' ) ) );
         return array_map( function ( $part ) { return str_replace( '\\;', ';', $part ); }, $parts );
     }

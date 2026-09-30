@@ -9,7 +9,7 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
-    level: 5
+    level: 6
     phpVersion:
         min: 80100
         max: 80599
@@ -31,3 +31,12 @@ parameters:
     # null for a missing id, and so on. Checks this code makes against such a
     # return (instanceof, is_object(), !== null) are necessary, not redundant.
     treatPhpDocTypesAsCertain: false
+    # Level 6 also asks for a native or PHPDoc type on every parameter, return
+    # value and property. Like the kernel, this code has almost none, and adding
+    # them is a separate piece of work that finds no bug by itself; the rest of
+    # level 6 (PHPDoc that contradicts the code) applies.
+    ignoreErrors:
+        - identifier: missingType.parameter
+        - identifier: missingType.return
+        - identifier: missingType.property
+        - identifier: missingType.iterableValue
