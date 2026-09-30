@@ -4,6 +4,62 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>One class of content export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multi class of content export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Compared with the site at %time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>kept for 15 minutes while you page through it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Check again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pages of the package’s objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%from-%to of %total objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>First</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Page %page of %pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Per page:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>What was installed</source>
         <translation type="unfinished"></translation>
     </message>

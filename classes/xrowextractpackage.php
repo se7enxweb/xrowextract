@@ -473,6 +473,59 @@ class XrowExtractPackage
 
     // ------------------------------------------------------------ inspect (dry run)
 
+    /** How long a cached dry run is used before it is worked out again (seconds). */
+    const INSPECTION_CACHE_TTL = 900;
+
+    /**
+     * The dry run of inspect(), cached per package, package version on disk and parent: a large package takes
+     * seconds to compare with the site (4339 objects: about 9 s and 200 MB), and the package views page through
+     * the same result, so it is worked out once and reused for INSPECTION_CACHE_TTL seconds, until $refresh
+     * ("Check again"), or until an install of that package clears it (forgetInspections()).
+     * Adds 'checked_at' (when it was worked out) and 'cached' (whether this call reused it).
+     */
+    public static function cachedInspection( eZPackage $package, $parentNodeID = false, $refresh = false )
+    {
+        $dir = eZSys::cacheDirectory() . '/xrowextract/inspect';
+        $definition = rtrim( (string)$package->path(), '/' ) . '/package.xml';
+        $version = is_file( $definition ) ? (int)@filemtime( $definition ) : 0;
+        $file = $dir . '/' . self::inspectionCachePrefix( $package->attribute( 'name' ) )
+              . md5( $version . '|' . (int)$parentNodeID ) . '.json';
+        if ( !$refresh && is_file( $file ) && ( time() - (int)@filemtime( $file ) ) < self::INSPECTION_CACHE_TTL )
+        {
+            $cached = json_decode( (string)@file_get_contents( $file ), true );
+            if ( is_array( $cached ) && isset( $cached['objects'] ) )
+            {
+                $cached['cached'] = true;
+                return $cached;
+            }
+        }
+        $inspection = self::inspect( $package, $parentNodeID );
+        $inspection['checked_at'] = time();
+        if ( !is_dir( $dir ) )
+            eZDir::mkdir( $dir, false, true );
+        $tmp = $file . '.' . getmypid() . '.tmp';
+        if ( @file_put_contents( $tmp, json_encode( $inspection ) ) !== false )
+        {
+            @rename( $tmp, $file );
+            if ( class_exists( 'XrowExtractJob' ) )
+                XrowExtractJob::fixOwnership( $file );
+        }
+        $inspection['cached'] = false;
+        return $inspection;
+    }
+
+    /** Forgets every cached dry run of a package (after it was installed, the site no longer matches it). */
+    public static function forgetInspections( $packageName )
+    {
+        foreach ( (array)glob( eZSys::cacheDirectory() . '/xrowextract/inspect/' . self::inspectionCachePrefix( $packageName ) . '*.json' ) as $file )
+            @unlink( $file );
+    }
+
+    protected static function inspectionCachePrefix( $packageName )
+    {
+        return preg_replace( '/[^a-z0-9_]+/', '_', strtolower( (string)$packageName ) ) . '__';
+    }
+
     /**
      * The dry run: every content class and content object install item, matched
      * against what already exists on this site by remote id (classes fall back
@@ -1063,6 +1116,8 @@ class XrowExtractPackage
     public static function install( eZPackage $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $userID = false )
     {
         $report = array( 'ok' => false, 'errors' => array(), 'created_classes' => array(), 'created_objects' => array() );
+        // Whatever a cached dry run said no longer holds once this package is (being) installed
+        self::forgetInspections( $package->attribute( 'name' ) );
 
         $parentNode = eZContentObjectTreeNode::fetch( (int)$parentNodeID );
         if ( !$parentNode instanceof eZContentObjectTreeNode || !$parentNode->canRead() )

@@ -159,9 +159,29 @@ $parentNode = $ParentNodeID ? eZContentObjectTreeNode::fetch( $ParentNodeID ) : 
 $tpl->setVariable( 'ParentNode', ( $parentNode instanceof eZContentObjectTreeNode && $parentNode->canRead() )
     ? array( 'name' => $parentNode->attribute( 'name' ), 'path' => $parentNode->attribute( 'path_identification_string' ), 'node_id' => $ParentNodeID ) : false );
 
+// The dry run, worked out once per package and reused while paging (XrowExtractPackage::cachedInspection():
+// a 4339-object package takes about 9 s to compare with the site); "Check again" works it out anew
 $inspection = false;
 if ( $package instanceof eZPackage )
-    $inspection = XrowExtractPackage::inspect( $package, $ParentNodeID );
+    $inspection = XrowExtractPackage::cachedInspection( $package, $ParentNodeID, $http->hasPostVariable( 'RecheckInspection' ) );
+
+// Its object list a page at a time: how many per page (25 ... 1000 or all, remembered per user) and which page
+$perPageChoices = array( '25', '50', '100', '250', '1000', 'all' );
+$perPage = isset( $_GET['per_page'] ) && in_array( (string)$_GET['per_page'], $perPageChoices, true ) ? (string)$_GET['per_page'] : '';
+if ( $perPage !== '' )
+    eZPreferences::setValue( 'admin_xrowextract_pkg_per_page', $perPage );
+else
+    $perPage = in_array( (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ), $perPageChoices, true ) ? (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ) : '50';
+$objectTotal = $inspection ? count( $inspection['objects'] ) : 0;
+$pageSize = $perPage === 'all' ? max( 1, $objectTotal ) : (int)$perPage;
+$pageCount = max( 1, (int)ceil( $objectTotal / $pageSize ) );
+$pageNumber = isset( $_GET['page'] ) && ctype_digit( (string)$_GET['page'] ) ? min( $pageCount, max( 1, (int)$_GET['page'] ) ) : 1;
+$tpl->setVariable( 'InspectionPager', array(
+    'per_page' => $perPage, 'choices' => $perPageChoices, 'page' => $pageNumber, 'pages' => $pageCount, 'total' => $objectTotal,
+    'from' => $objectTotal ? ( $pageNumber - 1 ) * $pageSize + 1 : 0, 'to' => min( $objectTotal, $pageNumber * $pageSize ),
+) );
+if ( $inspection )
+    $inspection['objects'] = array_slice( $inspection['objects'], ( $pageNumber - 1 ) * $pageSize, $pageSize );
 $tpl->setVariable( 'Inspection', $inspection );
 
 $availableSiteAccesses = eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );

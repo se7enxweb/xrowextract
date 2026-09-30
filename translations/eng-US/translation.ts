@@ -4,6 +4,62 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>One class of content export</source>
+        <translation>One class of content export</translation>
+    </message>
+    <message>
+        <source>Multi class of content export</source>
+        <translation>Multi class of content export</translation>
+    </message>
+    <message>
+        <source>Compared with the site at %time</source>
+        <translation>Compared with the site at %time</translation>
+    </message>
+    <message>
+        <source>kept for 15 minutes while you page through it</source>
+        <translation>kept for 15 minutes while you page through it</translation>
+    </message>
+    <message>
+        <source>Check again</source>
+        <translation>Check again</translation>
+    </message>
+    <message>
+        <source>Pages of the package’s objects</source>
+        <translation>Pages of the package’s objects</translation>
+    </message>
+    <message>
+        <source>%from-%to of %total objects</source>
+        <translation>%from-%to of %total objects</translation>
+    </message>
+    <message>
+        <source>First</source>
+        <translation>First</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>Previous</translation>
+    </message>
+    <message>
+        <source>Page %page of %pages</source>
+        <translation>Page %page of %pages</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>Next</translation>
+    </message>
+    <message>
+        <source>Last</source>
+        <translation>Last</translation>
+    </message>
+    <message>
+        <source>Per page:</source>
+        <translation>Per page:</translation>
+    </message>
+    <message>
+        <source>all</source>
+        <translation>all</translation>
+    </message>
+    <message>
         <source>What was installed</source>
         <translation>What was installed</translation>
     </message>

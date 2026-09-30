@@ -777,3 +777,13 @@ li.xe-badge { margin: 0; }
 .xe-job-install { margin-top: .5em; }
 .xe-job-recent { margin: .4em 0 0; padding-left: 1.4em; font-size: .88em; color: var(--xe-muted); }
 .xe-job-recent li { margin: .1em 0; }
+
+/* Package Inspection: when it was compared with the site, and its pages */
+.xe-inspection-checked { margin: .4em 0 .8em; align-items: center; gap: .6em; }
+.xe-inspection-checked small { color: var(--xe-muted); }
+.xe-pager { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1em; margin: .6em 0; font-size: .92em; }
+.xe-pager-range { font-weight: bold; }
+.xe-pager-links { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35em; }
+.xe-pager-links .button { padding: .2em .6em; }
+.xe-pager-size { color: var(--xe-muted); }
+.xe-pager-size a, .xe-pager-size strong { margin-left: .35em; }

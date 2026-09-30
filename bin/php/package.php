@@ -206,6 +206,8 @@ if ( $options['install'] )
 
     $installStarted = microtime( true );
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
+    // The site now differs from any cached dry run of this package
+    XrowExtractPackage::forgetInspections( $package->attribute( 'name' ) );
     // What happened, in the terms of the dry run just before and the chosen handling of existing items
     // (install()'s own list names every item the package carries, whether it was written or left alone)
     $c = $preInstallCounts;

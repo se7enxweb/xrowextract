@@ -140,6 +140,10 @@
                 <li class="xe-badge xe-badge-unchanged"><strong>{$Inspection.counts.objects_unchanged}</strong> {'objects: unchanged'|i18n('design/standard/extract')}</li>
                 <li class="xe-badge xe-badge-error"><strong>{$Inspection.counts.objects_class_missing}</strong> {'objects: class missing'|i18n('design/standard/extract')}</li>
             </ul>
+            <form method="post" action={'xrowextract/package'|ezurl} class="xe-inline xe-inspection-checked">
+                <small>{'Compared with the site at %time'|i18n('design/standard/extract',, hash( '%time', $Inspection.checked_at|l10n( shortdatetime ) ))}{if $Inspection.cached} · {'kept for 15 minutes while you page through it'|i18n('design/standard/extract')}{/if}</small>
+                <input class="button" type="submit" name="RecheckInspection" value="{'Check again'|i18n('design/standard/extract')}" />
+            </form>
 
             {if $Inspection.classes|count}
             <div class="xe-scroll" tabindex="0">
@@ -160,6 +164,24 @@
             </div>
             {/if}
 
+            {if $InspectionPager.total|gt( 0 )}
+            {* A page of the package's objects at a time; the per-page choice is remembered *}
+            <nav class="xe-pager" aria-label="{'Pages of the package’s objects'|i18n('design/standard/extract')|wash}">
+                <span class="xe-pager-range">{'%from-%to of %total objects'|i18n('design/standard/extract',, hash( '%from', $InspectionPager.from, '%to', $InspectionPager.to, '%total', $InspectionPager.total ))}</span>
+                {if $InspectionPager.pages|gt( 1 )}
+                <span class="xe-pager-links">
+                    {if $InspectionPager.page|gt( 1 )}<a class="button" href={concat( 'xrowextract/package?page=1&per_page=', $InspectionPager.per_page )|ezurl}>&laquo; {'First'|i18n('design/standard/extract')}</a>
+                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|dec, '&per_page=', $InspectionPager.per_page )|ezurl}>&lsaquo; {'Previous'|i18n('design/standard/extract')}</a>{/if}
+                    <span>{'Page %page of %pages'|i18n('design/standard/extract',, hash( '%page', $InspectionPager.page, '%pages', $InspectionPager.pages ))}</span>
+                    {if $InspectionPager.page|lt( $InspectionPager.pages )}<a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|inc, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Next'|i18n('design/standard/extract')} &rsaquo;</a>
+                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.pages, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Last'|i18n('design/standard/extract')} &raquo;</a>{/if}
+                </span>
+                {/if}
+                <span class="xe-pager-size">{'Per page:'|i18n('design/standard/extract')}
+                    {foreach $InspectionPager.choices as $choice}{if $choice|eq( $InspectionPager.per_page )}<strong>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</strong>{else}<a href={concat( 'xrowextract/package?page=1&per_page=', $choice )|ezurl}>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</a>{/if} {/foreach}
+                </span>
+            </nav>
+            {/if}
             {if $Inspection.objects|count}
             <div class="xe-scroll" tabindex="0">
                 <table class="xe-table">
@@ -180,6 +202,24 @@
                     </tbody>
                 </table>
             </div>
+            {if $InspectionPager.pages|gt( 1 )}
+            {* A page of the package's objects at a time; the per-page choice is remembered *}
+            <nav class="xe-pager" aria-label="{'Pages of the package’s objects'|i18n('design/standard/extract')|wash}">
+                <span class="xe-pager-range">{'%from-%to of %total objects'|i18n('design/standard/extract',, hash( '%from', $InspectionPager.from, '%to', $InspectionPager.to, '%total', $InspectionPager.total ))}</span>
+                {if $InspectionPager.pages|gt( 1 )}
+                <span class="xe-pager-links">
+                    {if $InspectionPager.page|gt( 1 )}<a class="button" href={concat( 'xrowextract/package?page=1&per_page=', $InspectionPager.per_page )|ezurl}>&laquo; {'First'|i18n('design/standard/extract')}</a>
+                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|dec, '&per_page=', $InspectionPager.per_page )|ezurl}>&lsaquo; {'Previous'|i18n('design/standard/extract')}</a>{/if}
+                    <span>{'Page %page of %pages'|i18n('design/standard/extract',, hash( '%page', $InspectionPager.page, '%pages', $InspectionPager.pages ))}</span>
+                    {if $InspectionPager.page|lt( $InspectionPager.pages )}<a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|inc, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Next'|i18n('design/standard/extract')} &rsaquo;</a>
+                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.pages, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Last'|i18n('design/standard/extract')} &raquo;</a>{/if}
+                </span>
+                {/if}
+                <span class="xe-pager-size">{'Per page:'|i18n('design/standard/extract')}
+                    {foreach $InspectionPager.choices as $choice}{if $choice|eq( $InspectionPager.per_page )}<strong>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</strong>{else}<a href={concat( 'xrowextract/package?page=1&per_page=', $choice )|ezurl}>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</a>{/if} {/foreach}
+                </span>
+            </nav>
+            {/if}
             {/if}
         </section>
         {/if}

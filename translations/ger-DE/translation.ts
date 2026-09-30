@@ -2,6 +2,62 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>One class of content export</source>
+        <translation>Inhaltsexport einer Klasse</translation>
+    </message>
+    <message>
+        <source>Multi class of content export</source>
+        <translation>Inhaltsexport mehrerer Klassen</translation>
+    </message>
+    <message>
+        <source>Compared with the site at %time</source>
+        <translation>Mit der Website verglichen um %time</translation>
+    </message>
+    <message>
+        <source>kept for 15 minutes while you page through it</source>
+        <translation>wird 15 Minuten lang zum Blättern behalten</translation>
+    </message>
+    <message>
+        <source>Check again</source>
+        <translation>Erneut prüfen</translation>
+    </message>
+    <message>
+        <source>Pages of the package’s objects</source>
+        <translation>Seiten der Objekte des Pakets</translation>
+    </message>
+    <message>
+        <source>%from-%to of %total objects</source>
+        <translation>%from-%to von %total Objekten</translation>
+    </message>
+    <message>
+        <source>First</source>
+        <translation>Erste</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>Zurück</translation>
+    </message>
+    <message>
+        <source>Page %page of %pages</source>
+        <translation>Seite %page von %pages</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>Weiter</translation>
+    </message>
+    <message>
+        <source>Last</source>
+        <translation>Letzte</translation>
+    </message>
+    <message>
+        <source>Per page:</source>
+        <translation>Pro Seite:</translation>
+    </message>
+    <message>
+        <source>all</source>
+        <translation>alle</translation>
+    </message>
+    <message>
         <source>What was installed</source>
         <translation>Was installiert wurde</translation>
     </message>
