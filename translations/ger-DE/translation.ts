@@ -6049,6 +6049,466 @@
         <source>Back to %name</source>
         <translation>Zurück zu %name</translation>
     </message>
+    <message>
+        <source>Compare %a with %b</source>
+        <translation>%a mit %b vergleichen</translation>
+    </message>
+    <message>
+        <source>Compare %name with this site</source>
+        <translation>%name mit dieser Website vergleichen</translation>
+    </message>
+    <message>
+        <source>What is compared</source>
+        <translation>Was verglichen wird</translation>
+    </message>
+    <message>
+        <source>Classes and objects matched by remote id, read from the two packages alone; nothing on the site is looked at.</source>
+        <translation>Klassen und Objekte über die Remote-ID zugeordnet, nur aus den beiden Paketen gelesen; auf der Website wird nichts nachgesehen.</translation>
+    </message>
+    <message>
+        <source>The package against this site: what installing it would create or change, from the same dry run as the Package tab. Nothing is written.</source>
+        <translation>Das Paket gegenüber dieser Website: was eine Installation anlegen oder ändern würde, aus demselben Probelauf wie auf dem Reiter Paket. Es wird nichts geschrieben.</translation>
+    </message>
+    <message>
+        <source>Compare %name with</source>
+        <translation>%name vergleichen mit</translation>
+    </message>
+    <message>
+        <source>this site</source>
+        <translation>dieser Website</translation>
+    </message>
+    <message>
+        <source>Compare</source>
+        <translation>Vergleichen</translation>
+    </message>
+    <message>
+        <source>Compared at %time</source>
+        <translation>Verglichen um %time</translation>
+    </message>
+    <message>
+        <source>Added: only in %b. Removed: only in %a. Changed: in both, with differences.</source>
+        <translation>Hinzugefügt: nur in %b. Entfernt: nur in %a. Geändert: in beiden, mit Unterschieden.</translation>
+    </message>
+    <message>
+        <source>Pick a count to list only those objects.</source>
+        <translation>Eine Zahl anklicken, um nur diese Objekte aufzulisten.</translation>
+    </message>
+    <message>
+        <source>Added</source>
+        <translation>Hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Removed</source>
+        <translation>Entfernt</translation>
+    </message>
+    <message>
+        <source>Changed</source>
+        <translation>Geändert</translation>
+    </message>
+    <message>
+        <source>The same</source>
+        <translation>Gleich</translation>
+    </message>
+    <message>
+        <source>Objects</source>
+        <translation>Objekte</translation>
+    </message>
+    <message>
+        <source>Name and attributes: added, removed, or with another datatype.</source>
+        <translation>Name und Attribute: hinzugefügt, entfernt oder mit anderem Datentyp.</translation>
+    </message>
+    <message>
+        <source>A new class, or the attributes that differ from the site’s class of the same remote id or identifier.</source>
+        <translation>Eine neue Klasse, oder die Attribute, die von der Klasse der Website mit derselben Remote-ID oder demselben Bezeichner abweichen.</translation>
+    </message>
+    <message>
+        <source>No class differs.</source>
+        <translation>Keine Klasse weicht ab.</translation>
+    </message>
+    <message>
+        <source>Differences</source>
+        <translation>Unterschiede</translation>
+    </message>
+    <message>
+        <source>added</source>
+        <translation>hinzugefügt</translation>
+    </message>
+    <message>
+        <source>changed</source>
+        <translation>geändert</translation>
+    </message>
+    <message>
+        <source>only on the site</source>
+        <translation>nur auf der Website</translation>
+    </message>
+    <message>
+        <source>The same attributes as the site’s class.</source>
+        <translation>Dieselben Attribute wie die Klasse der Website.</translation>
+    </message>
+    <message>
+        <source>Per object: added, removed, or changed, with every field that differs (per language).</source>
+        <translation>Je Objekt: hinzugefügt, entfernt oder geändert, mit jedem abweichenden Feld (je Sprache).</translation>
+    </message>
+    <message>
+        <source>Per object: what an install would do, and the fields that differ from the site (text, numbers, checkboxes, e-mail and identifiers are compared field by field).</source>
+        <translation>Je Objekt: was eine Installation tun würde, und die Felder, die von der Website abweichen (Text, Zahlen, Kontrollkästchen, E-Mail und Bezeichner werden Feld für Feld verglichen).</translation>
+    </message>
+    <message>
+        <source>any</source>
+        <translation>alle</translation>
+    </message>
+    <message>
+        <source>what an install would change</source>
+        <translation>was eine Installation ändern würde</translation>
+    </message>
+    <message>
+        <source>all objects</source>
+        <translation>alle Objekte</translation>
+    </message>
+    <message>
+        <source>Name or remote id</source>
+        <translation>Name oder Remote-ID</translation>
+    </message>
+    <message>
+        <source>Pages of the compared objects</source>
+        <translation>Seiten der verglichenen Objekte</translation>
+    </message>
+    <message>
+        <source>No object matches these filters.</source>
+        <translation>Kein Objekt passt zu diesen Filtern.</translation>
+    </message>
+    <message>
+        <source>No object differs.</source>
+        <translation>Kein Objekt weicht ab.</translation>
+    </message>
+    <message>
+        <source>New, below %path</source>
+        <translation>Neu, unterhalb von %path</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <translation>Neu</translation>
+    </message>
+    <message>
+        <source>Differs from the site (its modified date); none of the fields compared one by one differ.</source>
+        <translation>Weicht von der Website ab (sein Änderungsdatum); keines der einzeln verglichenen Felder weicht ab.</translation>
+    </message>
+    <message>
+        <source>The same as on the site.</source>
+        <translation>Genau wie auf der Website.</translation>
+    </message>
+    <message>
+        <source>This site does not have %count datatype(s) the package uses.</source>
+        <translation>Dieser Website fehlen %count Datentyp(en), die das Paket verwendet.</translation>
+    </message>
+    <message>
+        <source>Installing is still possible, but the values of these attributes are not installed, and a class using one is incomplete. Install or enable the extension that provides the datatype first.</source>
+        <translation>Installieren ist weiterhin möglich, aber die Werte dieser Attribute werden nicht installiert, und eine Klasse, die einen davon verwendet, ist unvollständig. Zuerst die Erweiterung installieren oder aktivieren, die den Datentyp bereitstellt.</translation>
+    </message>
+    <message>
+        <source>classes:</source>
+        <translation>Klassen:</translation>
+    </message>
+    <message>
+        <source>%count object(s)</source>
+        <translation>%count Objekt(e)</translation>
+    </message>
+    <message>
+        <source>Datatypes: every datatype the package uses exists on this site.</source>
+        <translation>Datentypen: jeder Datentyp, den das Paket verwendet, ist auf dieser Website vorhanden.</translation>
+    </message>
+    <message>
+        <source>no longer in the repository</source>
+        <translation>nicht mehr im Repository</translation>
+    </message>
+    <message>
+        <source>by %name</source>
+        <translation>von %name</translation>
+    </message>
+    <message>
+        <source>command line</source>
+        <translation>Kommandozeile</translation>
+    </message>
+    <message>
+        <source>error(s)</source>
+        <translation>Fehler</translation>
+    </message>
+    <message>
+        <source>Existing objects: %objects, existing classes: %classes</source>
+        <translation>Vorhandene Objekte: %objects, vorhandene Klassen: %classes</translation>
+    </message>
+    <message>
+        <source>below %parent</source>
+        <translation>unterhalb von %parent</translation>
+    </message>
+    <message>
+        <source>Datatypes this site did not have:</source>
+        <translation>Datentypen, die dieser Website fehlten:</translation>
+    </message>
+    <message>
+        <source>Open the job</source>
+        <translation>Job öffnen</translation>
+    </message>
+    <message>
+        <source>A new content package of the %count objects this install left on the site, as a background job</source>
+        <translation>Ein neues Inhaltspaket der %count Objekte, die diese Installation auf der Website hinterlassen hat, als Hintergrundjob</translation>
+    </message>
+    <message>
+        <source>Export these again</source>
+        <translation>Diese erneut exportieren</translation>
+    </message>
+    <message>
+        <source>What differs: a package against this site (what installing it would create or change), or two packages against each other. Nothing is written.</source>
+        <translation>Was abweicht: ein Paket gegenüber dieser Website (was eine Installation anlegen oder ändern würde), oder zwei Pakete gegeneinander. Es wird nichts geschrieben.</translation>
+    </message>
+    <message>
+        <source>Pick "this site" or another package in the repository and press Compare; Check again works the comparison out anew.</source>
+        <translation>„dieser Website“ oder ein anderes Paket im Repository wählen und auf Vergleichen klicken; Erneut prüfen rechnet den Vergleich neu.</translation>
+    </message>
+    <message>
+        <source>How many classes and objects are added, removed, changed or the same; pick a count to list only those objects.</source>
+        <translation>Wie viele Klassen und Objekte hinzugefügt, entfernt, geändert oder gleich sind; eine Zahl anklicken, um nur diese Objekte aufzulisten.</translation>
+    </message>
+    <message>
+        <source>Filter by change, class, and a part of the name or remote id; every field that differs, per language.</source>
+        <translation>Nach Änderung, Klasse und einem Teil des Namens oder der Remote-ID filtern; jedes abweichende Feld, je Sprache.</translation>
+    </message>
+    <message>
+        <source>How objects are matched</source>
+        <translation>Wie Objekte zugeordnet werden</translation>
+    </message>
+    <message>
+        <source>By remote id, the same key an install uses; a class without one by its identifier.</source>
+        <translation>Über die Remote-ID, denselben Schlüssel, den eine Installation verwendet; eine Klasse ohne Remote-ID über ihren Bezeichner.</translation>
+    </message>
+    <message>
+        <source>Two packages: added means only in the second, removed only in the first, changed in both with a different name, class, modified date or field value.</source>
+        <translation>Zwei Pakete: hinzugefügt heißt nur im zweiten, entfernt nur im ersten, geändert in beiden mit anderem Namen, anderer Klasse, anderem Änderungsdatum oder Feldwert.</translation>
+    </message>
+    <message>
+        <source>With this site: the dry run of the Package tab, kept for 15 minutes; text, numbers, checkboxes, e-mail and identifiers are compared field by field, other datatypes as a whole object.</source>
+        <translation>Mit dieser Website: der Probelauf des Reiters Paket, 15 Minuten lang behalten; Text, Zahlen, Kontrollkästchen, E-Mail und Bezeichner werden Feld für Feld verglichen, andere Datentypen als ganzes Objekt.</translation>
+    </message>
+    <message>
+        <source>ext:xrowextract:package --compare=&lt;a&gt; --with=&lt;b&gt; compares two packages; --compare=&lt;a&gt; alone compares one with this site.</source>
+        <translation>ext:xrowextract:package --compare=&lt;a&gt; --with=&lt;b&gt; vergleicht zwei Pakete; --compare=&lt;a&gt; allein vergleicht eines mit dieser Website.</translation>
+    </message>
+    <message>
+        <source>Open in Import</source>
+        <translation>Im Import öffnen</translation>
+    </message>
+    <message>
+        <source>Review and install it on the Import page, the same way as an uploaded file</source>
+        <translation>Auf der Seite Import prüfen und installieren, genauso wie eine hochgeladene Datei</translation>
+    </message>
+    <message>
+        <source>compare</source>
+        <translation>vergleichen</translation>
+    </message>
+    <message>
+        <source>Compare with</source>
+        <translation>Vergleichen mit</translation>
+    </message>
+    <message>
+        <source>Filter the package’s objects</source>
+        <translation>Die Objekte des Pakets filtern</translation>
+    </message>
+    <message>
+        <source>What the install would do</source>
+        <translation>Was die Installation tun würde</translation>
+    </message>
+    <message>
+        <source>%count of %all objects match the filters.</source>
+        <translation>%count von %all Objekten passen zu den Filtern.</translation>
+    </message>
+    <message>
+        <source>The datatype check above found %count datatype(s) this site does not have; installing is still possible, and the install job’s log repeats the warning.</source>
+        <translation>Die Datentypprüfung oben hat %count Datentyp(en) gefunden, die dieser Website fehlen; Installieren ist weiterhin möglich, und das Protokoll des Installationsjobs wiederholt die Warnung.</translation>
+    </message>
+    <message>
+        <source>Installs of this package</source>
+        <translation>Installationen dieses Pakets</translation>
+    </message>
+    <message>
+        <source>Who installed it, when, how existing objects and classes were handled, and the result. Kept after the job itself is removed.</source>
+        <translation>Wer es installiert hat, wann, wie vorhandene Objekte und Klassen behandelt wurden, und das Ergebnis. Bleibt erhalten, nachdem der Job selbst entfernt ist.</translation>
+    </message>
+    <message>
+        <source>Not installed through this page, the Import page or the command line yet.</source>
+        <translation>Noch nicht über diese Seite, die Seite Import oder die Kommandozeile installiert.</translation>
+    </message>
+    <message>
+        <source>All %count installs on the Jobs page</source>
+        <translation>Alle %count Installationen auf der Seite Jobs</translation>
+    </message>
+    <message>
+        <source>Open the package</source>
+        <translation>Paket öffnen</translation>
+    </message>
+    <message>
+        <source>Install history</source>
+        <translation>Installationsverlauf</translation>
+    </message>
+    <message>
+        <source>Every package install: who installed which package, when, how existing objects and classes were handled, and the result. Kept after the job itself is removed.</source>
+        <translation>Jede Paketinstallation: wer welches Paket installiert hat, wann, wie vorhandene Objekte und Klassen behandelt wurden, und das Ergebnis. Bleibt erhalten, nachdem der Job selbst entfernt ist.</translation>
+    </message>
+    <message>
+        <source>every package</source>
+        <translation>jedes Paket</translation>
+    </message>
+    <message>
+        <source>No package installs yet.</source>
+        <translation>Noch keine Paketinstallationen.</translation>
+    </message>
+    <message>
+        <source>Pages of the install history</source>
+        <translation>Seiten des Installationsverlaufs</translation>
+    </message>
+    <message>
+        <source>%from-%to of %total installs</source>
+        <translation>%from-%to von %total Installationen</translation>
+    </message>
+    <message>
+        <source>Open it on the Package tab</source>
+        <translation>Auf dem Reiter Paket öffnen</translation>
+    </message>
+    <message>
+        <source>Compare with this site</source>
+        <translation>Mit dieser Website vergleichen</translation>
+    </message>
+    <message>
+        <source>Package install</source>
+        <translation>Paketinstallation</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository: Open shows it here, Open in Import reviews and installs it on the Import page instead. Next to the current package: its full package view, browse its files, compare, download .ezpkg, the full install wizard, Open in Import and Forget.</source>
+        <translation>Eine .ezpkg-Datei hochladen oder eine bereits im Repository wählen: Öffnen zeigt sie hier, Im Import öffnen prüft und installiert sie stattdessen auf der Seite Import. Neben dem aktuellen Paket: die vollständige Paketansicht, Dateien durchsuchen, vergleichen, .ezpkg herunterladen, der vollständige Installationsassistent, Im Import öffnen und Vergessen.</translation>
+    </message>
+    <message>
+        <source>What the package carries and what installing it would do: create, update, unchanged, or class missing; Check again; the datatype check; Compare with this site or another package. Filter its objects by what the install would do, by class, and by name or remote id, a page at a time.</source>
+        <translation>Was das Paket enthält und was eine Installation tun würde: anlegen, aktualisieren, unverändert oder Klasse fehlt; Erneut prüfen; die Datentypprüfung; Vergleichen mit dieser Website oder einem anderen Paket. Seine Objekte nach dem, was die Installation tun würde, nach Klasse und nach Name oder Remote-ID filtern, seitenweise.</translation>
+    </message>
+    <message>
+        <source>Parent for new objects, site access, and how an existing object or class is handled; Install this package runs as a background job on the Jobs page, with its progress, log and links to what it installed.</source>
+        <translation>Elternknoten für neue Objekte, Zugriffsbereich und wie ein vorhandenes Objekt oder eine vorhandene Klasse behandelt wird; Dieses Paket installieren läuft als Hintergrundjob auf der Seite Jobs, mit Fortschritt, Protokoll und Links zu dem, was installiert wurde.</translation>
+    </message>
+    <message>
+        <source>A class and a variant (class only, content only, class + content); Build the sample package opens the result here for inspection.</source>
+        <translation>Eine Klasse und eine Variante (nur Klasse, nur Inhalt, Klasse + Inhalt); Beispielpaket erzeugen öffnet das Ergebnis hier zur Prüfung.</translation>
+    </message>
+    <message>
+        <source>Also on the page: Package contents (the package’s files, with Browse all files), Installs of this package (who installed it, when, how, the result, and Export these again), and the Package template reference.</source>
+        <translation>Außerdem auf der Seite: Paketinhalt (die Dateien des Pakets, mit Alle Dateien durchsuchen), Installationen dieses Pakets (wer es installiert hat, wann, wie, das Ergebnis und Diese erneut exportieren) und die Referenz zur Paketvorlage.</translation>
+    </message>
+    <message>
+        <source>The datatype check lists every datatype the package uses that this site does not have (an extension not installed or not enabled); installing is still possible, but those values are left out, so the check, the Import review and the install job’s log all say so.</source>
+        <translation>Die Datentypprüfung listet jeden Datentyp auf, den das Paket verwendet und der dieser Website fehlt (eine Erweiterung, die nicht installiert oder nicht aktiviert ist); Installieren ist weiterhin möglich, aber diese Werte werden ausgelassen, deshalb sagen es die Prüfung, die Prüfung auf der Seite Import und das Protokoll des Installationsjobs.</translation>
+    </message>
+    <message>
+        <source>Every install is kept in the install history (the Jobs page, and Installs of this package here): who, when, with which options, and the result, after the job itself is removed.</source>
+        <translation>Jede Installation bleibt im Installationsverlauf (die Seite Jobs, und Installationen dieses Pakets hier): wer, wann, mit welchen Optionen und das Ergebnis, auch nachdem der Job selbst entfernt ist.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:package --inspect / --install / --export / --template / --compare.</source>
+        <translation>Kommandozeile: ext:xrowextract:package --inspect / --install / --export / --template / --compare.</translation>
+    </message>
+    <message>
+        <source>Pick a format - XML, CSV, JSON or a content package - to Try a sample, Download a template or read its reference, then Upload a file (class and object XML files upload the same way). A package already in the repository comes here with Open in Import on the Package tab. Remove starts over.</source>
+        <translation>Ein Format wählen - XML, CSV, JSON oder ein Inhaltspaket -, um ein Beispiel auszuprobieren, eine Vorlage herunterzuladen oder seine Referenz zu lesen, dann eine Datei hochladen (Klassen- und Objekt-XML-Dateien werden genauso hochgeladen). Ein Paket, das schon im Repository ist, kommt mit Im Import öffnen auf dem Reiter Paket hierher. Entfernen beginnt von vorn.</translation>
+    </message>
+    <message>
+        <source>Which class, which objects a row updates (remote id, object id, or always create), the language, and the parent for new objects; a class, language or parent column in the file wins for its rows.</source>
+        <translation>Welche Klasse, welche Objekte eine Zeile aktualisiert (Remote-ID, Objekt-ID oder immer anlegen), die Sprache und der Elternknoten für neue Objekte; eine Klassen-, Sprach- oder Elternspalte in der Datei gilt für ihre Zeilen.</translation>
+    </message>
+    <message>
+        <source>For a content package this step is Review and install the package instead: what it carries, the datatype check, the parent, how an existing object or class is handled, and Review the package (dry run).</source>
+        <translation>Für ein Inhaltspaket ist dieser Schritt stattdessen Paket prüfen und installieren: was es enthält, die Datentypprüfung, der Elternknoten, wie ein vorhandenes Objekt oder eine vorhandene Klasse behandelt wird, und Paket prüfen (Probelauf).</translation>
+    </message>
+    <message>
+        <source>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it; then Preview. Not needed for a content package.</source>
+        <translation>Spalten werden über den Namen Attributen, Attributformaten und Sonderspalten zugeordnet; jede lässt sich ändern oder ignorieren; dann Vorschau. Für ein Inhaltspaket nicht nötig.</translation>
+    </message>
+    <message>
+        <source>Per row: create, update (old and new values), unchanged, skip or error with the reason; for a package, every class and object it carries, and its files.</source>
+        <translation>Je Zeile: anlegen, aktualisieren (alte und neue Werte), unverändert, überspringen oder Fehler mit dem Grund; für ein Paket jede Klasse und jedes Objekt, das es enthält, und seine Dateien.</translation>
+    </message>
+    <message>
+        <source>Import N changes writes only the changed attributes of each row; a row with an error writes nothing. A package: Install N changes (in the background), with its progress, log and install history on the Jobs page.</source>
+        <translation>N Änderungen importieren schreibt nur die geänderten Attribute jeder Zeile; eine Zeile mit Fehler schreibt nichts. Ein Paket: N Änderungen installieren (im Hintergrund), mit Fortschritt, Protokoll und Installationsverlauf auf der Seite Jobs.</translation>
+    </message>
+    <message>
+        <source>Below the jobs: the Install history - every package install, who, when, how and with what result, filtered by package, kept after the job is removed; a finished install offers Open the package and Export these again (its installed objects as a new package).</source>
+        <translation>Unter den Jobs: der Installationsverlauf - jede Paketinstallation, wer, wann, wie und mit welchem Ergebnis, nach Paket filterbar, auch nachdem der Job entfernt ist; eine fertige Installation bietet Paket öffnen und Diese erneut exportieren (ihre installierten Objekte als neues Paket).</translation>
+    </message>
+    <message>
+        <source>The same export with every filter of ext:xrowextract:csv: ext:xrowextract:package --export --node=&lt;id&gt; --class=&lt;id&gt; plus --since, --before, --date, --section, --state, --visibility, --where, --sort, --depth, --languages, --extended-filter, --fetch-alias ... (the name filter is --name-contains, since --name names the package), or --preset=&lt;site:id|user:id&gt; for a saved export preset; it runs that export as ext:xrowextract:csv --format=ezpkg does, one class, with the same selection code.</source>
+        <translation>Derselbe Export mit jedem Filter von ext:xrowextract:csv: ext:xrowextract:package --export --node=&lt;id&gt; --class=&lt;id&gt; plus --since, --before, --date, --section, --state, --visibility, --where, --sort, --depth, --languages, --extended-filter, --fetch-alias ... (der Namensfilter heißt --name-contains, weil --name das Paket benennt), oder --preset=&lt;site:id|user:id&gt; für eine gespeicherte Exportvorlage; er führt diesen Export so aus wie ext:xrowextract:csv --format=ezpkg, eine Klasse, mit demselben Auswahlcode.</translation>
+    </message>
+    <message>
+        <source>ext:xrowextract:package --compare=&lt;a&gt; --with=&lt;b&gt; compares two packages; --compare=&lt;a&gt; alone compares one with this site (see Compare below).</source>
+        <translation>ext:xrowextract:package --compare=&lt;a&gt; --with=&lt;b&gt; vergleicht zwei Pakete; --compare=&lt;a&gt; allein vergleicht eines mit dieser Website (siehe Vergleichen unten).</translation>
+    </message>
+    <message>
+        <source>Before installing: the datatype check</source>
+        <translation>Vor dem Installieren: die Datentypprüfung</translation>
+    </message>
+    <message>
+        <source>Every datatype the package uses - in its class definitions (each attribute’s datatype="...") and in its objects (each attribute’s type="...") - is checked against the datatypes this site has: content.ini [DataTypeSettings] AvailableDataTypes, each one really loadable.</source>
+        <translation>Jeder Datentyp, den das Paket verwendet - in seinen Klassendefinitionen (datatype="..." jedes Attributs) und in seinen Objekten (type="..." jedes Attributs) -, wird mit den Datentypen dieser Website abgeglichen: content.ini [DataTypeSettings] AvailableDataTypes, jeder tatsächlich ladbar.</translation>
+    </message>
+    <message>
+        <source>A datatype the site does not have (an extension such as an enhanced selection not installed, or not enabled for this siteaccess) is listed with the classes and objects that use it: on the Package tab, in the Review and install step here, on the compare page, and as a WARNING line in the install job’s log (so the job and its install history say "done, with warnings").</source>
+        <translation>Ein Datentyp, der der Website fehlt (eine Erweiterung wie eine erweiterte Auswahl, nicht installiert oder für diesen Zugriffsbereich nicht aktiviert), wird mit den Klassen und Objekten aufgelistet, die ihn verwenden: auf dem Reiter Paket, im Schritt Paket prüfen und installieren hier, auf der Vergleichsseite und als WARNING-Zeile im Protokoll des Installationsjobs (daher sagen der Job und sein Installationsverlauf „fertig, mit Warnungen“).</translation>
+    </message>
+    <message>
+        <source>Installing stays possible: the kernel leaves out what it cannot read, so those attribute values are missing afterwards. Install or enable the extension first when they matter.</source>
+        <translation>Installieren bleibt möglich: der Kernel lässt aus, was er nicht lesen kann, daher fehlen diese Attributwerte danach. Zuerst die Erweiterung installieren oder aktivieren, wenn sie wichtig sind.</translation>
+    </message>
+    <message>
+        <source>With this site (xrowextract/compare/&lt;package&gt;): per class and object what installing would create or change - a class’s attributes added, only on the site or with another datatype; an object’s fields that differ, old and new, for text, numbers, checkboxes, e-mail and identifiers (other datatypes count for the object as a whole). It reads the same cached dry run as the Package tab.</source>
+        <translation>Mit dieser Website (xrowextract/compare/&lt;package&gt;): je Klasse und Objekt, was eine Installation anlegen oder ändern würde - die Attribute einer Klasse: hinzugefügt, nur auf der Website oder mit anderem Datentyp; die abweichenden Felder eines Objekts, alt und neu, für Text, Zahlen, Kontrollkästchen, E-Mail und Bezeichner (andere Datentypen zählen für das Objekt als Ganzes). Es liest denselben zwischengespeicherten Probelauf wie der Reiter Paket.</translation>
+    </message>
+    <message>
+        <source>Two packages (xrowextract/compare/&lt;a&gt;/&lt;b&gt;): classes and objects matched by remote id, each added (only in the second), removed (only in the first) or changed - a different name, class, modified date or any field value, per language - read from the two packages alone.</source>
+        <translation>Zwei Pakete (xrowextract/compare/&lt;a&gt;/&lt;b&gt;): Klassen und Objekte über die Remote-ID zugeordnet, jeweils hinzugefügt (nur im zweiten), entfernt (nur im ersten) oder geändert - anderer Name, andere Klasse, anderes Änderungsdatum oder irgendein Feldwert, je Sprache -, nur aus den beiden Paketen gelesen.</translation>
+    </message>
+    <message>
+        <source>Reached from the Package tab (Compare with, next to the dry run, and the compare link next to the package’s name), from the package contents browser and from the Review and install step here; filter by change, class and name or remote id, a page at a time.</source>
+        <translation>Erreichbar über den Reiter Paket (Vergleichen mit, neben dem Probelauf, und der Link vergleichen neben dem Namen des Pakets), über den Paketinhalt-Browser und über den Schritt Paket prüfen und installieren hier; nach Änderung, Klasse und Name oder Remote-ID filtern, seitenweise.</translation>
+    </message>
+    <message>
+        <source>After installing: the install history</source>
+        <translation>Nach dem Installieren: der Installationsverlauf</translation>
+    </message>
+    <message>
+        <source>Every install - a background job, one in the request, or ext:xrowextract:package --install run by hand - is kept in the install history: who, when, which package, the parent, how existing objects and classes were handled, created / already there / not installed, errors and missing datatypes. It stays after the job files are removed (xrowextract.ini [History] RetentionDays).</source>
+        <translation>Jede Installation - ein Hintergrundjob, eine in der Anfrage oder ext:xrowextract:package --install von Hand - bleibt im Installationsverlauf: wer, wann, welches Paket, der Elternknoten, wie vorhandene Objekte und Klassen behandelt wurden, angelegt / schon vorhanden / nicht installiert, Fehler und fehlende Datentypen. Er bleibt erhalten, nachdem die Jobdateien entfernt sind (xrowextract.ini [History] RetentionDays).</translation>
+    </message>
+    <message>
+        <source>The Jobs page lists it for every package (filtered by package), the Package tab under Installs of this package; the History page lists it as the kind Package install.</source>
+        <translation>Die Seite Jobs listet ihn für jedes Paket (nach Paket filterbar), der Reiter Paket unter Installationen dieses Pakets; die Seite Verlauf listet ihn als Art Paketinstallation.</translation>
+    </message>
+    <message>
+        <source>A finished install links to the classes and objects it installed, and Export these again starts a background export of exactly those objects as a new content package - from the job while it exists, and from the install history after that.</source>
+        <translation>Eine fertige Installation verlinkt die Klassen und Objekte, die sie installiert hat, und Diese erneut exportieren startet einen Hintergrundexport genau dieser Objekte als neues Inhaltspaket - aus dem Job, solange er existiert, und danach aus dem Installationsverlauf.</translation>
+    </message>
+    <message>
+        <source>A package already in the repository opens here with Open in Import on the Package tab, the same review and install as an uploaded one.</source>
+        <translation>Ein Paket, das schon im Repository ist, öffnet sich hier mit Im Import öffnen auf dem Reiter Paket, dieselbe Prüfung und Installation wie bei einem hochgeladenen.</translation>
+    </message>
+    <message>
+        <source>You may not export content (policy xrowextract/csv).</source>
+        <translation>Sie dürfen keine Inhalte exportieren (Richtlinie xrowextract/csv).</translation>
+    </message>
+    <message>
+        <source>None of the objects this install left on the site exist any more, or you may not read them; nothing to export.</source>
+        <translation>Keines der Objekte, die diese Installation auf der Website hinterlassen hat, existiert noch, oder Sie dürfen sie nicht lesen; nichts zu exportieren.</translation>
+    </message>
+    <message>
+        <source>Export again: %count object(s) installed from %name</source>
+        <translation>Erneut exportieren: %count aus %name installierte(s) Objekt(e)</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
