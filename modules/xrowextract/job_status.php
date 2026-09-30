@@ -49,7 +49,7 @@ if ( $logSize > $logOffset )
     if ( $fp )
     {
         fseek( $fp, $logOffset );
-        $logText = (string)fread( $fp, min( 262144, $logSize - $logOffset ) );
+        $logText = (string)fread( $fp, max( 1, min( 262144, $logSize - $logOffset ) ) );
         fclose( $fp );
         // Only whole lines (up to the last line break), so a line is never cleaned in two halves; the
         // rest comes with the next poll

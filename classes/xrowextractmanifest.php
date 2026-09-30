@@ -671,21 +671,27 @@ class XrowExtractManifest
     }
 
     /**
-     * A zip of a data file and its manifest ($manifestJSON), for a single download. Returns the zip bytes.
+     * A zip of a data file and its manifest ($manifestJSON), for a single download. Returns the zip bytes, or
+     * false when no zip can be written (no temporary file, ZipArchive refuses it).
      * @param string $dataName
      * @param string $dataBytes
      * @param string $manifestJSON
      */
     public static function zipWithManifest( $dataName, $dataBytes, $manifestJSON ): string|false
     {
-        $tmp = tempnam( eZSys::cacheDirectory(), 'xezip' );
+        $tmp = @tempnam( eZSys::cacheDirectory(), 'xezip' );
+        if ( $tmp === false )
+            return false;
         $zip = new ZipArchive();
         if ( $zip->open( $tmp, ZipArchive::OVERWRITE ) !== true )
+        {
+            @unlink( $tmp );
             return false;
+        }
         $zip->addFromString( $dataName, $dataBytes );
         $zip->addFromString( $dataName . self::SIDECAR_SUFFIX, $manifestJSON );
         $zip->close();
-        $bytes = (string)file_get_contents( $tmp );
+        $bytes = @file_get_contents( $tmp );
         @unlink( $tmp );
         return $bytes;
     }

@@ -415,7 +415,8 @@ $tpl->setVariable( 'filter_date_modes', $archiveDateModes );
 $tpl->setVariable( 'filter_sections', eZSection::fetchList() );
 $tpl->setVariable( 'TabNotation', '\t' );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$scriptHash = is_file( $scriptFile ) ? md5_file( $scriptFile ) : false;
+$tpl->setVariable( 'ScriptVersion', $scriptHash !== false ? substr( $scriptHash, 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/archive.tpl' );

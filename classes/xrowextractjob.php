@@ -440,16 +440,18 @@ class XrowExtractJob
      * log in pieces), so the timeline does not start over with every piece.
      * @param mixed $text
      * @param array{phase: string, step: int}|null $state
+     * @param-out array{phase: string, step: int} $state
      */
     public static function cleanLog( $text, ?array &$state = null ): string
     {
         if ( !is_array( $state ) )
             $state = array( 'phase' => '', 'step' => -1 );
-        $text = preg_replace( '/\x1b\[[0-9;?]*[A-Za-z]/', '', (string)$text );
-        $text = preg_replace( '/(?<![\x1b])\[[0-9;]{1,12}m/', '', $text ); // codes whose ESC byte got lost
+        $text = (string)$text;
+        $text = preg_replace( '/\x1b\[[0-9;?]*[A-Za-z]/', '', $text ) ?? $text;
+        $text = preg_replace( '/(?<![\x1b])\[[0-9;]{1,12}m/', '', $text ) ?? $text; // codes whose ESC byte got lost
         $text = str_replace( "\r\n", "\n", $text );
         $lines = array();
-        foreach ( preg_split( '/[\n\r]/', $text ) as $line )
+        foreach ( preg_split( '/[\n\r]/', $text ) ?: array( $text ) as $line )
         {
             $progress = self::parseProgressLine( $line );
             if ( $progress )
@@ -520,7 +522,8 @@ class XrowExtractJob
      */
     public static function parseProgressLine( $line ): ?array
     {
-        $line = preg_replace( '/\x1b?\[[0-9;?]*m/', '', (string)$line );
+        $line = (string)$line;
+        $line = preg_replace( '/\x1b?\[[0-9;?]*m/', '', $line ) ?? $line;
         if ( !preg_match( '/^\s*(?:(.*?)\s*\|\s*)?([\d.]+)%\s*\((\d+)\/(\d+)\)(?:.*?elapsed\s*([\d:]+))?(?:.*?end\s*@\s*([\d:]+))?/', $line, $m ) )
             return null;
         return array( 'phase' => trim( (string)$m[1] ), 'percent' => (float)$m[2], 'done' => (int)$m[3], 'total' => (int)$m[4],
@@ -541,7 +544,7 @@ class XrowExtractJob
         $size = (int)@filesize( $logPath );
         $tail = (string)@file_get_contents( $logPath, false, null, max( 0, $size - 16384 ) );
         $found = null;
-        foreach ( preg_split( '/[\n\r]/', $tail ) as $line )
+        foreach ( preg_split( '/[\n\r]/', $tail ) ?: array() as $line )
         {
             $parsed = self::parseProgressLine( $line );
             if ( $parsed )
@@ -597,8 +600,8 @@ class XrowExtractJob
         {
             $candidates[] = PHP_BINARY;
             // Plesk and the common FHS layout keep the CLI binary in bin/ next to sbin/php-fpm or sbin/php-cgi
-            $candidates[] = preg_replace( '#/sbin/php-fpm[0-9.]*$#', '/bin/php', PHP_BINARY );
-            $candidates[] = preg_replace( '#/sbin/php-cgi[0-9.]*$#', '/bin/php', PHP_BINARY );
+            $candidates[] = preg_replace( '#/sbin/php-fpm[0-9.]*$#', '/bin/php', PHP_BINARY ) ?? '';
+            $candidates[] = preg_replace( '#/sbin/php-cgi[0-9.]*$#', '/bin/php', PHP_BINARY ) ?? '';
         }
         foreach ( $candidates as $candidate )
         {
@@ -636,9 +639,9 @@ class XrowExtractJob
      */
     public static function start( $id ): bool
     {
-        if ( !self::available() )
-            return false;
         $php = self::phpCliBinary();
+        if ( !self::available() || $php === false )
+            return false;
         $log = self::path( $id ) . '/' . self::LOG_FILE;
         $command = 'nohup ' . escapeshellarg( $php ) . ' ' . escapeshellarg( self::runnerScript() )
                  . ' --run=' . escapeshellarg( $id )
@@ -682,7 +685,7 @@ class XrowExtractJob
 
     /**
      * array( uid, gid ) of the var directory's owner, or false when it cannot be read.
-     * @return array{0: int|false, 1: int|false}|false
+     * @return array{0: int, 1: int}|false
      */
     protected static function varOwner(): array|false
     {
@@ -690,7 +693,10 @@ class XrowExtractJob
         if ( $owner === null )
         {
             $dir = eZSys::varDirectory();
-            $owner = is_dir( $dir ) ? array( fileowner( $dir ), filegroup( $dir ) ) : false;
+            $uid = is_dir( $dir ) ? @fileowner( $dir ) : false;
+            $gid = is_dir( $dir ) ? @filegroup( $dir ) : false;
+            // false (the folder cannot be read) would be taken as 0 by chown(): root
+            $owner = $uid !== false && $gid !== false ? array( $uid, $gid ) : false;
         }
         return $owner;
     }

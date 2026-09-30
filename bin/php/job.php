@@ -158,7 +158,7 @@ if ( $logHandle )
 // refuses to run as root without it; this process is root exactly when the child would be too).
 $runScript = function ( $type, array $args ) use ( $phpCli, $logPath, $job )
 {
-    $argv = array_merge( array( $phpCli, XrowExtractJob::scriptFor( $type ) ), array_map( 'strval', $args ) );
+    $argv = array_merge( array( $phpCli, XrowExtractJob::scriptFor( $type ) ), array_values( array_map( 'strval', $args ) ) );
     $argv[] = '--user=' . $job['owner'];
     if ( XrowExtractJob::runningAsRoot() )
         $argv[] = '--allow-root-user';
@@ -184,7 +184,7 @@ $runScript = function ( $type, array $args ) use ( $phpCli, $logPath, $job )
 $readLog = function () use ( $logPath )
 {
     $log = is_file( $logPath ) ? (string)@file_get_contents( $logPath ) : '';
-    return preg_replace( '/\x1b\[[0-9;]*m/', '', $log );
+    return preg_replace( '/\x1b\[[0-9;]*m/', '', $log ) ?? $log;
 };
 $logWarnings = function ( $log )
 {
@@ -237,7 +237,7 @@ if ( $job['type'] === 'archive' )
     // in the job folder that is not one of ours (nor the archive's manifest next to it)
     $known = array( XrowExtractJob::JOB_FILE, XrowExtractJob::LOG_FILE, XrowExtractJob::PROGRESS_FILE );
     $found = null;
-    foreach ( (array)@scandir( $dir ) as $entry )
+    foreach ( @scandir( $dir ) ?: array() as $entry )
     {
         if ( $entry === '.' || $entry === '..' || in_array( $entry, $known, true ) || substr( $entry, -4 ) === '.tmp'
              || substr( $entry, -strlen( XrowExtractManifest::SIDECAR_SUFFIX ) ) === XrowExtractManifest::SIDECAR_SUFFIX )

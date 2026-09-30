@@ -56,6 +56,19 @@ class XrowExtractArchive
         return false;
     }
 
+    /**
+     * The first of the programs found, as binary() does; throws when there is none (a format whose program is
+     * missing is not offered, see formats(), so this only happens when it went away in between).
+     * @param array<string> $names
+     */
+    protected static function requiredBinary( array $names ): string
+    {
+        $binary = self::binary( $names );
+        if ( $binary === false )
+            throw new RuntimeException( 'The program ' . implode( ' or ', $names ) . ' is not installed on this server' );
+        return $binary;
+    }
+
     /** PharData needs the phar:// stream wrapper, which an installation may switch off. */
     protected static function pharUsable(): bool
     {
@@ -320,6 +333,8 @@ class XrowExtractArchive
      */
     public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false, array $options = array() ): array
     {
+        // The parser takes only true or false (anything else leaves it quoting)
+        $escape = (bool)$escape;
         // Languages (default: every content language), columns (standard, migration, attributes), plain text of rich text
         $languages = isset( $options['languages'] ) && is_array( $options['languages'] ) ? array_values( $options['languages'] )
                                                                                           : array_keys( XrowExtractColumns::contentLanguages() );
@@ -569,15 +584,15 @@ class XrowExtractArchive
                 break;
 
             case 'tar.xz':
-                self::run( escapeshellarg( self::binary( array( 'tar' ) ) ) . ' -C ' . escapeshellarg( $work ) . ' -cJf ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
+                self::run( escapeshellarg( self::requiredBinary( array( 'tar' ) ) ) . ' -C ' . escapeshellarg( $work ) . ' -cJf ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
                 break;
 
             case '7z':
-                self::run( 'cd ' . escapeshellarg( $work ) . ' && ' . escapeshellarg( self::binary( array( '7zz', '7z', '7za' ) ) ) . ' a -bd -y -- ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
+                self::run( 'cd ' . escapeshellarg( $work ) . ' && ' . escapeshellarg( self::requiredBinary( array( '7zz', '7z', '7za' ) ) ) . ' a -bd -y -- ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
                 break;
 
             case 'rar':
-                self::run( 'cd ' . escapeshellarg( $work ) . ' && ' . escapeshellarg( self::binary( array( 'rar' ) ) ) . ' a -idq -y -- ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
+                self::run( 'cd ' . escapeshellarg( $work ) . ' && ' . escapeshellarg( self::requiredBinary( array( 'rar' ) ) ) . ' a -idq -y -- ' . escapeshellarg( $archive ) . ' ' . escapeshellarg( $folder ) );
                 break;
         }
         if ( !is_file( $archive ) || filesize( $archive ) === 0 )

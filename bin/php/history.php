@@ -56,7 +56,7 @@ $rowArray = function ( XrowExtractHistory $h )
 {
     $data = array();
     foreach ( array_keys( XrowExtractHistory::definition()['fields'] ) as $field )
-        $data[$field] = $h->attribute( $field );
+        $data[$field] = $h->attribute( (string)$field );
     $data['warnings'] = $h->warningList();
     $data['delivery'] = $h->deliveryList();
     return $data;

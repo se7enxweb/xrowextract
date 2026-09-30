@@ -161,8 +161,9 @@ if ( $options['date'] )
         $fail( '--date is today, 7, 30, 90, 365 or past.' );
     $filterValues['date_mode'] = $options['date'];
 }
-$filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['since'] ) ) : '';
-$filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
+// Both are readable dates here: the loop above refused one that is not
+$filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', (int)XrowExtractFilters::timestamp( $options['since'] ) ) : '';
+$filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', (int)XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
 if ( $options['section'] )
 {
     $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( XrowExtractColumns::dbID( $options['section'] ) ) : eZSection::fetchByIdentifier( $options['section'] );
@@ -230,9 +231,13 @@ if ( $options['exclude-classes'] )
 if ( $options['list-classes'] || $options['dry-run'] )
 {
     foreach ( $resolved as $item )
+    {
+        if ( !$item['node'] ) // left out above
+            continue;
         $cli->output( sprintf( '  node %-6d %-30s %s', $item['id'], $item['node']->attribute( 'name' ),
                                $item['covered_by'] ? 'inside ' . $item['covered_by']->attribute( 'name' ) . ', read with it'
                                                    : XrowExtractArchive::subtreeCount( $item['node'] ) . ' objects' ) );
+    }
     $rows = 0;
     foreach ( $counts as $id => $count )
     {
