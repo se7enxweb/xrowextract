@@ -51,6 +51,7 @@
     <p class="xe-note">{'The ezoe extension is not active on this installation; rich text columns were imported as plain paragraphs, without inline formatting or links.'|i18n('design/standard/extract')}</p>
     {/if}
 
+    {if $PackageMode|not}
     <div class="xe-scroll" tabindex="0">
         <table class="xe-table">
             <thead><tr>
@@ -100,6 +101,11 @@
             </tbody>
         </table>
     </div>
+    {/if}
+
+    {if $PackageMode}
+    {include uri='design:xrowextract/package_files_preview.tpl'}
+    {/if}
 
     {if $Applied}
     <div class="xe-toolbar">

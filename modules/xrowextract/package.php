@@ -144,6 +144,15 @@ else
 $tpl->setVariable( 'PackageName', $packageName );
 $tpl->setVariable( 'Package', $package instanceof eZPackage ? $package : false );
 
+// The package contents browser (#26): a short preview here (design:xrowextract/
+// package_files_preview.tpl), "Browse all N files" linking to the full paginated
+// xrowextract/browse/<name> for the rest.
+$filesPreview = $package instanceof eZPackage ? XrowExtractPackage::packageFilesPreview( $package ) : array( 'files' => array(), 'total' => 0 );
+$tpl->setVariable( 'Files', $filesPreview['files'] );
+$tpl->setVariable( 'FilesTotal', $filesPreview['total'] );
+$tpl->setVariable( 'FilesOffset', 0 );
+$tpl->setVariable( 'ViewedFile', false );
+
 // ---------------------------------------------------------------- install options
 // (ParentNodeID is resolved before the first inspect() call below, so the dry run can describe
 // where a new top-level object would land under the parent currently chosen on the page)
@@ -259,7 +268,10 @@ elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
     if ( $installReport['ok'] )
     {
         eZContentObject::clearCache();
-        $inspection = XrowExtractPackage::inspect( $package, $ParentNodeID );
+        // What "already exists" means just changed; a cached inspect() from before the install would
+        // still say "create" for what this just installed.
+        XrowExtractPackage::forgetInspections( $packageName );
+        $inspection = XrowExtractPackage::cachedInspection( $package, $ParentNodeID );
         $tpl->setVariable( 'Inspection', $inspection );
     }
 }

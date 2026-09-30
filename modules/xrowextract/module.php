@@ -74,6 +74,21 @@ $ViewList['history'] = array( 'script' => 'history.php',
                               'post_actions' => array( 'AcknowledgeAlerts' ),
                               'params' => array() );
 
+// The package contents browser (#26): every file a package carries, paginated, each one viewable.
+// Same policy as package/import - anyone who can inspect a package's classes/objects can read its
+// raw files the same way. Reachable from the Import page, the Package tab and a link added to the
+// kernel's own package/view/full/<name>.
+$ViewList['browse'] = array( 'script' => 'browse.php',
+                             'functions' => array( 'import' ),
+                             'default_navigation_part' => 'ezextractnavigationpart',
+                             'params' => array( 'PackageName', 'Offset', 'ViewIndex' ) );
+
+// ViewIndex: a file's position in allPackageFiles()'s own sorted list, not its path (which can
+// carry slashes of its own, "ezcontentobject/abc123.xml" - see browse.php's own comment)
+$ViewList['browse_file'] = array( 'script' => 'browse_file.php',
+                                  'functions' => array( 'import' ),
+                                  'params' => array( 'PackageName', 'ViewIndex' ) );
+
 $FunctionList = array();
 // Create, change, run, enable and disable schedules (your own; with xrowextract/all_jobs everyone's)
 $FunctionList['schedule'] = array();

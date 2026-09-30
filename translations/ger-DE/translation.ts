@@ -2,6 +2,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>View</source>
+        <translation>Ansehen</translation>
+    </message>
+    <message>
+        <source>Package contents</source>
+        <translation>Paketinhalt</translation>
+    </message>
+    <message>
+        <source>%count files</source>
+        <translation>%count Dateien</translation>
+    </message>
+    <message>
+        <source>%count files, %from to %to shown.</source>
+        <translation>%count Dateien, %from bis %to angezeigt.</translation>
+    </message>
+    <message>
+        <source>Browse all %count files</source>
+        <translation>Alle %count Dateien durchsuchen</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+    <message>
+        <source>Package contents: %name</source>
+        <translation>Paketinhalt: %name</translation>
+    </message>
+    <message>
+        <source>No package %name in the repository.</source>
+        <translation>Kein Paket %name im Repository.</translation>
+    </message>
+    <message>
+        <source>browse its files</source>
+        <translation>Dateien durchsuchen</translation>
+    </message>
+    <message>
         <source>One class of content export</source>
         <translation>Inhaltsexport einer Klasse</translation>
     </message>
