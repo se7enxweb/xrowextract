@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The xrowextract unit tests: the parts that need no database and no request.
+  EXPONENTIAL_ROOT names the Exponential root the kernel classes come from
+  (default: the installation this extension is installed in). Run with
+  bin/check.sh (part "unit"), or: EXPONENTIAL_ROOT=... phpunit
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="tests/bootstrap.php"
+         colors="false"
+         cacheDirectory="var/phpunit"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory suffix="Test.php">tests/unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
