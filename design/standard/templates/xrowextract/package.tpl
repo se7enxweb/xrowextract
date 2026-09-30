@@ -337,9 +337,28 @@
                 <p class="xe-help">{'Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.'|i18n('design/standard/extract')}</p>
             </div>
 
+            {if $Inspection.missing_datatypes|count}<p class="xe-help">{'The datatype check above found %count datatype(s) this site does not have; installing is still possible, and the install job’s log repeats the warning.'|i18n('design/standard/extract',, hash( '%count', $Inspection.missing_datatypes|count ))}</p>{/if}
             <input class="defaultbutton" type="submit" name="Install" value="{'Install this package'|i18n('design/standard/extract')}" />
         </section>
         </form>
+
+        {* Installs of this package: who, when, how, with what result - kept after the job files expire *}
+        <section class="xe-card" id="xe-card-installs" aria-labelledby="xe-card-installs-h">
+            <header class="xe-card-head">
+                <div>
+                    <h2 id="xe-card-installs-h">{'Installs of this package'|i18n('design/standard/extract')}</h2>
+                    <p>{'Who installed it, when, how existing objects and classes were handled, and the result. Kept after the job itself is removed.'|i18n('design/standard/extract')}</p>
+                </div>
+            </header>
+            {if $PackageInstalls|count|eq( 0 )}
+            <p class="xe-columns-empty">{'Not installed through this page, the Import page or the command line yet.'|i18n('design/standard/extract')}</p>
+            {else}
+            {include uri='design:xrowextract/install_history_rows.tpl' installs=$PackageInstalls show_package=false()}
+            {if $PackageInstallCount|gt( $PackageInstalls|count )}
+            <p><a href={concat( 'xrowextract/jobs?package=', $PackageName|urlencode )|ezurl}>{'All %count installs on the Jobs page'|i18n('design/standard/extract',, hash( '%count', $PackageInstallCount ))}</a></p>
+            {/if}
+            {/if}
+        </section>
         {/if}
 
         {* 4. Package template *}

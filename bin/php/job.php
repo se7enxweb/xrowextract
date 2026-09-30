@@ -239,6 +239,8 @@ elseif ( ( $exitCode === 0 || $job['type'] === 'package' ) && $outputPath && is_
             $job['created_objects'] = isset( $report['report']['created_objects'] ) ? $report['report']['created_objects'] : array();
             if ( !empty( $report['report']['errors'] ) )
                 $job['install_errors'] = $report['report']['errors'];
+            // The datatype check taken before installing (also WARNING lines in the log, so in 'warnings')
+            $job['missing_datatypes'] = isset( $report['missing_datatypes'] ) ? (array)$report['missing_datatypes'] : array();
             // A partial failure (install_errors set, report.ok false) is still shown as 'done': the
             // items that did install (counts, created_classes/created_objects) are real and worth
             // reading, exactly as a few bad import rows do not fail the whole import job.

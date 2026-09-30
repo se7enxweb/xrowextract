@@ -318,6 +318,7 @@ if ( $options['install'] )
     }
 
     $installStarted = microtime( true );
+    $installStartedAt = time();
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
     // The site now differs from any cached dry run of this package
     XrowExtractPackage::forgetInspections( $package->attribute( 'name' ) );
@@ -352,7 +353,19 @@ if ( $options['install'] )
         file_put_contents( (string)$options['output'], json_encode( array(
             'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report,
             'package_name' => $package->attribute( 'name' ), 'counts' => $preInstallCounts,
+            'missing_datatypes' => $missingDatatypes,
         ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    }
+    else
+    {
+        // Run by hand, not as a background job (a job's runner records it when the job ends): the install history
+        XrowExtractHistory::recordInstall( array(
+            'owner_login' => $login, 'trigger_type' => 'cli',
+            'started_at' => $installStartedAt, 'ended_at' => time(),
+            'package' => $package->attribute( 'name' ), 'parent_node_id' => $parentNodeID, 'site_access' => $siteAccess,
+            'object_mode' => $objectMode, 'class_mode' => $classMode,
+            'counts' => $preInstallCounts, 'report' => $report, 'missing_datatypes' => $missingDatatypes,
+        ) );
     }
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], max( 1, $total ), max( 1, $total ), 'done' );

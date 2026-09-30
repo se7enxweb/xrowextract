@@ -194,6 +194,16 @@
                         <a class="button" href={concat( 'xrowextract/job_download/', $job.id, '/manifest' )|ezurl} title="{'The typed column manifest of the file: datatype, format and language of every column, row count and checksum'|i18n('design/standard/extract')|wash}">{'Download manifest'|i18n('design/standard/extract')}</a>
                         {/if}
                         {/if}
+                        {* A finished package install: the package itself, and its installed objects exported again *}
+                        {if and( $job.type|eq( 'package' ), $job.package_name )}
+                        <a class="button" href={concat( 'xrowextract/package/', $job.package_name )|ezurl}>{'Open the package'|i18n('design/standard/extract')}</a>
+                        {/if}
+                        {if and( $job.type|eq( 'package' ), $job.state|eq( 'done' ), $job.created_objects|count, $JobsAvailable )}
+                        <form method="post" action={'xrowextract/jobs'|ezurl} class="xe-inline">
+                            <input type="hidden" name="ExportAgainJobID" value="{$job.id|wash}" />
+                            <button type="submit" class="button" title="{'A new content package of the %count objects this install left on the site, as a background job'|i18n('design/standard/extract',, hash( '%count', $job.created_objects|count ))|wash}">{'Export these again'|i18n('design/standard/extract')}</button>
+                        </form>
+                        {/if}
                         {if $job.type|eq( 'import' )|and( or( $job.state|eq( 'failed' ), $job.counts.error|gt( 0 ) ) )}
                         <form method="post" action={'xrowextract/import'|ezurl} class="xe-job-resume-form xe-inline">
                             <input type="hidden" name="ResumeJobID" value="{$job.id|wash}" />
@@ -217,6 +227,46 @@
                 </li>
                 {/foreach}
             </ul>
+            {/if}
+        </section>
+
+        {* The install history: every package install (as a job, in a request or from the command line), who, when,
+           how and with what result - kept after the job files expire *}
+        <section class="xe-card" id="xe-card-install-history" aria-labelledby="xe-card-install-history-h">
+            <header class="xe-card-head">
+                <div>
+                    <h2 id="xe-card-install-history-h">{'Install history'|i18n('design/standard/extract')}</h2>
+                    <p>{'Every package install: who installed which package, when, how existing objects and classes were handled, and the result. Kept after the job itself is removed.'|i18n('design/standard/extract')}</p>
+                </div>
+            </header>
+            <form method="get" action={'xrowextract/jobs'|ezurl} class="xe-filter-bar" role="search">
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-install-package">{'Package'|i18n('design/standard/extract')}</label>
+                    <select name="package" id="xe-install-package">
+                        <option value="">{'every package'|i18n('design/standard/extract')}</option>
+                        {foreach $install_history.packages as $installPackage}
+                        <option value="{$installPackage|wash}"{if $installPackage|eq( $install_history.package )} selected{/if}>{$installPackage|wash}</option>
+                        {/foreach}
+                        {if and( $install_history.package|ne( '' ), $install_history.packages|contains( $install_history.package )|not )}
+                        <option value="{$install_history.package|wash}" selected>{$install_history.package|wash}</option>
+                        {/if}
+                    </select>
+                </div>
+                <div class="xe-field xe-filter-buttons">
+                    <input class="button" type="submit" value="{'Filter'|i18n('design/standard/extract')}" />
+                </div>
+            </form>
+            {if $installs|count|eq( 0 )}
+            <p class="xe-columns-empty">{'No package installs yet.'|i18n('design/standard/extract')}</p>
+            {else}
+            {include uri='design:xrowextract/install_history_rows.tpl' installs=$installs show_package=true()}
+            <nav class="xe-pager" aria-label="{'Pages of the install history'|i18n('design/standard/extract')|wash}">
+                <span class="xe-pager-range">{'%from-%to of %total installs'|i18n('design/standard/extract',, hash( '%from', $install_history.from, '%to', $install_history.to, '%total', $install_history.total ))}</span>
+                <span class="xe-pager-links">
+                    {if $install_history.prev|ge( 0 )}<a class="button" href="?install_offset={$install_history.prev}{$install_history.query|wash}#xe-card-install-history">&lsaquo; {'Previous'|i18n('design/standard/extract')}</a>{/if}
+                    {if $install_history.next|ge( 0 )}<a class="button" href="?install_offset={$install_history.next}{$install_history.query|wash}#xe-card-install-history">{'Next'|i18n('design/standard/extract')} &rsaquo;</a>{/if}
+                </span>
+            </nav>
             {/if}
         </section>
     </div>

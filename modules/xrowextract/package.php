@@ -214,6 +214,21 @@ if ( $inspection )
     $inspection['objects'] = array_slice( $inspection['objects'], ( $pageNumber - 1 ) * $pageSize, $pageSize );
 $tpl->setVariable( 'Inspection', $inspection );
 
+// The install history of this package: who installed it, when, how and with what result (kept after the
+// job files expire), the viewer's own installs or, with xrowextract/all_jobs, everyone's
+$packageInstalls = array();
+$packageInstallCount = 0;
+if ( $package instanceof eZPackage && XrowExtractSchema::exists() )
+{
+    $viewerLogin = eZUser::currentUser()->attribute( 'login' );
+    foreach ( XrowExtractHistory::fetchInstalls( $viewerLogin, XrowExtractJob::allowAllJobs(), $packageName, 0, 10 ) as $historyRow )
+        $packageInstalls[] = $historyRow->installRow( $viewerLogin );
+    $packageInstallCount = XrowExtractHistory::countInstalls( $viewerLogin, XrowExtractJob::allowAllJobs(), $packageName );
+}
+$tpl->setVariable( 'PackageInstalls', $packageInstalls );
+$tpl->setVariable( 'PackageInstallCount', $packageInstallCount );
+$tpl->setVariable( 'JobsAvailable', XrowExtractJob::available() );
+
 $availableSiteAccesses = eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );
 $tpl->setVariable( 'AvailableSiteAccesses', $availableSiteAccesses );
 $SiteAccess = $http->hasPostVariable( 'SiteAccess' ) ? (string)$http->postVariable( 'SiteAccess' ) : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
@@ -285,7 +300,17 @@ if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage && Xro
 elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
 {
     // No background jobs on this installation (XrowExtractJob::available() is false): install in the request
+    $installStartedAt = time();
+    $preInstall = XrowExtractPackage::cachedInspection( $package, $ParentNodeID );
     $installReport = XrowExtractPackage::install( $package, $ParentNodeID, $SiteAccess, $ObjectMode, $ClassMode );
+    XrowExtractHistory::recordInstall( array(
+        'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'trigger_type' => 'manual',
+        'started_at' => $installStartedAt, 'ended_at' => time(),
+        'package' => $package->attribute( 'name' ), 'parent_node_id' => (int)$ParentNodeID, 'site_access' => $SiteAccess,
+        'object_mode' => $ObjectMode, 'class_mode' => $ClassMode,
+        'counts' => $preInstall['counts'], 'report' => $installReport,
+        'missing_datatypes' => isset( $preInstall['missing_datatypes'] ) ? $preInstall['missing_datatypes'] : array(),
+    ) );
     if ( $installReport['ok'] )
     {
         eZContentObject::clearCache();

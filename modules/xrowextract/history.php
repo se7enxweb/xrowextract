@@ -53,7 +53,9 @@ foreach ( XrowExtractHistory::fetchPage( $filter, $login, $allowAll, $offset, $p
         'what' => $h->attribute( 'what' ),
         'trigger' => $h->attribute( 'trigger_type' ),
         'run_mode' => $h->attribute( 'run_mode' ),
-        'format' => $h->attribute( 'output_format' ),
+        // A package install keeps its class mode in output_format; say what it is instead
+        'format' => $h->attribute( 'kind' ) === XrowExtractHistory::KIND_INSTALL
+                    ? 'ezpkg · install · ' . $h->attribute( 'run_mode' ) . '/' . $h->attribute( 'output_format' ) : $h->attribute( 'output_format' ),
         'state' => $h->attribute( 'run_state' ),
         'schedule_id' => (int)$h->attribute( 'schedule_id' ),
         'schedule_name' => $h->scheduleName(),

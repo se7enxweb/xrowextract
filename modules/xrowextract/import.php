@@ -864,8 +864,19 @@ elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $h
     $forceFreshInspection = false;
     if ( $apply && $Package instanceof eZPackage )
     {
+        $installStartedAt = time();
         $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
                                                        $PkgObjectMode, $PkgClassMode );
+        // In the request (no background jobs here): the install history row the job's runner writes otherwise
+        XrowExtractHistory::recordInstall( array(
+            'owner_login' => $login, 'trigger_type' => 'manual', 'started_at' => $installStartedAt, 'ended_at' => time(),
+            'package' => $Package->attribute( 'name' ), 'parent_node_id' => (int)$ParentNodeID,
+            'site_access' => eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
+            'object_mode' => $PkgObjectMode, 'class_mode' => $PkgClassMode,
+            'counts' => isset( $earlyInspection['counts'] ) ? $earlyInspection['counts'] : array(),
+            'report' => $installReport,
+            'missing_datatypes' => isset( $earlyInspection['missing_datatypes'] ) ? $earlyInspection['missing_datatypes'] : array(),
+        ) );
         if ( $installReport['ok'] )
         {
             eZContentObject::clearCache();
