@@ -128,7 +128,7 @@ $ownerInfo = function ( $ownerLogin ) use ( &$owners )
         }
     }
     $initials = '';
-    foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) as $part )
+    foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $part ) // false: not UTF-8
     {
         $initials .= mb_strtoupper( mb_substr( $part, 0, 1 ) );
         if ( mb_strlen( $initials ) >= 2 )

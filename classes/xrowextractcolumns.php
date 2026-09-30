@@ -10,6 +10,19 @@ class XrowExtractColumns
     /** The language rows are written in (a locale such as eng-US), or null for the object's own language order. */
     public static $language = null;
 
+    /**
+     * A cache that lives for one request: an array kept in $GLOBALS, which Velocity clears between the
+     * requests one worker serves (a static variable or property would carry what one request found, such
+     * as a user's name or the request's http/https, into every later one). On the command line and under
+     * Apache it lives as long as the process, like a static. Returned by reference.
+     */
+    public static function &requestCache( $name )
+    {
+        if ( !isset( $GLOBALS['xrowExtractRequestCache'][$name] ) || !is_array( $GLOBALS['xrowExtractRequestCache'][$name] ) )
+            $GLOBALS['xrowExtractRequestCache'][$name] = array();
+        return $GLOBALS['xrowExtractRequestCache'][$name];
+    }
+
     /** The special columns. Only these exist; each value is computed in extraValue(). */
     public static function extraAttributes( $allowPasswordHash = null )
     {
@@ -99,9 +112,10 @@ class XrowExtractColumns
     /** Whether a datatype is registered on this installation (its extension active), without trying to load it. */
     public static function datatypeInstalled( $datatype )
     {
-        static $allowed = null;
-        if ( $allowed === null )
-            $allowed = array_flip( eZDataType::allowedTypes() );
+        // Per request: the datatypes are the siteaccess's (content.ini), and one Velocity worker serves several
+        $allowed =& self::requestCache( 'allowed_datatypes' );
+        if ( !$allowed )
+            $allowed = array_flip( (array)eZDataType::allowedTypes() );
         return isset( $allowed[$datatype] );
     }
 
@@ -278,14 +292,15 @@ class XrowExtractColumns
     /** The public site's address (DefaultAccess), not the admin one the view runs in. */
     public static function publicSiteURL()
     {
-        static $url = null;
-        if ( $url === null )
+        // Per request: the scheme is the request's own
+        $cache =& self::requestCache( 'public_site_url' );
+        if ( !isset( $cache['url'] ) )
         {
             $siteINI = self::publicSiteINI();
             $scheme = eZSys::isSSLNow() ? 'https://' : 'http://';
-            $url = $scheme . rtrim( preg_replace( '#^https?://#', '', $siteINI->variable( 'SiteSettings', 'SiteURL' ) ), '/' );
+            $cache['url'] = $scheme . rtrim( (string)preg_replace( '#^https?://#', '', (string)$siteINI->variable( 'SiteSettings', 'SiteURL' ) ), '/' );
         }
-        return $url;
+        return $cache['url'];
     }
 
     /**

@@ -303,7 +303,8 @@ class XrowExtractJob
      */
     public static function ownerInfo( $ownerLogin )
     {
-        static $owners = array();
+        // Per request: a name or an account can change between two requests of one Velocity worker
+        $owners =& XrowExtractColumns::requestCache( 'owner_info' );
         if ( isset( $owners[$ownerLogin] ) )
             return $owners[$ownerLogin];
         $name = $ownerLogin;
@@ -320,7 +321,7 @@ class XrowExtractJob
             }
         }
         $initials = '';
-        foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) as $part )
+        foreach ( preg_split( '/[\s._@-]+/u', trim( $name ), -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $part ) // false: not UTF-8
         {
             $initials .= mb_strtoupper( mb_substr( $part, 0, 1 ) );
             if ( mb_strlen( $initials ) >= 2 )

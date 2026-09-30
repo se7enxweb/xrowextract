@@ -686,8 +686,10 @@ class XrowExtractPackage
     /** The datatypes this site can use (see above), cached per request. */
     public static function siteDatatypes()
     {
-        static $available = null;
-        if ( $available === null )
+        // Per request, as the comment says (a static was per Velocity worker): the datatypes are the
+        // siteaccess's, and one worker serves several
+        $cache =& XrowExtractColumns::requestCache( 'site_datatypes' );
+        if ( !isset( $cache['available'] ) )
         {
             // Registered, not instantiated: eZDataType::create() would construct every datatype, and one
             // with a constructor that needs arguments throws (seen with an extension datatype).
@@ -699,8 +701,9 @@ class XrowExtractPackage
                 if ( isset( $GLOBALS['eZDataTypes'][$datatype] ) )
                     $available[$datatype] = true;
             }
+            $cache['available'] = $available;
         }
-        return $available;
+        return $cache['available'];
     }
 
     /** $usage as a sorted list: datatype, classes (identifiers), objects (count), object_classes, available. */

@@ -227,7 +227,8 @@ class XrowExtractHistory extends eZPersistentObject
 
     public function scheduleName()
     {
-        static $names = array();
+        // Per request: a schedule can be renamed or deleted between two requests of one Velocity worker
+        $names =& XrowExtractColumns::requestCache( 'schedule_names' );
         $id = (int)$this->attribute( 'schedule_id' );
         if ( !$id )
             return '';
