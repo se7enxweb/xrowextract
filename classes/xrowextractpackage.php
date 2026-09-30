@@ -861,10 +861,18 @@ class XrowExtractPackage
             foreach ( $attributesNode->getElementsByTagName( 'attribute' ) as $attrNode )
             {
                 $attrIdentifierNode = $attrNode->getElementsByTagName( 'identifier' )->item( 0 );
-                $attrTypeNode = $attrNode->getElementsByTagName( 'type' )->item( 0 );
+                // The datatype is the attribute's own datatype="..." (what eZContentClassPackageHandler
+                // writes); a <type> element inside it is one of the datatype's parameters (an ezmedia's
+                // player type, an ezobjectrelationlist's "0"), read only when datatype="" is absent.
+                $datatype = (string)$attrNode->getAttribute( 'datatype' );
+                if ( $datatype === '' )
+                {
+                    $attrTypeNode = $attrNode->getElementsByTagName( 'type' )->item( 0 );
+                    $datatype = $attrTypeNode ? (string)$attrTypeNode->textContent : '';
+                }
                 $attributeRows[] = array(
                     'identifier' => $attrIdentifierNode ? $attrIdentifierNode->textContent : '',
-                    'datatype'   => $attrTypeNode ? $attrTypeNode->textContent : '',
+                    'datatype'   => $datatype,
                     'required'   => $attrNode->getAttribute( 'required' ) === 'true',
                 );
             }
