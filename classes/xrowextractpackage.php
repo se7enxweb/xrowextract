@@ -38,8 +38,12 @@ class XrowExtractPackage
      * 'contentobject' (a standalone content-object XML, the file
      * eZContentObjectPackageHandler writes). False for anything else (a row
      * CSV/XML/JSON file, handled by XrowExtractImport as before).
+     *
+     * @param string $storedPath
+     * @param string|null $originalName
+     * @return 'package'|'contentclass'|'contentobject'|false
      */
-    public static function detectUploadKind( $storedPath, $originalName )
+    public static function detectUploadKind( $storedPath, $originalName ): string|false
     {
         $lowerName = strtolower( (string)$originalName );
         if ( self::endsWith( $lowerName, '.ezpkg' ) || self::endsWith( $lowerName, '.tar.gz' ) || self::endsWith( $lowerName, '.tgz' ) )
@@ -67,7 +71,7 @@ class XrowExtractPackage
         return false;
     }
 
-    protected static function endsWith( $haystack, $needle )
+    protected static function endsWith( string $haystack, string $needle ): bool
     {
         $len = strlen( $needle );
         return $len === 0 || substr( $haystack, -$len ) === $needle;
@@ -81,8 +85,11 @@ class XrowExtractPackage
      * (streaming: entries are listed without loading the archive into
      * memory), not eZ's own ezcArchive, specifically so this check runs
      * first and independently of how the kernel itself later extracts it.
+     *
+     * @param string $path
+     * @return array{ok: bool, entries: list<string>, error: string|null}
      */
-    public static function scanArchiveEntries( $path )
+    public static function scanArchiveEntries( $path ): array
     {
         $real = realpath( $path );
         if ( $real === false || !is_file( $real ) )
@@ -160,8 +167,11 @@ class XrowExtractPackage
      * .ezpkg whose own package.xml name is not a valid kernel identifier
      * (capitals, spaces...) is imported anyway, under a corrected name, with
      * enough returned for the caller to say so, instead of being refused.
+     *
+     * @param string $storedPath
+     * @return array{ok: bool, package: eZPackage|null, error: string|null, renamed: bool, renamed_from: string|null, renamed_to: string|null}
      */
-    public static function importUploadedArchive( $storedPath )
+    public static function importUploadedArchive( $storedPath ): array
     {
         // An absolute path: the kernel opens the archive as "compress.zlib://<path>", and a relative
         // one (var/site/cache/...) cannot be opened that way ("can not be opened for reading")
@@ -229,8 +239,10 @@ class XrowExtractPackage
      * found in package.xml (or null if it could not be read at all), 'to' => the corrected name, or
      * null ). A 'path' equal to $storedPath (renamed false) is the normal, unmodified case; the
      * caller only has to @unlink() the result when 'renamed' is true.
+     *
+     * @return array{path: string, renamed: bool, from: string|null, to: string|null}
      */
-    protected static function renamedArchiveCopyIfNeeded( $storedPath )
+    protected static function renamedArchiveCopyIfNeeded( string $storedPath ): array
     {
         $result = array( 'path' => $storedPath, 'renamed' => false, 'from' => null, 'to' => null );
         try
@@ -318,7 +330,7 @@ class XrowExtractPackage
     }
 
     /** The <name> package.xml's root element carries, or null if the file cannot be read as one. */
-    protected static function readPackageNameFromXML( $path )
+    protected static function readPackageNameFromXML( string $path ): ?string
     {
         if ( !is_file( $path ) )
             return null;
@@ -336,8 +348,13 @@ class XrowExtractPackage
      * XrowExtractPackage::inspect()/install() code as a full .ezpkg - "build
      * a transient package around it", per the class/content XML upload
      * requirement. Returns array( 'ok', 'package', 'error' ).
+     *
+     * @param string $storedPath
+     * @param string $kind
+     * @param string $originalName
+     * @return array{ok: bool, package: eZPackage|null, error: string|null}
      */
-    public static function wrapStandaloneXML( $storedPath, $kind, $originalName = '' )
+    public static function wrapStandaloneXML( $storedPath, $kind, $originalName = '' ): array
     {
         if ( !in_array( $kind, array( 'contentclass', 'contentobject' ), true ) )
             return array( 'ok' => false, 'package' => null, 'error' => 'unknown file kind' );
@@ -380,8 +397,12 @@ class XrowExtractPackage
 
     // ------------------------------------------------------------ listing
 
-    /** Packages in the repository that carry a content class or content object install item. */
-    public static function repositoryPackages()
+    /**
+     * Packages in the repository that carry a content class or content object install item.
+     *
+     * @return list<array{name: string, summary: string, version: string, is_installed: bool, install_type: string, has_classes: bool, has_objects: bool, class_count: int, object_item_count: int}>
+     */
+    public static function repositoryPackages(): array
     {
         $out = array();
         foreach ( eZPackage::fetchPackages() as $package )
@@ -405,7 +426,8 @@ class XrowExtractPackage
         return $out;
     }
 
-    protected static function installItemTypes( eZPackage $package )
+    /** @return list<string> */
+    protected static function installItemTypes( eZPackage $package ): array
     {
         $types = array();
         foreach ( $package->installItemsList() as $item )
@@ -414,7 +436,7 @@ class XrowExtractPackage
         return array_keys( $types );
     }
 
-    protected static function countItems( eZPackage $package, $type )
+    protected static function countItems( eZPackage $package, string $type ): int
     {
         return count( self::installItemsOfType( $package, $type ) );
     }
@@ -426,8 +448,10 @@ class XrowExtractPackage
      * whole install list instead of filtering - see the kernel bug note in
      * this extension's port docs (installItemsList( 'ezcontentclass' ) was
      * observed to also return the package's 'ezcontentobject' item).
+     *
+     * @return list<array<string, mixed>>
      */
-    protected static function installItemsOfType( eZPackage $package, $type )
+    protected static function installItemsOfType( eZPackage $package, string $type ): array
     {
         $matches = array();
         foreach ( $package->installItemsList() as $item )
@@ -438,8 +462,12 @@ class XrowExtractPackage
 
     // ------------------------------------------------------------ metadata
 
-    /** Package-level metadata for the inspect screen: name, summary, version, licence, dependencies, changelog. */
-    public static function packageMeta( eZPackage $package )
+    /**
+     * Package-level metadata for the inspect screen: name, summary, version, licence, dependencies, changelog.
+     *
+     * @return array<string, mixed>
+     */
+    public static function packageMeta( eZPackage $package ): array
     {
         $changelog = array();
         foreach ( (array)$package->attribute( 'changelog' ) as $entry )
@@ -487,8 +515,12 @@ class XrowExtractPackage
      * the same result, so it is worked out once and reused for INSPECTION_CACHE_TTL seconds, until $refresh
      * ("Check again"), or until an install of that package clears it (forgetInspections()).
      * Adds 'checked_at' (when it was worked out) and 'cached' (whether this call reused it).
+     *
+     * @param int|string|false|null $parentNodeID
+     * @param bool $refresh
+     * @return array<string, mixed>
      */
-    public static function cachedInspection( eZPackage $package, $parentNodeID = false, $refresh = false )
+    public static function cachedInspection( eZPackage $package, $parentNodeID = false, $refresh = false ): array
     {
         $dir = eZSys::cacheDirectory() . '/xrowextract/inspect';
         $definition = rtrim( (string)$package->path(), '/' ) . '/package.xml';
@@ -518,8 +550,12 @@ class XrowExtractPackage
         return $inspection;
     }
 
-    /** Forgets every cached dry run of a package (after it was installed, the site no longer matches it). */
-    public static function forgetInspections( $packageName )
+    /**
+     * Forgets every cached dry run of a package (after it was installed, the site no longer matches it).
+     *
+     * @param string $packageName
+     */
+    public static function forgetInspections( $packageName ): void
     {
         foreach ( (array)glob( eZSys::cacheDirectory() . '/xrowextract/inspect/' . self::inspectionCachePrefix( $packageName ) . '*.json' ) as $file )
             @unlink( $file );
@@ -530,7 +566,7 @@ class XrowExtractPackage
      * a root command line), hands it and its parent back to the var directory's owner: a folder root
      * created first would otherwise keep PHP-FPM from ever writing a cached dry run or comparison there.
      */
-    protected static function ensureCacheDir( $dir )
+    protected static function ensureCacheDir( string $dir ): void
     {
         if ( !is_dir( $dir ) )
             eZDir::mkdir( $dir, false, true );
@@ -541,7 +577,8 @@ class XrowExtractPackage
         }
     }
 
-    protected static function inspectionCachePrefix( $packageName )
+    /** @param string|null $packageName */
+    protected static function inspectionCachePrefix( $packageName ): string
     {
         return preg_replace( '/[^a-z0-9_]+/', '_', strtolower( (string)$packageName ) ) . '__';
     }
@@ -552,8 +589,11 @@ class XrowExtractPackage
      * to identifier). Nothing is written. $parentNodeID (the parent chosen in
      * the install form, when known) is only used to describe where a new
      * top-level object would land - it changes nothing about matching.
+     *
+     * @param int|string|false|null $parentNodeID
+     * @return array<string, mixed>
      */
-    public static function inspect( eZPackage $package, $parentNodeID = false )
+    public static function inspect( eZPackage $package, $parentNodeID = false ): array
     {
         // eZContentObject::fetch()/fetchDataMap() keep their results in
         // $GLOBALS['eZContentObjectContentObjectCache']/[...DataMapCache], populated once and
@@ -651,8 +691,14 @@ class XrowExtractPackage
     // whose class file is gone, does not count). A missing one does not stop an install - the kernel skips
     // what it cannot read - but the page, the Import review and the install job's log say so clearly.
 
-    /** $usage[datatype] = array( 'classes' => identifier => true, 'objects' => n, 'object_classes' => identifier => true ). */
-    public static function addClassDatatypes( array &$usage, $classIdentifier, array $attributeRows )
+    /**
+     * $usage[datatype] = array( 'classes' => identifier => true, 'objects' => n, 'object_classes' => identifier => true ).
+     *
+     * @param array<string, array{classes: array<string, true>, objects: int, object_classes: array<string, true>}> $usage
+     * @param string $classIdentifier
+     * @param array<array<string, mixed>> $attributeRows
+     */
+    public static function addClassDatatypes( array &$usage, $classIdentifier, array $attributeRows ): void
     {
         foreach ( $attributeRows as $attribute )
         {
@@ -666,8 +712,13 @@ class XrowExtractPackage
         }
     }
 
-    /** Counts the datatypes one object's XML carries (each once per object, whatever its languages). */
-    public static function addObjectDatatypes( array &$usage, DOMElement $objectNode, $classIdentifier )
+    /**
+     * Counts the datatypes one object's XML carries (each once per object, whatever its languages).
+     *
+     * @param array<string, array{classes: array<string, true>, objects: int, object_classes: array<string, true>}> $usage
+     * @param string $classIdentifier
+     */
+    public static function addObjectDatatypes( array &$usage, DOMElement $objectNode, $classIdentifier ): void
     {
         $seen = array();
         foreach ( $objectNode->getElementsByTagNameNS( 'http://ez.no/object/', 'attribute' ) as $attrNode )
@@ -686,8 +737,12 @@ class XrowExtractPackage
         }
     }
 
-    /** The datatypes this site can use (see above), cached per request. */
-    public static function siteDatatypes()
+    /**
+     * The datatypes this site can use (see above), cached per request.
+     *
+     * @return array<string, true>
+     */
+    public static function siteDatatypes(): array
     {
         // Per request, as the comment says (a static was per Velocity worker): the datatypes are the
         // siteaccess's, and one worker serves several
@@ -709,8 +764,13 @@ class XrowExtractPackage
         return $cache['available'];
     }
 
-    /** $usage as a sorted list: datatype, classes (identifiers), objects (count), object_classes, available. */
-    public static function datatypeUsageList( array $usage )
+    /**
+     * $usage as a sorted list: datatype, classes (identifiers), objects (count), object_classes, available.
+     *
+     * @param array<string, array{classes: array<string, true>, objects: int, object_classes: array<string, true>}> $usage
+     * @return list<array{datatype: string, classes: list<string>, objects: int, object_classes: list<string>, available: bool}>
+     */
+    public static function datatypeUsageList( array $usage ): array
     {
         $site = self::siteDatatypes();
         $list = array();
@@ -728,14 +788,24 @@ class XrowExtractPackage
         return $list;
     }
 
-    /** Only the rows of datatypeUsageList() this site does not have. */
-    public static function missingDatatypes( array $usage )
+    /**
+     * Only the rows of datatypeUsageList() this site does not have.
+     *
+     * @param array<string, array{classes: array<string, true>, objects: int, object_classes: array<string, true>}> $usage
+     * @return list<array{datatype: string, classes: list<string>, objects: int, object_classes: list<string>, available: bool}>
+     */
+    public static function missingDatatypes( array $usage ): array
     {
         return array_values( array_filter( self::datatypeUsageList( $usage ), function ( $row ) { return !$row['available']; } ) );
     }
 
-    /** One line per missing datatype, for the command line and the install job's log (without the "WARNING: " prefix). */
-    public static function missingDatatypeLines( array $missing )
+    /**
+     * One line per missing datatype, for the command line and the install job's log (without the "WARNING: " prefix).
+     *
+     * @param array<array<string, mixed>> $missing rows of missingDatatypes()
+     * @return list<string>
+     */
+    public static function missingDatatypeLines( array $missing ): array
     {
         $lines = array();
         foreach ( $missing as $row )
@@ -757,8 +827,14 @@ class XrowExtractPackage
      * The inspection's objects narrowed to what the Package tab's filters ask for: $state (create, update,
      * unchanged, class_missing or '' for all), $classIdentifier ('' for all) and $text (a case-insensitive
      * part of the name or remote id). Works on the cached dry run alone; the order is kept.
+     *
+     * @param array<array<string, mixed>> $objects
+     * @param string $state
+     * @param string $classIdentifier
+     * @param string|null $text
+     * @return list<array<string, mixed>>
      */
-    public static function filterInspectionObjects( array $objects, $state = '', $classIdentifier = '', $text = '' )
+    public static function filterInspectionObjects( array $objects, $state = '', $classIdentifier = '', $text = '' ): array
     {
         $text = trim( (string)$text );
         if ( $state === '' && $classIdentifier === '' && $text === '' )
@@ -777,8 +853,13 @@ class XrowExtractPackage
         return $out;
     }
 
-    /** Per class identifier: how many of the inspection's objects are of it, sorted by identifier (the class filter's choices). */
-    public static function inspectionObjectClasses( array $objects )
+    /**
+     * Per class identifier: how many of the inspection's objects are of it, sorted by identifier (the class filter's choices).
+     *
+     * @param array<array<string, mixed>> $objects
+     * @return list<array{identifier: string, count: int}>
+     */
+    public static function inspectionObjectClasses( array $objects ): array
     {
         $counts = array();
         foreach ( $objects as $object )
@@ -802,8 +883,11 @@ class XrowExtractPackage
      * row per content-class item (action 'create'/'update', its attribute diff
      * as 'changes'), then one row per content-object item ('class_missing' maps
      * to 'error', its reason explaining why; field-level changes as 'changes').
+     *
+     * @param array<string, mixed> $inspection inspect()'s result
+     * @return array{rows: list<array<string, mixed>>, counts: array<string, int>, ezoe: bool}
      */
-    public static function inspectionToResultRows( array $inspection )
+    public static function inspectionToResultRows( array $inspection ): array
     {
         $rows = array();
         $number = 0;
@@ -872,8 +956,12 @@ class XrowExtractPackage
         return array( 'rows' => $rows, 'counts' => $counts, 'ezoe' => true );
     }
 
-    /** Every file a package carries outside its XML install items (simplefiles/, images/), with sizes. */
-    public static function packageFiles( eZPackage $package )
+    /**
+     * Every file a package carries outside its XML install items (simplefiles/, images/), with sizes.
+     *
+     * @return list<array{path: string, size: int|false}>
+     */
+    public static function packageFiles( eZPackage $package ): array
     {
         $out = array();
         $base = $package->path();
@@ -904,8 +992,12 @@ class XrowExtractPackage
     // all N files" beyond it) and xrowextract/browse (the full, paginated page a link from the
     // kernel's own package/view/full reaches).
 
-    /** Every regular file under the package's own directory, recursively, sorted by path. No limit: paginate the result, do not slice it here. */
-    public static function allPackageFiles( eZPackage $package )
+    /**
+     * Every regular file under the package's own directory, recursively, sorted by path. No limit: paginate the result, do not slice it here.
+     *
+     * @return list<array{path: string, size: int|false, size_human: string, kind: string}>
+     */
+    public static function allPackageFiles( eZPackage $package ): array
     {
         $out = array();
         $base = rtrim( (string)$package->path(), '/' );
@@ -933,8 +1025,11 @@ class XrowExtractPackage
      * not a path, identifies a file in a URL), for the short preview embedded on the Import page and
      * the Package tab (design:xrowextract/package_files_preview.tpl). Returns array( 'files',
      * 'total' ) - 'total' is allPackageFiles()'s own count, always, not count( 'files' ).
+     *
+     * @param int $limit
+     * @return array{files: list<array{path: string, size: int|false, size_human: string, kind: string, index: int}>, total: int}
      */
-    public static function packageFilesPreview( eZPackage $package, $limit = 10 )
+    public static function packageFilesPreview( eZPackage $package, $limit = 10 ): array
     {
         $all = self::allPackageFiles( $package );
         $slice = array_slice( $all, 0, $limit );
@@ -944,8 +1039,12 @@ class XrowExtractPackage
         return array( 'files' => $slice, 'total' => count( $all ) );
     }
 
-    /** 'xml', 'image', 'text' or 'binary' by extension - what the browser shows inline, and how. */
-    public static function fileKind( $relativePath )
+    /**
+     * 'xml', 'image', 'text' or 'binary' by extension - what the browser shows inline, and how.
+     *
+     * @param string $relativePath
+     */
+    public static function fileKind( $relativePath ): string
     {
         $ext = strtolower( (string)pathinfo( $relativePath, PATHINFO_EXTENSION ) );
         if ( $ext === 'xml' )
@@ -961,8 +1060,10 @@ class XrowExtractPackage
      * The content type xrowextract/browse_file answers a file with. An image's own real type; every
      * other kind (including xml) as text/plain - an .xml or .txt item is shown as data here, never
      * served as a type a browser would try to render as markup or execute.
+     *
+     * @param string $relativePath
      */
-    public static function fileMimeType( $relativePath )
+    public static function fileMimeType( $relativePath ): string
     {
         $ext = strtolower( (string)pathinfo( $relativePath, PATHINFO_EXTENSION ) );
         $map = array(
@@ -977,8 +1078,10 @@ class XrowExtractPackage
      * component, or anything realpath() follows (a symlink included) outside it. Returns the real,
      * safe, absolute path to an existing regular file, or false - the one gate both the inline
      * viewer and the raw-byte view (xrowextract/browse_file) read a package file through.
+     *
+     * @param string|null $relativePath
      */
-    public static function packageFilePath( eZPackage $package, $relativePath )
+    public static function packageFilePath( eZPackage $package, $relativePath ): string|false
     {
         $relativePath = ltrim( (string)$relativePath, '/' );
         if ( $relativePath === '' || strpos( $relativePath, "\0" ) !== false || preg_match( '#(^|/)\.\.(/|$)#', $relativePath ) )
@@ -994,8 +1097,12 @@ class XrowExtractPackage
         return $real;
     }
 
-    /** Pretty-printed XML (indented, no run-together text nodes), or the original bytes unchanged if they do not parse as XML. */
-    public static function prettyPrintXML( $bytes )
+    /**
+     * Pretty-printed XML (indented, no run-together text nodes), or the original bytes unchanged if they do not parse as XML.
+     *
+     * @param string|false|null $bytes
+     */
+    public static function prettyPrintXML( $bytes ): string
     {
         $dom = new DOMDocument( '1.0', 'utf-8' );
         $dom->preserveWhiteSpace = false;
@@ -1006,7 +1113,11 @@ class XrowExtractPackage
         return $pretty !== false ? $pretty : (string)$bytes;
     }
 
-    protected static function inspectClassItem( eZPackage $package, array $item )
+    /**
+     * @param array<string, mixed> $item
+     * @return array<string, mixed>|null
+     */
+    protected static function inspectClassItem( eZPackage $package, array $item ): ?array
     {
         $row = self::readClassItem( $package, $item );
         if ( $row === null )
@@ -1024,8 +1135,11 @@ class XrowExtractPackage
      * A content class install item as the package's own XML states it - identifier, remote id, name and
      * attributes (identifier, datatype, required) - without looking at the site at all: what inspectClassItem()
      * then matches, and what comparePackages() compares between two packages.
+     *
+     * @param array<string, mixed> $item
+     * @return array{identifier: string, remote_id: string, name: string, attributes: list<array{identifier: string, datatype: string, required: bool}>, attribute_count: int, file_path: string|null}|null
      */
-    protected static function readClassItem( eZPackage $package, array $item )
+    protected static function readClassItem( eZPackage $package, array $item ): ?array
     {
         if ( empty( $item['filename'] ) )
             return null;
@@ -1084,8 +1198,12 @@ class XrowExtractPackage
         );
     }
 
-    /** The item's own file, relative to the package's root - what fetchItemDOM() reads, and the same path allPackageFiles() reports it under. */
-    protected static function itemRelativePath( array $item )
+    /**
+     * The item's own file, relative to the package's root - what fetchItemDOM() reads, and the same path allPackageFiles() reports it under.
+     *
+     * @param array<string, mixed> $item
+     */
+    protected static function itemRelativePath( array $item ): ?string
     {
         if ( empty( $item['filename'] ) )
             return null;
@@ -1093,8 +1211,13 @@ class XrowExtractPackage
         return ( $subdirectory ? $subdirectory . '/' : '' ) . $item['filename'] . '.xml';
     }
 
-    /** Attributes added, removed or changed datatype, package vs. the installed class of the same identifier/remote id. */
-    protected static function classAttributeDiff( array $packageAttributeRows, eZContentClass $existingClass )
+    /**
+     * Attributes added, removed or changed datatype, package vs. the installed class of the same identifier/remote id.
+     *
+     * @param array<array{identifier: string, datatype: string, required?: bool}> $packageAttributeRows
+     * @return array{added: list<array{identifier: string, datatype: string}>, removed: list<array{identifier: string, datatype: string}>, changed: list<array{identifier: string, old_datatype: string, new_datatype: string}>, has_changes: bool}
+     */
+    protected static function classAttributeDiff( array $packageAttributeRows, eZContentClass $existingClass ): array
     {
         $existingRows = array();
         foreach ( eZContentClassAttribute::fetchListByClassID( (int)$existingClass->attribute( 'id' ), eZContentClass::VERSION_STATUS_DEFINED, true ) as $attribute )
@@ -1123,8 +1246,17 @@ class XrowExtractPackage
                       'has_changes' => (bool)( $added || $removed || $changed ) );
     }
 
-    /** One install item can carry many content objects (inline or one XML file per object). */
-    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false, array &$datatypeUsage = array() )
+    /**
+     * One install item can carry many content objects (inline or one XML file per object).
+     *
+     * @param array<string, mixed> $item
+     * @param array<string, true> $classRemoteIDsInPackage
+     * @param array<string, true> $classIdentifiersInPackage
+     * @param int|string|false|null $parentNodeID
+     * @param array<string, array{classes: array<string, true>, objects: int, object_classes: array<string, true>}> $datatypeUsage
+     * @return list<array<string, mixed>>
+     */
+    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false, array &$datatypeUsage = array() ): array
     {
         $rows = array();
         foreach ( self::objectDOMNodesWithPaths( $package, $item ) as $pair )
@@ -1227,8 +1359,10 @@ class XrowExtractPackage
      * ezobjectrelation(list), ezselection, eztags, ezdate(time)... - each
      * has its own custom serializer) is not compared field by field; the
      * object as a whole is still reported as 'update'.
+     *
+     * @return array<string, array{source: string, xml: string, bool?: bool}>
      */
-    protected static function diffableAttributeFields()
+    protected static function diffableAttributeFields(): array
     {
         return array(
             'ezstring'     => array( 'source' => 'data_text',  'xml' => 'text' ),
@@ -1241,8 +1375,12 @@ class XrowExtractPackage
         );
     }
 
-    /** Old (live) -> new (package) value per attribute, for the datatypes diffableAttributeFields() covers; only attributes that actually differ are returned. */
-    protected static function objectFieldChanges( DOMElement $objectNode, eZContentObject $existing )
+    /**
+     * Old (live) -> new (package) value per attribute, for the datatypes diffableAttributeFields() covers; only attributes that actually differ are returned.
+     *
+     * @return list<array{identifier: string, datatype: string, language: string, old: string, new: string}>
+     */
+    protected static function objectFieldChanges( DOMElement $objectNode, eZContentObject $existing ): array
     {
         $changes = array();
         $map = self::diffableAttributeFields();
@@ -1284,7 +1422,7 @@ class XrowExtractPackage
      * outer name/modified date. A class with none of those datatypes is left as is - the
      * object still shows as 'update' (via its modified date), just with no field diff row.
      */
-    protected static function mutateOneDiffableAttributeValue( DOMElement $objectNode )
+    protected static function mutateOneDiffableAttributeValue( DOMElement $objectNode ): bool
     {
         $map = self::diffableAttributeFields();
         $versionListNode = $objectNode->getElementsByTagName( 'version-list' )->item( 0 );
@@ -1324,8 +1462,11 @@ class XrowExtractPackage
      * the package contents browser's own "view this item's file" link (#26), where an inline
      * object-list's every object shares the item's own file, but an object-files-list gives each
      * object a separate one.
+     *
+     * @param array<string, mixed> $item
+     * @return list<array{node: DOMElement, file_path: string|null}>
      */
-    protected static function objectDOMNodesWithPaths( eZPackage $package, array $item )
+    protected static function objectDOMNodesWithPaths( eZPackage $package, array $item ): array
     {
         if ( empty( $item['filename'] ) )
             return array();
@@ -1359,8 +1500,13 @@ class XrowExtractPackage
         return $pairs;
     }
 
-    /** DOM nodes for every content object an install item carries, inline or in separate files. */
-    protected static function objectDOMNodes( eZPackage $package, array $item )
+    /**
+     * DOM nodes for every content object an install item carries, inline or in separate files.
+     *
+     * @param array<string, mixed> $item
+     * @return array<int, DOMElement>
+     */
+    protected static function objectDOMNodes( eZPackage $package, array $item ): array
     {
         if ( empty( $item['filename'] ) )
             return array();
@@ -1388,8 +1534,12 @@ class XrowExtractPackage
         return $nodes;
     }
 
-    /** The document element of an install item's own XML file (class or top-level content object file). */
-    protected static function fetchItemDOM( eZPackage $package, array $item )
+    /**
+     * The document element of an install item's own XML file (class or top-level content object file).
+     *
+     * @param array<string, mixed> $item
+     */
+    protected static function fetchItemDOM( eZPackage $package, array $item ): DOMElement|false|null
     {
         $filename = $item['filename'];
         $subdirectory = isset( $item['sub-directory'] ) ? $item['sub-directory'] : false;
@@ -1410,8 +1560,12 @@ class XrowExtractPackage
     /** How long a cached comparison is reused (seconds). */
     const COMPARE_CACHE_TTL = 900;
 
-    /** Classes and objects of one package as its XML states them, keyed for matching (see above). */
-    public static function packageSnapshot( eZPackage $package )
+    /**
+     * Classes and objects of one package as its XML states them, keyed for matching (see above).
+     *
+     * @return array{classes: array<string, array{identifier: string, remote_id: string, name: string, attributes: array<string, string>}>, objects: array<string, array{remote_id: string, name: string, class_identifier: string, modified: string, languages: list<string>, fields: array<string, array{identifier: string, language: string, datatype: string, hash: string, text: string}>}>}
+     */
+    public static function packageSnapshot( eZPackage $package ): array
     {
         $classes = array();
         foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
@@ -1479,8 +1633,10 @@ class XrowExtractPackage
      * $from compared with $to: 'classes' and 'objects', each a list of rows with 'change' (added: only in $to,
      * removed: only in $from, changed), plus 'counts' (added/removed/changed/unchanged per kind) and the two
      * packages' names and versions.
+     *
+     * @return array<string, mixed>
      */
-    public static function comparePackages( eZPackage $from, eZPackage $to )
+    public static function comparePackages( eZPackage $from, eZPackage $to ): array
     {
         $a = self::packageSnapshot( $from );
         $b = self::packageSnapshot( $to );
@@ -1580,21 +1736,34 @@ class XrowExtractPackage
         );
     }
 
-    protected static function classCompareRow( array $class )
+    /**
+     * @param array{identifier: string, remote_id: string, name: string, attributes: array<string, string>} $class
+     * @return array{identifier: string, remote_id: string, name: string, attribute_count: int}
+     */
+    protected static function classCompareRow( array $class ): array
     {
         return array( 'identifier' => $class['identifier'], 'remote_id' => $class['remote_id'], 'name' => $class['name'], 'attribute_count' => count( $class['attributes'] ) );
     }
 
-    protected static function objectCompareRow( array $object )
+    /**
+     * @param array{remote_id: string, name: string, class_identifier: string, languages: list<string>} $object
+     * @return array{remote_id: string, name: string, class_identifier: string, languages: list<string>}
+     */
+    protected static function objectCompareRow( array $object ): array
     {
         return array( 'remote_id' => $object['remote_id'], 'name' => $object['name'], 'class_identifier' => $object['class_identifier'], 'languages' => $object['languages'] );
     }
 
-    /** comparePackages(), cached per pair and both packages' versions on disk; $refresh works it out anew. Adds 'checked_at' and 'cached'. */
-    public static function cachedComparison( eZPackage $from, eZPackage $to, $refresh = false )
+    /**
+     * comparePackages(), cached per pair and both packages' versions on disk; $refresh works it out anew. Adds 'checked_at' and 'cached'.
+     *
+     * @param bool $refresh
+     * @return array<string, mixed>
+     */
+    public static function cachedComparison( eZPackage $from, eZPackage $to, $refresh = false ): array
     {
         $dir = eZSys::cacheDirectory() . '/xrowextract/compare';
-        $version = function ( eZPackage $package )
+        $version = function ( eZPackage $package ): int
         {
             $definition = rtrim( (string)$package->path(), '/' ) . '/package.xml';
             return is_file( $definition ) ? (int)@filemtime( $definition ) : 0;
@@ -1624,8 +1793,16 @@ class XrowExtractPackage
         return $comparison;
     }
 
-    /** The rows of a comparison list narrowed by $change (added/removed/changed, '' for all), $classIdentifier and $text (name or remote id). */
-    public static function filterComparisonRows( array $rows, $change = '', $classIdentifier = '', $text = '' )
+    /**
+     * The rows of a comparison list narrowed by $change (added/removed/changed, '' for all), $classIdentifier and $text (name or remote id).
+     *
+     * @param array<array<string, mixed>> $rows
+     * @param string $change
+     * @param string $classIdentifier
+     * @param string|null $text
+     * @return list<array<string, mixed>>
+     */
+    public static function filterComparisonRows( array $rows, $change = '', $classIdentifier = '', $text = '' ): array
     {
         $text = trim( (string)$text );
         $out = array();
@@ -1649,8 +1826,10 @@ class XrowExtractPackage
      * inspection against the site), plus their names: what an install is about to write. Used by a
      * background install to record what to count its progress against (see installProgress()).
      * 'missing_datatypes': the datatype check (see missingDatatypes()), from the same read.
+     *
+     * @return array{classes: list<array{remote_id: string, identifier: string}>, objects: list<string>, missing_datatypes: list<array{datatype: string, classes: list<string>, objects: int, object_classes: list<string>, available: bool}>}
      */
-    public static function packageContents( eZPackage $package )
+    public static function packageContents( eZPackage $package ): array
     {
         $contents = array( 'classes' => array(), 'objects' => array() );
         $usage = array();
@@ -1681,16 +1860,19 @@ class XrowExtractPackage
      * many exist now and were written since the start, and the names of the latest ones. The kernel's
      * package installer reports nothing while it works, so this is what the Jobs page shows as the
      * job's real progress.
-     * @return array|null array( done, total, classes_done, objects_done, recent => list of names ) or null
+     * @param string $watchFile
+     * @return array{done: int, total: int, classes_done: int, classes_total: int, objects_done: int, objects_total: int, recent: list<array{id: int, name: string, at: int}>}|null
+     *         array( done, total, classes_done, objects_done, recent => list of names ) or null
      */
-    public static function installProgress( $watchFile )
+    public static function installProgress( $watchFile ): ?array
     {
         $watch = is_file( $watchFile ) ? json_decode( (string)@file_get_contents( $watchFile ), true ) : null;
         if ( !is_array( $watch ) || empty( $watch['started'] ) )
             return null;
         $db = eZDB::instance();
         $since = (int)$watch['started'];
-        $count = function ( $table, array $remoteIDs ) use ( $db, $since )
+        /** @param list<mixed> $remoteIDs */
+        $count = function ( string $table, array $remoteIDs ) use ( $db, $since ): int
         {
             $done = 0;
             foreach ( array_chunk( $remoteIDs, 500 ) as $chunk )
@@ -1726,8 +1908,15 @@ class XrowExtractPackage
      * "top" nodes the package carries (a content package's own root objects)
      * are placed under $parentNodeID; existing classes/objects are handled
      * per $classMode/$objectMode.
+     *
+     * @param int|string $parentNodeID
+     * @param string $siteAccess
+     * @param string $objectMode
+     * @param string $classMode
+     * @param int|string|false|null $userID
+     * @return array{ok: bool, errors: list<string>, created_classes: list<array{id: int, identifier: string, name: string}>, created_objects: list<array{id: int, name: string, node_id: int|null}>}
      */
-    public static function install( eZPackage $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $userID = false )
+    public static function install( eZPackage $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $userID = false ): array
     {
         $report = array( 'ok' => false, 'errors' => array(), 'created_classes' => array(), 'created_objects' => array() );
         // Whatever a cached dry run said no longer holds once this package is (being) installed
@@ -1855,8 +2044,11 @@ class XrowExtractPackage
      * unless keepSamplePackage() is called for it later (import.php imports
      * the returned file transiently, one request at a time, and removes it
      * again after each - see XrowExtractPackage::withTransientImport()).
+     *
+     * @param int|string $classID a class id or identifier
+     * @return array{ok: bool, errors: list<string>, file: string|null, object_count: int, outcomes: list<array{outcome: string, name: string}>, note: string}
      */
-    public static function buildSamplePackage( $classID )
+    public static function buildSamplePackage( $classID ): array
     {
         $result = array( 'ok' => false, 'errors' => array(), 'file' => null, 'object_count' => 0, 'outcomes' => array(), 'note' => '' );
         $class = ctype_digit( (string)$classID ) ? eZContentClass::fetch( (int)$classID ) : eZContentClass::fetchByIdentifier( $classID );
@@ -1906,8 +2098,12 @@ class XrowExtractPackage
         return $result;
     }
 
-    /** Exports $package to a randomly-named .ezpkg inside XrowExtractImport::uploadDir() (the same private, 0700 folder a row sample/upload uses), never a public path. Returns the file path, or false on failure. */
-    public static function exportToPrivateFile( eZPackage $package, $baseName )
+    /**
+     * Exports $package to a randomly-named .ezpkg inside XrowExtractImport::uploadDir() (the same private, 0700 folder a row sample/upload uses), never a public path. Returns the file path, or false on failure.
+     *
+     * @param string $baseName
+     */
+    public static function exportToPrivateFile( eZPackage $package, $baseName ): string|false
     {
         $dir = XrowExtractImport::uploadDir();
         $dir = realpath( $dir ) ?: $dir; // compress.zlib:// needs an absolute path
@@ -1932,6 +2128,11 @@ class XrowExtractPackage
      * $callback's return value is passed straight through. If $callback
      * throws, the transient package is still removed before the exception
      * continues up (a request that errors out must not leak one either).
+     *
+     * @template T
+     * @param string $ezpkgPath
+     * @param callable( eZPackage|null, string|null ): T $callback
+     * @return T
      */
     public static function withTransientImport( $ezpkgPath, callable $callback )
     {
@@ -1958,8 +2159,11 @@ class XrowExtractPackage
      * nodes. $includeClasses also adds the class item(s) the objects belong
      * to (eZContentObjectPackageHandler::generatePackage() does this itself
      * when true).
+     *
+     * @param array<mixed> $objects eZContentObject instances
+     * @param bool $includeClasses
      */
-    protected static function exportExistingObjectsIntoPackage( eZPackage $package, eZContentClass $class, array $objects, $includeClasses )
+    protected static function exportExistingObjectsIntoPackage( eZPackage $package, eZContentClass $class, array $objects, $includeClasses ): bool
     {
         $nodeIDs = array();
         foreach ( $objects as $object )
@@ -2018,8 +2222,12 @@ class XrowExtractPackage
      * whatever XrowExtractFilters resolved), and only the languages the export itself was asked for -
      * "columns don't apply to a package" is true of the row-level output, but scope, class, filters and
      * languages still do, and this is the method that keeps that true. See bin/php/csv.php --format=ezpkg.
+     *
+     * @param array<int|string> $nodeIDs
+     * @param list<string> $languages
+     * @param bool $includeClasses
      */
-    public static function exportNodeIDsIntoPackage( eZPackage $package, array $nodeIDs, array $languages, $includeClasses = true )
+    public static function exportNodeIDsIntoPackage( eZPackage $package, array $nodeIDs, array $languages, $includeClasses = true ): bool
     {
         if ( !$nodeIDs )
             return false;
@@ -2056,8 +2264,11 @@ class XrowExtractPackage
      * date (update), a fresh clone gets a brand new remote id (create), and
      * another fresh clone gets a class identifier that exists nowhere
      * (class_missing). Returns the outcomes produced, for the page to list.
+     *
+     * @param list<string> $errors
+     * @return list<array{outcome: string, name: string}>
      */
-    protected static function mutateSampleOutcomes( eZPackage $package, $classIdentifier, array &$errors )
+    protected static function mutateSampleOutcomes( eZPackage $package, string $classIdentifier, array &$errors ): array
     {
         $items = self::installItemsOfType( $package, 'ezcontentobject' );
         if ( !$items )
@@ -2127,13 +2338,17 @@ class XrowExtractPackage
     }
 
     /** Marks a "Try a sample" package as one the user chose to keep, exempting it from cleanupOldSamplePackages(). */
-    public static function keepSamplePackage( eZPackage $package )
+    public static function keepSamplePackage( eZPackage $package ): void
     {
         @file_put_contents( $package->path() . '/' . self::SAMPLE_PACKAGE_KEEP_MARKER, (string)time() );
     }
 
-    /** If $sessionEntry names a "Try a sample" package that was never kept, removes it from the repository right away (leaving before cleanupOldSamplePackages() gets to it). */
-    public static function forgetUnkeptSamplePackage( array $sessionEntry )
+    /**
+     * If $sessionEntry names a "Try a sample" package that was never kept, removes it from the repository right away (leaving before cleanupOldSamplePackages() gets to it).
+     *
+     * @param array<string, mixed> $sessionEntry
+     */
+    public static function forgetUnkeptSamplePackage( array $sessionEntry ): void
     {
         if ( empty( $sessionEntry['is_sample'] ) || empty( $sessionEntry['package_name'] ) )
             return;
@@ -2152,7 +2367,7 @@ class XrowExtractPackage
      * xrowextract/import request, the same pattern as
      * XrowExtractImport::cleanupOldUploads().
      */
-    public static function cleanupOldSamplePackages()
+    public static function cleanupOldSamplePackages(): int
     {
         $removed = 0;
         foreach ( eZPackage::fetchPackages() as $package )
@@ -2173,14 +2388,22 @@ class XrowExtractPackage
         return $removed;
     }
 
-    /** The name prefixes ext:xrowextract:package --clean and cleanupOldSamplePackages() both look for - every package this extension itself builds and might leave behind, never another extension's. */
-    public static function leftoverPackagePrefixes()
+    /**
+     * The name prefixes ext:xrowextract:package --clean and cleanupOldSamplePackages() both look for - every package this extension itself builds and might leave behind, never another extension's.
+     *
+     * @return list<string>
+     */
+    public static function leftoverPackagePrefixes(): array
     {
         return array( self::SAMPLE_PACKAGE_PREFIX, 'xrowextract_export_', 'xrowextract_template_' );
     }
 
-    /** Every repository package whose name starts with one of leftoverPackagePrefixes() - what ext:xrowextract:package --clean lists and, without --dry-run, removes. Never matches a package this extension did not build (sevenx_*, and so on). */
-    public static function findLeftoverPackages()
+    /**
+     * Every repository package whose name starts with one of leftoverPackagePrefixes() - what ext:xrowextract:package --clean lists and, without --dry-run, removes. Never matches a package this extension did not build (sevenx_*, and so on).
+     *
+     * @return list<eZPackage>
+     */
+    public static function findLeftoverPackages(): array
     {
         $prefixes = self::leftoverPackagePrefixes();
         $matches = array();
@@ -2207,8 +2430,13 @@ class XrowExtractPackage
      * buildTemplatePackage()'s scratch-content approach only when the class
      * has no existing content and the variant needs some, flagged with
      * 'used_scratch' => true so the page can say so.
+     *
+     * @param int|string $classID a class id or identifier
+     * @param string $variant
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
      */
-    public static function buildContentPackage( $classID, $variant, array $options = array() )
+    public static function buildContentPackage( $classID, $variant, array $options = array() ): array
     {
         $variant = in_array( $variant, array( 'class', 'content', 'both' ), true ) ? $variant : 'both';
         $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'used_scratch' => false, 'object_count' => 0 );
@@ -2261,8 +2489,12 @@ class XrowExtractPackage
         return $fallback;
     }
 
-    /** The raw bytes of the single XML file a class-only or content-only package carries, for "Download class/object XML" on their own (no archive). */
-    public static function singleItemXMLBytes( eZPackage $package, $type )
+    /**
+     * The raw bytes of the single XML file a class-only or content-only package carries, for "Download class/object XML" on their own (no archive).
+     *
+     * @param string $type
+     */
+    public static function singleItemXMLBytes( eZPackage $package, $type ): string|false
     {
         $items = self::installItemsOfType( $package, $type );
         if ( !$items || empty( $items[0]['filename'] ) )
@@ -2275,7 +2507,8 @@ class XrowExtractPackage
 
     // ------------------------------------------------------------ template / sample package builder
 
-    public static function templateVariants()
+    /** @return array<string, string> */
+    public static function templateVariants(): array
     {
         return array(
             'class'   => 'Class only',
@@ -2292,8 +2525,13 @@ class XrowExtractPackage
      * to the package through the kernel handlers exactly as package/create
      * does, and then removed again - nothing from this call is left in the
      * content tree.
+     *
+     * @param int|string $classID a class id or identifier
+     * @param string $variant
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
      */
-    public static function buildTemplatePackage( $classID, $variant, array $options = array() )
+    public static function buildTemplatePackage( $classID, $variant, array $options = array() ): array
     {
         $result = array( 'ok' => false, 'errors' => array(), 'package' => null, 'sample_object_ids' => array(), 'scratch_location' => null );
 
@@ -2424,7 +2662,11 @@ class XrowExtractPackage
         return $result;
     }
 
-    protected static function sampleLanguages( array $options )
+    /**
+     * @param array<string, mixed> $options
+     * @return list<string>
+     */
+    protected static function sampleLanguages( array $options ): array
     {
         if ( !empty( $options['languages'] ) && is_array( $options['languages'] ) )
             return array_values( $options['languages'] );
@@ -2443,7 +2685,7 @@ class XrowExtractPackage
      * shipped layout, search index or the static/content-view cache renders
      * for a visitor, unlike RootNode.
      */
-    public static function defaultScratchNodeID()
+    public static function defaultScratchNodeID(): int
     {
         $exportINI = eZINI::instance( 'export.ini' );
         if ( $exportINI->hasVariable( 'PackageTemplate', 'ScratchNodeID' ) )
@@ -2456,8 +2698,13 @@ class XrowExtractPackage
         return (int)$publicContentINI->variable( 'NodeSettings', 'MediaRootNode' );
     }
 
-    /** Node id and path of where a template build's sample objects would be created, for display before/after a build. */
-    public static function scratchLocationInfo( $nodeID = false )
+    /**
+     * Node id and path of where a template build's sample objects would be created, for display before/after a build.
+     *
+     * @param int|string|false|null $nodeID
+     * @return array{node_id: int, path: string, exists: bool}
+     */
+    public static function scratchLocationInfo( $nodeID = false ): array
     {
         $nodeID = $nodeID ? (int)$nodeID : self::defaultScratchNodeID();
         $node = eZContentObjectTreeNode::fetch( $nodeID );
@@ -2478,8 +2725,10 @@ class XrowExtractPackage
      * here (the caller then creates the sample objects directly below
      * $parentNodeID instead - still not the public front page, just without
      * the extra hidden layer).
+     *
+     * @param list<string> $errors
      */
-    protected static function createScratchFolder( $parentNodeID, $language, array &$errors )
+    protected static function createScratchFolder( int $parentNodeID, string $language, array &$errors ): int|false
     {
         $folderClass = eZContentClass::fetchByIdentifier( 'folder' );
         if ( !$folderClass instanceof eZContentClass )
@@ -2541,8 +2790,10 @@ class XrowExtractPackage
      * this extension's own package-building code so a package built by this
      * extension always survives the eZPackage::import() an upload runs it
      * through.
+     *
+     * @param string $text
      */
-    public static function attachAboutDocument( eZPackage $package, $text )
+    public static function attachAboutDocument( eZPackage $package, $text ): void
     {
         $package->appendDocument( 'about.txt', 'text/plain', false, false, false, $text );
     }
@@ -2551,8 +2802,10 @@ class XrowExtractPackage
      * A package name the kernel accepts: eZPackage::import() refuses (STATUS_INVALID_NAME) any name that
      * is not already its own "identifier" transformation (lowercase, digits, underscores), so a name built
      * from a node or class name such as "xrowextract_export_Websites_2" could be written but not imported.
+     *
+     * @param string|null $name
      */
-    public static function validPackageName( $name )
+    public static function validPackageName( $name ): string
     {
         eZPackage::isValidName( (string)$name, $transformed );
         $transformed = trim( (string)$transformed, '_' );
@@ -2566,6 +2819,10 @@ class XrowExtractPackage
      * "not there" to the archive reader, which opens it as compress.zlib://<path>: "can not be opened for
      * reading". clearstatcache() makes that layer forget at once (and is a plain stat cache reset elsewhere).
      * Swapping the file stream wrapper out instead was tried and must not be: it kills the Velocity worker.
+     *
+     * @template T
+     * @param callable(): T $operation
+     * @return T
      */
     public static function withNativeFileStreams( callable $operation )
     {
@@ -2573,7 +2830,7 @@ class XrowExtractPackage
         return $operation();
     }
 
-    protected static function uniquePackageName( $base )
+    protected static function uniquePackageName( string $base ): string
     {
         $base = self::validPackageName( $base );
         $name = $base;
@@ -2586,8 +2843,14 @@ class XrowExtractPackage
         return $name;
     }
 
-    /** Creates $count real content objects of $class below $scratchNodeID, with a value for every importable attribute. Returns false if none could be created. */
-    protected static function createSampleObjects( eZContentClass $class, $count, array $languages, $scratchNodeID, array &$errors )
+    /**
+     * Creates $count real content objects of $class below $scratchNodeID, with a value for every importable attribute. Returns false if none could be created.
+     *
+     * @param list<string> $languages
+     * @param list<string> $errors
+     * @return array{object_ids: list<int>, node_ids: list<int>}|false
+     */
+    protected static function createSampleObjects( eZContentClass $class, int $count, array $languages, int $scratchNodeID, array &$errors ): array|false
     {
         $classID = (int)$class->attribute( 'id' );
         $classIdentifier = $class->attribute( 'identifier' );
@@ -2655,13 +2918,20 @@ class XrowExtractPackage
         return array( 'object_ids' => $objectIDs, 'node_ids' => $nodeIDs );
     }
 
-    /** One row + mapping (as XrowExtractImport::run() expects) with a real sample value for every attribute this importer can write. */
-    protected static function sampleRow( array $classAttributes, $classIdentifier, $index, array $remoteIDs, $scratchNodeID, $language )
+    /**
+     * One row + mapping (as XrowExtractImport::run() expects) with a real sample value for every attribute this importer can write.
+     *
+     * @param array<eZContentClassAttribute> $classAttributes
+     * @param string $classIdentifier
+     * @param array<int, string> $remoteIDs
+     * @return array{0: array<string, string>, 1: list<array{column: string, target: string}>}
+     */
+    protected static function sampleRow( array $classAttributes, $classIdentifier, int $index, array $remoteIDs, int $scratchNodeID, string $language ): array
     {
         $row = array();
         $mapping = array();
         $column = 0;
-        $add = function ( $target, $value ) use ( &$row, &$mapping, &$column )
+        $add = function ( string $target, string $value ) use ( &$row, &$mapping, &$column ): void
         {
             $key = 'c' . $column++;
             $row[$key] = $value;
@@ -2687,8 +2957,15 @@ class XrowExtractPackage
         return array( $row, $mapping );
     }
 
-    /** A real, valid value for one class attribute's datatype, or null to leave the class default (no import handler, or not applicable for this row). */
-    protected static function sampleAttributeValue( eZContentClassAttribute $classAttribute, $datatype, $index, $classIdentifier, array $remoteIDs, $language )
+    /**
+     * A real, valid value for one class attribute's datatype, or null to leave the class default (no import handler, or not applicable for this row).
+     *
+     * @param string $datatype
+     * @param string $classIdentifier
+     * @param array<int, string> $remoteIDs
+     * @return array{kind: 'attr'|'attrfmt', value: string, format?: string}|null
+     */
+    protected static function sampleAttributeValue( eZContentClassAttribute $classAttribute, $datatype, int $index, $classIdentifier, array $remoteIDs, string $language ): ?array
     {
         $label = $classAttribute->attribute( 'name' );
         switch ( $datatype )
@@ -2743,8 +3020,12 @@ class XrowExtractPackage
         return null;
     }
 
-    /** Whether an ezobjectrelation(list) attribute's class restriction (if any) allows relating to $classIdentifier itself. */
-    protected static function classAllowsRelation( eZContentClassAttribute $classAttribute, $classIdentifier )
+    /**
+     * Whether an ezobjectrelation(list) attribute's class restriction (if any) allows relating to $classIdentifier itself.
+     *
+     * @param string $classIdentifier
+     */
+    protected static function classAllowsRelation( eZContentClassAttribute $classAttribute, $classIdentifier ): bool
     {
         $content = $classAttribute->content();
         $list = isset( $content['class_constraint_list'] ) ? (array)$content['class_constraint_list'] : array();
@@ -2755,7 +3036,7 @@ class XrowExtractPackage
      * The bundled sample file as a resolved path: the importer refuses any path containing "..", so
      * "classes/../share/..." made every image and file sample fail ("not an importable path").
      */
-    protected static function sampleAssetPath( $name )
+    protected static function sampleAssetPath( string $name ): string
     {
         $path = dirname( dirname( __FILE__ ) ) . '/share/sample/' . $name;
         $real = realpath( $path );
