@@ -49,12 +49,12 @@ class XrowExtractNotifier
         if ( $failure )
         {
             $recipients[] = self::userEmail( $schedule->attribute( 'owner_login' ) );
-            $recipients = array_merge( $recipients, preg_split( '/[\s,;]+/', (string)$notify['failure_emails'], -1, PREG_SPLIT_NO_EMPTY ) );
+            $recipients = array_merge( $recipients, preg_split( '/[\s,;]+/', (string)$notify['failure_emails'], -1, PREG_SPLIT_NO_EMPTY ) ?: array() );
         }
         elseif ( !empty( $notify['success'] ) )
         {
             $recipients[] = self::userEmail( $schedule->attribute( 'owner_login' ) );
-            $recipients = array_merge( $recipients, preg_split( '/[\s,;]+/', (string)$notify['success_emails'], -1, PREG_SPLIT_NO_EMPTY ) );
+            $recipients = array_merge( $recipients, preg_split( '/[\s,;]+/', (string)$notify['success_emails'], -1, PREG_SPLIT_NO_EMPTY ) ?: array() );
         }
         $recipients = array_values( array_unique( array_filter( $recipients, function ( $a ) { return $a !== '' && eZMail::validate( $a ); } ) ) );
         if ( $recipients )

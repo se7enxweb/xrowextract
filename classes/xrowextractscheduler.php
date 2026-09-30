@@ -378,7 +378,7 @@ class XrowExtractScheduler
      * folder (dry-run.json, report.json) and in job.json. Returns the job patch.
      *
      * @param string $jobID
-     * @param string $runScript
+     * @param callable(string, array<int|string, mixed>): int $runScript runs one command of the extension with these arguments, returns its exit code
      * @return array<string, mixed>
      */
     public static function runScheduledImport( $jobID, $runScript ): array
