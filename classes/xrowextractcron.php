@@ -17,8 +17,12 @@ class XrowExtractCron
 {
     const RANGES = array( array( 0, 59 ), array( 0, 23 ), array( 1, 31 ), array( 1, 12 ), array( 0, 7 ) );
 
-    /** The simple frequencies. */
-    public static function kinds()
+    /**
+     * The simple frequencies.
+     *
+     * @return list<string>
+     */
+    public static function kinds(): array
     {
         return array( 'hourly', 'daily', 'weekly', 'monthly', 'cron' );
     }
@@ -26,8 +30,10 @@ class XrowExtractCron
     /**
      * A frequency array ('kind' => hourly|daily|weekly|monthly|cron, 'minute', 'time' => 'HH:MM',
      * 'weekday' => 0-6, 'monthday' => 1-31, 'expression') as a cron expression, or false when invalid.
+     *
+     * @param array<string, mixed> $frequency
      */
-    public static function expressionFor( array $frequency )
+    public static function expressionFor( array $frequency ): string|false
     {
         $kind = isset( $frequency['kind'] ) ? $frequency['kind'] : 'daily';
         $time = isset( $frequency['time'] ) ? (string)$frequency['time'] : '02:00';
@@ -55,8 +61,13 @@ class XrowExtractCron
         return false;
     }
 
-    /** The five fields as sets of allowed values, or false when the expression is not valid. */
-    public static function parse( $expression )
+    /**
+     * The five fields as sets of allowed values, or false when the expression is not valid.
+     *
+     * @param mixed $expression
+     * @return array{minute: array<int, bool>, hour: array<int, bool>, day: array<int, bool>, month: array<int, bool>, weekday: array<int, bool>, day_any: bool, weekday_any: bool}|false
+     */
+    public static function parse( $expression ): array|false
     {
         $expression = strtolower( trim( (string)$expression ) );
         $aliases = array( '@hourly' => '0 * * * *', '@daily' => '0 0 * * *', '@midnight' => '0 0 * * *', '@weekly' => '0 0 * * 0',
@@ -117,13 +128,19 @@ class XrowExtractCron
         );
     }
 
-    public static function isValid( $expression )
+    /** @param mixed $expression */
+    public static function isValid( $expression ): bool
     {
         return self::parse( $expression ) !== false;
     }
 
-    /** Whether a Unix time's minute matches the expression. */
-    public static function matches( $expression, $time )
+    /**
+     * Whether a Unix time's minute matches the expression.
+     *
+     * @param array{minute: array<int, bool>, hour: array<int, bool>, day: array<int, bool>, month: array<int, bool>, weekday: array<int, bool>, day_any: bool, weekday_any: bool}|string $expression an expression, or what parse() made of one
+     * @param int $time
+     */
+    public static function matches( $expression, $time ): bool
     {
         $p = is_array( $expression ) ? $expression : self::parse( $expression );
         if ( !$p )
@@ -146,8 +163,11 @@ class XrowExtractCron
      * The first minute strictly after $after that matches, or false (an expression such as "0 0 31 2 *"
      * never matches; the search stops after five years). Walks days first, then hours, then minutes,
      * so a yearly expression costs a few thousand steps at most.
+     *
+     * @param array{minute: array<int, bool>, hour: array<int, bool>, day: array<int, bool>, month: array<int, bool>, weekday: array<int, bool>, day_any: bool, weekday_any: bool}|string $expression an expression, or what parse() made of one
+     * @param int|string|null $after
      */
-    public static function nextRun( $expression, $after = null )
+    public static function nextRun( $expression, $after = null ): int|false
     {
         $p = is_array( $expression ) ? $expression : self::parse( $expression );
         if ( !$p )
@@ -175,7 +195,12 @@ class XrowExtractCron
         return false;
     }
 
-    protected static function dayMatches( array $p, $day, $weekday )
+    /**
+     * @param array{minute: array<int, bool>, hour: array<int, bool>, day: array<int, bool>, month: array<int, bool>, weekday: array<int, bool>, day_any: bool, weekday_any: bool} $p
+     * @param int $day
+     * @param int $weekday
+     */
+    protected static function dayMatches( array $p, $day, $weekday ): bool
     {
         $dayOk = isset( $p['day'][$day] );
         $weekdayOk = isset( $p['weekday'][$weekday] );
@@ -188,8 +213,13 @@ class XrowExtractCron
         return $dayOk || $weekdayOk;
     }
 
-    /** A frequency in words, for the Schedules page and the CLI. */
-    public static function describe( array $frequency, $expression )
+    /**
+     * A frequency in words, for the Schedules page and the CLI.
+     *
+     * @param array<string, mixed> $frequency
+     * @param string $expression
+     */
+    public static function describe( array $frequency, $expression ): string
     {
         $t = function ( $text, $args = array() ) { return ezpI18n::tr( 'design/standard/extract', $text, null, $args ); };
         $days = array( $t( 'Sunday' ), $t( 'Monday' ), $t( 'Tuesday' ), $t( 'Wednesday' ), $t( 'Thursday' ), $t( 'Friday' ), $t( 'Saturday' ) );

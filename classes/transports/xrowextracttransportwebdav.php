@@ -6,7 +6,8 @@
  */
 class XrowExtractTransportWebdav extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'url' => array( 'Folder URL', 'text', '' ),
@@ -14,35 +15,41 @@ class XrowExtractTransportWebdav extends XrowExtractTransport
         );
     }
 
-    public static function secretFields()
+    /** @return array<string, string> */
+    public static function secretFields(): array
     {
         return array( 'password' => 'Password' );
     }
 
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         return function_exists( 'curl_init' ) ? '' : 'the PHP curl extension is not available';
     }
 
-    protected function base()
+    protected function base(): string|false
     {
         $url = trim( (string)$this->config( 'url' ) );
         return preg_match( '#^https?://[^\s/]+#i', $url ) ? rtrim( $url, '/' ) : false;
     }
 
-    protected function auth()
+    /** @return array{0: mixed, 1: string}|null user and password for curl() */
+    protected function auth(): ?array
     {
         return $this->config( 'user' ) !== '' ? array( $this->config( 'user' ), $this->secret( 'password' ) ) : null;
     }
 
-    /** A URL below the folder, every path segment encoded. */
-    protected function urlFor( $relative )
+    /**
+     * A URL below the folder, every path segment encoded.
+     *
+     * @param mixed $relative
+     */
+    protected function urlFor( $relative ): string
     {
         $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$relative ), static function ( $part ) { return $part !== ''; } ) );
         return $this->base() . ( $segments ? '/' . implode( '/', $segments ) : '' );
     }
 
-    public function test()
+    public function test(): array
     {
         if ( !$this->base() )
             return array( 'ok' => false, 'message' => 'The URL must start with http:// or https://.' );
@@ -62,7 +69,7 @@ class XrowExtractTransportWebdav extends XrowExtractTransport
         return array( 'ok' => false, 'message' => 'HTTP ' . $result['status'] . ( $result['status'] === 401 ? ': the user or password is wrong' : '' ) );
     }
 
-    public function upload( $localPath, $remoteName )
+    public function upload( $localPath, $remoteName ): array
     {
         if ( !$this->base() )
             return array( 'ok' => false, 'message' => 'The URL must start with http:// or https://.' );
@@ -83,7 +90,7 @@ class XrowExtractTransportWebdav extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'Uploaded to ' . $target, 'location' => $target );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         if ( !$this->base() || strpos( (string)$remotePath, '..' ) !== false )
             return array( 'ok' => false, 'message' => 'Not a path below the destination folder.' );

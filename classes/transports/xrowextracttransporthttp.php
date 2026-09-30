@@ -9,7 +9,8 @@
  */
 class XrowExtractTransportHttp extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'url' => array( 'URL', 'text', '' ),
@@ -17,24 +18,31 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         );
     }
 
-    public static function secretFields()
+    /** @return array<string, string> */
+    public static function secretFields(): array
     {
         return array( 'bearer_token' => 'Bearer token', 'hmac_key' => 'HMAC signing key' );
     }
 
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         return function_exists( 'curl_init' ) ? '' : 'the PHP curl extension is not available';
     }
 
-    protected function url()
+    protected function url(): string|false
     {
         $url = trim( (string)$this->config( 'url' ) );
         return preg_match( '#^https?://[^\s/]+#i', $url ) ? $url : false;
     }
 
-    /** The request headers for a body/file with this sha256. */
-    public function signedHeaders( $sha256, $timestamp = null )
+    /**
+     * The request headers for a body/file with this sha256.
+     *
+     * @param string $sha256
+     * @param int|string|null $timestamp
+     * @return list<string>
+     */
+    public function signedHeaders( $sha256, $timestamp = null ): array
     {
         $timestamp = $timestamp === null ? time() : (int)$timestamp;
         $headers = array( 'X-Xrowextract-Timestamp: ' . $timestamp );
@@ -45,7 +53,7 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         return $headers;
     }
 
-    public function test()
+    public function test(): array
     {
         $url = $this->url();
         if ( !$url )
@@ -60,7 +68,13 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'HTTP ' . $result['status'] . ' from ' . parse_url( $url, PHP_URL_HOST ) );
     }
 
-    public function upload( $localPath, $remoteName, $manifestPath = null )
+    /**
+     * @param string $localPath
+     * @param string $remoteName
+     * @param string|null $manifestPath the manifest, sent along as a third part
+     * @return array<string, mixed>
+     */
+    public function upload( $localPath, $remoteName, $manifestPath = null ): array
     {
         $url = $this->url();
         if ( !$url )
@@ -81,7 +95,7 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'HTTP ' . $result['status'] . ' from ' . parse_url( $url, PHP_URL_HOST ), 'location' => $url );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         $url = $this->url();
         if ( !$url )

@@ -14,8 +14,14 @@
  */
 class XrowExtractScheduler
 {
-    /** Checks a definition before it is saved. Returns a list of error messages. */
-    public static function validateDefinition( $kind, array $def )
+    /**
+     * Checks a definition before it is saved. Returns a list of error messages.
+     *
+     * @param string $kind
+     * @param array<mixed> $def
+     * @return list<string>
+     */
+    public static function validateDefinition( $kind, array $def ): array
     {
         $errors = array();
         switch ( $kind )
@@ -64,7 +70,7 @@ class XrowExtractScheduler
     }
 
     /** The configured default: files are kept as long as csv.ini [Jobs] RetentionDays says. */
-    public static function fileRetentionDays( ?XrowExtractSchedule $schedule = null )
+    public static function fileRetentionDays( ?XrowExtractSchedule $schedule = null ): int
     {
         if ( $schedule )
         {
@@ -76,7 +82,7 @@ class XrowExtractScheduler
     }
 
     /** "YYYY-MM-DD_HHMMSS" plus the schedule name as a file name stem. */
-    protected static function stem( XrowExtractSchedule $schedule )
+    protected static function stem( XrowExtractSchedule $schedule ): string
     {
         return XrowExtractColumns::fileName( $schedule->attribute( 'name' ), '', 'schedule_' . (int)$schedule->attribute( 'id' ) ) . '_' . date( 'Y-m-d_His' );
     }
@@ -84,8 +90,13 @@ class XrowExtractScheduler
     /**
      * The XrowExtractJob data for one run of $schedule, or array( 'skip' => reason ) when nothing can run
      * (a deleted preset or node). $runMode: full or delta; $since: the delta start time.
+     *
+     * @param string $runMode
+     * @param int $since
+     * @param string $trigger
+     * @return array<string, mixed>
      */
-    public static function jobSpec( XrowExtractSchedule $schedule, $runMode, $since, $trigger )
+    public static function jobSpec( XrowExtractSchedule $schedule, $runMode, $since, $trigger ): array
     {
         $def = $schedule->definitionArray();
         $warnings = array();
@@ -190,7 +201,7 @@ class XrowExtractScheduler
     }
 
     /** Whether the schedule's last job is still queued or running (the concurrency guard). */
-    public static function isRunning( XrowExtractSchedule $schedule )
+    public static function isRunning( XrowExtractSchedule $schedule ): bool
     {
         $jobID = (string)$schedule->attribute( 'last_job_id' );
         if ( $jobID === '' || !XrowExtractJob::isValidID( $jobID ) )
@@ -209,8 +220,13 @@ class XrowExtractScheduler
      * Starts one run. $mode: null (the schedule's own delta_mode), 'full' or 'delta'. $wait: run the job
      * in this process (the command line's --wait) instead of detached. Returns array( 'ok', 'job_id',
      * 'message', 'state' ).
+     *
+     * @param string|null $mode
+     * @param string $trigger
+     * @param bool $wait
+     * @return array{ok: bool, job_id: mixed, state: string, message: string}
      */
-    public static function start( XrowExtractSchedule $schedule, $mode = null, $trigger = 'schedule', $wait = false )
+    public static function start( XrowExtractSchedule $schedule, $mode = null, $trigger = 'schedule', $wait = false ): array
     {
         $now = time();
         $mode = $mode === 'full' || $mode === 'delta' ? $mode : $schedule->attribute( 'delta_mode' );
@@ -267,8 +283,12 @@ class XrowExtractScheduler
         return array( 'ok' => true, 'job_id' => $jobID, 'state' => 'queued', 'message' => 'Started as job ' . $jobID . '.' );
     }
 
-    /** bin/php/job.php --run=<id> in the foreground (the CLI's --wait). Returns its exit code. */
-    public static function runJobHere( $jobID )
+    /**
+     * bin/php/job.php --run=<id> in the foreground (the CLI's --wait). Returns its exit code.
+     *
+     * @param string $jobID
+     */
+    public static function runJobHere( $jobID ): int
     {
         $php = XrowExtractJob::phpCliBinary();
         if ( !$php || !function_exists( 'proc_open' ) ) // disabled: it does not exist in PHP 8
@@ -285,8 +305,13 @@ class XrowExtractScheduler
      * The cronjob part: every due schedule started, then the retention clean-up. $log: a callable getting
      * one line per action. Returns array( 'started' => n, 'skipped' => n, 'busy' => n, 'cleaned_jobs' => n,
      * 'cleaned_history' => n ).
+     *
+     * @param int|null $now
+     * @param callable|null $log
+     * @param bool $wait
+     * @return array{started: int, skipped: int, busy: int, cleaned_jobs: int, cleaned_history: int}
      */
-    public static function runDue( $now = null, $log = null, $wait = false )
+    public static function runDue( $now = null, $log = null, $wait = false ): array
     {
         $now = $now === null ? time() : $now;
         $say = is_callable( $log ) ? $log : function () {};
@@ -318,8 +343,12 @@ class XrowExtractScheduler
         return $stats;
     }
 
-    /** Job folders past their retention: a schedule's own files_days, else csv.ini [Jobs] RetentionDays. */
-    public static function cleanJobs( $now = null )
+    /**
+     * Job folders past their retention: a schedule's own files_days, else csv.ini [Jobs] RetentionDays.
+     *
+     * @param int|null $now
+     */
+    public static function cleanJobs( $now = null ): int
     {
         $now = $now === null ? time() : $now;
         $schedules = array();
@@ -347,8 +376,12 @@ class XrowExtractScheduler
      * (a local path below [Destinations] LocalPathRoots[], or a destination), a dry run reports what would
      * change, and only when it found no errors is the import applied. Both reports stay in the job
      * folder (dry-run.json, report.json) and in job.json. Returns the job patch.
+     *
+     * @param string $jobID
+     * @param string $runScript
+     * @return array<string, mixed>
      */
-    public static function runScheduledImport( $jobID, $runScript )
+    public static function runScheduledImport( $jobID, $runScript ): array
     {
         $job = XrowExtractJob::load( $jobID );
         $dir = XrowExtractJob::path( $jobID );
@@ -440,8 +473,11 @@ class XrowExtractScheduler
     /**
      * After a job ended (bin/php/job.php): its history row; for a scheduled job, the delivery to every
      * destination of the schedule (retried with backoff), the schedule's own state, and the notifications.
+     *
+     * @param string $jobID
+     * @return array<string, mixed>|null the history row's fields, null when there is no such job
      */
-    public static function afterJob( $jobID )
+    public static function afterJob( $jobID ): ?array
     {
         $job = XrowExtractJob::load( $jobID );
         if ( !$job )
@@ -555,14 +591,18 @@ class XrowExtractScheduler
     }
 
     /** Whether the current user may manage schedules (policy xrowextract/schedule). */
-    public static function canManage()
+    public static function canManage(): bool
     {
         $access = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'schedule' );
         return $access['accessWord'] !== 'no';
     }
 
-    /** The crontab line for the cronjob part (run every few minutes). */
-    public static function cronjobPartLine( $every = 5 )
+    /**
+     * The crontab line for the cronjob part (run every few minutes).
+     *
+     * @param int $every
+     */
+    public static function cronjobPartLine( $every = 5 ): string
     {
         $php = XrowExtractJob::phpCliBinary() ?: 'php';
         return '*/' . (int)$every . ' * * * * cd ' . escapeshellarg( eZSys::rootDir() ) . ' && ' . escapeshellarg( $php ) . ' runcronjobs.php xrowextract >/dev/null 2>&1';

@@ -19,12 +19,14 @@
  */
 class XrowExtractSchedule extends eZPersistentObject
 {
+    /** @param array<string, mixed> $row */
     public function __construct( $row = array() )
     {
         parent::__construct( $row );
     }
 
-    public static function definition()
+    /** @return array<string, mixed> */
+    public static function definition(): array
     {
         $int = function ( $name, $default = 0 ) { return array( 'name' => $name, 'datatype' => 'integer', 'default' => $default, 'required' => true ); };
         $str = function ( $name, $default = '' ) { return array( 'name' => $name, 'datatype' => 'string', 'default' => $default, 'required' => true ); };
@@ -67,40 +69,54 @@ class XrowExtractSchedule extends eZPersistentObject
         );
     }
 
-    public static function kinds()
+    /** @return list<string> */
+    public static function kinds(): array
     {
         return array( 'preset', 'archive', 'package', 'import' );
     }
 
-    protected static function decode( $json )
+    /**
+     * @param mixed $json
+     * @return array<mixed>
+     */
+    protected static function decode( $json ): array
     {
         $data = json_decode( (string)$json, true );
         return is_array( $data ) ? $data : array();
     }
 
-    public function definitionArray() { return self::decode( $this->attribute( 'definition' ) ); }
-    public function frequencyArray() { return self::decode( $this->attribute( 'frequency' ) ); }
-    public function notifyArray()
+    /** @return array<mixed> */
+    public function definitionArray(): array { return self::decode( $this->attribute( 'definition' ) ); }
+    /** @return array<mixed> */
+    public function frequencyArray(): array { return self::decode( $this->attribute( 'frequency' ) ); }
+    /** @return array<mixed> failure_emails, success, success_emails, admin_notice, webhook_url and whatever else is stored */
+    public function notifyArray(): array
     {
         return array_merge( array( 'failure_emails' => '', 'success' => false, 'success_emails' => '', 'admin_notice' => true, 'webhook_url' => '' ),
                             self::decode( $this->attribute( 'notify' ) ) );
     }
-    public function retentionArray()
+    /** @return array<mixed> files_days, history_days */
+    public function retentionArray(): array
     {
         return array_merge( array( 'files_days' => '', 'history_days' => '' ), self::decode( $this->attribute( 'retention' ) ) );
     }
 
-    public function destinationIDList()
+    /** @return list<int> */
+    public function destinationIDList(): array
     {
         return array_values( array_filter( array_map( 'intval', explode( ',', (string)$this->attribute( 'destination_ids' ) ) ) ) );
     }
 
-    public function frequencyText()
+    public function frequencyText(): string
     {
         return XrowExtractCron::describe( $this->frequencyArray(), $this->attribute( 'cron_expr' ) );
     }
 
-    /** What the schedule runs, in one line. */
+    /**
+     * What the schedule runs, in one line.
+     *
+     * @return string
+     */
     public function summary()
     {
         $def = $this->definitionArray();
@@ -124,7 +140,8 @@ class XrowExtractSchedule extends eZPersistentObject
         return $this->attribute( 'kind' );
     }
 
-    public static function paramsText( array $params )
+    /** @param array<string, mixed> $params */
+    public static function paramsText( array $params ): string
     {
         $parts = array();
         foreach ( $params as $key => $value )
@@ -132,8 +149,11 @@ class XrowExtractSchedule extends eZPersistentObject
         return implode( ', ', $parts );
     }
 
-    /** @return XrowExtractSchedule|null */
-    public static function fetch( $id )
+    /**
+     * @param mixed $id
+     * @return XrowExtractSchedule|null
+     */
+    public static function fetch( $id ): ?XrowExtractSchedule
     {
         $id = XrowExtractColumns::dbID( $id ); // never an id the database cannot even compare
         if ( !$id )
@@ -144,21 +164,33 @@ class XrowExtractSchedule extends eZPersistentObject
         return $object instanceof self ? $object : null;
     }
 
-    /** Every schedule (or only $login's), by name. */
-    public static function fetchList( $login = null )
+    /**
+     * Every schedule (or only $login's), by name.
+     *
+     * @param string|null $login
+     * @return array<int, XrowExtractSchedule>
+     */
+    public static function fetchList( $login = null ): array
     {
         if ( !XrowExtractSchema::exists() )
             return array();
         $conds = $login === null ? null : array( 'owner_login' => (string)$login );
+        /** @var array<int, XrowExtractSchedule>|null $list the definition's class_name */
         $list = eZPersistentObject::fetchObjectList( self::definition(), null, $conds, array( 'name' => 'asc' ) );
         return is_array( $list ) ? $list : array();
     }
 
-    /** Enabled schedules due at $now. */
-    public static function fetchDue( $now )
+    /**
+     * Enabled schedules due at $now.
+     *
+     * @param int $now
+     * @return array<int, XrowExtractSchedule>
+     */
+    public static function fetchDue( $now ): array
     {
         if ( !XrowExtractSchema::exists() )
             return array();
+        /** @var array<int, XrowExtractSchedule>|null $list the definition's class_name */
         $list = eZPersistentObject::fetchObjectList( self::definition(), null,
             array( 'enabled' => 1, 'next_run' => array( '<=', (int)$now ) ), array( 'next_run' => 'asc' ) );
         return is_array( $list ) ? $list : array();
@@ -168,8 +200,12 @@ class XrowExtractSchedule extends eZPersistentObject
      * A new or changed schedule from the form/CLI values. Returns array( 'schedule' => ..., 'errors' => array ).
      * $values: name, kind, definition (array), frequency (array), delta_mode, destination_ids (array),
      * notify (array), retention (array), enabled.
+     *
+     * @param array<string, mixed> $values
+     * @param string $ownerLogin
+     * @return array{schedule: XrowExtractSchedule|null, errors: list<string>}
      */
-    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractSchedule $schedule = null )
+    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractSchedule $schedule = null ): array
     {
         $errors = array();
         $name = mb_substr( trim( (string)( isset( $values['name'] ) ? $values['name'] : '' ) ), 0, 150 );
@@ -222,8 +258,12 @@ class XrowExtractSchedule extends eZPersistentObject
         return array( 'schedule' => $schedule, 'errors' => array() );
     }
 
-    /** A comma/space/semicolon list of e-mail addresses, the valid ones only. */
-    public static function cleanEmails( $text )
+    /**
+     * A comma/space/semicolon list of e-mail addresses, the valid ones only.
+     *
+     * @param mixed $text
+     */
+    public static function cleanEmails( $text ): string
     {
         $valid = array();
         foreach ( preg_split( '/[\s,;]+/', (string)$text, -1, PREG_SPLIT_NO_EMPTY ) as $address )
@@ -234,7 +274,8 @@ class XrowExtractSchedule extends eZPersistentObject
         return implode( ', ', array_unique( $valid ) );
     }
 
-    public function setEnabled( $on )
+    /** @param bool $on */
+    public function setEnabled( $on ): void
     {
         $this->setAttribute( 'enabled', $on ? 1 : 0 );
         if ( $on )
@@ -243,14 +284,23 @@ class XrowExtractSchedule extends eZPersistentObject
         $this->store();
     }
 
-    /** Whether $login may see and change this schedule (the owner, or anyone with xrowextract/all_jobs). */
-    public function canEdit( $login, $allowAll )
+    /**
+     * Whether $login may see and change this schedule (the owner, or anyone with xrowextract/all_jobs).
+     *
+     * @param string $login
+     * @param bool $allowAll
+     */
+    public function canEdit( $login, $allowAll ): bool
     {
         return $allowAll || $this->attribute( 'owner_login' ) === $login;
     }
 
-    /** The crontab line that runs this schedule from system cron instead of the cronjob part. */
-    public function crontabLine( $phpBinary = null )
+    /**
+     * The crontab line that runs this schedule from system cron instead of the cronjob part.
+     *
+     * @param string|null $phpBinary
+     */
+    public function crontabLine( $phpBinary = null ): string
     {
         $php = $phpBinary ?: ( XrowExtractJob::phpCliBinary() ?: 'php' );
         $access = eZSiteAccess::current();

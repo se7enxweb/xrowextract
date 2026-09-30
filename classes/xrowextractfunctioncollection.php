@@ -11,7 +11,8 @@ class XrowExtractFunctionCollection
      * not acknowledged on the History page yet. 0 without the policy xrowextract/history, and before any
      * schedule table exists (never creates one).
      */
-    public static function fetchScheduleAlerts()
+    /** @return array{result: int} */
+    public static function fetchScheduleAlerts(): array
     {
         if ( !XrowExtractSchema::exists() || !XrowExtractHistory::canView() )
             return array( 'result' => 0 );

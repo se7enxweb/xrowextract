@@ -8,7 +8,8 @@
  */
 class XrowExtractTransportS3 extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'endpoint' => array( 'Endpoint URL', 'text', 'https://s3.amazonaws.com' ),
@@ -20,24 +21,33 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         );
     }
 
-    public static function secretFields()
+    /** @return array<string, string> */
+    public static function secretFields(): array
     {
         return array( 'secret_key' => 'Secret access key' );
     }
 
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         return function_exists( 'curl_init' ) ? '' : 'the PHP curl extension is not available';
     }
 
-    /** RFC 3986 encoding of one path segment, as SigV4 wants it. */
-    public static function encodeSegment( $segment )
+    /**
+     * RFC 3986 encoding of one path segment, as SigV4 wants it.
+     *
+     * @param string $segment
+     */
+    public static function encodeSegment( $segment ): string
     {
         return str_replace( '%7E', '~', rawurlencode( $segment ) );
     }
 
-    /** The canonical URI of a key: each segment encoded, slashes kept. */
-    public static function canonicalURI( $path )
+    /**
+     * The canonical URI of a key: each segment encoded, slashes kept.
+     *
+     * @param string $path
+     */
+    public static function canonicalURI( $path ): string
     {
         return implode( '/', array_map( array( __CLASS__, 'encodeSegment' ), explode( '/', $path ) ) );
     }
@@ -47,8 +57,19 @@ class XrowExtractTransportS3 extends XrowExtractTransport
      * the canonical request, 'string_to_sign' => ..., 'signature' => hex ). $headers: lower-case name =>
      * value, host and x-amz-date and x-amz-content-sha256 included. $query: already encoded key=value pairs
      * are not needed here beyond an empty string or a sorted canonical query.
+     *
+     * @param string $method
+     * @param string $canonicalURI
+     * @param string $canonicalQuery
+     * @param array<string, mixed> $headers
+     * @param string $payloadHash
+     * @param string $accessKey
+     * @param string $secretKey
+     * @param string $region
+     * @param string $service
+     * @return array{authorization: string, canonical: string, string_to_sign: string, signature: string}
      */
-    public static function sign( $method, $canonicalURI, $canonicalQuery, array $headers, $payloadHash, $accessKey, $secretKey, $region, $service = 's3' )
+    public static function sign( $method, $canonicalURI, $canonicalQuery, array $headers, $payloadHash, $accessKey, $secretKey, $region, $service = 's3' ): array
     {
         ksort( $headers );
         $canonicalHeaders = '';
@@ -73,8 +94,13 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         );
     }
 
-    /** array( url, host, canonical uri ) for $key (relative to the prefix; '' for the bucket itself), or false. */
-    public function target( $key )
+    /**
+     * array( url, host, canonical uri ) for $key (relative to the prefix; '' for the bucket itself), or false.
+     *
+     * @param string $key
+     * @return array{url: string, host: string, uri: string, key: string}|false
+     */
+    public function target( $key ): array|false
     {
         $endpoint = rtrim( trim( (string)$this->config( 'endpoint', 'https://s3.amazonaws.com' ) ), '/' );
         $bucket = trim( (string)$this->config( 'bucket' ) );
@@ -91,8 +117,17 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         return array( 'url' => strtolower( $m[1] ) . '://' . $host . $uri, 'host' => $host, 'uri' => $uri, 'key' => $objectKey );
     }
 
-    /** The signed header lines for one request. */
-    public function headersFor( $method, array $target, $payloadHash, array $extra = array(), $time = null )
+    /**
+     * The signed header lines for one request.
+     *
+     * @param string $method
+     * @param array{url: string, host: string, uri: string, key: string} $target
+     * @param string $payloadHash
+     * @param array<string, string> $extra
+     * @param int|null $time
+     * @return list<string>
+     */
+    public function headersFor( $method, array $target, $payloadHash, array $extra = array(), $time = null ): array
     {
         $time = $time === null ? time() : $time;
         $headers = array_merge( array(
@@ -111,7 +146,8 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         return $lines;
     }
 
-    protected function errorText( array $result )
+    /** @param array{ok: bool, status: int, body: string, headers: list<string>, error: string} $result */
+    protected function errorText( array $result ): string
     {
         if ( !$result['ok'] )
             return 'No connection: ' . $result['error'];
@@ -120,7 +156,7 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         return 'HTTP ' . $result['status'] . ( $code !== '' ? ' ' . $code : '' ) . ( $message !== '' ? ': ' . $message : '' );
     }
 
-    public function test()
+    public function test(): array
     {
         $target = $this->target( '' );
         if ( !$target )
@@ -133,7 +169,7 @@ class XrowExtractTransportS3 extends XrowExtractTransport
                                                     : ( $result['ok'] && $result['status'] === 404 ? 'HTTP 404: no such bucket' : $this->errorText( $result ) ) );
     }
 
-    public function upload( $localPath, $remoteName )
+    public function upload( $localPath, $remoteName ): array
     {
         $target = $this->target( self::safeName( $remoteName ) );
         if ( !$target )
@@ -148,7 +184,7 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         return array( 'ok' => false, 'message' => $this->errorText( $result ) );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         $target = $this->target( (string)$remotePath );
         if ( !$target || $target['key'] === '' )

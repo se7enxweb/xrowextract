@@ -8,7 +8,8 @@
  */
 class XrowExtractTransportFtp extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'host' => array( 'Host', 'text', '' ),
@@ -19,12 +20,13 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         );
     }
 
-    public static function secretFields()
+    /** @return array<string, string> */
+    public static function secretFields(): array
     {
         return array( 'password' => 'Password' );
     }
 
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         if ( !function_exists( 'curl_init' ) )
             return 'the PHP curl extension is not available';
@@ -32,14 +34,14 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         return in_array( 'ftp', $version['protocols'], true ) ? '' : 'the curl library has no FTP support';
     }
 
-    protected function security()
+    protected function security(): string
     {
         $value = $this->config( 'security', 'explicit' );
         return in_array( $value, array( 'none', 'explicit', 'implicit' ), true ) ? $value : 'explicit';
     }
 
     /** The folder URL (ends in /) or false. */
-    protected function folderURL()
+    protected function folderURL(): string|false
     {
         $host = trim( (string)$this->config( 'host' ) );
         if ( !preg_match( '/^[A-Za-z0-9.-]+$|^\[[0-9a-fA-F:]+\]$/', $host ) )
@@ -53,7 +55,11 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         return $scheme . '://' . $host . ':' . $port . '/' . ( $segments ? implode( '/', $segments ) . '/' : '' );
     }
 
-    protected function options( array $extra = array() )
+    /**
+     * @param array<int, mixed> $extra more CURLOPT_* => value
+     * @return array<string, mixed>
+     */
+    protected function options( array $extra = array() ): array
     {
         $curlExtra = array( CURLOPT_FTP_USE_EPSV => true, CURLOPT_FTP_CREATE_MISSING_DIRS => CURLFTP_CREATE_DIR_RETRY );
         if ( $this->security() !== 'none' )
@@ -65,7 +71,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         );
     }
 
-    public function test()
+    public function test(): array
     {
         $url = $this->folderURL();
         if ( !$url )
@@ -77,7 +83,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
                                               . ( $this->security() === 'none' ? '; the connection is NOT encrypted' : '; TLS' ) . '.' );
     }
 
-    public function upload( $localPath, $remoteName )
+    public function upload( $localPath, $remoteName ): array
     {
         $url = $this->folderURL();
         if ( !$url )
@@ -93,7 +99,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'Uploaded to ' . preg_replace( '#^(ftps?://)#', '$1', $url ) . $name, 'location' => $url . $name );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         $url = $this->folderURL();
         if ( !$url || strpos( (string)$remotePath, '..' ) !== false )

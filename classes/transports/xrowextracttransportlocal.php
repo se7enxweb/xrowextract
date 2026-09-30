@@ -7,15 +7,20 @@
  */
 class XrowExtractTransportLocal extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'path' => array( 'Folder', 'text', '' ),
         );
     }
 
-    /** The allowed roots (absolute, resolved); empty means none is allowed. */
-    public static function allowedRoots()
+    /**
+     * The allowed roots (absolute, resolved); empty means none is allowed.
+     *
+     * @return list<string>
+     */
+    public static function allowedRoots(): array
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $roots = $ini->hasVariable( 'Destinations', 'LocalPathRoots' ) ? (array)$ini->variable( 'Destinations', 'LocalPathRoots' ) : array();
@@ -37,8 +42,12 @@ class XrowExtractTransportLocal extends XrowExtractTransport
     /**
      * $path resolved and checked against the allowed roots: array( 'ok', 'path' => the real path,
      * 'message' ). $mustExist: the folder (or, for a file, the file) must already exist.
+     *
+     * @param mixed $path
+     * @param bool $isFile
+     * @return array{ok: true, path: string, message: string}|array{ok: false, message: string}
      */
-    public static function checkPath( $path, $isFile = false )
+    public static function checkPath( $path, $isFile = false ): array
     {
         $path = trim( (string)$path );
         if ( $path === '' || $path[0] !== '/' || strpos( $path, "\0" ) !== false )
@@ -59,7 +68,7 @@ class XrowExtractTransportLocal extends XrowExtractTransport
         return array( 'ok' => false, 'message' => $path . ' is not below an allowed folder (xrowextract.ini [Destinations] LocalPathRoots[]).' );
     }
 
-    public function test()
+    public function test(): array
     {
         $check = self::checkPath( $this->config( 'path' ) );
         if ( !$check['ok'] )
@@ -73,7 +82,7 @@ class XrowExtractTransportLocal extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'The folder ' . $check['path'] . ' is writable.' );
     }
 
-    public function upload( $localPath, $remoteName )
+    public function upload( $localPath, $remoteName ): array
     {
         $check = self::checkPath( $this->config( 'path' ) );
         if ( !$check['ok'] )
@@ -91,7 +100,7 @@ class XrowExtractTransportLocal extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'Copied to ' . $target, 'location' => $target, 'bytes' => filesize( $target ) );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         $remotePath = (string)$remotePath;
         $full = $remotePath !== '' && $remotePath[0] === '/' ? $remotePath : rtrim( (string)$this->config( 'path' ), '/' ) . '/' . $remotePath;

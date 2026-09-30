@@ -17,7 +17,8 @@
  */
 class XrowExtractTransportSftp extends XrowExtractTransport
 {
-    public static function fields()
+    /** @return array<string, array<mixed>> */
+    public static function fields(): array
     {
         return array(
             'host' => array( 'Host', 'text', '' ),
@@ -28,13 +29,18 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         );
     }
 
-    public static function secretFields()
+    /** @return array<string, string> */
+    public static function secretFields(): array
     {
         return array( 'private_key' => 'Private key (OpenSSH format, without a passphrase)', 'password' => 'Password' );
     }
 
-    /** The binaries this transport runs. */
-    public static function binary( $name )
+    /**
+     * The binaries this transport runs: the path of $name, or false when it is not installed.
+     *
+     * @param string $name
+     */
+    public static function binary( $name ): string|false
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $configured = $ini->hasVariable( 'Destinations', 'SshBinaryDir' ) ? trim( (string)$ini->variable( 'Destinations', 'SshBinaryDir' ) ) : '';
@@ -46,7 +52,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return false;
     }
 
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         if ( !function_exists( 'proc_open' ) )
             return 'proc_open() is disabled';
@@ -58,19 +64,19 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return '';
     }
 
-    protected function host()
+    protected function host(): string|false
     {
         $host = trim( (string)$this->config( 'host' ) );
         return preg_match( '/^[A-Za-z0-9][A-Za-z0-9.-]*$|^[0-9a-fA-F:]+$/', $host ) ? $host : false;
     }
 
-    protected function port()
+    protected function port(): int
     {
         $port = (int)$this->config( 'port', 22 );
         return $port > 0 && $port < 65536 ? $port : 22;
     }
 
-    protected function user()
+    protected function user(): string|false
     {
         $user = trim( (string)$this->config( 'user' ) );
         return preg_match( '/^[A-Za-z0-9._][A-Za-z0-9._-]*$/', $user ) ? $user : false;
@@ -79,8 +85,14 @@ class XrowExtractTransportSftp extends XrowExtractTransport
     /**
      * Runs a command given as an argument array (no shell). Returns array( exit code, stdout, stderr ).
      * $env: extra environment; $stdin: text for the child's stdin.
+     *
+     * @param list<string|false> $argv
+     * @param array<string, string> $env
+     * @param string $stdin
+     * @param int $timeout
+     * @return array{0: int, 1: string, 2: string}
      */
-    public static function run( array $argv, array $env = array(), $stdin = '', $timeout = 120 )
+    public static function run( array $argv, array $env = array(), $stdin = '', $timeout = 120 ): array
     {
         $descriptors = array( 0 => array( 'pipe', 'r' ), 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
         $baseEnv = array( 'PATH' => '/usr/bin:/bin', 'LANG' => 'C', 'HOME' => sys_get_temp_dir() );
@@ -132,8 +144,12 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return array( (int)$code, $out, $err );
     }
 
-    /** The host's keys as known_hosts lines (ssh-keyscan), with their SHA256 fingerprints. */
-    public function scanHostKeys()
+    /**
+     * The host's keys as known_hosts lines (ssh-keyscan), with their SHA256 fingerprints.
+     *
+     * @return array{ok: true, keys: list<array{line: string, fingerprint: string}>, message: string}|array{ok: false, message: string}
+     */
+    public function scanHostKeys(): array
     {
         $host = $this->host();
         if ( !$host )
@@ -148,8 +164,12 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return array( 'ok' => true, 'keys' => $keys, 'message' => count( $keys ) . ' host key(s) received.' );
     }
 
-    /** The SHA256 fingerprint of one known_hosts line ("SHA256:... (ED25519)"). */
-    public static function fingerprint( $line )
+    /**
+     * The SHA256 fingerprint of one known_hosts line ("SHA256:... (ED25519)").
+     *
+     * @param string $line
+     */
+    public static function fingerprint( $line ): string
     {
         $dir = self::privateTempDir();
         if ( !$dir )
@@ -160,8 +180,12 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return $code === 0 && preg_match( '/(SHA256:\S+).*(\([A-Z0-9-]+\))/', $out, $m ) ? $m[1] . ' ' . $m[2] : '';
     }
 
-    /** The trusted host key lines (config 'host_keys', one per line), for this host and port only. */
-    protected function knownHosts()
+    /**
+     * The trusted host key lines (config 'host_keys', one per line), for this host and port only.
+     *
+     * @return list<string>
+     */
+    protected function knownHosts(): array
     {
         $lines = array();
         foreach ( explode( "\n", (string)$this->config( 'host_keys' ) ) as $line )
@@ -180,8 +204,11 @@ class XrowExtractTransportSftp extends XrowExtractTransport
     /**
      * One sftp session running $commands (sftp batch lines). Returns array( ok, message, stdout ).
      * Refuses to connect without a trusted host key.
+     *
+     * @param list<string> $commands
+     * @return array<string, mixed> ok (bool), message (string), stdout, needs_host_key
      */
-    protected function session( array $commands )
+    protected function session( array $commands ): array
     {
         $reason = self::unavailableReason();
         if ( $reason !== '' )
@@ -255,19 +282,23 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => '', 'stdout' => $out );
     }
 
-    /** An sftp batch argument: double quoted, with no quote, backslash or control character inside. */
-    protected static function quote( $path )
+    /**
+     * An sftp batch argument: double quoted, with no quote, backslash or control character inside.
+     *
+     * @param mixed $path
+     */
+    protected static function quote( $path ): string
     {
         return '"' . preg_replace( '/["\\\\\x00-\x1f\x7f]/', '', (string)$path ) . '"';
     }
 
-    protected function folder()
+    protected function folder(): string|false
     {
         $folder = self::safeFolder( $this->config( 'path', '' ) );
         return $folder === false ? false : $folder;
     }
 
-    public function test()
+    public function test(): array
     {
         $folder = $this->folder();
         if ( $folder === false )
@@ -288,8 +319,13 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'Signed in as ' . $this->user() . ' and listed ' . ( $folder !== '' ? $folder : 'the home folder' ) . '.' );
     }
 
-    /** Batch lines creating each level of the folder if missing ("-": an existing one is no error), then going there. */
-    protected function folderCommands( $folder )
+    /**
+     * Batch lines creating each level of the folder if missing ("-": an existing one is no error), then going there.
+     *
+     * @param string $folder
+     * @return list<string>
+     */
+    protected function folderCommands( $folder ): array
     {
         $commands = array();
         if ( $folder === '' )
@@ -304,7 +340,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return $commands;
     }
 
-    public function upload( $localPath, $remoteName )
+    public function upload( $localPath, $remoteName ): array
     {
         $folder = $this->folder();
         if ( $folder === false )
@@ -321,7 +357,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         return array( 'ok' => true, 'message' => 'Uploaded to ' . $location, 'location' => $location );
     }
 
-    public function download( $remotePath, $localPath )
+    public function download( $remotePath, $localPath ): array
     {
         $folder = $this->folder();
         if ( $folder === false || strpos( (string)$remotePath, '..' ) !== false )

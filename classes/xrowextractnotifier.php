@@ -12,15 +12,23 @@
  */
 class XrowExtractNotifier
 {
-    /** The e-mail address of a login, or ''. */
-    public static function userEmail( $login )
+    /**
+     * The e-mail address of a login, or ''.
+     *
+     * @param mixed $login
+     */
+    public static function userEmail( $login ): string
     {
         $user = $login !== '' ? eZUser::fetchByName( $login ) : null;
         return $user instanceof eZUser ? (string)$user->attribute( 'email' ) : '';
     }
 
-    /** Whether a run counts as a failure for notifications. */
-    public static function isFailure( array $run )
+    /**
+     * Whether a run counts as a failure for notifications.
+     *
+     * @param array<string, mixed> $run
+     */
+    public static function isFailure( array $run ): bool
     {
         return in_array( $run['run_state'], array( 'failed', 'skipped' ), true ) || ( isset( $run['delivery_state'] ) && in_array( $run['delivery_state'], array( 'failed', 'partial' ), true ) );
     }
@@ -28,8 +36,11 @@ class XrowExtractNotifier
     /**
      * Sends what the schedule asks for about $run (a history row's fields, warnings and delivery as
      * arrays). Returns array( 'emails' => addresses mailed, 'webhook' => result or null ).
+     *
+     * @param array<string, mixed> $run
+     * @return array{emails: list<string>, webhook: array{ok: bool, status: int, message: string}|null}
      */
-    public static function notify( XrowExtractSchedule $schedule, array $run )
+    public static function notify( XrowExtractSchedule $schedule, array $run ): array
     {
         $notify = $schedule->notifyArray();
         $failure = self::isFailure( $run );
@@ -56,7 +67,11 @@ class XrowExtractNotifier
         return $sent;
     }
 
-    public static function subject( XrowExtractSchedule $schedule, array $run, $failure )
+    /**
+     * @param array<string, mixed> $run
+     * @param bool $failure
+     */
+    public static function subject( XrowExtractSchedule $schedule, array $run, $failure ): string
     {
         $site = XrowExtractManifest::source();
         $state = $run['run_state'] === 'done' && !empty( $run['warnings'] ) ? 'done with warnings' : $run['run_state'];
@@ -65,7 +80,8 @@ class XrowExtractNotifier
         return '[' . ( $site['site'] !== '' ? $site['site'] : 'Exponential' ) . '] Scheduled export "' . $schedule->attribute( 'name' ) . '": ' . $state;
     }
 
-    public static function body( XrowExtractSchedule $schedule, array $run )
+    /** @param array<string, mixed> $run */
+    public static function body( XrowExtractSchedule $schedule, array $run ): string
     {
         $lines = array(
             'Schedule: ' . $schedule->attribute( 'name' ) . ' (#' . (int)$schedule->attribute( 'id' ) . ', ' . $schedule->summary() . ')',
@@ -98,16 +114,25 @@ class XrowExtractNotifier
         return implode( "\n", $lines ) . "\n";
     }
 
-    /** An absolute URL into the admin, when site.ini [SiteSettings] SiteURL of the admin siteaccess is known; else the path. */
-    protected static function adminURL( $path )
+    /**
+     * An absolute URL into the admin, when site.ini [SiteSettings] SiteURL of the admin siteaccess is known; else the path.
+     *
+     * @param string $path
+     */
+    protected static function adminURL( $path ): string
     {
         $ini = eZINI::instance();
         $url = $ini->hasVariable( 'SiteSettings', 'SiteURL' ) ? trim( (string)$ini->variable( 'SiteSettings', 'SiteURL' ) ) : '';
         return $url !== '' ? 'https://' . preg_replace( '#^https?://#', '', rtrim( $url, '/' ) ) . '/' . $path : '/' . $path;
     }
 
-    /** The webhook body. */
-    public static function payload( XrowExtractSchedule $schedule, array $run )
+    /**
+     * The webhook body.
+     *
+     * @param array<string, mixed> $run
+     * @return array<string, mixed>
+     */
+    public static function payload( XrowExtractSchedule $schedule, array $run ): array
     {
         return array(
             'event' => 'xrowextract.run',
@@ -132,8 +157,14 @@ class XrowExtractNotifier
         );
     }
 
-    /** One e-mail through the kernel's mail transport. */
-    public static function mail( array $recipients, $subject, $body )
+    /**
+     * One e-mail through the kernel's mail transport.
+     *
+     * @param list<string> $recipients
+     * @param string $subject
+     * @param string $body
+     */
+    public static function mail( array $recipients, $subject, $body ): bool
     {
         $ini = eZINI::instance();
         $mail = new eZMail();
@@ -157,8 +188,14 @@ class XrowExtractNotifier
         return (bool)eZMailTransport::send( $mail );
     }
 
-    /** POST $payload as JSON; returns array( ok, status, message ). */
-    public static function webhook( $url, array $payload )
+    /**
+     * POST $payload as JSON; returns array( ok, status, message ).
+     *
+     * @param string $url
+     * @param array<string, mixed> $payload
+     * @return array{ok: bool, status: int, message: string}
+     */
+    public static function webhook( $url, array $payload ): array
     {
         $transport = new XrowExtractTransportHttp( array( 'url' => $url ), array( 'hmac_key' => self::webhookSecret() ) );
         $body = json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE );
@@ -166,7 +203,7 @@ class XrowExtractNotifier
         return $result;
     }
 
-    protected static function webhookSecret()
+    protected static function webhookSecret(): string
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         return $ini->hasVariable( 'Notifications', 'WebhookSecret' ) ? (string)$ini->variable( 'Notifications', 'WebhookSecret' ) : '';
@@ -176,10 +213,16 @@ class XrowExtractNotifier
 /** The webhook's HTTP call: XrowExtractTransport's curl helper with a JSON body. */
 class XrowExtractNotifierHttp extends XrowExtractTransport
 {
-    public function test() { return array( 'ok' => false, 'message' => '' ); }
-    public function upload( $localPath, $remoteName ) { return array( 'ok' => false, 'message' => '' ); }
+    public function test(): array { return array( 'ok' => false, 'message' => '' ); }
+    public function upload( $localPath, $remoteName ): array { return array( 'ok' => false, 'message' => '' ); }
 
-    public static function post( $url, $body, array $headers )
+    /**
+     * @param string $url
+     * @param string $body
+     * @param list<string> $headers
+     * @return array{ok: bool, status: int, message: string}
+     */
+    public static function post( $url, $body, array $headers ): array
     {
         if ( !preg_match( '#^https?://#i', $url ) )
             return array( 'ok' => false, 'status' => 0, 'message' => 'not an http(s) URL' );

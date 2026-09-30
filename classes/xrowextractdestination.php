@@ -8,12 +8,14 @@
  */
 class XrowExtractDestination extends eZPersistentObject
 {
+    /** @param array<string, mixed> $row */
     public function __construct( $row = array() )
     {
         parent::__construct( $row );
     }
 
-    public static function definition()
+    /** @return array<string, mixed> */
+    public static function definition(): array
     {
         $int = function ( $name, $default = 0 ) { return array( 'name' => $name, 'datatype' => 'integer', 'default' => $default, 'required' => true ); };
         $str = function ( $name, $default = '' ) { return array( 'name' => $name, 'datatype' => 'string', 'default' => $default, 'required' => true ); };
@@ -46,8 +48,12 @@ class XrowExtractDestination extends eZPersistentObject
         );
     }
 
-    /** type => array( name, transport class ). */
-    public static function types()
+    /**
+     * type => array( name, transport class ).
+     *
+     * @return array<string, array{0: string, 1: class-string<XrowExtractTransport>}>
+     */
+    public static function types(): array
     {
         return array(
             'sftp'   => array( 'SFTP', 'XrowExtractTransportSftp' ),
@@ -59,38 +65,49 @@ class XrowExtractDestination extends eZPersistentObject
         );
     }
 
-    public static function transportClass( $type )
+    /**
+     * @param mixed $type
+     * @return class-string<XrowExtractTransport>|false
+     */
+    public static function transportClass( $type ): string|false
     {
         $types = self::types();
         return isset( $types[$type] ) ? $types[$type][1] : false;
     }
 
-    public function configArray()
+    /** @return array<string, mixed> */
+    public function configArray(): array
     {
         $data = json_decode( (string)$this->attribute( 'config' ), true );
         return is_array( $data ) ? $data : array();
     }
 
-    /** The names of the secrets that are set (never the values). */
-    public function secretNames()
+    /**
+     * The names of the secrets that are set (never the values).
+     *
+     * @return list<int|string>
+     */
+    public function secretNames(): array
     {
         return XrowExtractSecrets::names( $this->attribute( 'secret' ) );
     }
 
+    /** @return string */
     public function typeName()
     {
         $types = self::types();
         return isset( $types[$this->attribute( 'dest_type' )] ) ? $types[$this->attribute( 'dest_type' )][0] : $this->attribute( 'dest_type' );
     }
 
-    public function lastTestArray()
+    /** @return array<string, mixed>|null */
+    public function lastTestArray(): ?array
     {
         $data = json_decode( (string)$this->attribute( 'last_test_result' ), true );
         return is_array( $data ) ? $data : null;
     }
 
     /** Plain FTP: user, password and file in clear text. */
-    public function isUnencrypted()
+    public function isUnencrypted(): bool
     {
         $config = $this->configArray();
         if ( $this->attribute( 'dest_type' ) === 'ftp' )
@@ -103,7 +120,11 @@ class XrowExtractDestination extends eZPersistentObject
         return false;
     }
 
-    /** Where it delivers, in one line (no secret in it). */
+    /**
+     * Where it delivers, in one line (no secret in it).
+     *
+     * @return string
+     */
     public function summary()
     {
         $c = $this->configArray();
@@ -119,8 +140,11 @@ class XrowExtractDestination extends eZPersistentObject
         return '';
     }
 
-    /** @return XrowExtractDestination|null */
-    public static function fetch( $id )
+    /**
+     * @param mixed $id
+     * @return XrowExtractDestination|null
+     */
+    public static function fetch( $id ): ?XrowExtractDestination
     {
         $id = XrowExtractColumns::dbID( $id ); // never an id the database cannot even compare
         if ( !$id )
@@ -131,16 +155,22 @@ class XrowExtractDestination extends eZPersistentObject
         return $object instanceof self ? $object : null;
     }
 
-    public static function fetchList()
+    /** @return array<int, XrowExtractDestination> */
+    public static function fetchList(): array
     {
         if ( !XrowExtractSchema::exists() )
             return array();
+        /** @var array<int, XrowExtractDestination>|null $list the definition's class_name */
         $list = eZPersistentObject::fetchObjectList( self::definition(), null, null, array( 'name' => 'asc' ) );
         return is_array( $list ) ? $list : array();
     }
 
-    /** id => name, for pickers (no config, no secrets). */
-    public static function nameList()
+    /**
+     * id => name, for pickers (no config, no secrets).
+     *
+     * @return array<int, string>
+     */
+    public static function nameList(): array
     {
         $names = array();
         foreach ( self::fetchList() as $destination )
@@ -151,8 +181,12 @@ class XrowExtractDestination extends eZPersistentObject
     /**
      * Creates or changes a destination. $values: name, type, config (array), secrets (name => new value;
      * '' keeps the stored one), clear_secrets (names to remove). Returns array( 'destination', 'errors' ).
+     *
+     * @param array<string, mixed> $values
+     * @param string $ownerLogin
+     * @return array{destination: XrowExtractDestination|null, errors: list<string>}
      */
-    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractDestination $destination = null )
+    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractDestination $destination = null ): array
     {
         $errors = array();
         $name = mb_substr( trim( (string)( isset( $values['name'] ) ? $values['name'] : '' ) ), 0, 150 );
@@ -232,8 +266,12 @@ class XrowExtractDestination extends eZPersistentObject
         return array( 'destination' => $destination, 'errors' => array() );
     }
 
-    /** Trusts SFTP host key lines (from a scan the admin looked at). */
-    public function trustHostKeys( array $lines )
+    /**
+     * Trusts SFTP host key lines (from a scan the admin looked at).
+     *
+     * @param array<string> $lines
+     */
+    public function trustHostKeys( array $lines ): void
     {
         $config = $this->configArray();
         $config['host_keys'] = implode( "\n", array_map( 'trim', $lines ) );
@@ -243,7 +281,7 @@ class XrowExtractDestination extends eZPersistentObject
     }
 
     /** @return XrowExtractTransport|false */
-    public function transport()
+    public function transport(): XrowExtractTransport|false
     {
         $class = self::transportClass( $this->attribute( 'dest_type' ) );
         if ( !$class )
@@ -260,8 +298,12 @@ class XrowExtractDestination extends eZPersistentObject
         return new $class( $this->configArray(), $secrets );
     }
 
-    /** "Test connection": stored with its time (no secret in the message). */
-    public function test()
+    /**
+     * "Test connection": stored with its time (no secret in the message).
+     *
+     * @return array<string, mixed> ok (bool), message (string), ...
+     */
+    public function test(): array
     {
         $transport = $this->transport();
         $reason = $transport ? call_user_func( array( get_class( $transport ), 'unavailableReason' ) ) : 'unknown type';
@@ -284,8 +326,12 @@ class XrowExtractDestination extends eZPersistentObject
         return $result;
     }
 
-    /** How often and how patiently a delivery is tried: xrowextract.ini [Destinations] MaxAttempts, BackoffSeconds. */
-    public static function retryPolicy()
+    /**
+     * How often and how patiently a delivery is tried: xrowextract.ini [Destinations] MaxAttempts, BackoffSeconds.
+     *
+     * @return array{0: int, 1: int} attempts, seconds
+     */
+    public static function retryPolicy(): array
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $attempts = $ini->hasVariable( 'Destinations', 'MaxAttempts' ) ? (int)$ini->variable( 'Destinations', 'MaxAttempts' ) : 3;
@@ -297,8 +343,13 @@ class XrowExtractDestination extends eZPersistentObject
      * Delivers a file (and its manifest, when there is one) with retries and exponential backoff
      * (BackoffSeconds, twice that, four times ...). Returns array( 'ok', 'message', 'attempts', 'location',
      * 'destination' => name, 'destination_id', 'type', 'seconds', 'log' => one line per attempt ).
+     *
+     * @param string $filePath
+     * @param string|null $manifestPath
+     * @param string|null $remoteName
+     * @return array{ok: bool, message: string, attempts: int, location: mixed, destination: mixed, destination_id: int, type: mixed, seconds: float, log: list<string>}
      */
-    public function deliver( $filePath, $manifestPath = null, $remoteName = null )
+    public function deliver( $filePath, $manifestPath = null, $remoteName = null ): array
     {
         list( $maxAttempts, $backoff ) = self::retryPolicy();
         $started = microtime( true );
@@ -347,7 +398,7 @@ class XrowExtractDestination extends eZPersistentObject
     }
 
     /** Whether the current user may manage destinations and their secrets (policy xrowextract/destinations). */
-    public static function canManage()
+    public static function canManage(): bool
     {
         $access = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'destinations' );
         return $access['accessWord'] !== 'no';

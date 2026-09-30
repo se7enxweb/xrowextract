@@ -9,65 +9,109 @@
  */
 abstract class XrowExtractTransport
 {
+    /** @var array<string, mixed> the destination's plain config */
     protected $config;
+    /** @var array<string, mixed> the destination's decrypted secrets */
     protected $secrets;
 
+    /**
+     * @param array<string, mixed> $config
+     * @param array<string, mixed> $secrets
+     */
     public function __construct( array $config, array $secrets )
     {
         $this->config = $config;
         $this->secrets = $secrets;
     }
 
-    /** The config fields of this type: name => array( label, kind text|number|bool|select, default, options ). */
-    public static function fields()
+    /**
+     * The config fields of this type: name => array( label, kind text|number|bool|select, default, options ).
+     *
+     * @return array<string, array<mixed>>
+     */
+    public static function fields(): array
     {
         return array();
     }
 
-    /** The secret fields of this type: name => label. Write only: never shown again once set. */
-    public static function secretFields()
+    /**
+     * The secret fields of this type: name => label. Write only: never shown again once set.
+     *
+     * @return array<string, string>
+     */
+    public static function secretFields(): array
     {
         return array();
     }
 
     /** Can this server use the type at all (a PHP extension, a binary)? '' when yes, else why not. */
-    public static function unavailableReason()
+    public static function unavailableReason(): string
     {
         return '';
     }
 
-    /** Checks the destination without writing a file (connect, log in, see the folder). */
-    abstract public function test();
+    /**
+     * Checks the destination without writing a file (connect, log in, see the folder).
+     *
+     * @return array<string, mixed> ok (bool), message (string), ...
+     */
+    abstract public function test(): array;
 
-    /** Uploads $localPath as $remoteName into the destination's folder (via a temporary name, then renamed where the protocol allows). */
-    abstract public function upload( $localPath, $remoteName );
+    /**
+     * Uploads $localPath as $remoteName into the destination's folder (via a temporary name, then renamed where the protocol allows).
+     *
+     * @param string $localPath
+     * @param string $remoteName
+     * @return array<string, mixed> ok (bool), message (string), location, ...
+     */
+    abstract public function upload( $localPath, $remoteName ): array;
 
-    /** Downloads $remotePath (relative to the destination's folder) to $localPath, for a scheduled import. */
-    public function download( $remotePath, $localPath )
+    /**
+     * Downloads $remotePath (relative to the destination's folder) to $localPath, for a scheduled import.
+     *
+     * @param string $remotePath
+     * @param string $localPath
+     * @return array<string, mixed> ok (bool), message (string), location, ...
+     */
+    public function download( $remotePath, $localPath ): array
     {
         return array( 'ok' => false, 'message' => 'This destination type cannot be read from.' );
     }
 
+    /**
+     * @param string $name
+     * @param mixed $default
+     * @return mixed
+     */
     protected function config( $name, $default = '' )
     {
         return isset( $this->config[$name] ) && $this->config[$name] !== '' ? $this->config[$name] : $default;
     }
 
-    protected function secret( $name )
+    /** @param string $name */
+    protected function secret( $name ): string
     {
         return isset( $this->secrets[$name] ) ? (string)$this->secrets[$name] : '';
     }
 
-    /** A safe file name: no folder part, no control characters. */
-    public static function safeName( $name )
+    /**
+     * A safe file name: no folder part, no control characters.
+     *
+     * @param mixed $name
+     */
+    public static function safeName( $name ): string
     {
         $name = basename( str_replace( '\\', '/', (string)$name ) );
         $name = preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $name );
         return $name === '' || $name === '.' || $name === '..' ? 'export' : $name;
     }
 
-    /** A remote folder path: forward slashes, no "..", no control characters or quotes. */
-    public static function safeFolder( $path )
+    /**
+     * A remote folder path: forward slashes, no "..", no control characters or quotes.
+     *
+     * @param mixed $path
+     */
+    public static function safeFolder( $path ): string|false
     {
         $path = str_replace( '\\', '/', trim( (string)$path ) );
         $path = preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $path );
@@ -84,7 +128,7 @@ abstract class XrowExtractTransport
     }
 
     /** A private temp folder for one call (0700, below the var directory, not the web root). */
-    protected static function privateTempDir()
+    protected static function privateTempDir(): string|false
     {
         $base = eZSys::varDirectory() . '/xrowextract-tmp';
         if ( !is_dir( $base ) )
@@ -101,7 +145,8 @@ abstract class XrowExtractTransport
         return is_dir( $dir ) ? $dir : false;
     }
 
-    protected static function removeDir( $dir )
+    /** @param string|false $dir */
+    protected static function removeDir( $dir ): void
     {
         if ( !$dir || !is_dir( $dir ) )
             return;
@@ -119,8 +164,12 @@ abstract class XrowExtractTransport
      * (CURLPROTO_* mask; default http and https), extra (more CURLOPT_* => value).
      * Returns array( 'ok' => transport-level success, 'status' => HTTP status or FTP code, 'body' => ...,
      * 'headers' => response header lines, 'error' => curl error ).
+     *
+     * @param string $url
+     * @param array<string, mixed> $options
+     * @return array{ok: bool, status: int, body: string, headers: list<string>, error: string}
      */
-    protected static function curl( $url, array $options = array() )
+    protected static function curl( $url, array $options = array() ): array
     {
         if ( !function_exists( 'curl_init' ) )
             return array( 'ok' => false, 'status' => 0, 'body' => '', 'headers' => array(), 'error' => 'the PHP curl extension is not available' );
@@ -197,7 +246,8 @@ abstract class XrowExtractTransport
     }
 
     /** The first 300 characters of a response body, one line, for a result message. */
-    protected static function bodyExcerpt( $body )
+    /** @param mixed $body */
+    protected static function bodyExcerpt( $body ): string
     {
         $text = trim( preg_replace( '/\s+/', ' ', strip_tags( (string)$body ) ) );
         return mb_substr( $text, 0, 300 );

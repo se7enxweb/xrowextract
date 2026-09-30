@@ -17,7 +17,7 @@ class XrowExtractSecrets
     const PREFIX = 'xs1:';
 
     /** Where the key file is (absolute). */
-    public static function keyFilePath()
+    public static function keyFilePath(): string
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $path = $ini->hasVariable( 'Secrets', 'KeyFile' ) ? trim( (string)$ini->variable( 'Secrets', 'KeyFile' ) ) : '';
@@ -28,13 +28,13 @@ class XrowExtractSecrets
         return $path;
     }
 
-    public static function available()
+    public static function available(): bool
     {
         return function_exists( 'sodium_crypto_secretbox' ) && defined( 'SODIUM_CRYPTO_SECRETBOX_KEYBYTES' );
     }
 
     /** The key (32 raw bytes), generated and stored on first use. Throws when it can be neither read nor written. */
-    protected static function key()
+    protected static function key(): string
     {
         static $key = null;
         if ( $key !== null )
@@ -75,8 +75,13 @@ class XrowExtractSecrets
         return $key = $new;
     }
 
-    /** Hands a file to the owner of $dir when running as root (Velocity, a root command line). */
-    protected static function giveToFolderOwner( $path, $dir )
+    /**
+     * Hands a file to the owner of $dir when running as root (Velocity, a root command line).
+     *
+     * @param string $path
+     * @param string $dir
+     */
+    protected static function giveToFolderOwner( $path, $dir ): void
     {
         if ( !XrowExtractJob::runningAsRoot() )
             return;
@@ -89,8 +94,12 @@ class XrowExtractSecrets
             @chgrp( $path, $group );
     }
 
-    /** Encrypts an array of secret values (JSON inside the box). An empty array is stored as ''. */
-    public static function encrypt( array $values )
+    /**
+     * Encrypts an array of secret values (JSON inside the box). An empty array is stored as ''.
+     *
+     * @param array<string, mixed> $values
+     */
+    public static function encrypt( array $values ): string
     {
         $values = array_filter( $values, function ( $v ) { return $v !== null && $v !== ''; } );
         if ( !$values )
@@ -104,8 +113,13 @@ class XrowExtractSecrets
         return self::PREFIX . base64_encode( $nonce . $box );
     }
 
-    /** The array encrypt() was given, or array() for '' ; throws when the value cannot be opened (wrong key, tampered). */
-    public static function decrypt( $stored )
+    /**
+     * The array encrypt() was given, or array() for '' ; throws when the value cannot be opened (wrong key, tampered).
+     *
+     * @param mixed $stored
+     * @return array<mixed>
+     */
+    public static function decrypt( $stored ): array
     {
         $stored = (string)$stored;
         if ( $stored === '' )
@@ -122,8 +136,13 @@ class XrowExtractSecrets
         return is_array( $values ) ? $values : array();
     }
 
-    /** Which secret names are set (never their values), for the write-only secret fields of the GUI. */
-    public static function names( $stored )
+    /**
+     * Which secret names are set (never their values), for the write-only secret fields of the GUI.
+     *
+     * @param mixed $stored
+     * @return list<int|string>
+     */
+    public static function names( $stored ): array
     {
         try
         {
