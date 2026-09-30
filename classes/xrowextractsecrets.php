@@ -129,7 +129,7 @@ class XrowExtractSecrets
         {
             return array_keys( self::decrypt( $stored ) );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             return array();
         }

@@ -152,7 +152,7 @@ try
 {
     $parsed = XrowExtractImport::parseFile( $path );
 }
-catch ( Exception $e )
+catch ( Throwable $e )
 {
     $fail( $e->getMessage() );
 }

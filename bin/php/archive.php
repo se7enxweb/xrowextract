@@ -301,7 +301,7 @@ try
     $result = XrowExtractArchive::build( $roots, $selected, $format, $separator, !$options['unquoted'], $lines[$lineKey], (bool)$options['password-hashes'],
                                           $buildOptions );
 }
-catch ( Exception $e )
+catch ( Throwable $e )
 {
     $fail( 'The archive could not be written: ' . $e->getMessage() );
 }

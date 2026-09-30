@@ -441,7 +441,7 @@ class XrowExtractArchive
             $archive = $work . '/' . $folder . '.' . $formats[$format]['extension'];
             self::pack( $format, $work, $folder, $files, $archive );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             umask( $umask );
             self::removeWork( $work );

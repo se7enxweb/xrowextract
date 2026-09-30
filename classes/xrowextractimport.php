@@ -1476,7 +1476,7 @@ class XrowExtractImport
                     $rowResult['node_id'] = ( $forNode instanceof eZContentObject && (int)$forNode->attribute( 'main_node_id' ) )
                         ? (int)$forNode->attribute( 'main_node_id' ) : null;
                 }
-                catch ( Exception $e )
+                catch ( Throwable $e )
                 {
                     $rowResult['action'] = 'error';
                     $rowResult['reason'] = $e->getMessage();

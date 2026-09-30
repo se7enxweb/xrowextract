@@ -194,7 +194,7 @@ class XrowExtractDestination extends eZPersistentObject
         {
             $secrets = $destination ? XrowExtractSecrets::decrypt( $destination->attribute( 'secret' ) ) : array();
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             $secrets = array(); // unreadable with the current key: whatever is entered now replaces it
         }
@@ -212,7 +212,7 @@ class XrowExtractDestination extends eZPersistentObject
         {
             $encrypted = XrowExtractSecrets::encrypt( $secrets );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             return array( 'destination' => $destination, 'errors' => array( $e->getMessage() ) );
         }
@@ -249,7 +249,7 @@ class XrowExtractDestination extends eZPersistentObject
         {
             $secrets = XrowExtractSecrets::decrypt( $this->attribute( 'secret' ) );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             eZDebug::writeError( 'Destination ' . $this->attribute( 'id' ) . ': ' . $e->getMessage(), __METHOD__ );
             $secrets = array();
@@ -270,7 +270,7 @@ class XrowExtractDestination extends eZPersistentObject
             {
                 $result = $transport->test();
             }
-            catch ( Exception $e )
+            catch ( Throwable $e )
             {
                 $result = array( 'ok' => false, 'message' => $e->getMessage() );
             }
@@ -320,7 +320,7 @@ class XrowExtractDestination extends eZPersistentObject
                     }
                 }
             }
-            catch ( Exception $e )
+            catch ( Throwable $e )
             {
                 $result = array( 'ok' => false, 'message' => $e->getMessage() );
             }

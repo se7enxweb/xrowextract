@@ -71,7 +71,7 @@ class XrowExtractManifest
         {
             $siteName = (string)XrowExtractColumns::publicSiteINI()->variable( 'SiteSettings', 'SiteName' );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
         }
         $host = '';
@@ -79,7 +79,7 @@ class XrowExtractManifest
         {
             $host = (string)XrowExtractColumns::publicHostURL();
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
         }
         return array(
@@ -142,7 +142,7 @@ class XrowExtractManifest
         {
             $content = $attribute->content();
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             $content = null;
         }

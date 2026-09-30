@@ -171,7 +171,7 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
             $result = XrowExtractArchive::build( $roots, $selectedClassIDs, $state['format'], $state['separator'], $state['escape'], $lineSeparators[$state['line']], $state['password_hashes'],
                                                   array( 'languages' => $state['languages'], 'columns' => $state['columns'], 'plain_text' => $state['plain_text'], 'output' => $state['output'] ) );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             eZDebug::writeError( $e->getMessage(), 'xrowextract/archive' );
             $error = ezpI18n::tr( 'design/standard/extract', 'The archive could not be written: %reason', null, array( '%reason' => $e->getMessage() ) );

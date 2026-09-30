@@ -372,7 +372,7 @@ elseif ( $hasFile )
             $parsed = array( 'header' => $info['header'], 'rows' => array(), 'total_rows' => null,
                             'columnIDs' => $info['columnIDs'], 'class' => $info['class'], 'format' => $format, 'separator' => $separator );
         }
-        catch ( Exception $e )
+        catch ( Throwable $e )
         {
             $parsed = array( 'header' => array(), 'rows' => array(), 'total_rows' => null, 'format' => $format, 'separator' => $separator, 'error' => $e->getMessage() );
         }
