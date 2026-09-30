@@ -9,6 +9,14 @@ $module = $Params['Module'];
 $http = eZHTTPTool::instance();
 $tpl = eZTemplate::factory();
 $contentINI = eZINI::instance( 'content.ini' );
+// A posted choice as a string, or null: an array posted in its place would be used as an array key (an Error)
+$postString = function ( $name ) use ( $http )
+{
+    if ( !$http->hasPostVariable( $name ) )
+        return null;
+    $value = $http->postVariable( $name );
+    return is_string( $value ) ? $value : null;
+};
 
 $state = $http->hasSessionVariable( 'eZExtractArchive' ) ? $http->sessionVariable( 'eZExtractArchive' ) : null;
 if ( !is_array( $state ) )
@@ -23,8 +31,8 @@ $lineSeparators = array( 'win32' => "\r\n", 'unix' => "\n", 'mac' => "\r" );
 $error = false;
 
 // Nodes: a ready-made set, one added or removed, all removed, or chosen in the browse page
-if ( $http->hasPostVariable( 'UseNodeSet' ) && isset( $nodeSets[$http->postVariable( 'UseNodeSet' )] ) )
-    $state['nodes'] = $nodeSets[$http->postVariable( 'UseNodeSet' )]['nodes'];
+if ( isset( $nodeSets[(string)$postString( 'UseNodeSet' )] ) )
+    $state['nodes'] = $nodeSets[$postString( 'UseNodeSet' )]['nodes'];
 if ( $http->hasPostVariable( 'AddNodeID' ) && is_array( $http->postVariable( 'AddNodeID' ) ) )
 {
     foreach ( array_keys( $http->postVariable( 'AddNodeID' ) ) as $nodeID )
@@ -46,11 +54,11 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) && $http->hasPostVariable( 
 $state['nodes'] = array_values( array_unique( array_filter( array_map( 'intval', $state['nodes'] ) ) ) );
 
 // Format
-if ( $http->hasPostVariable( 'ArchiveFormat' ) && isset( $formats[$http->postVariable( 'ArchiveFormat' )] ) )
-    $state['format'] = $http->postVariable( 'ArchiveFormat' );
+if ( isset( $formats[(string)$postString( 'ArchiveFormat' )] ) )
+    $state['format'] = $postString( 'ArchiveFormat' );
 if ( $http->hasPostVariable( 'Separator' ) )
 {
-    $separator = (string)$http->postVariable( 'Separator' );
+    $separator = (string)$postString( 'Separator' );
     if ( $separator === '\t' )
         $separator = "\t";
     $state['separator'] = ( strlen( $separator ) === 1 && strpbrk( $separator, "\"\r\n" ) === false ) ? $separator : ',';
@@ -63,8 +71,8 @@ if ( $http->hasPostVariable( 'ClassSelection' ) )
     $state['password_hashes'] = $allowHashes && $http->hasPostVariable( 'IncludePasswordHashes' );
 if ( !$allowHashes || !isset( $state['password_hashes'] ) )
     $state['password_hashes'] = false;
-if ( $http->hasPostVariable( 'LineSeparator' ) && isset( $lineSeparators[$http->postVariable( 'LineSeparator' )] ) )
-    $state['line'] = $http->postVariable( 'LineSeparator' );
+if ( isset( $lineSeparators[(string)$postString( 'LineSeparator' )] ) )
+    $state['line'] = $postString( 'LineSeparator' );
 if ( !isset( $formats[$state['format']] ) || !$formats[$state['format']]['available'] )
     $state['format'] = 'zip';
 
@@ -81,8 +89,8 @@ elseif ( $http->hasPostVariable( 'LanguageSelection' ) )
     $state['languages'] = (array)( $http->hasPostVariable( 'Languages' ) ? $http->postVariable( 'Languages' ) : array() );
 $state['languages'] = array_values( array_intersect( $allLocales, $state['languages'] ) );
 $columnChoices = XrowExtractArchive::columnChoices();
-if ( $http->hasPostVariable( 'ArchiveColumns' ) && isset( $columnChoices[$http->postVariable( 'ArchiveColumns' )] ) )
-    $state['columns'] = $http->postVariable( 'ArchiveColumns' );
+if ( isset( $columnChoices[(string)$postString( 'ArchiveColumns' )] ) )
+    $state['columns'] = $postString( 'ArchiveColumns' );
 if ( !isset( $state['columns'] ) || !isset( $columnChoices[$state['columns']] ) )
     $state['columns'] = 'standard';
 if ( $http->hasPostVariable( 'OutputFormat' ) && XrowExtractWriter::isRowFormat( $http->postVariable( 'OutputFormat' ) ) )
