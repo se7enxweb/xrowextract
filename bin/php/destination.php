@@ -79,7 +79,7 @@ $pairs = function ( $values, $option ) use ( $fail )
         if ( $entry === false || $entry === null || $entry === '' ) // the option was not given
             continue;
         // A setting without "=" was dropped without a word, so the destination was saved without it
-        if ( strpos( (string)$entry, '=' ) === false || trim( strstr( (string)$entry, '=', true ) ) === '' )
+        if ( strpos( (string)$entry, '=' ) === false || trim( (string)strstr( (string)$entry, '=', true ) ) === '' )
             $fail( "--$option takes key=value, not $entry." );
         list( $key, $value ) = explode( '=', (string)$entry, 2 );
         $out[trim( $key )] = $value;
@@ -188,9 +188,9 @@ if ( $options['create'] || $options['update'] )
         'type' => (string)$options['type'], 'config' => $config, 'secrets' => $secrets,
         'clear_secrets' => (array)$options['clear-secret'],
     ), $options['owner'] ? $options['owner'] : 'admin', $existing );
-    if ( $result['errors'] )
-        $fail( implode( "\n", $result['errors'] ) );
     $d = $result['destination'];
+    if ( $result['errors'] || !$d )
+        $fail( implode( "\n", $result['errors'] ) ?: 'The destination was not saved.' );
     $cli->output( sprintf( 'PASS: destination %d "%s" %s (%s); secrets set: %s.', $d->attribute( 'id' ), $d->attribute( 'name' ), $existing ? 'changed' : 'created',
                            $d->summary(), $d->secretNames() ? implode( ', ', $d->secretNames() ) : 'none' ) );
     $script->shutdown( 0 );

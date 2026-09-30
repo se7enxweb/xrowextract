@@ -59,6 +59,8 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         if ( !$url )
             return array( 'ok' => false, 'message' => 'The URL must start with http:// or https://.' );
         $body = json_encode( array( 'event' => 'xrowextract.test', 'time' => date( 'c' ) ) );
+        if ( $body === false )
+            return array( 'ok' => false, 'message' => 'The test request could not be encoded.' );
         $result = self::curl( $url, array( 'method' => 'POST', 'body' => $body, 'timeout' => 30,
                                            'headers' => array_merge( array( 'Content-Type: application/json' ), $this->signedHeaders( hash( 'sha256', $body ) ) ) ) );
         if ( !$result['ok'] )
@@ -80,6 +82,8 @@ class XrowExtractTransportHttp extends XrowExtractTransport
         if ( !$url )
             return array( 'ok' => false, 'message' => 'The URL must start with http:// or https://.' );
         $sha = hash_file( 'sha256', $localPath );
+        if ( $sha === false )
+            return array( 'ok' => false, 'message' => 'The file to upload cannot be read: ' . basename( (string)$localPath ) . '.' );
         $name = self::safeName( $remoteName );
         $fields = array(
             preg_replace( '/[^A-Za-z0-9_-]/', '', (string)$this->config( 'field', 'file' ) ) ?: 'file' => new CURLFile( $localPath, 'application/octet-stream', $name ),

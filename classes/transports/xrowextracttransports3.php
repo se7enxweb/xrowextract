@@ -74,7 +74,7 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         ksort( $headers );
         $canonicalHeaders = '';
         foreach ( $headers as $name => $value )
-            $canonicalHeaders .= strtolower( $name ) . ':' . trim( preg_replace( '/\s+/', ' ', (string)$value ) ) . "\n";
+            $canonicalHeaders .= strtolower( $name ) . ':' . trim( (string)preg_replace( '/\s+/', ' ', (string)$value ) ) . "\n";
         $signedHeaders = implode( ';', array_map( 'strtolower', array_keys( $headers ) ) );
         $canonical = $method . "\n" . $canonicalURI . "\n" . $canonicalQuery . "\n" . $canonicalHeaders . "\n" . $signedHeaders . "\n" . $payloadHash;
         $amzDate = $headers['x-amz-date'];
@@ -174,9 +174,12 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         $target = $this->target( self::safeName( $remoteName ) );
         if ( !$target )
             return array( 'ok' => false, 'message' => 'The endpoint or bucket name is not valid.' );
-        if ( filesize( $localPath ) > 5 * 1024 * 1024 * 1024 )
+        $bytes = @filesize( $localPath );
+        $hash = $bytes === false ? false : hash_file( 'sha256', $localPath );
+        if ( $hash === false )
+            return array( 'ok' => false, 'message' => 'The file to upload cannot be read: ' . basename( (string)$localPath ) . '.' );
+        if ( $bytes > 5 * 1024 * 1024 * 1024 )
             return array( 'ok' => false, 'message' => 'The file is larger than 5 GB, the limit of a single S3 PUT.' );
-        $hash = hash_file( 'sha256', $localPath );
         $result = self::curl( $target['url'], array( 'method' => 'PUT', 'upload_file' => $localPath,
                                                      'headers' => $this->headersFor( 'PUT', $target, $hash, array( 'content-type' => 'application/octet-stream' ) ) ) );
         if ( $result['ok'] && $result['status'] >= 200 && $result['status'] < 300 )

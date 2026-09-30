@@ -102,7 +102,7 @@ abstract class XrowExtractTransport
     public static function safeName( $name ): string
     {
         $name = basename( str_replace( '\\', '/', (string)$name ) );
-        $name = preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $name );
+        $name = (string)preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $name );
         return $name === '' || $name === '.' || $name === '..' ? 'export' : $name;
     }
 
@@ -114,7 +114,7 @@ abstract class XrowExtractTransport
     public static function safeFolder( $path ): string|false
     {
         $path = str_replace( '\\', '/', trim( (string)$path ) );
-        $path = preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $path );
+        $path = (string)preg_replace( '/[\x00-\x1f\x7f"\'`]/', '', $path );
         $parts = array();
         foreach ( explode( '/', $path ) as $part )
         {
@@ -249,7 +249,7 @@ abstract class XrowExtractTransport
     /** @param mixed $body */
     protected static function bodyExcerpt( $body ): string
     {
-        $text = trim( preg_replace( '/\s+/', ' ', strip_tags( (string)$body ) ) );
+        $text = trim( (string)preg_replace( '/\s+/', ' ', strip_tags( (string)$body ) ) );
         return mb_substr( $text, 0, 300 );
     }
 }

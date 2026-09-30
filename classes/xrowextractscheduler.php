@@ -92,7 +92,7 @@ class XrowExtractScheduler
      * (a deleted preset or node). $runMode: full or delta; $since: the delta start time.
      *
      * @param string $runMode
-     * @param int $since
+     * @param int|null $since the last successful run of a delta export (null or 0: everything)
      * @param string $trigger
      * @return array<string, mixed>
      */
@@ -414,7 +414,7 @@ class XrowExtractScheduler
         {
             $check = XrowExtractTransportLocal::checkPath( $remote, true );
             $fetched = $check['ok'] ? array( 'ok' => @copy( $check['path'], $local ), 'message' => 'copied ' . $check['path'] ) : $check;
-            if ( $fetched['ok'] && is_file( $check['path'] . XrowExtractManifest::SIDECAR_SUFFIX ) )
+            if ( $check['ok'] && $fetched['ok'] && is_file( $check['path'] . XrowExtractManifest::SIDECAR_SUFFIX ) )
                 @copy( $check['path'] . XrowExtractManifest::SIDECAR_SUFFIX, $local . XrowExtractManifest::SIDECAR_SUFFIX );
         }
         if ( !$fetched['ok'] || !is_file( $local ) || filesize( $local ) === 0 )
@@ -605,7 +605,7 @@ class XrowExtractScheduler
     public static function cronjobPartLine( $every = 5 ): string
     {
         $php = XrowExtractJob::phpCliBinary() ?: 'php';
-        return '*/' . (int)$every . ' * * * * cd ' . escapeshellarg( eZSys::rootDir() ) . ' && ' . escapeshellarg( $php ) . ' runcronjobs.php xrowextract >/dev/null 2>&1';
+        return '*/' . (int)$every . ' * * * * cd ' . escapeshellarg( (string)eZSys::rootDir() ) . ' && ' . escapeshellarg( $php ) . ' runcronjobs.php xrowextract >/dev/null 2>&1';
     }
 }
 

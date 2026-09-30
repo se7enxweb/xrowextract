@@ -199,6 +199,8 @@ class XrowExtractNotifier
     {
         $transport = new XrowExtractTransportHttp( array( 'url' => $url ), array( 'hmac_key' => self::webhookSecret() ) );
         $body = json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE );
+        if ( $body === false )
+            return array( 'ok' => false, 'status' => 0, 'message' => 'The notification could not be encoded: ' . json_last_error_msg() );
         $result = XrowExtractNotifierHttp::post( $url, $body, $transport->signedHeaders( hash( 'sha256', $body ) ) );
         return $result;
     }

@@ -224,6 +224,10 @@ class XrowExtractDestination extends eZPersistentObject
         }
         if ( $errors )
             return array( 'destination' => $destination, 'errors' => $errors );
+        // json_encode() refuses text that is not UTF-8: storing its false would silently empty every setting
+        $configJson = json_encode( $config );
+        if ( $configJson === false )
+            return array( 'destination' => $destination, 'errors' => array( 'A setting of the destination is not valid UTF-8 text and cannot be stored.' ) );
 
         // Secrets: a new value replaces, an empty field keeps, "clear" removes; never read back to the form
         $secretFields = call_user_func( array( $class, 'secretFields' ) );
@@ -259,7 +263,7 @@ class XrowExtractDestination extends eZPersistentObject
         if ( !$destination )
             $destination = new XrowExtractDestination( array( 'dest_type' => $type, 'owner_login' => (string)$ownerLogin, 'created' => $now ) );
         $destination->setAttribute( 'name', $name );
-        $destination->setAttribute( 'config', json_encode( $config ) );
+        $destination->setAttribute( 'config', $configJson );
         $destination->setAttribute( 'secret', $encrypted );
         $destination->setAttribute( 'modified', $now );
         $destination->store();
@@ -275,7 +279,13 @@ class XrowExtractDestination extends eZPersistentObject
     {
         $config = $this->configArray();
         $config['host_keys'] = implode( "\n", array_map( 'trim', $lines ) );
-        $this->setAttribute( 'config', json_encode( $config ) );
+        $encoded = json_encode( $config );
+        if ( $encoded === false )
+        {
+            eZDebug::writeError( 'Destination ' . $this->attribute( 'id' ) . ': the host keys cannot be stored (not UTF-8).', __METHOD__ );
+            return;
+        }
+        $this->setAttribute( 'config', $encoded );
         $this->setAttribute( 'modified', time() );
         $this->store();
     }
@@ -295,7 +305,8 @@ class XrowExtractDestination extends eZPersistentObject
             eZDebug::writeError( 'Destination ' . $this->attribute( 'id' ) . ': ' . $e->getMessage(), __METHOD__ );
             $secrets = array();
         }
-        return new $class( $this->configArray(), $secrets );
+        $transport = new $class( $this->configArray(), $secrets );
+        return $transport instanceof XrowExtractTransport ? $transport : false;
     }
 
     /**
@@ -306,8 +317,8 @@ class XrowExtractDestination extends eZPersistentObject
     public function test(): array
     {
         $transport = $this->transport();
-        $reason = $transport ? call_user_func( array( get_class( $transport ), 'unavailableReason' ) ) : 'unknown type';
-        if ( $reason !== '' )
+        $reason = $transport ? $transport::unavailableReason() : 'unknown type';
+        if ( $reason !== '' || !$transport )
             $result = array( 'ok' => false, 'message' => 'Not available on this server: ' . $reason );
         else
         {
@@ -321,7 +332,8 @@ class XrowExtractDestination extends eZPersistentObject
             }
         }
         $this->setAttribute( 'last_test', time() );
-        $this->setAttribute( 'last_test_result', json_encode( array( 'ok' => (bool)$result['ok'], 'message' => (string)$result['message'], 'time' => time() ) ) );
+        // The message can quote what the server answered, which need not be UTF-8
+        $this->setAttribute( 'last_test_result', (string)json_encode( array( 'ok' => (bool)$result['ok'], 'message' => (string)$result['message'], 'time' => time() ), JSON_INVALID_UTF8_SUBSTITUTE ) );
         $this->store();
         return $result;
     }

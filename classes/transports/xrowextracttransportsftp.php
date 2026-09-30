@@ -206,7 +206,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
             $line = trim( $line );
             if ( $line === '' || $line[0] === '#' )
                 continue;
-            $parts = preg_split( '/\s+/', $line );
+            $parts = preg_split( '/\s+/', $line ) ?: array();
             if ( count( $parts ) < 3 || !preg_match( '/^(ssh-|ecdsa-|sk-)/', $parts[1] ) )
                 continue;
             $lines[] = $line;
@@ -238,7 +238,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
             return array( 'ok' => false, 'message' => 'No private temp folder.' );
         file_put_contents( $dir . '/known_hosts', implode( "\n", $known ) . "\n" );
         file_put_contents( $dir . '/batch', implode( "\n", $commands ) . "\n" );
-        $argv = array( self::binary( 'sftp' ) );
+        $argv = array( (string)self::binary( 'sftp' ) );
         $env = array();
         $options = array(
             'StrictHostKeyChecking=yes', 'UserKnownHostsFile=' . $dir . '/known_hosts', 'GlobalKnownHostsFile=/dev/null',
@@ -285,7 +285,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         $argv[] = $user . '@' . ( strpos( $host, ':' ) !== false ? '[' . $host . ']' : $host );
         list( $code, $out, $err ) = self::run( $argv, $env, '', 1800 );
         self::removeDir( $dir );
-        $err = trim( preg_replace( '/\s+/', ' ', $err ) );
+        $err = trim( (string)preg_replace( '/\s+/', ' ', $err ) );
         if ( $code !== 0 )
         {
             if ( stripos( $err, 'host key verification failed' ) !== false || stripos( $err, 'REMOTE HOST IDENTIFICATION HAS CHANGED' ) !== false )

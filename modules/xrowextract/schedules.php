@@ -35,7 +35,7 @@ $postedValues = function () use ( $http )
     $lines = function ( $text )
     {
         $out = array();
-        foreach ( preg_split( '/\r\n|\r|\n/', (string)$text ) as $line )
+        foreach ( preg_split( '/\r\n|\r|\n/', (string)$text ) ?: array() as $line )
         {
             if ( strpos( $line, '=' ) === false )
                 continue;
@@ -137,7 +137,8 @@ elseif ( $http->hasPostVariable( 'SaveSchedule' ) )
     if ( $values['id'] && !$existing )
         return $backTo();
     $result = XrowExtractSchedule::saveFrom( $values, $login, $existing );
-    if ( $result['errors'] )
+    $saved = $result['schedule'];
+    if ( $result['errors'] || !$saved )
     {
         $errors = array_map( function ( $message ) { return ezpI18n::tr( 'design/standard/extract', $message ); }, $result['errors'] );
         $editValues = $values;
@@ -145,8 +146,8 @@ elseif ( $http->hasPostVariable( 'SaveSchedule' ) )
     else
     {
         $http->setSessionVariable( 'eZExtractScheduleNotice', ezpI18n::tr( 'design/standard/extract', 'Schedule saved. Next run: %time', null,
-                                   array( '%time' => $result['schedule']->attribute( 'next_run' ) ? date( 'Y-m-d H:i', $result['schedule']->attribute( 'next_run' ) ) : '-' ) ) );
-        return $backTo( 'schedule-' . (int)$result['schedule']->attribute( 'id' ) );
+                                   array( '%time' => $saved->attribute( 'next_run' ) ? date( 'Y-m-d H:i', $saved->attribute( 'next_run' ) ) : '-' ) ) );
+        return $backTo( 'schedule-' . (int)$saved->attribute( 'id' ) );
     }
 }
 elseif ( $http->hasPostVariable( 'DeleteScheduleID' ) )
@@ -296,9 +297,9 @@ $tpl->setVariable( 'history_retention_days', XrowExtractHistory::retentionDays()
 $tpl->setVariable( 'local_roots', XrowExtractTransportLocal::allowedRoots() );
 $tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( $login, $allowAll ) );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( (string)md5_file( $scriptFile ), 0, 12 ) : '0' );
 $scheduleScript = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-schedules.js';
-$tpl->setVariable( 'ScheduleScriptVersion', is_file( $scheduleScript ) ? substr( md5_file( $scheduleScript ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScheduleScriptVersion', is_file( $scheduleScript ) ? substr( (string)md5_file( $scheduleScript ), 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/schedules.tpl' );

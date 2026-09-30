@@ -31,7 +31,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         if ( !function_exists( 'curl_init' ) )
             return 'the PHP curl extension is not available';
         $version = curl_version();
-        return in_array( 'ftp', $version['protocols'], true ) ? '' : 'the curl library has no FTP support';
+        return is_array( $version ) && in_array( 'ftp', $version['protocols'], true ) ? '' : 'the curl library has no FTP support';
     }
 
     protected function security(): string

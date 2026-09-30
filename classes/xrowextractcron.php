@@ -55,7 +55,7 @@ class XrowExtractCron
                 $monthday = isset( $frequency['monthday'] ) ? (int)$frequency['monthday'] : 1;
                 return "$minute $hour " . ( $monthday >= 1 && $monthday <= 31 ? $monthday : 1 ) . ' * *';
             case 'cron':
-                $expression = trim( preg_replace( '/\s+/', ' ', isset( $frequency['expression'] ) ? (string)$frequency['expression'] : '' ) );
+                $expression = trim( (string)preg_replace( '/\s+/', ' ', isset( $frequency['expression'] ) ? (string)$frequency['expression'] : '' ) );
                 return self::parse( $expression ) ? $expression : false;
         }
         return false;
@@ -74,7 +74,7 @@ class XrowExtractCron
                           '@monthly' => '0 0 1 * *', '@yearly' => '0 0 1 1 *', '@annually' => '0 0 1 1 *' );
         if ( isset( $aliases[$expression] ) )
             $expression = $aliases[$expression];
-        $parts = preg_split( '/\s+/', $expression );
+        $parts = preg_split( '/\s+/', $expression ) ?: array();
         if ( count( $parts ) !== 5 )
             return false;
         $names = array(
@@ -181,11 +181,15 @@ class XrowExtractCron
             if ( !isset( $p['month'][$month] ) || !self::dayMatches( $p, $day, $weekday ) )
             {
                 $t = mktime( 0, 0, 0, (int)date( 'n', $t ), (int)date( 'j', $t ) + 1, (int)date( 'Y', $t ) );
+                if ( $t === false )
+                    return false;
                 continue;
             }
             if ( !isset( $p['hour'][$hour] ) )
             {
                 $t = mktime( $hour + 1, 0, 0, (int)date( 'n', $t ), (int)date( 'j', $t ), (int)date( 'Y', $t ) );
+                if ( $t === false )
+                    return false;
                 continue;
             }
             if ( self::matches( $p, $t ) )

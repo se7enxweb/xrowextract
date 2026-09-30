@@ -271,9 +271,9 @@ if ( $options['create'] )
         'destination_ids' => $options['destinations'] ? explode( ',', $options['destinations'] ) : array(),
         'notify' => array( 'failure_emails' => (string)$options['notify-emails'] ),
     ), $owner );
-    if ( $result['errors'] )
-        $fail( implode( "\n", $result['errors'] ) );
     $s = $result['schedule'];
+    if ( $result['errors'] || !$s )
+        $fail( implode( "\n", $result['errors'] ) ?: 'The schedule was not saved.' );
     $cli->output( sprintf( 'PASS: schedule %d "%s" created: %s, next run %s.', $s->attribute( 'id' ), $s->attribute( 'name' ), $s->frequencyText(), $when( $s->attribute( 'next_run' ) ) ) );
     $script->shutdown( 0 );
 }

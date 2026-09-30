@@ -74,7 +74,8 @@ elseif ( $http->hasPostVariable( 'SaveDestination' ) )
         'secrets' => isset( $posted['secret'] ) ? (array)$posted['secret'] : array(),
         'clear_secrets' => isset( $posted['clear'] ) ? array_keys( (array)$posted['clear'] ) : array(),
     ), $login, $existing );
-    if ( $result['errors'] )
+    $saved = $result['destination'];
+    if ( $result['errors'] || !$saved )
     {
         $errors = array_map( function ( $message ) { return ezpI18n::tr( 'design/standard/extract', $message ); }, $result['errors'] );
         if ( isset( $types[$type] ) )
@@ -84,7 +85,7 @@ elseif ( $http->hasPostVariable( 'SaveDestination' ) )
     else
     {
         $http->setSessionVariable( 'eZExtractDestinationNotice', ezpI18n::tr( 'design/standard/extract', 'Destination saved. Test the connection to be sure.' ) );
-        return $backTo( 'destination-' . (int)$result['destination']->attribute( 'id' ) );
+        return $backTo( 'destination-' . (int)$saved->attribute( 'id' ) );
     }
 }
 elseif ( $http->hasPostVariable( 'DeleteDestinationID' ) )
@@ -189,9 +190,9 @@ $tpl->setVariable( 'local_roots', XrowExtractTransportLocal::allowedRoots() );
 $tpl->setVariable( 'secrets_available', XrowExtractSecrets::available() );
 $tpl->setVariable( 'RunningJobsCount', XrowExtractJob::countRunning( $login, XrowExtractJob::allowAllJobs() ) );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( (string)md5_file( $scriptFile ), 0, 12 ) : '0' );
 $scheduleScript = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-schedules.js';
-$tpl->setVariable( 'ScheduleScriptVersion', is_file( $scheduleScript ) ? substr( md5_file( $scheduleScript ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScheduleScriptVersion', is_file( $scheduleScript ) ? substr( (string)md5_file( $scheduleScript ), 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/destinations.tpl' );

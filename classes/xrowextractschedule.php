@@ -279,7 +279,7 @@ class XrowExtractSchedule extends eZPersistentObject
     public static function cleanEmails( $text ): string
     {
         $valid = array();
-        foreach ( preg_split( '/[\s,;]+/', (string)$text, -1, PREG_SPLIT_NO_EMPTY ) as $address )
+        foreach ( preg_split( '/[\s,;]+/', (string)$text, -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $address )
         {
             if ( eZMail::validate( $address ) )
                 $valid[] = $address;
@@ -317,7 +317,7 @@ class XrowExtractSchedule extends eZPersistentObject
     {
         $php = $phpBinary ?: ( XrowExtractJob::phpCliBinary() ?: 'php' );
         $access = eZSiteAccess::current();
-        return $this->attribute( 'cron_expr' ) . ' cd ' . escapeshellarg( eZSys::rootDir() ) . ' && ' . escapeshellarg( $php )
+        return $this->attribute( 'cron_expr' ) . ' cd ' . escapeshellarg( (string)eZSys::rootDir() ) . ' && ' . escapeshellarg( $php )
              . ' extension/xrowextract/bin/php/schedule.php --run=' . (int)$this->attribute( 'id' ) . ' --if-enabled'
              . ( $access && !empty( $access['name'] ) ? ' --siteaccess=' . $access['name'] : '' ) . ' >/dev/null 2>&1';
     }
