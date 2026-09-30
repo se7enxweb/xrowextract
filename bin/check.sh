@@ -42,7 +42,7 @@ for arg in "$@"; do
   case "$arg" in
     --php=*) PHP_BIN=${arg#--php=} ;;
     --only=*) ONLY=${arg#--only=} ;;
-    -h|--help) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "FAIL unknown option $arg (see --help)"; exit 2 ;;
   esac
 done
