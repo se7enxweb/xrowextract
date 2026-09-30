@@ -1,0 +1,55 @@
+# The release gate (bin/check.sh) on every supported PHP version: php -l, the
+# translation files, and PHPStan against the kernel and library classes of
+# se7enxweb/exponential.
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - name: Check out xrowextract
+        uses: actions/checkout@v4
+        with:
+          path: xrowextract
+
+      - name: Check out Exponential (kernel and library classes for PHPStan)
+        uses: actions/checkout@v4
+        with:
+          repository: se7enxweb/exponential
+          path: exponential
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, libxml, mbstring, xml, xmlreader, zip, curl, sodium
+          ini-values: memory_limit=2G
+          tools: composer
+          coverage: none
+
+      - name: Install xmllint
+        run: sudo apt-get install -y --no-install-recommends libxml2-utils
+
+      # The Zeta Components (ezc*) the extension uses, for PHPStan only; the
+      # Exponential checkout has no vendor/ of its own.
+      - name: Zeta Components
+        run: mkdir -p "$RUNNER_TEMP/zeta" && composer require --working-dir="$RUNNER_TEMP/zeta" --no-interaction --no-progress --no-plugins zetacomponents/archive zetacomponents/base
+
+      - name: bin/check.sh
+        working-directory: xrowextract
+        env:
+          EXPONENTIAL_ROOT: ${{ github.workspace }}/exponential
+          EXPONENTIAL_VENDOR_DIR: ${{ runner.temp }}/zeta/vendor
+        run: bin/check.sh --php="$(command -v php)"

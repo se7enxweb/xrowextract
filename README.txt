@@ -159,3 +159,24 @@ holds the same for a manual install.
 Command line: ext:xrowextract:schedule (--list, --run, --enable,
 --disable, --cron, --crontab, --create), ext:xrowextract:destination
 (--list, --test, --send, --trust-host-key), ext:xrowextract:history.
+
+Checks (the release gate)
+
+bin/check.sh runs everything a release has to pass and prints PASS/FAIL
+per part, exit code 1 when any part fails:
+  lint     php -l on every PHP file, every error level on (a compile-time
+           deprecation fails too); --php=/path/to/php picks the binary
+  ts       xmllint --noout on translations/*/translation.ts
+  dup      no <source> twice in one <context> of a .ts file
+  phpstan  PHPStan (phpstan.neon.dist: level 6 without required type
+           declarations, PHP 8.1 to 8.5; phpstan-baseline.neon holds only
+           findings PHPStan cannot see past, each explained)
+PHPStan needs the Exponential kernel and library classes: EXPONENTIAL_ROOT
+names an Exponential root (default: the installation this extension is
+installed in). Anywhere else, clone se7enxweb/exponential and point
+EXPONENTIAL_ROOT at it; the Zeta Components come from that root's vendor/
+or from EXPONENTIAL_VENDOR_DIR (a vendor directory with
+zetacomponents/archive and zetacomponents/base). PHPSTAN names a phpstan
+binary; without it the pinned release is downloaded once into var/tools/
+and checked against its SHA-256. .github/workflows/check.yml runs the same
+on PHP 8.1, 8.2, 8.3, 8.4 and 8.5 for every push and pull request.
