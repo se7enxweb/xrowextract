@@ -38,7 +38,7 @@ class XrowExtractTransportWebdav extends XrowExtractTransport
     /** A URL below the folder, every path segment encoded. */
     protected function urlFor( $relative )
     {
-        $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$relative ), 'strlen' ) );
+        $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$relative ), static function ( $part ) { return $part !== ''; } ) );
         return $this->base() . ( $segments ? '/' . implode( '/', $segments ) : '' );
     }
 

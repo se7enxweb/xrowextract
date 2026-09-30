@@ -127,7 +127,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         fclose( $pipes[1] );
         fclose( $pipes[2] );
         $code = proc_close( $process );
-        if ( isset( $status ) && !$status['running'] && $status['exitcode'] >= 0 )
+        if ( !$status['running'] && $status['exitcode'] >= 0 )
             $code = $status['exitcode'];
         return array( (int)$code, $out, $err );
     }
@@ -295,7 +295,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
         if ( $folder === '' )
             return $commands;
         $walk = strpos( $folder, '/' ) === 0 ? '' : null;
-        foreach ( array_filter( explode( '/', $folder ), 'strlen' ) as $segment )
+        foreach ( array_filter( explode( '/', $folder ), static function ( $part ) { return $part !== ''; } ) as $segment )
         {
             $walk = $walk === null ? $segment : $walk . '/' . $segment;
             $commands[] = '-mkdir ' . self::quote( $walk );

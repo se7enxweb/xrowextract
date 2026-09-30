@@ -780,7 +780,7 @@ class XrowExtractImport
                 }
                 if ( $target === 'ignore' && isset( $attrByID[$key] ) === false )
                 {
-                    $reason = $classID ? 'no attribute, format or special column matches this header' : '';
+                    $reason = 'no attribute, format or special column matches this header';
                 }
             }
             else

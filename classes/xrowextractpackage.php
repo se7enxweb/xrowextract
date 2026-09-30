@@ -2455,11 +2455,12 @@ class XrowExtractPackage
     {
         $nodeID = $nodeID ? (int)$nodeID : self::defaultScratchNodeID();
         $node = eZContentObjectTreeNode::fetch( $nodeID );
-        $path = $node instanceof eZContentObjectTreeNode ? $node->attribute( 'path_identification_string' ) : false;
+        $exists = $node instanceof eZContentObjectTreeNode;
+        $path = $exists ? $node->attribute( 'path_identification_string' ) : false;
         return array(
             'node_id' => $nodeID,
             'path'    => $path ?: ( 'node ' . $nodeID ),
-            'exists'  => $node instanceof eZContentObjectTreeNode,
+            'exists'  => $exists,
         );
     }
 

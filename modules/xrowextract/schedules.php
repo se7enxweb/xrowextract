@@ -47,7 +47,7 @@ $postedValues = function () use ( $http )
     };
     $list = function ( $text, $int = false )
     {
-        $items = array_values( array_filter( array_map( 'trim', explode( ',', (string)$text ) ), 'strlen' ) );
+        $items = array_values( array_filter( array_map( 'trim', explode( ',', (string)$text ) ), static function ( $part ) { return $part !== ''; } ) );
         return $int ? array_values( array_filter( array_map( 'intval', $items ) ) ) : $items;
     };
     $access = eZSiteAccess::current();

@@ -23,15 +23,18 @@ class XrowExtractSchema
     /** The tables of this database, lower case. */
     protected static function existingTables( eZDBInterface $db )
     {
-        $list = array();
-        if ( method_exists( $db, 'relationList' ) )
-            $list = $db->relationList();
+        $list = $db->relationList();
         if ( !is_array( $list ) || !$list )
-            $list = method_exists( $db, 'eZTableList' ) ? array_keys( (array)$db->eZTableList() ) : array();
+            $list = array_keys( (array)$db->eZTableList() );
         return array_map( 'strtolower', (array)$list );
     }
 
-    /** Whether every table exists already (never creates one). */
+    /**
+     * Whether every table exists already (never creates one). Asks the database until the answer is yes;
+     * ensure() relies on asking again after it created the tables.
+     *
+     * @phpstan-impure
+     */
     public static function exists()
     {
         if ( self::$ready === true )

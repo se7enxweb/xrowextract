@@ -49,7 +49,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
             return false;
         $scheme = $this->security() === 'implicit' ? 'ftps' : 'ftp';
         $port = (int)$this->config( 'port' ) ?: ( $this->security() === 'implicit' ? 990 : 21 );
-        $segments = array_map( 'rawurlencode', array_filter( explode( '/', $folder ), 'strlen' ) );
+        $segments = array_map( 'rawurlencode', array_filter( explode( '/', $folder ), static function ( $part ) { return $part !== ''; } ) );
         return $scheme . '://' . $host . ':' . $port . '/' . ( $segments ? implode( '/', $segments ) . '/' : '' );
     }
 
@@ -73,7 +73,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         $result = self::curl( $url, $this->options( array( CURLOPT_DIRLISTONLY => true, CURLOPT_TIMEOUT => 30 ) ) );
         if ( !$result['ok'] )
             return array( 'ok' => false, 'message' => 'FTP: ' . $result['error'] );
-        return array( 'ok' => true, 'message' => 'Logged in and listed the folder (' . count( array_filter( explode( "\n", trim( $result['body'] ) ), 'strlen' ) ) . ' entries)'
+        return array( 'ok' => true, 'message' => 'Logged in and listed the folder (' . count( array_filter( explode( "\n", trim( $result['body'] ) ), static function ( $part ) { return $part !== ''; } ) ) . ' entries)'
                                               . ( $this->security() === 'none' ? '; the connection is NOT encrypted' : '; TLS' ) . '.' );
     }
 
@@ -98,7 +98,7 @@ class XrowExtractTransportFtp extends XrowExtractTransport
         $url = $this->folderURL();
         if ( !$url || strpos( (string)$remotePath, '..' ) !== false )
             return array( 'ok' => false, 'message' => 'Not a path below the destination folder.' );
-        $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$remotePath ), 'strlen' ) );
+        $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$remotePath ), static function ( $part ) { return $part !== ''; } ) );
         $out = fopen( $localPath, 'wb' );
         $result = self::curl( $url . implode( '/', $segments ), $this->options( array( CURLOPT_RETURNTRANSFER => false, CURLOPT_FILE => $out ) ) );
         fclose( $out );

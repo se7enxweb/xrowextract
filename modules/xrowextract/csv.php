@@ -1193,8 +1193,8 @@ if ( $http->hasPostVariable( 'SavePreset' ) && !$hasPreFilledData )
             'mainnodeonly' => $Mainnodeonly,
             'limit' => $Limit,
             'offset' => $Offset,
-            'languages' => array_values( $SelectedLanguages ),
-            'attributes' => array_values( $Attributes ),
+            'languages' => $SelectedLanguages,
+            'attributes' => $Attributes,
             'filters' => $Filters->values,
             'sort_field' => $SortField,
             'sort_ascending' => $SortAscending,
@@ -1539,7 +1539,7 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
         $downloadManifest = XrowExtractManifest::build( array(
             'type' => 'csv', 'format' => $OutputFormat, 'separator' => $Separator, 'quoted' => (bool)$Escape, 'line_endings' => $newLine,
             'languages' => $SelectedLanguages, 'columns' => $ExportColumns, 'class_id' => (int)$Class_id, 'allow_password_hash' => $allowPasswordHash,
-            'filters' => $Filters->values, 'preset' => isset( $LoadedPresetRef ) && $LoadedPresetRef !== '' ? $LoadedPresetRef : null, 'run_mode' => 'full',
+            'filters' => $Filters->values, 'preset' => $LoadedPresetRef !== '' ? $LoadedPresetRef : null, 'run_mode' => 'full',
             'selection' => array( 'scope' => $Scope, 'node_id' => $Scope === 'all' ? null : (int)$Subtree, 'offset' => (int)$Offset, 'limit' => (int)$Limit,
                                   'main_only' => $FetchMainnodeonly === '1', 'user' => eZUser::currentUser()->attribute( 'login' ) ),
         ) );
@@ -1690,7 +1690,7 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
         XrowExtractHistory::record( array(
             'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'kind' => 'csv', 'trigger_type' => 'download', 'run_mode' => 'full',
             'what' => ( $metaClass ? $metaClass->attribute( 'name' ) : 'class ' . $Class_id ) . ' — ' . ( $Scope === 'all' ? ezpI18n::tr( 'design/standard/extract', 'whole site' ) : ( ( $historyNode = eZContentObjectTreeNode::fetch( $Subtree ) ) ? $historyNode->attribute( 'name' ) : 'node ' . $Subtree ) ),
-            'preset_ref' => isset( $LoadedPresetRef ) ? (string)$LoadedPresetRef : '', 'output_format' => $OutputFormat,
+            'preset_ref' => $LoadedPresetRef, 'output_format' => $OutputFormat,
             'started_at' => (int)$started, 'ended_at' => time(), 'run_state' => 'done', 'row_count' => $written,
             'byte_size' => strlen( $data ), 'checksum' => $finishedManifest['file']['sha256'],
             'file_name' => $downloadManifestOnly ? $file . XrowExtractManifest::SIDECAR_SUFFIX : ( $downloadWithManifest ? $file . '.zip' : $file ),

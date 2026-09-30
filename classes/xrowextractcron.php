@@ -81,7 +81,7 @@ class XrowExtractCron
             {
                 if ( !preg_match( '#^(\*|\d+(?:-\d+)?)(?:/(\d+))?$#', $item, $m ) )
                     return false;
-                $step = isset( $m[2] ) && $m[2] !== '' ? (int)$m[2] : 1;
+                $step = isset( $m[2] ) ? (int)$m[2] : 1;
                 if ( $step < 1 )
                     return false;
                 if ( $m[1] === '*' )
@@ -96,7 +96,7 @@ class XrowExtractCron
                 else
                 {
                     $from = (int)$m[1];
-                    $to = isset( $m[2] ) && $m[2] !== '' ? $high : $from;
+                    $to = isset( $m[2] ) ? $high : $from;
                 }
                 if ( $from < $low || $to > $high || $from > $to )
                     return false;

@@ -84,7 +84,7 @@ $query = array();
 foreach ( array( 'state' => $filter['state'], 'kind' => $filter['kind'], 'schedule' => $filter['schedule_id'] ?: '', 'trigger' => $filter['trigger'],
                  'delivery' => $filter['delivery'], 'from' => $filter['from'], 'to' => $filter['to'], 'text' => $filter['text'], 'owner' => $filter['owner'] ) as $key => $value )
 {
-    if ( $value !== '' && $value !== 0 )
+    if ( $value !== '' )
         $query[$key] = $value;
 }
 $queryWithout = function ( $drop ) use ( $query )

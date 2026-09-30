@@ -174,7 +174,7 @@ class XrowExtractJob
      * A process started by another system user (a job started from :8080 runs as root, from :443 as the
      * web user) may not be stoppable from here; that is reported, and the job is still marked cancelled so
      * its runner does not overwrite the state when it ends.
-     * @return array( ok, message )
+     * @return array{0: bool, 1: string} ok, message
      */
     public static function cancel( $id, $login )
     {
