@@ -698,7 +698,7 @@ class XrowExtractImport
      * "authors:ids") comes from an XML file's own <columns> block - when given,
      * it settles a column's target exactly, without guessing from its name.
      */
-    public static function suggestMapping( array $header, $classID, array $columnIDs = null )
+    public static function suggestMapping( array $header, $classID, ?array $columnIDs = null )
     {
         $specials = self::specialColumnsByExportName( false );
         $knownSpecialIDs = array_flip( $specials );
@@ -1519,7 +1519,7 @@ class XrowExtractImport
     }
 
     /** A small, valid placeholder for a required attribute the sample's new object fills in. */
-    public static function placeholderValue( $datatype, eZContentClassAttribute $classAttribute = null )
+    public static function placeholderValue( $datatype, ?eZContentClassAttribute $classAttribute = null )
     {
         switch ( $datatype )
         {

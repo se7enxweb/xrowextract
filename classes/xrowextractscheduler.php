@@ -64,7 +64,7 @@ class XrowExtractScheduler
     }
 
     /** The configured default: files are kept as long as csv.ini [Jobs] RetentionDays says. */
-    public static function fileRetentionDays( XrowExtractSchedule $schedule = null )
+    public static function fileRetentionDays( ?XrowExtractSchedule $schedule = null )
     {
         if ( $schedule )
         {

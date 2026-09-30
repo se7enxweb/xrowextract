@@ -149,7 +149,7 @@ class XrowExtractDestination extends eZPersistentObject
      * Creates or changes a destination. $values: name, type, config (array), secrets (name => new value;
      * '' keeps the stored one), clear_secrets (names to remove). Returns array( 'destination', 'errors' ).
      */
-    public static function saveFrom( array $values, $ownerLogin, XrowExtractDestination $destination = null )
+    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractDestination $destination = null )
     {
         $errors = array();
         $name = mb_substr( trim( (string)( isset( $values['name'] ) ? $values['name'] : '' ) ), 0, 150 );

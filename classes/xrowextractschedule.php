@@ -166,7 +166,7 @@ class XrowExtractSchedule extends eZPersistentObject
      * $values: name, kind, definition (array), frequency (array), delta_mode, destination_ids (array),
      * notify (array), retention (array), enabled.
      */
-    public static function saveFrom( array $values, $ownerLogin, XrowExtractSchedule $schedule = null )
+    public static function saveFrom( array $values, $ownerLogin, ?XrowExtractSchedule $schedule = null )
     {
         $errors = array();
         $name = mb_substr( trim( (string)( isset( $values['name'] ) ? $values['name'] : '' ) ), 0, 150 );

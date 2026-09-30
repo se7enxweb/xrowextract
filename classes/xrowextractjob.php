@@ -345,7 +345,7 @@ class XrowExtractJob
      * $state carries the phase and 10 % step already written between calls (the Jobs page appends a running
      * log in pieces), so the timeline does not start over with every piece.
      */
-    public static function cleanLog( $text, array &$state = null )
+    public static function cleanLog( $text, ?array &$state = null )
     {
         if ( !is_array( $state ) )
             $state = array( 'phase' => '', 'step' => -1 );
