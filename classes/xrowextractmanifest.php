@@ -337,6 +337,8 @@ class XrowExtractManifest
         $languages = isset( $params['languages'] ) ? array_values( (array)$params['languages'] ) : array();
         $separator = isset( $params['separator'] ) ? (string)$params['separator'] : ',';
         $newLine = isset( $params['line_endings'] ) ? $params['line_endings'] : "\n";
+        // A class removed while its export ran (or an id that is none) has no identifier to import into
+        $importClass = $classID ? eZContentClass::fetch( $classID ) : null;
         return array(
             'manifest_version' => self::VERSION,
             'generator' => trim( 'xrowextract ' . self::extensionVersion() ),
@@ -364,7 +366,7 @@ class XrowExtractManifest
                        . '(attr:<attribute>, attrfmt:<attribute>:<format>, special:<column id> or ignore); '
                        . 'rows are matched by remote id when a remote-id column is present.',
                 'match' => 'remote_id',
-                'class' => $classID ? eZContentClass::fetch( $classID )->attribute( 'identifier' ) : null,
+                'class' => $importClass instanceof eZContentClass ? $importClass->attribute( 'identifier' ) : null,
             ),
         );
     }
