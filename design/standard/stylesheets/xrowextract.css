@@ -794,3 +794,33 @@ li.xe-badge { margin: 0; }
 .xe-pager-links .button { padding: .2em .6em; }
 .xe-pager-size { color: var(--xe-muted); }
 .xe-pager-size a, .xe-pager-size strong { margin-left: .35em; }
+
+/* Package tab: the Inspection object filters, the datatype check, compare and the install history */
+.xe-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5em 1em; margin: .8em 0 .4em; }
+.xe-filter-bar .xe-field { margin: 0; min-width: 0; flex: 0 1 auto; }
+.xe-filter-bar select, .xe-filter-bar input[type="search"] { max-width: 100%; box-sizing: border-box; }
+.xe-filter-bar input[type="search"] { width: 16em; padding: .3em .5em; border: 1px solid var(--xe-line); border-radius: 5px; }
+.xe-filter-buttons { display: flex; flex-wrap: wrap; gap: .4em; }
+.xe-compare-pick { margin: .6em 0; }
+.xe-compare-pick .xe-label { margin: 0; }
+.xe-current-package p { margin: 0 0 .4em; }
+.xe-current-package .xe-inline form { margin: 0; }
+.xe-datatype-check { margin: .6em 0; }
+.xe-datatype-check ul { margin: .3em 0 0 1.2em; padding: 0; }
+.xe-datatype-check p { margin: 0; }
+.xe-diff-list { margin: 0; padding-left: 1.1em; }
+.xe-diff-list li { margin: .1em 0; overflow-wrap: anywhere; }
+.xe-diff-list del { color: var(--xe-bad); }
+.xe-diff-list ins { color: #05603a; text-decoration: none; }
+.xe-compare-table td, .xe-compare-counts td { vertical-align: top; }
+.xe-install-history { list-style: none; margin: .5em 0; padding: 0; }
+.xe-install-row { padding: .6em 0; border-top: 1px solid var(--xe-line); }
+.xe-install-row:first-child { border-top: 0; }
+.xe-install-main, .xe-install-result { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2em .6em; overflow-wrap: anywhere; }
+.xe-install-result { margin-top: .25em; }
+.xe-install-row .xe-note { margin: .4em 0 0; }
+.xe-install-buttons { display: flex; flex-wrap: wrap; gap: .4em; margin-top: .4em; }
+.xe-install-buttons form { margin: 0; }
+@media (max-width: 640px) {
+    .xe-filter-bar .xe-field, .xe-filter-bar input[type="search"], .xe-filter-bar select { flex: 1 1 100%; width: 100%; }
+}

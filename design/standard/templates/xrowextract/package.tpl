@@ -146,6 +146,21 @@
                 <input class="button" type="submit" name="RecheckInspection" value="{'Check again'|i18n('design/standard/extract')}" />
             </form>
 
+            {* The datatype check: what the package's classes and objects use that this site lacks *}
+            {include uri='design:xrowextract/package_datatype_check.tpl' missing=$Inspection.missing_datatypes}
+
+            {* Compare: with this site in detail (every field that differs), or with another package *}
+            <form method="get" action={concat( 'xrowextract/compare/', $PackageName )|ezurl} class="xe-inline xe-compare-pick">
+                <label class="xe-label" for="xe-compare-with">{'Compare with'|i18n('design/standard/extract')}</label>
+                <select name="with" id="xe-compare-with">
+                    <option value="">{'this site'|i18n('design/standard/extract')}</option>
+                    {foreach $RepositoryPackages as $repoPackage}{if $repoPackage.name|ne( $PackageName )}
+                    <option value="{$repoPackage.name|wash}">{$repoPackage.name|wash}{if $repoPackage.version} ({$repoPackage.version|wash}){/if}</option>
+                    {/if}{/foreach}
+                </select>
+                <input class="button" type="submit" value="{'Compare'|i18n('design/standard/extract')}" />
+            </form>
+
             {if $Inspection.classes|count}
             <div class="xe-scroll" tabindex="0">
                 <table class="xe-table">
@@ -165,23 +180,41 @@
             </div>
             {/if}
 
-            {if $InspectionPager.total|gt( 0 )}
-            {* A page of the package's objects at a time; the per-page choice is remembered *}
-            <nav class="xe-pager" aria-label="{'Pages of the package’s objects'|i18n('design/standard/extract')|wash}">
-                <span class="xe-pager-range">{'%from-%to of %total objects'|i18n('design/standard/extract',, hash( '%from', $InspectionPager.from, '%to', $InspectionPager.to, '%total', $InspectionPager.total ))}</span>
-                {if $InspectionPager.pages|gt( 1 )}
-                <span class="xe-pager-links">
-                    {if $InspectionPager.page|gt( 1 )}<a class="button" href={concat( 'xrowextract/package?page=1&per_page=', $InspectionPager.per_page )|ezurl}>&laquo; {'First'|i18n('design/standard/extract')}</a>
-                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|dec, '&per_page=', $InspectionPager.per_page )|ezurl}>&lsaquo; {'Previous'|i18n('design/standard/extract')}</a>{/if}
-                    <span>{'Page %page of %pages'|i18n('design/standard/extract',, hash( '%page', $InspectionPager.page, '%pages', $InspectionPager.pages ))}</span>
-                    {if $InspectionPager.page|lt( $InspectionPager.pages )}<a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|inc, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Next'|i18n('design/standard/extract')} &rsaquo;</a>
-                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.pages, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Last'|i18n('design/standard/extract')} &raquo;</a>{/if}
-                </span>
-                {/if}
-                <span class="xe-pager-size">{'Per page:'|i18n('design/standard/extract')}
-                    {foreach $InspectionPager.choices as $choice}{if $choice|eq( $InspectionPager.per_page )}<strong>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</strong>{else}<a href={concat( 'xrowextract/package?page=1&per_page=', $choice )|ezurl}>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</a>{/if} {/foreach}
-                </span>
-            </nav>
+            {if $InspectionFilter.all_total|gt( 0 )}
+            {* The objects: filtered by what an install would do, by class and by a part of the name or remote id,
+               a page at a time (the per-page choice is remembered); every link keeps the filters *}
+            <form method="get" action="" class="xe-filter-bar" role="search" aria-label="{'Filter the package’s objects'|i18n('design/standard/extract')|wash}">
+                <input type="hidden" name="per_page" value="{$InspectionPager.per_page|wash}" />
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-inspect-state">{'What the install would do'|i18n('design/standard/extract')}</label>
+                    <select name="state" id="xe-inspect-state">
+                        <option value="">{'any'|i18n('design/standard/extract')}</option>
+                        <option value="create"{if $InspectionFilter.state|eq( 'create' )} selected{/if}>{'create'|i18n('design/standard/extract')} ({$Inspection.counts.objects_create})</option>
+                        <option value="update"{if $InspectionFilter.state|eq( 'update' )} selected{/if}>{'update'|i18n('design/standard/extract')} ({$Inspection.counts.objects_update})</option>
+                        <option value="unchanged"{if $InspectionFilter.state|eq( 'unchanged' )} selected{/if}>{'already there'|i18n('design/standard/extract')} ({$Inspection.counts.objects_unchanged})</option>
+                        <option value="class_missing"{if $InspectionFilter.state|eq( 'class_missing' )} selected{/if}>{'class missing'|i18n('design/standard/extract')} ({$Inspection.counts.objects_class_missing})</option>
+                    </select>
+                </div>
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-inspect-class">{'Class'|i18n('design/standard/extract')}</label>
+                    <select name="class" id="xe-inspect-class">
+                        <option value="">{'any'|i18n('design/standard/extract')}</option>
+                        {foreach $InspectionFilter.classes as $classChoice}
+                        <option value="{$classChoice.identifier|wash}"{if $classChoice.identifier|eq( $InspectionFilter.class )} selected{/if}>{$classChoice.identifier|wash} ({$classChoice.count})</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="xe-field">
+                    <label class="xe-label" for="xe-inspect-q">{'Name or remote id'|i18n('design/standard/extract')}</label>
+                    <input type="search" name="q" id="xe-inspect-q" value="{$InspectionFilter.q|wash}" />
+                </div>
+                <div class="xe-field xe-filter-buttons">
+                    <input class="button" type="submit" value="{'Filter'|i18n('design/standard/extract')}" />
+                    {if $InspectionFilter.active}<a class="button" href="?per_page={$InspectionPager.per_page|wash}">{'Clear filters'|i18n('design/standard/extract')}</a>{/if}
+                </div>
+            </form>
+            {if $InspectionFilter.active}<p class="xe-help">{'%count of %all objects match the filters.'|i18n('design/standard/extract',, hash( '%count', $InspectionPager.total, '%all', $InspectionFilter.all_total ))}</p>{/if}
+            {include uri='design:xrowextract/pager.tpl' pager=$InspectionPager query=$InspectionFilter.query label='Pages of the package’s objects'|i18n('design/standard/extract')}
             {/if}
             {if $Inspection.objects|count}
             <div class="xe-scroll" tabindex="0">
@@ -204,23 +237,10 @@
                 </table>
             </div>
             {if $InspectionPager.pages|gt( 1 )}
-            {* A page of the package's objects at a time; the per-page choice is remembered *}
-            <nav class="xe-pager" aria-label="{'Pages of the package’s objects'|i18n('design/standard/extract')|wash}">
-                <span class="xe-pager-range">{'%from-%to of %total objects'|i18n('design/standard/extract',, hash( '%from', $InspectionPager.from, '%to', $InspectionPager.to, '%total', $InspectionPager.total ))}</span>
-                {if $InspectionPager.pages|gt( 1 )}
-                <span class="xe-pager-links">
-                    {if $InspectionPager.page|gt( 1 )}<a class="button" href={concat( 'xrowextract/package?page=1&per_page=', $InspectionPager.per_page )|ezurl}>&laquo; {'First'|i18n('design/standard/extract')}</a>
-                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|dec, '&per_page=', $InspectionPager.per_page )|ezurl}>&lsaquo; {'Previous'|i18n('design/standard/extract')}</a>{/if}
-                    <span>{'Page %page of %pages'|i18n('design/standard/extract',, hash( '%page', $InspectionPager.page, '%pages', $InspectionPager.pages ))}</span>
-                    {if $InspectionPager.page|lt( $InspectionPager.pages )}<a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.page|inc, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Next'|i18n('design/standard/extract')} &rsaquo;</a>
-                    <a class="button" href={concat( 'xrowextract/package?page=', $InspectionPager.pages, '&per_page=', $InspectionPager.per_page )|ezurl}>{'Last'|i18n('design/standard/extract')} &raquo;</a>{/if}
-                </span>
-                {/if}
-                <span class="xe-pager-size">{'Per page:'|i18n('design/standard/extract')}
-                    {foreach $InspectionPager.choices as $choice}{if $choice|eq( $InspectionPager.per_page )}<strong>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</strong>{else}<a href={concat( 'xrowextract/package?page=1&per_page=', $choice )|ezurl}>{if $choice|eq( 'all' )}{'all'|i18n('design/standard/extract')}{else}{$choice}{/if}</a>{/if} {/foreach}
-                </span>
-            </nav>
+            {include uri='design:xrowextract/pager.tpl' pager=$InspectionPager query=$InspectionFilter.query label='Pages of the package’s objects'|i18n('design/standard/extract')}
             {/if}
+            {elseif $InspectionFilter.active}
+            <p class="xe-columns-empty">{'No object matches these filters.'|i18n('design/standard/extract')}</p>
             {/if}
         </section>
         {/if}

@@ -475,6 +475,8 @@ class XrowExtractPackage
 
     /** How long a cached dry run is used before it is worked out again (seconds). */
     const INSPECTION_CACHE_TTL = 900;
+    /** Raised whenever inspect()'s result gains or changes a key, so a dry run cached by older code is not reused. */
+    const INSPECTION_CACHE_VERSION = 2;
 
     /**
      * The dry run of inspect(), cached per package, package version on disk and parent: a large package takes
@@ -489,7 +491,7 @@ class XrowExtractPackage
         $definition = rtrim( (string)$package->path(), '/' ) . '/package.xml';
         $version = is_file( $definition ) ? (int)@filemtime( $definition ) : 0;
         $file = $dir . '/' . self::inspectionCachePrefix( $package->attribute( 'name' ) )
-              . md5( $version . '|' . (int)$parentNodeID ) . '.json';
+              . md5( self::INSPECTION_CACHE_VERSION . '|' . $version . '|' . (int)$parentNodeID ) . '.json';
         if ( !$refresh && is_file( $file ) && ( time() - (int)@filemtime( $file ) ) < self::INSPECTION_CACHE_TTL )
         {
             $cached = json_decode( (string)@file_get_contents( $file ), true );
@@ -583,9 +585,14 @@ class XrowExtractPackage
                 $classIdentifiersInPackage[$row['identifier']] = true;
         }
 
+        // Which datatype the package's classes and objects use, and where: the datatype check
+        $datatypeUsage = array();
+        foreach ( $classes as $classRow )
+            self::addClassDatatypes( $datatypeUsage, $classRow['identifier'], $classRow['attributes'] );
+
         foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
         {
-            foreach ( self::inspectObjectItem( $package, $item, $classRemoteIDsInPackage, $classIdentifiersInPackage, $parentNodeID ) as $row )
+            foreach ( self::inspectObjectItem( $package, $item, $classRemoteIDsInPackage, $classIdentifiersInPackage, $parentNodeID, $datatypeUsage ) as $row )
                 $objects[] = $row;
         }
 
@@ -628,7 +635,156 @@ class XrowExtractPackage
                 'objects_unchanged' => count( array_filter( $objects, function ( $o ) { return $o['state'] === 'unchanged'; } ) ),
                 'objects_class_missing' => count( array_filter( $objects, function ( $o ) { return $o['state'] === 'class_missing'; } ) ),
             ),
+            'datatypes' => self::datatypeUsageList( $datatypeUsage ),
+            'missing_datatypes' => self::missingDatatypes( $datatypeUsage ),
         );
+    }
+
+    // ------------------------------------------------------------ datatype check
+    //
+    // Every datatype a package's classes (their attribute definitions) and objects (the type of every
+    // attribute they carry) use, against the datatypes this site has: content.ini [DataTypeSettings]
+    // AvailableDataTypes, each one loadable (an extension that registers a datatype but is not active, or
+    // whose class file is gone, does not count). A missing one does not stop an install - the kernel skips
+    // what it cannot read - but the page, the Import review and the install job's log say so clearly.
+
+    /** $usage[datatype] = array( 'classes' => identifier => true, 'objects' => n, 'object_classes' => identifier => true ). */
+    public static function addClassDatatypes( array &$usage, $classIdentifier, array $attributeRows )
+    {
+        foreach ( $attributeRows as $attribute )
+        {
+            $datatype = isset( $attribute['datatype'] ) ? (string)$attribute['datatype'] : '';
+            if ( $datatype === '' )
+                continue;
+            if ( !isset( $usage[$datatype] ) )
+                $usage[$datatype] = array( 'classes' => array(), 'objects' => 0, 'object_classes' => array() );
+            if ( $classIdentifier !== '' )
+                $usage[$datatype]['classes'][$classIdentifier] = true;
+        }
+    }
+
+    /** Counts the datatypes one object's XML carries (each once per object, whatever its languages). */
+    public static function addObjectDatatypes( array &$usage, DOMElement $objectNode, $classIdentifier )
+    {
+        $seen = array();
+        foreach ( $objectNode->getElementsByTagNameNS( 'http://ez.no/object/', 'attribute' ) as $attrNode )
+        {
+            $datatype = (string)$attrNode->getAttribute( 'type' );
+            if ( $datatype !== '' )
+                $seen[$datatype] = true;
+        }
+        foreach ( array_keys( $seen ) as $datatype )
+        {
+            if ( !isset( $usage[$datatype] ) )
+                $usage[$datatype] = array( 'classes' => array(), 'objects' => 0, 'object_classes' => array() );
+            $usage[$datatype]['objects']++;
+            if ( $classIdentifier !== '' )
+                $usage[$datatype]['object_classes'][$classIdentifier] = true;
+        }
+    }
+
+    /** The datatypes this site can use (see above), cached per request. */
+    public static function siteDatatypes()
+    {
+        static $available = null;
+        if ( $available === null )
+        {
+            // Registered, not instantiated: eZDataType::create() would construct every datatype, and one
+            // with a constructor that needs arguments throws (seen with an extension datatype).
+            $available = array();
+            foreach ( (array)eZDataType::allowedTypes() as $datatype )
+            {
+                if ( !isset( $GLOBALS['eZDataTypes'][$datatype] ) )
+                    eZDataType::loadAndRegisterType( $datatype );
+                if ( isset( $GLOBALS['eZDataTypes'][$datatype] ) )
+                    $available[$datatype] = true;
+            }
+        }
+        return $available;
+    }
+
+    /** $usage as a sorted list: datatype, classes (identifiers), objects (count), object_classes, available. */
+    public static function datatypeUsageList( array $usage )
+    {
+        $site = self::siteDatatypes();
+        $list = array();
+        foreach ( $usage as $datatype => $where )
+        {
+            $list[] = array(
+                'datatype' => (string)$datatype,
+                'classes' => array_keys( $where['classes'] ),
+                'objects' => (int)$where['objects'],
+                'object_classes' => array_keys( $where['object_classes'] ),
+                'available' => isset( $site[$datatype] ),
+            );
+        }
+        usort( $list, function ( $a, $b ) { return strcmp( $a['datatype'], $b['datatype'] ); } );
+        return $list;
+    }
+
+    /** Only the rows of datatypeUsageList() this site does not have. */
+    public static function missingDatatypes( array $usage )
+    {
+        return array_values( array_filter( self::datatypeUsageList( $usage ), function ( $row ) { return !$row['available']; } ) );
+    }
+
+    /** One line per missing datatype, for the command line and the install job's log (without the "WARNING: " prefix). */
+    public static function missingDatatypeLines( array $missing )
+    {
+        $lines = array();
+        foreach ( $missing as $row )
+        {
+            $where = array();
+            if ( $row['classes'] )
+                $where[] = 'class ' . implode( ', ', $row['classes'] );
+            if ( $row['objects'] )
+                $where[] = $row['objects'] . ' object(s)' . ( $row['object_classes'] ? ' of ' . implode( ', ', $row['object_classes'] ) : '' );
+            $lines[] = 'The package uses the datatype ' . $row['datatype'] . ', which this site does not have (' . implode( '; ', $where )
+                     . '). Its values are not installed; install or enable the extension that provides it first.';
+        }
+        return $lines;
+    }
+
+    // ------------------------------------------------------------ inspection object list: filter
+
+    /**
+     * The inspection's objects narrowed to what the Package tab's filters ask for: $state (create, update,
+     * unchanged, class_missing or '' for all), $classIdentifier ('' for all) and $text (a case-insensitive
+     * part of the name or remote id). Works on the cached dry run alone; the order is kept.
+     */
+    public static function filterInspectionObjects( array $objects, $state = '', $classIdentifier = '', $text = '' )
+    {
+        $text = trim( (string)$text );
+        if ( $state === '' && $classIdentifier === '' && $text === '' )
+            return array_values( $objects );
+        $out = array();
+        foreach ( $objects as $object )
+        {
+            if ( $state !== '' && $object['state'] !== $state )
+                continue;
+            if ( $classIdentifier !== '' && $object['class_identifier'] !== $classIdentifier )
+                continue;
+            if ( $text !== '' && mb_stripos( (string)$object['name'], $text ) === false && mb_stripos( (string)$object['remote_id'], $text ) === false )
+                continue;
+            $out[] = $object;
+        }
+        return $out;
+    }
+
+    /** Per class identifier: how many of the inspection's objects are of it, sorted by identifier (the class filter's choices). */
+    public static function inspectionObjectClasses( array $objects )
+    {
+        $counts = array();
+        foreach ( $objects as $object )
+        {
+            $identifier = (string)$object['class_identifier'];
+            $counts[$identifier] = isset( $counts[$identifier] ) ? $counts[$identifier] + 1 : 1;
+        }
+        ksort( $counts );
+        $out = array();
+        foreach ( $counts as $identifier => $count )
+            $out[] = array( 'identifier' => $identifier, 'count' => $count );
+        return $out;
     }
 
     /**
@@ -846,6 +1002,25 @@ class XrowExtractPackage
 
     protected static function inspectClassItem( eZPackage $package, array $item )
     {
+        $row = self::readClassItem( $package, $item );
+        if ( $row === null )
+            return null;
+        $existing = $row['remote_id'] ? eZContentClass::fetchByRemoteID( $row['remote_id'] ) : null;
+        if ( !$existing && $row['identifier'] )
+            $existing = eZContentClass::fetchByIdentifier( $row['identifier'] );
+        $row['state'] = $existing instanceof eZContentClass ? 'update' : 'create';
+        $row['existing_id'] = $existing instanceof eZContentClass ? (int)$existing->attribute( 'id' ) : null;
+        $row['diff'] = $existing instanceof eZContentClass ? self::classAttributeDiff( $row['attributes'], $existing ) : null;
+        return $row;
+    }
+
+    /**
+     * A content class install item as the package's own XML states it - identifier, remote id, name and
+     * attributes (identifier, datatype, required) - without looking at the site at all: what inspectClassItem()
+     * then matches, and what comparePackages() compares between two packages.
+     */
+    protected static function readClassItem( eZPackage $package, array $item )
+    {
         if ( empty( $item['filename'] ) )
             return null;
         $dom = self::fetchItemDOM( $package, $item );
@@ -893,20 +1068,12 @@ class XrowExtractPackage
             }
         }
 
-        $existing = $remoteID ? eZContentClass::fetchByRemoteID( $remoteID ) : null;
-        if ( !$existing && $identifier )
-            $existing = eZContentClass::fetchByIdentifier( $identifier );
-        $state = $existing instanceof eZContentClass ? 'update' : 'create';
-
         return array(
             'identifier'  => $identifier,
             'remote_id'   => $remoteID,
             'name'        => $name,
-            'state'       => $state,
-            'existing_id' => $existing instanceof eZContentClass ? (int)$existing->attribute( 'id' ) : null,
             'attributes'  => $attributeRows,
             'attribute_count' => count( $attributeRows ),
-            'diff'        => $existing instanceof eZContentClass ? self::classAttributeDiff( $attributeRows, $existing ) : null,
             'file_path'   => self::itemRelativePath( $item ),
         );
     }
@@ -951,7 +1118,7 @@ class XrowExtractPackage
     }
 
     /** One install item can carry many content objects (inline or one XML file per object). */
-    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false )
+    protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false, array &$datatypeUsage = array() )
     {
         $rows = array();
         foreach ( self::objectDOMNodesWithPaths( $package, $item ) as $pair )
@@ -961,6 +1128,7 @@ class XrowExtractPackage
             $remoteID = $objectNode->getAttribute( 'remote_id' );
             $classRemoteID = $objectNode->getAttribute( 'class_remote_id' );
             $classIdentifier = $objectNode->getAttributeNS( 'http://ez.no/ezobject', 'class_identifier' );
+            self::addObjectDatatypes( $datatypeUsage, $objectNode, $classIdentifier );
             $modifiedText = $objectNode->getAttributeNS( 'http://ez.no/ezobject', 'modified' );
 
             $languages = array();
@@ -1225,26 +1393,279 @@ class XrowExtractPackage
         return $dom ? $dom->documentElement : false;
     }
 
+    // ------------------------------------------------------------ compare two packages
+    //
+    // What changes between two packages, read from their own XML only (nothing on the site is looked at):
+    // classes and objects matched by remote id (a class without one by identifier), each one only in the
+    // first package, only in the second, or in both with differences - for a class its name and its
+    // attributes (added, removed, datatype changed), for an object its name, class, modified date and
+    // every attribute whose serialized value differs, per language. Cached like the dry run.
+
+    /** How long a cached comparison is reused (seconds). */
+    const COMPARE_CACHE_TTL = 900;
+
+    /** Classes and objects of one package as its XML states them, keyed for matching (see above). */
+    public static function packageSnapshot( eZPackage $package )
+    {
+        $classes = array();
+        foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
+        {
+            $row = self::readClassItem( $package, $item );
+            if ( !$row )
+                continue;
+            $attributes = array();
+            foreach ( $row['attributes'] as $attribute )
+                if ( $attribute['identifier'] !== '' )
+                    $attributes[$attribute['identifier']] = $attribute['datatype'];
+            $key = $row['remote_id'] !== '' ? $row['remote_id'] : 'identifier:' . $row['identifier'];
+            $classes[$key] = array( 'identifier' => $row['identifier'], 'remote_id' => $row['remote_id'], 'name' => $row['name'], 'attributes' => $attributes );
+        }
+        $objects = array();
+        foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
+        {
+            foreach ( self::objectDOMNodes( $package, $item ) as $node )
+            {
+                $remoteID = (string)$node->getAttribute( 'remote_id' );
+                if ( $remoteID === '' )
+                    continue;
+                $fields = array();
+                $languages = array();
+                foreach ( $node->getElementsByTagName( 'object-translation' ) as $translationNode )
+                {
+                    $language = (string)$translationNode->getAttribute( 'language' );
+                    $languages[$language] = true;
+                    foreach ( $translationNode->getElementsByTagNameNS( 'http://ez.no/object/', 'attribute' ) as $attrNode )
+                    {
+                        $identifier = (string)$attrNode->getAttributeNS( 'http://ez.no/ezobject', 'identifier' );
+                        if ( $identifier === '' )
+                            continue;
+                        $text = trim( preg_replace( '/\s+/u', ' ', (string)$attrNode->textContent ) );
+                        if ( $text === '' )
+                        {
+                            // A value held in XML attributes only (a relation's remote ids, a date's timestamp)
+                            $parts = array();
+                            foreach ( $attrNode->getElementsByTagName( '*' ) as $inner )
+                                foreach ( $inner->attributes as $xmlAttribute )
+                                    $parts[] = $xmlAttribute->nodeName . '=' . $xmlAttribute->nodeValue;
+                            $text = implode( ' ', $parts );
+                        }
+                        $fields[$identifier . '|' . $language] = array(
+                            'identifier' => $identifier, 'language' => $language, 'datatype' => (string)$attrNode->getAttribute( 'type' ),
+                            'hash' => md5( (string)$attrNode->C14N() ),
+                            'text' => mb_strlen( $text ) > 160 ? mb_substr( $text, 0, 160 ) . ' …' : $text,
+                        );
+                    }
+                }
+                $objects[$remoteID] = array(
+                    'remote_id' => $remoteID,
+                    'name' => (string)$node->getAttribute( 'name' ),
+                    'class_identifier' => (string)$node->getAttributeNS( 'http://ez.no/ezobject', 'class_identifier' ),
+                    'modified' => (string)$node->getAttributeNS( 'http://ez.no/ezobject', 'modified' ),
+                    'languages' => array_keys( $languages ),
+                    'fields' => $fields,
+                );
+            }
+        }
+        return array( 'classes' => $classes, 'objects' => $objects );
+    }
+
+    /**
+     * $from compared with $to: 'classes' and 'objects', each a list of rows with 'change' (added: only in $to,
+     * removed: only in $from, changed), plus 'counts' (added/removed/changed/unchanged per kind) and the two
+     * packages' names and versions.
+     */
+    public static function comparePackages( eZPackage $from, eZPackage $to )
+    {
+        $a = self::packageSnapshot( $from );
+        $b = self::packageSnapshot( $to );
+        $counts = array();
+        foreach ( array( 'classes', 'objects' ) as $kind )
+            $counts[$kind] = array( 'added' => 0, 'removed' => 0, 'changed' => 0, 'unchanged' => 0 );
+
+        $classRows = array();
+        foreach ( $b['classes'] as $key => $class )
+        {
+            if ( !isset( $a['classes'][$key] ) )
+            {
+                $classRows[] = array_merge( self::classCompareRow( $class ), array( 'change' => 'added', 'differences' => array() ) );
+                $counts['classes']['added']++;
+                continue;
+            }
+            $old = $a['classes'][$key];
+            $differences = array();
+            if ( $old['name'] !== $class['name'] )
+                $differences[] = array( 'field' => 'name', 'kind' => 'changed', 'old' => $old['name'], 'new' => $class['name'] );
+            if ( $old['identifier'] !== $class['identifier'] )
+                $differences[] = array( 'field' => 'identifier', 'kind' => 'changed', 'old' => $old['identifier'], 'new' => $class['identifier'] );
+            foreach ( $class['attributes'] as $identifier => $datatype )
+            {
+                if ( !isset( $old['attributes'][$identifier] ) )
+                    $differences[] = array( 'field' => $identifier, 'kind' => 'added', 'old' => '', 'new' => $datatype );
+                elseif ( $old['attributes'][$identifier] !== $datatype )
+                    $differences[] = array( 'field' => $identifier, 'kind' => 'changed', 'old' => $old['attributes'][$identifier], 'new' => $datatype );
+            }
+            foreach ( $old['attributes'] as $identifier => $datatype )
+                if ( !isset( $class['attributes'][$identifier] ) )
+                    $differences[] = array( 'field' => $identifier, 'kind' => 'removed', 'old' => $datatype, 'new' => '' );
+            if ( $differences )
+            {
+                $classRows[] = array_merge( self::classCompareRow( $class ), array( 'change' => 'changed', 'differences' => $differences ) );
+                $counts['classes']['changed']++;
+            }
+            else
+                $counts['classes']['unchanged']++;
+        }
+        foreach ( $a['classes'] as $key => $class )
+        {
+            if ( !isset( $b['classes'][$key] ) )
+            {
+                $classRows[] = array_merge( self::classCompareRow( $class ), array( 'change' => 'removed', 'differences' => array() ) );
+                $counts['classes']['removed']++;
+            }
+        }
+
+        $objectRows = array();
+        foreach ( $b['objects'] as $remoteID => $object )
+        {
+            if ( !isset( $a['objects'][$remoteID] ) )
+            {
+                $objectRows[] = array_merge( self::objectCompareRow( $object ), array( 'change' => 'added', 'differences' => array() ) );
+                $counts['objects']['added']++;
+                continue;
+            }
+            $old = $a['objects'][$remoteID];
+            $differences = array();
+            foreach ( array( 'name', 'class_identifier', 'modified' ) as $property )
+                if ( $old[$property] !== $object[$property] )
+                    $differences[] = array( 'field' => $property, 'language' => '', 'kind' => 'changed', 'old' => $old[$property], 'new' => $object[$property] );
+            foreach ( $object['fields'] as $key => $field )
+            {
+                if ( !isset( $old['fields'][$key] ) )
+                    $differences[] = array( 'field' => $field['identifier'], 'language' => $field['language'], 'kind' => 'added', 'old' => '', 'new' => $field['text'] );
+                elseif ( $old['fields'][$key]['hash'] !== $field['hash'] )
+                    $differences[] = array( 'field' => $field['identifier'], 'language' => $field['language'], 'kind' => 'changed', 'old' => $old['fields'][$key]['text'], 'new' => $field['text'] );
+            }
+            foreach ( $old['fields'] as $key => $field )
+                if ( !isset( $object['fields'][$key] ) )
+                    $differences[] = array( 'field' => $field['identifier'], 'language' => $field['language'], 'kind' => 'removed', 'old' => $field['text'], 'new' => '' );
+            if ( $differences )
+            {
+                $objectRows[] = array_merge( self::objectCompareRow( $object ), array( 'change' => 'changed', 'differences' => $differences ) );
+                $counts['objects']['changed']++;
+            }
+            else
+                $counts['objects']['unchanged']++;
+        }
+        foreach ( $a['objects'] as $remoteID => $object )
+        {
+            if ( !isset( $b['objects'][$remoteID] ) )
+            {
+                $objectRows[] = array_merge( self::objectCompareRow( $object ), array( 'change' => 'removed', 'differences' => array() ) );
+                $counts['objects']['removed']++;
+            }
+        }
+
+        return array(
+            'from' => array( 'name' => $from->attribute( 'name' ), 'version' => (string)$from->attribute( 'version-number' ), 'summary' => (string)$from->attribute( 'summary' ) ),
+            'to' => array( 'name' => $to->attribute( 'name' ), 'version' => (string)$to->attribute( 'version-number' ), 'summary' => (string)$to->attribute( 'summary' ) ),
+            'classes' => $classRows,
+            'objects' => $objectRows,
+            'counts' => $counts,
+        );
+    }
+
+    protected static function classCompareRow( array $class )
+    {
+        return array( 'identifier' => $class['identifier'], 'remote_id' => $class['remote_id'], 'name' => $class['name'], 'attribute_count' => count( $class['attributes'] ) );
+    }
+
+    protected static function objectCompareRow( array $object )
+    {
+        return array( 'remote_id' => $object['remote_id'], 'name' => $object['name'], 'class_identifier' => $object['class_identifier'], 'languages' => $object['languages'] );
+    }
+
+    /** comparePackages(), cached per pair and both packages' versions on disk; $refresh works it out anew. Adds 'checked_at' and 'cached'. */
+    public static function cachedComparison( eZPackage $from, eZPackage $to, $refresh = false )
+    {
+        $dir = eZSys::cacheDirectory() . '/xrowextract/compare';
+        $version = function ( eZPackage $package )
+        {
+            $definition = rtrim( (string)$package->path(), '/' ) . '/package.xml';
+            return is_file( $definition ) ? (int)@filemtime( $definition ) : 0;
+        };
+        $file = $dir . '/' . self::inspectionCachePrefix( $from->attribute( 'name' ) ) . self::inspectionCachePrefix( $to->attribute( 'name' ) )
+              . md5( $version( $from ) . '|' . $version( $to ) ) . '.json';
+        if ( !$refresh && is_file( $file ) && ( time() - (int)@filemtime( $file ) ) < self::COMPARE_CACHE_TTL )
+        {
+            $cached = json_decode( (string)@file_get_contents( $file ), true );
+            if ( is_array( $cached ) && isset( $cached['objects'] ) )
+            {
+                $cached['cached'] = true;
+                return $cached;
+            }
+        }
+        $comparison = self::comparePackages( $from, $to );
+        $comparison['checked_at'] = time();
+        self::ensureCacheDir( $dir );
+        $tmp = $file . '.' . getmypid() . '.tmp';
+        if ( @file_put_contents( $tmp, json_encode( $comparison, JSON_INVALID_UTF8_SUBSTITUTE ) ) !== false )
+        {
+            @rename( $tmp, $file );
+            if ( class_exists( 'XrowExtractJob' ) )
+                XrowExtractJob::fixOwnership( $file );
+        }
+        $comparison['cached'] = false;
+        return $comparison;
+    }
+
+    /** The rows of a comparison list narrowed by $change (added/removed/changed, '' for all), $classIdentifier and $text (name or remote id). */
+    public static function filterComparisonRows( array $rows, $change = '', $classIdentifier = '', $text = '' )
+    {
+        $text = trim( (string)$text );
+        $out = array();
+        foreach ( $rows as $row )
+        {
+            if ( $change !== '' && $row['change'] !== $change )
+                continue;
+            if ( $classIdentifier !== '' && ( isset( $row['class_identifier'] ) ? $row['class_identifier'] : $row['identifier'] ) !== $classIdentifier )
+                continue;
+            if ( $text !== '' && mb_stripos( (string)$row['name'], $text ) === false && mb_stripos( (string)$row['remote_id'], $text ) === false )
+                continue;
+            $out[] = $row;
+        }
+        return $out;
+    }
+
     // ------------------------------------------------------------ install
 
     /**
      * The remote ids of every class and object a package carries (from its own XML, cheaply: no
      * inspection against the site), plus their names: what an install is about to write. Used by a
      * background install to record what to count its progress against (see installProgress()).
+     * 'missing_datatypes': the datatype check (see missingDatatypes()), from the same read.
      */
     public static function packageContents( eZPackage $package )
     {
         $contents = array( 'classes' => array(), 'objects' => array() );
+        $usage = array();
         foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
         {
-            $row = self::inspectClassItem( $package, $item );
+            $row = self::readClassItem( $package, $item );
+            if ( $row )
+                self::addClassDatatypes( $usage, $row['identifier'], $row['attributes'] );
             if ( $row && $row['remote_id'] )
                 $contents['classes'][] = array( 'remote_id' => $row['remote_id'], 'identifier' => $row['identifier'] );
         }
         foreach ( self::installItemsOfType( $package, 'ezcontentobject' ) as $item )
+        {
             foreach ( self::objectDOMNodes( $package, $item ) as $node )
+            {
+                self::addObjectDatatypes( $usage, $node, $node->getAttributeNS( 'http://ez.no/ezobject', 'class_identifier' ) );
                 if ( $node->getAttribute( 'remote_id' ) )
                     $contents['objects'][] = $node->getAttribute( 'remote_id' );
+            }
+        }
+        $contents['missing_datatypes'] = self::missingDatatypes( $usage );
         return $contents;
     }
 
@@ -1319,7 +1740,7 @@ class XrowExtractPackage
         $beforeClasses = array();
         foreach ( self::installItemsOfType( $package, 'ezcontentclass' ) as $item )
         {
-            $row = self::inspectClassItem( $package, $item );
+            $row = self::readClassItem( $package, $item );
             if ( $row && $row['remote_id'] )
                 $beforeClasses[] = $row['remote_id'];
         }

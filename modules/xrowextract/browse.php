@@ -90,6 +90,12 @@ unset( $fileRow );
 
 $tpl->setVariable( 'PackageName', $packageName );
 $tpl->setVariable( 'Package', $package );
+// The other content packages, for "Compare with" (xrowextract/compare)
+$otherPackages = array();
+foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
+    if ( $repositoryPackage['name'] !== $packageName )
+        $otherPackages[] = $repositoryPackage;
+$tpl->setVariable( 'OtherPackages', $otherPackages );
 $tpl->setVariable( 'Files', $pageFiles );
 $tpl->setVariable( 'FilesTotal', $total );
 $tpl->setVariable( 'FilesOffset', $offset );

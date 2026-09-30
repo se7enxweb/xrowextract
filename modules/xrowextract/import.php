@@ -299,6 +299,8 @@ if ( $PackageMode && $Package instanceof eZPackage )
         'classes' => count( $contents['classes'] ),
         'objects' => count( $contents['objects'] ),
         'class_identifiers' => array_slice( array_map( function ( $c ) { return $c['identifier']; }, $contents['classes'] ), 0, 12 ),
+        // The datatype check: every datatype the package uses that this site does not have
+        'missing_datatypes' => $contents['missing_datatypes'],
     );
     // Up to 500 classes and objects the dry run takes a few seconds and is shown straight away; a larger
     // package waits for "Review the package" (it compares every item with the site)

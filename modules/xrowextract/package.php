@@ -181,6 +181,26 @@ if ( $perPage !== '' )
     eZPreferences::setValue( 'admin_xrowextract_pkg_per_page', $perPage );
 else
     $perPage = in_array( (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ), $perPageChoices, true ) ? (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ) : '50';
+// ... narrowed by the filters first (what the install would do, the class, a part of the name or remote id),
+// all worked out on the cached dry run - no new inspect() for a filter or a page
+$inspectionStates = array( 'create', 'update', 'unchanged', 'class_missing' );
+$filterState = isset( $_GET['state'] ) && in_array( (string)$_GET['state'], $inspectionStates, true ) ? (string)$_GET['state'] : '';
+$filterClass = isset( $_GET['class'] ) && preg_match( '/^[A-Za-z0-9_]{1,100}$/', (string)$_GET['class'] ) ? (string)$_GET['class'] : '';
+$filterText = isset( $_GET['q'] ) ? mb_substr( trim( (string)$_GET['q'] ), 0, 100 ) : '';
+$allObjectsTotal = $inspection ? count( $inspection['objects'] ) : 0;
+$objectClasses = $inspection ? XrowExtractPackage::inspectionObjectClasses( $inspection['objects'] ) : array();
+if ( $inspection )
+    $inspection['objects'] = XrowExtractPackage::filterInspectionObjects( $inspection['objects'], $filterState, $filterClass, $filterText );
+$filterQuery = array();
+foreach ( array( 'state' => $filterState, 'class' => $filterClass, 'q' => $filterText ) as $key => $value )
+    if ( $value !== '' )
+        $filterQuery[$key] = $value;
+$tpl->setVariable( 'InspectionFilter', array(
+    'state' => $filterState, 'class' => $filterClass, 'q' => $filterText, 'active' => (bool)$filterQuery,
+    'classes' => $objectClasses, 'all_total' => $allObjectsTotal,
+    // For the pager and per-page links, which are query-only (href="?page=..."): every filter, url-encoded
+    'query' => $filterQuery ? '&' . http_build_query( $filterQuery ) : '',
+) );
 $objectTotal = $inspection ? count( $inspection['objects'] ) : 0;
 $pageSize = $perPage === 'all' ? max( 1, $objectTotal ) : (int)$perPage;
 $pageCount = max( 1, (int)ceil( $objectTotal / $pageSize ) );
@@ -188,6 +208,7 @@ $pageNumber = isset( $_GET['page'] ) && ctype_digit( (string)$_GET['page'] ) ? m
 $tpl->setVariable( 'InspectionPager', array(
     'per_page' => $perPage, 'choices' => $perPageChoices, 'page' => $pageNumber, 'pages' => $pageCount, 'total' => $objectTotal,
     'from' => $objectTotal ? ( $pageNumber - 1 ) * $pageSize + 1 : 0, 'to' => min( $objectTotal, $pageNumber * $pageSize ),
+    'prev' => max( 1, $pageNumber - 1 ), 'next' => min( $pageCount, $pageNumber + 1 ),
 ) );
 if ( $inspection )
     $inspection['objects'] = array_slice( $inspection['objects'], ( $pageNumber - 1 ) * $pageSize, $pageSize );

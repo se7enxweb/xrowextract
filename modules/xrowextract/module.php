@@ -20,7 +20,7 @@ $ViewList['archive'] = array( 'script' => 'archive.php',
 $ViewList['jobs'] = array( 'script' => 'jobs.php',
                            'functions' => array( 'jobs' ),
                            'default_navigation_part' => 'ezextractnavigationpart',
-                           'post_actions' => array( 'DeleteJobID' ),
+                           'post_actions' => array( 'DeleteJobID', 'CancelJobID', 'ExportAgainJobID', 'ExportAgainHistoryID' ),
                            'params' => array() );
 
 $ViewList['job_status'] = array( 'script' => 'job_status.php',
@@ -35,7 +35,7 @@ $ViewList['import'] = array( 'script' => 'import.php',
                              'default_navigation_part' => 'ezextractnavigationpart',
                              'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
                                                       'RunInBackground', 'ResumeJobID', 'KeepSamplePackage',
-                                                      'DownloadClassXML', 'DownloadObjectXML' ),
+                                                      'DownloadClassXML', 'DownloadObjectXML', 'OpenRepositoryPackage' ),
                              'params' => array() );
 // The chunked upload endpoint XrowExtractUploadJS talks to: same policy as xrowextract/import
 $ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
@@ -85,6 +85,14 @@ $ViewList['browse'] = array( 'script' => 'browse.php',
 
 // ViewIndex: a file's position in allPackageFiles()'s own sorted list, not its path (which can
 // carry slashes of its own, "ezcontentobject/abc123.xml" - see browse.php's own comment)
+// Compare a package with another package, or with this site (what an install would create or change,
+// down to the fields). Same policy as package/browse: reading packages and the dry run.
+$ViewList['compare'] = array( 'script' => 'compare.php',
+                              'functions' => array( 'import' ),
+                              'default_navigation_part' => 'ezextractnavigationpart',
+                              'post_actions' => array( 'RecheckComparison' ),
+                              'params' => array( 'PackageName', 'OtherName' ) );
+
 $ViewList['browse_file'] = array( 'script' => 'browse_file.php',
                                   'functions' => array( 'import' ),
                                   'params' => array( 'PackageName', 'ViewIndex' ) );
