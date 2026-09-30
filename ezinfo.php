@@ -13,7 +13,7 @@ class xrowextractInfo
     {
         return array(
             'Name' => "Exponential xrowextract extension",
-            'Version' => "2.5.2",
+            'Version' => "2.5.3",
             'Copyright' => "Copyright (C) 2013 xrow GmbH",
             'Author' => "xrow GmbH",
             'License' => "GNU General Public License v2.0 (or any later version)",
