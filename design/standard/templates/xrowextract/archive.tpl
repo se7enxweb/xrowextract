@@ -227,7 +227,7 @@
                 <span class="xe-step">4</span>
                 <div>
                     <h2 id="xe-card-archive-format">{'File format'|i18n('design/standard/extract')}</h2>
-                    <p>{'The archive, and how the CSV files in it are written.'|i18n('design/standard/extract')}</p>
+                    <p>{'The archive, and how the files in it are written.'|i18n('design/standard/extract')}</p>
                 </div>
             </header>
             <div class="xe-grid">

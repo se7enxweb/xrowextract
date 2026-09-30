@@ -1,27 +1,31 @@
 {* DESIGN: Header START *}<div class="box-header"><div class="box-tc"><div class="box-ml"><div class="box-mr"><div class="box-tl"><div class="box-tr">
 
-<h4>{'CSV export'|i18n( 'design/standard/extract' )}</h4>
+<h4>{'One class of content export'|i18n( 'design/standard/extract' )}</h4>
 
 {* DESIGN: Header END *}</div></div></div></div></div></div>
 
 {* DESIGN: Content START *}<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-bl"><div class="box-br"><div class="box-content">
 
+{* The steps follow the page's cards from top to bottom: Presets, Data selection, Filters, File format,
+   Columns, then the buttons at the bottom. Keep them in step when a card changes. *}
 <div class="xe-side">
-<p class="xe-side-lead">{'Exports the objects of one class below a node as a CSV file, one row per object and one column per chosen attribute. Spreadsheets, mail tools and other systems read it.'|i18n( 'design/standard/extract' )}</p>
+<p class="xe-side-lead">{'Exports the objects of one class as one file: CSV, JSON or XML with a row per object (and per language) and a column per chosen field, or a content package (.ezpkg) to install on another site.'|i18n( 'design/standard/extract' )}</p>
 
 <ol class="xe-side-steps">
-    <li>{'Choose what to export'|i18n( 'design/standard/extract' )}
-        <small>{'Scope (below a node, below a node tree, the whole site), the class, the languages.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Start from a preset'|i18n( 'design/standard/extract' )}
+        <small>{'Optional: load a preset for the site, editors, users, maintenance, developers or partners, and change what you need. Save your own settings as a preset, for you or shared.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Choose the data'|i18n( 'design/standard/extract' )}
+        <small>{'Scope (below a node, below a node tree, the whole site), depth, a named fetch, the class, main locations only, skip and take at most, the languages.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Filter and sort'|i18n( 'design/standard/extract' )}
-        <small>{'By date (also changed since your last export), section, state, visibility, name or an attribute; the order of the rows.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'By date (also changed since your last export), section, object state, visibility, name, conditions on any field (all or any), an extended attribute filter; two sort orders.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Choose the file format'|i18n( 'design/standard/extract' )}
-        <small>{'CSV, JSON or XML; for CSV the separator, line endings and quoting, with a sample row.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'CSV, JSON, XML or a content package (.ezpkg); for CSV the separator, line endings and quoting, with a sample row.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Pick the columns'|i18n( 'design/standard/extract' )}
-        <small>{'Attributes, attribute formats, special columns and column sets; rename, reorder, remove.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Attributes, attribute formats, special columns and the column sets identity, URLs and SEO, publishing, location and migration; rename, reorder, remove. A content package takes whole objects, without columns.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Preview the rows'|i18n( 'design/standard/extract' )}
         <small>{'The first rows as a spreadsheet shows them, with warnings for shifted columns.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Download, or run in the background'|i18n( 'design/standard/extract' )}
-        <small>{'Large exports run as a job; the Jobs tab has the file when it is done.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Download the file, the file with its typed column manifest (.zip), or the manifest alone. Large exports run as a job, and Export as package builds a package in the background; the Jobs tab has the files.'|i18n( 'design/standard/extract' )}</small></li>
 </ol>
 
 <details open>
@@ -33,7 +37,8 @@
         <li>{'Your settings and columns are kept per class for your session.'|i18n( 'design/standard/extract' )}</li>
         <li>{'Regular updates: filter on "Changed since my last export" to get only what changed since your last download.'|i18n( 'design/standard/extract' )}</li>
         <li>{'"Reset to defaults" starts again from the default node and the class with the most objects.'|i18n( 'design/standard/extract' )}</li>
-        <li>{'The Import tab reads such a file back in (the Migration column set keeps what it needs).'|i18n( 'design/standard/extract' )}</li>
+        <li>{'Import content file reads such a file back in: the Migration column set keeps what it needs, and with the manifest every column is mapped exactly.'|i18n( 'design/standard/extract' )}</li>
+        <li>{'An export that should run on its own, daily or by a cron expression, goes on the Schedules tab.'|i18n( 'design/standard/extract' )}</li>
     </ul>
 </details>
 

@@ -5959,6 +5959,94 @@
         <source>Could not write the package file.</source>
         <translation>Could not write the package file.</translation>
     </message>
+    <message>
+        <source>Exports the objects of one class as one file: CSV, JSON or XML with a row per object (and per language) and a column per chosen field, or a content package (.ezpkg) to install on another site.</source>
+        <translation>Exports the objects of one class as one file: CSV, JSON or XML with a row per object (and per language) and a column per chosen field, or a content package (.ezpkg) to install on another site.</translation>
+    </message>
+    <message>
+        <source>Start from a preset</source>
+        <translation>Start from a preset</translation>
+    </message>
+    <message>
+        <source>Optional: load a preset for the site, editors, users, maintenance, developers or partners, and change what you need. Save your own settings as a preset, for you or shared.</source>
+        <translation>Optional: load a preset for the site, editors, users, maintenance, developers or partners, and change what you need. Save your own settings as a preset, for you or shared.</translation>
+    </message>
+    <message>
+        <source>Choose the data</source>
+        <translation>Choose the data</translation>
+    </message>
+    <message>
+        <source>Scope (below a node, below a node tree, the whole site), depth, a named fetch, the class, main locations only, skip and take at most, the languages.</source>
+        <translation>Scope (below a node, below a node tree, the whole site), depth, a named fetch, the class, main locations only, skip and take at most, the languages.</translation>
+    </message>
+    <message>
+        <source>By date (also changed since your last export), section, object state, visibility, name, conditions on any field (all or any), an extended attribute filter; two sort orders.</source>
+        <translation>By date (also changed since your last export), section, object state, visibility, name, conditions on any field (all or any), an extended attribute filter; two sort orders.</translation>
+    </message>
+    <message>
+        <source>CSV, JSON, XML or a content package (.ezpkg); for CSV the separator, line endings and quoting, with a sample row.</source>
+        <translation>CSV, JSON, XML or a content package (.ezpkg); for CSV the separator, line endings and quoting, with a sample row.</translation>
+    </message>
+    <message>
+        <source>Attributes, attribute formats, special columns and the column sets identity, URLs and SEO, publishing, location and migration; rename, reorder, remove. A content package takes whole objects, without columns.</source>
+        <translation>Attributes, attribute formats, special columns and the column sets identity, URLs and SEO, publishing, location and migration; rename, reorder, remove. A content package takes whole objects, without columns.</translation>
+    </message>
+    <message>
+        <source>Download the file, the file with its typed column manifest (.zip), or the manifest alone. Large exports run as a job, and Export as package builds a package in the background; the Jobs tab has the files.</source>
+        <translation>Download the file, the file with its typed column manifest (.zip), or the manifest alone. Large exports run as a job, and Export as package builds a package in the background; the Jobs tab has the files.</translation>
+    </message>
+    <message>
+        <source>Import content file reads such a file back in: the Migration column set keeps what it needs, and with the manifest every column is mapped exactly.</source>
+        <translation>Import content file reads such a file back in: the Migration column set keeps what it needs, and with the manifest every column is mapped exactly.</translation>
+    </message>
+    <message>
+        <source>An export that should run on its own, daily or by a cron expression, goes on the Schedules tab.</source>
+        <translation>An export that should run on its own, daily or by a cron expression, goes on the Schedules tab.</translation>
+    </message>
+    <message>
+        <source>Exports the content below the chosen nodes as one archive: a CSV, JSON or XML file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</source>
+        <translation>Exports the content below the chosen nodes as one archive: a CSV, JSON or XML file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</translation>
+    </message>
+    <message>
+        <source>A set (Sites, content, media, users ...) is the quickest start, Browse for nodes adds any other; the counts show how much is below each node.</source>
+        <translation>A set (Sites, content, media, users ...) is the quickest start, Browse for nodes adds any other; the counts show how much is below each node.</translation>
+    </message>
+    <message>
+        <source>The languages to export; filters by date, section and visibility; the columns: standard, migration or attributes only, and the plain text of rich text fields if you want it.</source>
+        <translation>The languages to export; filters by date, section and visibility; the columns: standard, migration or attributes only, and the plain text of rich text fields if you want it.</translation>
+    </message>
+    <message>
+        <source>Choose the archive and file format</source>
+        <translation>Choose the archive and file format</translation>
+    </message>
+    <message>
+        <source>ZIP opens everywhere; TAR.GZ, TAR.BZ2 and TAR.XZ are smaller; 7-Zip and RAR need their programs on the server. The files inside are CSV, JSON or XML.</source>
+        <translation>ZIP opens everywhere; TAR.GZ, TAR.BZ2 and TAR.XZ are smaller; 7-Zip and RAR need their programs on the server. The files inside are CSV, JSON or XML.</translation>
+    </message>
+    <message>
+        <source>Download archive, or run in the background</source>
+        <translation>Download archive, or run in the background</translation>
+    </message>
+    <message>
+        <source>Most sites are written in seconds and nothing is kept on the server. A large archive runs as a job, and Export as package makes a content package (.ezpkg) of the nodes instead; the Jobs tab has the files.</source>
+        <translation>Most sites are written in seconds and nothing is kept on the server. A large archive runs as a job, and Export as package makes a content package (.ezpkg) of the nodes instead; the Jobs tab has the files.</translation>
+    </message>
+    <message>
+        <source>One file per class in the chosen format, named by the class identifier.</source>
+        <translation>One file per class in the chosen format, named by the class identifier.</translation>
+    </message>
+    <message>
+        <source>Standard columns: object id, remote id, main node, parent node, URL alias, published, modified, then every attribute of the class. Migration adds what rebuilding elsewhere needs; Attributes only leaves the rest out.</source>
+        <translation>Standard columns: object id, remote id, main node, parent node, URL alias, published, modified, then every attribute of the class. Migration adds what rebuilding elsewhere needs; Attributes only leaves the rest out.</translation>
+    </message>
+    <message>
+        <source>The archive, and how the files in it are written.</source>
+        <translation>The archive, and how the files in it are written.</translation>
+    </message>
+    <message>
+        <source>Back to %name</source>
+        <translation>Back to %name</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

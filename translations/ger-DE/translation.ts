@@ -4383,7 +4383,7 @@
     </message>
     <message>
         <source>Identifier</source>
-        <translation>Identifier</translation>
+        <translation>Bezeichner</translation>
     </message>
     <message>
         <source>Remove selected attribute(s)</source>
@@ -4391,7 +4391,7 @@
     </message>
     <message>
         <source>Download</source>
-        <translation>Download</translation>
+        <translation>Herunterladen</translation>
     </message>
     <message>
         <source>Extract</source>
@@ -5960,6 +5960,94 @@
     <message>
         <source>Could not write the package file.</source>
         <translation>Die Paketdatei konnte nicht geschrieben werden.</translation>
+    </message>
+    <message>
+        <source>Exports the objects of one class as one file: CSV, JSON or XML with a row per object (and per language) and a column per chosen field, or a content package (.ezpkg) to install on another site.</source>
+        <translation>Exportiert die Objekte einer Klasse als eine Datei: CSV, JSON oder XML mit einer Zeile pro Objekt (und pro Sprache) und einer Spalte pro gewähltem Feld, oder ein Inhaltspaket (.ezpkg) zum Installieren auf einer anderen Site.</translation>
+    </message>
+    <message>
+        <source>Start from a preset</source>
+        <translation>Mit einer Vorlage beginnen</translation>
+    </message>
+    <message>
+        <source>Optional: load a preset for the site, editors, users, maintenance, developers or partners, and change what you need. Save your own settings as a preset, for you or shared.</source>
+        <translation>Optional: eine Vorlage für die Site, Redaktion, Benutzer, Wartung, Entwicklung oder Partner laden und anpassen, was nötig ist. Eigene Einstellungen als Vorlage speichern, für Sie selbst oder für alle.</translation>
+    </message>
+    <message>
+        <source>Choose the data</source>
+        <translation>Daten auswählen</translation>
+    </message>
+    <message>
+        <source>Scope (below a node, below a node tree, the whole site), depth, a named fetch, the class, main locations only, skip and take at most, the languages.</source>
+        <translation>Umfang (unter einem Knoten, unter einem Knotenbaum, die ganze Site), Tiefe, ein benannter Abruf, die Klasse, nur Hauptplatzierungen, Überspringen und Höchstens, die Sprachen.</translation>
+    </message>
+    <message>
+        <source>By date (also changed since your last export), section, object state, visibility, name, conditions on any field (all or any), an extended attribute filter; two sort orders.</source>
+        <translation>Nach Datum (auch geändert seit Ihrem letzten Export), Sektion, Objektzustand, Sichtbarkeit, Name, Bedingungen auf jedes Feld (alle oder eine), einem erweiterten Attributfilter; zwei Sortierungen.</translation>
+    </message>
+    <message>
+        <source>CSV, JSON, XML or a content package (.ezpkg); for CSV the separator, line endings and quoting, with a sample row.</source>
+        <translation>CSV, JSON, XML oder ein Inhaltspaket (.ezpkg); für CSV Trennzeichen, Zeilenenden und Anführungszeichen, mit einer Beispielzeile.</translation>
+    </message>
+    <message>
+        <source>Attributes, attribute formats, special columns and the column sets identity, URLs and SEO, publishing, location and migration; rename, reorder, remove. A content package takes whole objects, without columns.</source>
+        <translation>Attribute, Attributformate, Sonderspalten und die Spaltensätze Identität, URLs und SEO, Veröffentlichung, Ort und Migration; umbenennen, umsortieren, entfernen. Ein Inhaltspaket nimmt ganze Objekte, ohne Spalten.</translation>
+    </message>
+    <message>
+        <source>Download the file, the file with its typed column manifest (.zip), or the manifest alone. Large exports run as a job, and Export as package builds a package in the background; the Jobs tab has the files.</source>
+        <translation>Die Datei herunterladen, die Datei mit ihrem typisierten Spaltenmanifest (.zip) oder nur das Manifest. Große Exporte laufen als Job, und „Als Paket exportieren“ baut ein Paket im Hintergrund; der Reiter Jobs hat die Dateien.</translation>
+    </message>
+    <message>
+        <source>Import content file reads such a file back in: the Migration column set keeps what it needs, and with the manifest every column is mapped exactly.</source>
+        <translation>„Inhaltsdatei importieren“ liest eine solche Datei wieder ein: der Spaltensatz Migration behält, was dafür nötig ist, und mit dem Manifest wird jede Spalte exakt zugeordnet.</translation>
+    </message>
+    <message>
+        <source>An export that should run on its own, daily or by a cron expression, goes on the Schedules tab.</source>
+        <translation>Ein Export, der von selbst laufen soll, täglich oder nach einem Cron-Ausdruck, gehört auf den Reiter Zeitpläne.</translation>
+    </message>
+    <message>
+        <source>Exports the content below the chosen nodes as one archive: a CSV, JSON or XML file for every class, with a manifest. For a backup to read, a migration, an audit or a hand-over.</source>
+        <translation>Exportiert den Inhalt unter den gewählten Knoten als ein Archiv: eine CSV-, JSON- oder XML-Datei für jede Klasse, mit einem Manifest. Für eine lesbare Sicherung, eine Migration, eine Prüfung oder eine Übergabe.</translation>
+    </message>
+    <message>
+        <source>A set (Sites, content, media, users ...) is the quickest start, Browse for nodes adds any other; the counts show how much is below each node.</source>
+        <translation>Ein Satz (Sites, Inhalt, Medien, Benutzer …) ist der schnellste Start, „Knoten suchen“ fügt jeden anderen hinzu; die Zahlen zeigen, wie viel unter jedem Knoten liegt.</translation>
+    </message>
+    <message>
+        <source>The languages to export; filters by date, section and visibility; the columns: standard, migration or attributes only, and the plain text of rich text fields if you want it.</source>
+        <translation>Die zu exportierenden Sprachen; Filter nach Datum, Sektion und Sichtbarkeit; die Spalten: Standard, Migration oder nur Attribute, und auf Wunsch der reine Text der Rich-Text-Felder.</translation>
+    </message>
+    <message>
+        <source>Choose the archive and file format</source>
+        <translation>Archiv- und Dateiformat wählen</translation>
+    </message>
+    <message>
+        <source>ZIP opens everywhere; TAR.GZ, TAR.BZ2 and TAR.XZ are smaller; 7-Zip and RAR need their programs on the server. The files inside are CSV, JSON or XML.</source>
+        <translation>ZIP öffnet sich überall; TAR.GZ, TAR.BZ2 und TAR.XZ sind kleiner; 7-Zip und RAR brauchen ihre Programme auf dem Server. Die Dateien darin sind CSV, JSON oder XML.</translation>
+    </message>
+    <message>
+        <source>Download archive, or run in the background</source>
+        <translation>Archiv herunterladen oder im Hintergrund ausführen</translation>
+    </message>
+    <message>
+        <source>Most sites are written in seconds and nothing is kept on the server. A large archive runs as a job, and Export as package makes a content package (.ezpkg) of the nodes instead; the Jobs tab has the files.</source>
+        <translation>Die meisten Sites sind in Sekunden geschrieben, und auf dem Server bleibt nichts liegen. Ein großes Archiv läuft als Job, und „Als Paket exportieren“ macht stattdessen ein Inhaltspaket (.ezpkg) aus den Knoten; der Reiter Jobs hat die Dateien.</translation>
+    </message>
+    <message>
+        <source>One file per class in the chosen format, named by the class identifier.</source>
+        <translation>Eine Datei pro Klasse im gewählten Format, benannt nach dem Klassenbezeichner.</translation>
+    </message>
+    <message>
+        <source>Standard columns: object id, remote id, main node, parent node, URL alias, published, modified, then every attribute of the class. Migration adds what rebuilding elsewhere needs; Attributes only leaves the rest out.</source>
+        <translation>Standardspalten: Objekt-ID, Remote-ID, Hauptknoten, Elternknoten, URL-Alias, veröffentlicht, geändert, dann jedes Attribut der Klasse. Migration ergänzt, was ein Neuaufbau anderswo braucht; Nur Attribute lässt den Rest weg.</translation>
+    </message>
+    <message>
+        <source>The archive, and how the files in it are written.</source>
+        <translation>Das Archiv, und wie die Dateien darin geschrieben werden.</translation>
+    </message>
+    <message>
+        <source>Back to %name</source>
+        <translation>Zurück zu %name</translation>
     </message>
 </context>
 <context>
