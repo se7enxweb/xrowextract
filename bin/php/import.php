@@ -83,6 +83,17 @@ elseif ( !is_file( $path ) )
     $fail( "No such file: $path (--file)." );
 }
 
+// Options with a fixed set of values are checked here, before anything is read or queued: an unknown
+// --match used to be taken as remote_id, so a mistyped "none" would update existing objects instead
+if ( $options['match'] && !in_array( $options['match'], array( 'remote_id', 'object_id', 'none' ), true ) )
+    $fail( "Unknown --match {$options['match']}: remote_id, object_id or none." );
+if ( $options['language'] && !array_key_exists( (string)$options['language'], XrowExtractColumns::contentLanguages() ) )
+    $fail( "Unknown language {$options['language']} (--language): " . implode( ', ', array_keys( XrowExtractColumns::contentLanguages() ) ) . '.' );
+if ( $options['resume-from'] && !ctype_digit( (string)$options['resume-from'] ) )
+    $fail( "--resume-from is a row number, not {$options['resume-from']}." );
+if ( $options['parent'] && !ctype_digit( (string)$options['parent'] ) )
+    $fail( "--parent is a node id, not {$options['parent']}." );
+
 // The typed column manifest: an explicit --manifest, or none at all with --no-manifest; otherwise the
 // sidecar next to the file or the one embedded in it is found by XrowExtractImport::fileHeader()
 if ( $options['no-manifest'] )
