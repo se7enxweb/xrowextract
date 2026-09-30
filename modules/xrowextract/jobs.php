@@ -33,6 +33,74 @@ if ( $http->hasPostVariable( 'DeleteJobID' ) )
     return $module->redirectTo( 'xrowextract/jobs' );
 }
 
+// "Export these again": the objects a package install left on the site (a finished install job's own list,
+// or, once the job is gone, the node ids its history row kept) as a new content package, a background
+// export job of exactly those nodes - the same kind of job "Export as package" on the Site archive starts
+if ( $http->hasPostVariable( 'ExportAgainJobID' ) || $http->hasPostVariable( 'ExportAgainHistoryID' ) )
+{
+    $againNodeIDs = array();
+    $againPackage = '';
+    if ( $http->hasPostVariable( 'ExportAgainJobID' ) )
+    {
+        $id = (string)$http->postVariable( 'ExportAgainJobID' );
+        $job = XrowExtractJob::isValidID( $id ) ? XrowExtractJob::load( $id ) : null;
+        if ( $job && XrowExtractJob::canSee( $job, $login, $allJobs ) && $job['type'] === 'package' )
+        {
+            foreach ( isset( $job['created_objects'] ) ? (array)$job['created_objects'] : array() as $object )
+                if ( !empty( $object['node_id'] ) )
+                    $againNodeIDs[] = (int)$object['node_id'];
+            $againPackage = isset( $job['package_name'] ) ? (string)$job['package_name'] : '';
+        }
+    }
+    else
+    {
+        $row = XrowExtractSchema::exists() ? eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => (int)$http->postVariable( 'ExportAgainHistoryID' ) ) ) : null;
+        if ( $row instanceof XrowExtractHistory && $row->attribute( 'kind' ) === XrowExtractHistory::KIND_INSTALL
+             && ( $allJobs || $row->attribute( 'owner_login' ) === $login ) )
+        {
+            $details = $row->installDetails();
+            $againNodeIDs = isset( $details['node_ids'] ) ? array_map( 'intval', (array)$details['node_ids'] ) : array();
+            $againPackage = (string)$row->attribute( 'file_name' );
+        }
+    }
+    // Only what still exists and this user may read; exporting needs the export policy (xrowextract/csv) too
+    $readable = array();
+    foreach ( array_unique( $againNodeIDs ) as $nodeID )
+    {
+        $node = eZContentObjectTreeNode::fetch( $nodeID );
+        if ( $node instanceof eZContentObjectTreeNode && $node->canRead() )
+            $readable[] = $nodeID;
+    }
+    $exportAccess = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'csv' );
+    if ( $exportAccess['accessWord'] === 'no' )
+        $http->setSessionVariable( 'eZExtractJobNotice', ezpI18n::tr( 'design/standard/extract', 'You may not export content (policy xrowextract/csv).' ) );
+    elseif ( !$readable )
+        $http->setSessionVariable( 'eZExtractJobNotice', ezpI18n::tr( 'design/standard/extract', 'None of the objects this install left on the site exist any more, or you may not read them; nothing to export.' ) );
+    elseif ( !XrowExtractJob::available() )
+        $http->setSessionVariable( 'eZExtractJobNotice', ezpI18n::tr( 'design/standard/extract', 'Background exports are not available on this server (no PHP command line binary was found, or exec() is disabled).' ) );
+    else
+    {
+        $args = array( '--export', '--nodes=' . implode( ',', $readable ) );
+        if ( $againPackage !== '' )
+            $args[] = '--name=' . XrowExtractPackage::validPackageName( $againPackage . '_again' );
+        $againJobID = XrowExtractJob::create( array(
+            'type' => 'package', 'owner' => $login,
+            'what' => ezpI18n::tr( 'design/standard/extract', 'Export again: %count object(s) installed from %name', false,
+                                   array( '%count' => count( $readable ), '%name' => $againPackage !== '' ? $againPackage : '?' ) ),
+            'format' => 'ezpkg', 'output_file' => 'export.ezpkg', 'args' => $args,
+        ) );
+        if ( !XrowExtractJob::start( $againJobID ) )
+        {
+            XrowExtractJob::update( $againJobID, array(
+                'state' => 'failed', 'ended' => time(),
+                'error' => ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+            ) );
+        }
+        $http->setSessionVariable( 'eZExtractJobStarted', $againJobID );
+    }
+    return $module->redirectTo( 'xrowextract/jobs' );
+}
+
 // The id of a job this same browser just started (set by csv.php / archive.php), shown once as a notice
 $startedJobID = $http->hasSessionVariable( 'eZExtractJobStarted' ) ? $http->sessionVariable( 'eZExtractJobStarted' ) : false;
 if ( $startedJobID )
@@ -225,6 +293,34 @@ foreach ( $rows as $row )
 $scheduleAlerts = XrowExtractFunctionCollection::fetchScheduleAlerts();
 $tpl->setVariable( 'schedule_alerts', $scheduleAlerts['result'] );
 $tpl->setVariable( 'can_view_history', XrowExtractHistory::canView() );
+
+// The install history (package installs, kept after their job folders expire): every package, or one
+// (?package=<name>, the Package tab's "All N installs" link), 20 a page (?install_offset=)
+$installFilterPackage = isset( $_GET['package'] ) && preg_match( '/^[A-Za-z0-9_.-]{1,200}$/', (string)$_GET['package'] ) ? (string)$_GET['package'] : '';
+$installOffset = isset( $_GET['install_offset'] ) && ctype_digit( (string)$_GET['install_offset'] ) ? (int)$_GET['install_offset'] : 0;
+$installPageSize = 20;
+$installs = array();
+$installTotal = 0;
+if ( XrowExtractSchema::exists() )
+{
+    $installTotal = XrowExtractHistory::countInstalls( $login, $allJobs, $installFilterPackage );
+    if ( $installOffset >= $installTotal )
+        $installOffset = $installTotal > 0 ? (int)( floor( ( $installTotal - 1 ) / $installPageSize ) * $installPageSize ) : 0;
+    foreach ( XrowExtractHistory::fetchInstalls( $login, $allJobs, $installFilterPackage, $installOffset, $installPageSize ) as $historyRow )
+        $installs[] = $historyRow->installRow( $login );
+}
+$installPackages = array();
+foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
+    $installPackages[] = $repositoryPackage['name'];
+$tpl->setVariable( 'installs', $installs );
+$tpl->setVariable( 'install_history', array(
+    'package' => $installFilterPackage, 'packages' => $installPackages, 'total' => $installTotal,
+    'from' => $installTotal ? $installOffset + 1 : 0, 'to' => min( $installTotal, $installOffset + $installPageSize ),
+    'prev' => $installOffset > 0 ? max( 0, $installOffset - $installPageSize ) : -1,
+    'next' => $installOffset + $installPageSize < $installTotal ? $installOffset + $installPageSize : -1,
+    'query' => $installFilterPackage !== '' ? '&package=' . rawurlencode( $installFilterPackage ) : '',
+) );
+$tpl->setVariable( 'JobsAvailable', XrowExtractJob::available() );
 
 $tpl->setVariable( 'jobs', $rows );
 $tpl->setVariable( 'job_counts', $counts );

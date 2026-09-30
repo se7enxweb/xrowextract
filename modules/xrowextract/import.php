@@ -92,6 +92,24 @@ if ( $http->hasPostVariable( 'NewImport' ) )
     return $module->redirectTo( 'xrowextract/import' );
 }
 
+// "Open in Import" from the Package tab: a content package already in the repository becomes this page's
+// file, exactly as an uploaded one (the same session shape the upload below leaves), then its review step
+if ( $http->hasPostVariable( 'OpenRepositoryPackage' ) )
+{
+    $openName = $http->hasPostVariable( 'PackageName' ) ? (string)$http->postVariable( 'PackageName' ) : '';
+    $openPackage = $openName !== '' ? eZPackage::fetch( $openName ) : false;
+    $isContentPackage = false;
+    if ( $openPackage instanceof eZPackage )
+        foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
+            $isContentPackage = $isContentPackage || $repositoryPackage['name'] === $openName;
+    if ( $isContentPackage )
+    {
+        $forgetFile();
+        $_SESSION[$SESSION_KEY] = array( 'name' => $openName, 'format' => 'package', 'kind' => 'package', 'package_name' => $openName, 'source' => 'repository' );
+    }
+    return $module->redirectTo( 'xrowextract/import' );
+}
+
 // A new upload: the plain (no JavaScript) whole-file fallback, or a finished chunked upload
 // adopted by its UploadID (XrowExtractUpload::path() only returns a path for the current user's
 // own, complete upload). Either way, a content package (.ezpkg/.tar.gz) or a standalone
@@ -299,6 +317,8 @@ if ( $PackageMode && $Package instanceof eZPackage )
         'classes' => count( $contents['classes'] ),
         'objects' => count( $contents['objects'] ),
         'class_identifiers' => array_slice( array_map( function ( $c ) { return $c['identifier']; }, $contents['classes'] ), 0, 12 ),
+        // The datatype check: every datatype the package uses that this site does not have
+        'missing_datatypes' => $contents['missing_datatypes'],
     );
     // Up to 500 classes and objects the dry run takes a few seconds and is shown straight away; a larger
     // package waits for "Review the package" (it compares every item with the site)
@@ -862,8 +882,19 @@ elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $h
     $forceFreshInspection = false;
     if ( $apply && $Package instanceof eZPackage )
     {
+        $installStartedAt = time();
         $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
                                                        $PkgObjectMode, $PkgClassMode );
+        // In the request (no background jobs here): the install history row the job's runner writes otherwise
+        XrowExtractHistory::recordInstall( array(
+            'owner_login' => $login, 'trigger_type' => 'manual', 'started_at' => $installStartedAt, 'ended_at' => time(),
+            'package' => $Package->attribute( 'name' ), 'parent_node_id' => (int)$ParentNodeID,
+            'site_access' => eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
+            'object_mode' => $PkgObjectMode, 'class_mode' => $PkgClassMode,
+            'counts' => isset( $earlyInspection['counts'] ) ? $earlyInspection['counts'] : array(),
+            'report' => $installReport,
+            'missing_datatypes' => isset( $earlyInspection['missing_datatypes'] ) ? $earlyInspection['missing_datatypes'] : array(),
+        ) );
         if ( $installReport['ok'] )
         {
             eZContentObject::clearCache();

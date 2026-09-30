@@ -26,6 +26,14 @@
             </dd>
         </div>
     </dl>
+    {* The datatype check: every datatype the package uses that this site does not have *}
+    {include uri='design:xrowextract/package_datatype_check.tpl' missing=$PackageSummary.missing_datatypes}
+    {* Not for a "Try a sample" package: it is in the repository only for this one request *}
+    {if $IsPackageSample|not}
+    <p class="xe-help"><a href={concat( 'xrowextract/package/', $PackageSummary.name )|ezurl}>{'Open it on the Package tab'|i18n('design/standard/extract')}</a>
+        &middot; <a href={concat( 'xrowextract/compare/', $PackageSummary.name )|ezurl}>{'compare'|i18n('design/standard/extract')}</a>
+        &middot; <a href={concat( 'xrowextract/browse/', $PackageSummary.name, '/', 0 )|ezurl}>{'browse its files'|i18n('design/standard/extract')}</a></p>
+    {/if}
     {/if}
 
     <div class="xe-grid">

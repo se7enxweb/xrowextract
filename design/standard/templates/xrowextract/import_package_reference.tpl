@@ -122,3 +122,29 @@
     <li>{'A full .ezpkg: package/create’s wizard, or ext:xrowextract:package --export --node=<id> [--subtree] [--class=<id>] --file=<out.ezpkg> for a plain node/subtree, or --template --class=<id> --variant=both --file=<out.ezpkg> for a ready-made sample of a class (see the Package page).'|i18n('design/standard/extract')|wash}</li>
     <li>{'ext:xrowextract:package --inspect=<name> shows exactly what a package carries and what installing it would do, the same dry run this page runs after an upload.'|i18n('design/standard/extract')|wash}</li>
 </ul>
+<ul>
+    <li>{'The same export with every filter of ext:xrowextract:csv: ext:xrowextract:package --export --node=<id> --class=<id> plus --since, --before, --date, --section, --state, --visibility, --where, --sort, --depth, --languages, --extended-filter, --fetch-alias ... (the name filter is --name-contains, since --name names the package), or --preset=<site:id|user:id> for a saved export preset; it runs that export as ext:xrowextract:csv --format=ezpkg does, one class, with the same selection code.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'ext:xrowextract:package --compare=<a> --with=<b> compares two packages; --compare=<a> alone compares one with this site (see Compare below).'|i18n('design/standard/extract')|wash}</li>
+</ul>
+
+<h4>{'Before installing: the datatype check'|i18n('design/standard/extract')|wash}</h4>
+<ul>
+    <li>{'Every datatype the package uses - in its class definitions (each attribute’s datatype="...") and in its objects (each attribute’s type="...") - is checked against the datatypes this site has: content.ini [DataTypeSettings] AvailableDataTypes, each one really loadable.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'A datatype the site does not have (an extension such as an enhanced selection not installed, or not enabled for this siteaccess) is listed with the classes and objects that use it: on the Package tab, in the Review and install step here, on the compare page, and as a WARNING line in the install job’s log (so the job and its install history say "done, with warnings").'|i18n('design/standard/extract')|wash}</li>
+    <li>{'Installing stays possible: the kernel leaves out what it cannot read, so those attribute values are missing afterwards. Install or enable the extension first when they matter.'|i18n('design/standard/extract')|wash}</li>
+</ul>
+
+<h4>{'Compare'|i18n('design/standard/extract')|wash}</h4>
+<ul>
+    <li>{'With this site (xrowextract/compare/<package>): per class and object what installing would create or change - a class’s attributes added, only on the site or with another datatype; an object’s fields that differ, old and new, for text, numbers, checkboxes, e-mail and identifiers (other datatypes count for the object as a whole). It reads the same cached dry run as the Package tab.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'Two packages (xrowextract/compare/<a>/<b>): classes and objects matched by remote id, each added (only in the second), removed (only in the first) or changed - a different name, class, modified date or any field value, per language - read from the two packages alone.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'Reached from the Package tab (Compare with, next to the dry run, and the compare link next to the package’s name), from the package contents browser and from the Review and install step here; filter by change, class and name or remote id, a page at a time.'|i18n('design/standard/extract')|wash}</li>
+</ul>
+
+<h4>{'After installing: the install history'|i18n('design/standard/extract')|wash}</h4>
+<ul>
+    <li>{'Every install - a background job, one in the request, or ext:xrowextract:package --install run by hand - is kept in the install history: who, when, which package, the parent, how existing objects and classes were handled, created / already there / not installed, errors and missing datatypes. It stays after the job files are removed (xrowextract.ini [History] RetentionDays).'|i18n('design/standard/extract')|wash}</li>
+    <li>{'The Jobs page lists it for every package (filtered by package), the Package tab under Installs of this package; the History page lists it as the kind Package install.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'A finished install links to the classes and objects it installed, and Export these again starts a background export of exactly those objects as a new content package - from the job while it exists, and from the install history after that.'|i18n('design/standard/extract')|wash}</li>
+    <li>{'A package already in the repository opens here with Open in Import on the Package tab, the same review and install as an uploaded one.'|i18n('design/standard/extract')|wash}</li>
+</ul>

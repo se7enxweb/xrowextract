@@ -57,7 +57,7 @@
                         <label class="xe-label" for="xe-history-kind">{'Kind'|i18n('design/standard/extract')}</label>
                         <select id="xe-history-kind" name="kind">
                             <option value="">{'Any'|i18n('design/standard/extract')}</option>
-                            {foreach hash( 'csv', 'One class'|i18n('design/standard/extract'), 'archive', 'Site archive'|i18n('design/standard/extract'), 'package', 'Content package'|i18n('design/standard/extract'), 'import', 'Import'|i18n('design/standard/extract') ) as $kind => $label}
+                            {foreach hash( 'csv', 'One class'|i18n('design/standard/extract'), 'archive', 'Site archive'|i18n('design/standard/extract'), 'package', 'Content package'|i18n('design/standard/extract'), 'import', 'Import'|i18n('design/standard/extract'), 'install', 'Package install'|i18n('design/standard/extract') ) as $kind => $label}
                             <option value="{$kind}"{if $filter.kind|eq( $kind )} selected="selected"{/if}>{$label|wash}</option>
                             {/foreach}
                         </select>
@@ -120,7 +120,7 @@
                 {foreach $rows as $row}
                 <li id="history-{$row.id}" class="xe-job xe-job-{$row.state|wash}">
                     <div class="xe-job-main">
-                        <span class="xe-job-type">{if $row.kind|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{elseif $row.kind|eq( 'import' )}{'Import'|i18n('design/standard/extract')}{elseif $row.kind|eq( 'package' )}{'Package'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
+                        <span class="xe-job-type">{if $row.kind|eq( 'archive' )}{'Archive'|i18n('design/standard/extract')}{elseif $row.kind|eq( 'import' )}{'Import'|i18n('design/standard/extract')}{elseif $row.kind|eq( 'package' )}{'Package'|i18n('design/standard/extract')}{elseif $row.kind|eq( 'install' )}{'Install'|i18n('design/standard/extract')}{else}{'CSV'|i18n('design/standard/extract')}{/if}</span>
                         <span class="xe-colinfo">
                             <strong>{$row.what|wash}</strong>
                             <small>

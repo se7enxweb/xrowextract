@@ -42,7 +42,8 @@ $package = $packageName !== '' ? eZPackage::fetch( $packageName ) : false;
 if ( !$package instanceof eZPackage )
 {
     $Result = array();
-    $Result['content'] = ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false, array( '%name' => $packageName ) );
+    // The page content is HTML: the name comes from the address, so it is escaped
+    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false, array( '%name' => $packageName ) ), ENT_QUOTES, 'UTF-8' );
     $Result['path'] = array(
         array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
         array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Package contents' ) ),
@@ -90,6 +91,12 @@ unset( $fileRow );
 
 $tpl->setVariable( 'PackageName', $packageName );
 $tpl->setVariable( 'Package', $package );
+// The other content packages, for "Compare with" (xrowextract/compare)
+$otherPackages = array();
+foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
+    if ( $repositoryPackage['name'] !== $packageName )
+        $otherPackages[] = $repositoryPackage;
+$tpl->setVariable( 'OtherPackages', $otherPackages );
 $tpl->setVariable( 'Files', $pageFiles );
 $tpl->setVariable( 'FilesTotal', $total );
 $tpl->setVariable( 'FilesOffset', $offset );

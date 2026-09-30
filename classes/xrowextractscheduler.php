@@ -471,6 +471,41 @@ class XrowExtractScheduler
             'delivery' => array(),
             'delivery_state' => '',
         );
+        // A package install (bin/php/package.php --install as a job): its own kind of row, with who, which
+        // package, the modes and the result counts, kept after the job folder expires
+        $installArgs = array();
+        foreach ( (array)$job['args'] as $arg )
+            if ( preg_match( '/^--(install|parent|site-access|object-mode|class-mode)=(.*)$/s', (string)$arg, $m ) )
+                $installArgs[$m[1]] = $m[2];
+        if ( $job['type'] === 'package' && isset( $installArgs['install'] ) )
+        {
+            $installErrors = isset( $job['install_errors'] ) ? array_values( (array)$job['install_errors'] ) : array();
+            if ( $state === 'failed' && !$installErrors )
+                $installErrors[] = (string)$job['error'] !== '' ? (string)$job['error'] : 'The install did not finish.';
+            XrowExtractHistory::recordInstall( array(
+                'job_id' => $jobID,
+                'owner_login' => (string)$job['owner'],
+                'what' => (string)$job['what'],
+                'trigger_type' => isset( $job['trigger'] ) ? $job['trigger'] : 'manual',
+                'started_at' => $run['started_at'],
+                'ended_at' => $run['ended_at'],
+                'package' => !empty( $job['package_name'] ) ? (string)$job['package_name'] : $installArgs['install'],
+                'parent_node_id' => isset( $installArgs['parent'] ) ? (int)$installArgs['parent'] : 0,
+                'site_access' => isset( $installArgs['site-access'] ) ? $installArgs['site-access'] : '',
+                'object_mode' => isset( $installArgs['object-mode'] ) ? $installArgs['object-mode'] : 'update',
+                'class_mode' => isset( $installArgs['class-mode'] ) ? $installArgs['class-mode'] : 'skip',
+                'counts' => isset( $job['counts'] ) && is_array( $job['counts'] ) ? $job['counts'] : array(),
+                'report' => array(
+                    'ok' => $state !== 'failed' && !$installErrors,
+                    'errors' => $installErrors,
+                    'created_classes' => isset( $job['created_classes'] ) ? (array)$job['created_classes'] : array(),
+                    'created_objects' => isset( $job['created_objects'] ) ? (array)$job['created_objects'] : array(),
+                ),
+                'missing_datatypes' => isset( $job['missing_datatypes'] ) ? (array)$job['missing_datatypes'] : array(),
+                'warnings' => $warnings,
+            ) );
+            return $run;
+        }
         XrowExtractHistory::record( $run );
         if ( !$schedule )
             return $run;

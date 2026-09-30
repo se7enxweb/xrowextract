@@ -12,16 +12,17 @@
 <p class="xe-side-lead"><a href="#xe-card-upload">{'Try a sample'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-card-reference">{'File format reference'|i18n( 'design/standard/extract' )}</a> &middot; <a href="#xe-ref-packages">{'Content packages (.ezpkg)'|i18n( 'design/standard/extract' )}</a></p>
 
 <ol class="xe-side-steps">
-    <li>{'Choose the class, matching, language and parent'|i18n( 'design/standard/extract' )}
-        <small>{'Before or after the upload; a class, language or parent column in the file wins for its rows.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Upload the file, or try a sample, or a filled template'|i18n( 'design/standard/extract' )}
-        <small>{'XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Check the column mapping'|i18n( 'design/standard/extract' )}
-        <small>{'Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.'|i18n( 'design/standard/extract' )}</small></li>
-    <li>{'Read the dry run'|i18n( 'design/standard/extract' )}
-        <small>{'Per row: create, update (old and new values), unchanged, skip or error with the reason.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'File'|i18n( 'design/standard/extract' )}
+        <small>{'Pick a format - XML, CSV, JSON or a content package - to Try a sample, Download a template or read its reference, then Upload a file (class and object XML files upload the same way). A package already in the repository comes here with Open in Import on the Package tab. Remove starts over.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Class and matching'|i18n( 'design/standard/extract' )}
+        <small>{'Which class, which objects a row updates (remote id, object id, or always create), the language, and the parent for new objects; a class, language or parent column in the file wins for its rows.'|i18n( 'design/standard/extract' )}</small>
+        <small>{'For a content package this step is Review and install the package instead: what it carries, the datatype check, the parent, how an existing object or class is handled, and Review the package (dry run).'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Column mapping'|i18n( 'design/standard/extract' )}
+        <small>{'Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it; then Preview. Not needed for a content package.'|i18n( 'design/standard/extract' )}</small></li>
+    <li>{'Preview (dry run — nothing was written)'|i18n( 'design/standard/extract' )}
+        <small>{'Per row: create, update (old and new values), unchanged, skip or error with the reason; for a package, every class and object it carries, and its files.'|i18n( 'design/standard/extract' )}</small></li>
     <li>{'Import the changes'|i18n( 'design/standard/extract' )}
-        <small>{'Only the changed attributes of each row are written; a row with an error writes nothing.'|i18n( 'design/standard/extract' )}</small></li>
+        <small>{'Import N changes writes only the changed attributes of each row; a row with an error writes nothing. A package: Install N changes (in the background), with its progress, log and install history on the Jobs page.'|i18n( 'design/standard/extract' )}</small></li>
 </ol>
 
 <details open>

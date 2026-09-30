@@ -15,7 +15,20 @@
 
     {include uri='design:xrowextract/tabs.tpl' active='package'}
 
-    <p><a href={concat( 'xrowextract/package/', $PackageName )|ezurl}>&laquo; {'Back to %name'|i18n('design/standard/extract',, hash( '%name', $PackageName ))}</a></p>
+    <p><a href={concat( 'xrowextract/package/', $PackageName )|ezurl}>&laquo; {'Back to %name'|i18n('design/standard/extract',, hash( '%name', $PackageName ))}</a>
+        &middot; <a href={concat( 'xrowextract/compare/', $PackageName )|ezurl}>{'Compare with this site'|i18n('design/standard/extract')}</a></p>
+    {if $OtherPackages|count}
+    <form method="get" action={concat( 'xrowextract/compare/', $PackageName )|ezurl} class="xe-inline xe-compare-pick">
+        <label class="xe-label" for="xe-browse-compare-with">{'Compare with'|i18n('design/standard/extract')}</label>
+        <select name="with" id="xe-browse-compare-with">
+            <option value="">{'this site'|i18n('design/standard/extract')}</option>
+            {foreach $OtherPackages as $otherPackage}
+            <option value="{$otherPackage.name|wash}">{$otherPackage.name|wash}{if $otherPackage.version} ({$otherPackage.version|wash}){/if}</option>
+            {/foreach}
+        </select>
+        <input class="button" type="submit" value="{'Compare'|i18n('design/standard/extract')}" />
+    </form>
+    {/if}
 
     <p class="xe-help">{'%count files, %from to %to shown.'|i18n('design/standard/extract',, hash(
         '%count', $FilesTotal, '%from', $FilesShownFrom, '%to', $FilesShownTo ))}</p>

@@ -57,6 +57,7 @@ class XrowExtractHistory extends eZPersistentObject
                 'duration_text' => 'durationText',
                 'size_kb' => 'sizeKB',
                 'job_exists' => 'jobExists',
+                'install_details' => 'installDetails',
             ),
             'class_name' => 'XrowExtractHistory',
             'sort' => array( 'created' => 'desc' ),
@@ -77,8 +78,146 @@ class XrowExtractHistory extends eZPersistentObject
 
     public function deliveryList()
     {
+        // A package install is never delivered anywhere; its 'delivery' column holds installDetails()
+        if ( $this->attribute( 'kind' ) === self::KIND_INSTALL )
+            return array();
         $data = json_decode( (string)$this->attribute( 'delivery' ), true );
         return is_array( $data ) ? $data : array();
+    }
+
+    // ------------------------------------------------------------ package installs
+    //
+    // A package install is one row of kind "install" in the same table, so it outlives its job folder
+    // like every export run does: owner_login (who), started_at/ended_at (when), file_name (the package),
+    // run_mode/output_format (how existing objects/classes were handled), row_count (objects the package
+    // carries that exist after the install), run_state (done, warning, failed), warnings (the datatype
+    // check among them), error_text; and, in the 'delivery' column no install ever uses otherwise, the
+    // details as JSON: parent, site access, the dry run's counts just before installing, created /
+    // already there / not installed, the error messages and the installed objects' node ids (up to
+    // INSTALL_NODE_ID_LIMIT, for "Export these again" after the job itself has expired).
+
+    const KIND_INSTALL = 'install';
+    const INSTALL_NODE_ID_LIMIT = 5000;
+
+    /** The details of an install row (see above), or an empty array for any other kind. */
+    public function installDetails()
+    {
+        if ( $this->attribute( 'kind' ) !== self::KIND_INSTALL )
+            return array();
+        $data = json_decode( (string)$this->attribute( 'delivery' ), true );
+        return is_array( $data ) ? $data : array();
+    }
+
+    /**
+     * Records one package install. $data: job_id ('' for one that did not run as a job), owner_login,
+     * trigger_type (manual, cli), started_at, ended_at, package, parent_node_id, site_access, object_mode,
+     * class_mode, counts (inspect()'s counts just before installing), report (install()'s report: ok,
+     * errors, created_classes, created_objects), missing_datatypes (rows of XrowExtractPackage::missingDatatypes()),
+     * what (optional text). A row for the same job id is updated, as for every other run.
+     */
+    public static function recordInstall( array $data )
+    {
+        $report = isset( $data['report'] ) && is_array( $data['report'] ) ? $data['report'] : array();
+        $counts = isset( $data['counts'] ) && is_array( $data['counts'] ) ? $data['counts'] : array();
+        $count = function ( $key ) use ( $counts ) { return isset( $counts[$key] ) ? (int)$counts[$key] : 0; };
+        $errors = isset( $report['errors'] ) ? array_values( (array)$report['errors'] ) : array();
+        $createdObjects = isset( $report['created_objects'] ) ? (array)$report['created_objects'] : array();
+        $createdClasses = isset( $report['created_classes'] ) ? (array)$report['created_classes'] : array();
+        $missing = isset( $data['missing_datatypes'] ) ? (array)$data['missing_datatypes'] : array();
+        $nodeIDs = array();
+        foreach ( $createdObjects as $object )
+            if ( !empty( $object['node_id'] ) && count( $nodeIDs ) < self::INSTALL_NODE_ID_LIMIT )
+                $nodeIDs[] = (int)$object['node_id'];
+        $parentID = isset( $data['parent_node_id'] ) ? (int)$data['parent_node_id'] : 0;
+        $parent = $parentID ? eZContentObjectTreeNode::fetch( $parentID ) : null;
+        $ok = !isset( $report['ok'] ) || $report['ok'];
+        $warnings = array();
+        if ( class_exists( 'XrowExtractPackage' ) )
+            $warnings = XrowExtractPackage::missingDatatypeLines( $missing );
+        if ( isset( $data['warnings'] ) )
+            $warnings = array_values( array_unique( array_merge( $warnings, (array)$data['warnings'] ) ) );
+        $details = array(
+            'package' => (string)$data['package'],
+            'parent_node_id' => $parentID,
+            'parent_name' => $parent instanceof eZContentObjectTreeNode ? (string)$parent->attribute( 'name' ) : '',
+            'site_access' => isset( $data['site_access'] ) ? (string)$data['site_access'] : '',
+            'object_mode' => isset( $data['object_mode'] ) ? (string)$data['object_mode'] : '',
+            'class_mode' => isset( $data['class_mode'] ) ? (string)$data['class_mode'] : '',
+            'counts' => $counts,
+            'created' => $count( 'classes_create' ) + $count( 'objects_create' ),
+            'existing' => $count( 'classes_update' ) + $count( 'objects_update' ) + $count( 'objects_unchanged' ),
+            'not_installed' => $count( 'objects_class_missing' ),
+            'installed_classes' => count( $createdClasses ),
+            'installed_objects' => count( $createdObjects ),
+            'errors' => $errors,
+            'missing_datatypes' => array_values( array_map( function ( $row ) { return is_array( $row ) ? (string)$row['datatype'] : (string)$row; }, $missing ) ),
+            'node_ids' => $nodeIDs,
+            'node_ids_cut' => count( $createdObjects ) > count( $nodeIDs ) && count( $nodeIDs ) >= self::INSTALL_NODE_ID_LIMIT,
+        );
+        return self::record( array(
+            'job_id' => isset( $data['job_id'] ) ? (string)$data['job_id'] : '',
+            'owner_login' => (string)$data['owner_login'],
+            'kind' => self::KIND_INSTALL,
+            'what' => isset( $data['what'] ) && $data['what'] !== '' ? (string)$data['what'] : 'Install package ' . $data['package'],
+            'trigger_type' => isset( $data['trigger_type'] ) ? (string)$data['trigger_type'] : 'manual',
+            'run_mode' => $details['object_mode'],
+            'output_format' => $details['class_mode'],
+            'started_at' => (int)$data['started_at'],
+            'ended_at' => (int)$data['ended_at'],
+            'run_state' => !$ok ? 'failed' : ( $warnings ? 'warning' : 'done' ),
+            'row_count' => count( $createdObjects ),
+            'file_name' => (string)$data['package'],
+            'warnings' => $warnings,
+            'error_text' => $errors ? implode( ' ', $errors ) : ( isset( $data['error_text'] ) ? (string)$data['error_text'] : '' ),
+            'delivery' => $details,
+            'delivery_state' => '',
+        ) );
+    }
+
+    /** The install rows the viewer may see, newest first ($package: only that package's). */
+    public static function fetchInstalls( $viewerLogin, $allowAll, $package = '', $offset = 0, $limit = 25 )
+    {
+        return self::fetchPage( array( 'kind' => self::KIND_INSTALL, 'package' => (string)$package ), $viewerLogin, $allowAll, $offset, $limit );
+    }
+
+    public static function countInstalls( $viewerLogin, $allowAll, $package = '' )
+    {
+        return self::countFor( array( 'kind' => self::KIND_INSTALL, 'package' => (string)$package ), $viewerLogin, $allowAll );
+    }
+
+    /** One install row as the Jobs page and the Package tab show it. */
+    public function installRow( $viewerLogin )
+    {
+        $details = $this->installDetails();
+        return array(
+            'id' => (int)$this->attribute( 'id' ),
+            'job_id' => (string)$this->attribute( 'job_id' ),
+            'job_exists' => $this->jobExists(),
+            'package' => (string)$this->attribute( 'file_name' ),
+            'package_exists' => $this->attribute( 'file_name' ) !== '' && eZPackage::fetch( (string)$this->attribute( 'file_name' ) ) instanceof eZPackage,
+            'owner_user' => $this->ownerUser(),
+            'mine' => $this->attribute( 'owner_login' ) === $viewerLogin,
+            'trigger' => (string)$this->attribute( 'trigger_type' ),
+            'started' => (int)$this->attribute( 'started_at' ),
+            'ended' => (int)$this->attribute( 'ended_at' ),
+            'duration' => $this->durationText(),
+            'state' => (string)$this->attribute( 'run_state' ),
+            'object_mode' => (string)$this->attribute( 'run_mode' ),
+            'class_mode' => (string)$this->attribute( 'output_format' ),
+            'parent_node_id' => isset( $details['parent_node_id'] ) ? (int)$details['parent_node_id'] : 0,
+            'parent_name' => isset( $details['parent_name'] ) ? (string)$details['parent_name'] : '',
+            'site_access' => isset( $details['site_access'] ) ? (string)$details['site_access'] : '',
+            'created' => isset( $details['created'] ) ? (int)$details['created'] : 0,
+            'existing' => isset( $details['existing'] ) ? (int)$details['existing'] : 0,
+            'not_installed' => isset( $details['not_installed'] ) ? (int)$details['not_installed'] : 0,
+            'installed_objects' => isset( $details['installed_objects'] ) ? (int)$details['installed_objects'] : (int)$this->attribute( 'row_count' ),
+            'installed_classes' => isset( $details['installed_classes'] ) ? (int)$details['installed_classes'] : 0,
+            'error_count' => isset( $details['errors'] ) ? count( $details['errors'] ) : 0,
+            'missing_datatypes' => isset( $details['missing_datatypes'] ) ? (array)$details['missing_datatypes'] : array(),
+            'node_count' => isset( $details['node_ids'] ) ? count( $details['node_ids'] ) : 0,
+            'warnings' => $this->warningList(),
+            'error' => (string)$this->attribute( 'error_text' ),
+        );
     }
 
     public function ownerUser()
@@ -172,6 +311,9 @@ class XrowExtractHistory extends eZPersistentObject
             $conds['trigger_type'] = $filter['trigger'];
         if ( !empty( $filter['schedule_id'] ) )
             $conds['schedule_id'] = (int)$filter['schedule_id'];
+        // One package's installs (an install row keeps the package name in file_name)
+        if ( isset( $filter['package'] ) && $filter['package'] !== '' )
+            $conds['file_name'] = (string)$filter['package'];
         if ( !empty( $filter['delivery'] ) && in_array( $filter['delivery'], array( 'ok', 'partial', 'failed' ), true ) )
             $conds['delivery_state'] = $filter['delivery'];
         $from = !empty( $filter['from'] ) ? strtotime( $filter['from'] . ' 00:00:00' ) : false;

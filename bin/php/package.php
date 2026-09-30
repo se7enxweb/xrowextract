@@ -14,6 +14,15 @@
  *   php extension/xrowextract/bin/php/package.php --export --node=130 --file=var/tmp/ng_news_130.ezpkg
  *   php extension/xrowextract/bin/php/package.php --export --node=2 --subtree --class=ng_article --file=var/tmp/articles.ezpkg
  *   php extension/xrowextract/bin/php/package.php --template --class=ng_article --variant=both --file=var/tmp/ng_article_template.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --export --node=2 --class=ng_article --since=30d --section=standard --file=var/tmp/recent.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --export --preset=site:news_last_30_days --file=var/tmp/news.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --compare=package_a --with=package_b
+ *   php extension/xrowextract/bin/php/package.php --compare=package_a
+ *
+ * --export with any of the filter options of ext:xrowextract:csv (--since, --before, --date, --section,
+ * --state, --visibility, --where, --sort, --depth, --languages, --extended-filter, --fetch-alias, ...) or
+ * with --preset runs exactly that export (bin/php/csv.php --format=ezpkg): one class, every filter the
+ * same as there. Only the name filter is spelled --name-contains here (--name is the package's name).
  *
  * --output writes a JSON report alongside the normal text output, for
  * --inspect and --install: how xrowextract/jobs.php (type "package") runs a
@@ -35,9 +44,42 @@ $script = eZScript::instance( array(
 $script->startup();
 $options = $script->getOptions(
     '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:][remove-after]' .
-    '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]',
+    '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]' .
+    '[compare:][with:]' .
+    '[scope:][depth:][depth-operator:][main-only][offset:][limit:][date-field:][since:][before:][date:][section:][state:][visibility:]' .
+    '[name-contains:][where:][sort:][order:][sort2:][order2:][extended-filter:][extended-params:][fetch-alias:][alias-param:*][preset:][param:*]' .
+    '[changed-since:][lenient]',
     '',
     array(
+        'compare'      => 'Package name: compare it with --with=<other package> (classes and objects added, removed and changed, by remote id), or without --with with this site (what an install would create or change, down to the fields the dry run can compare)',
+        'with'         => '--compare: the other package',
+        'scope'        => '--export with filters: node (default) or all, as ext:xrowextract:csv',
+        'depth'        => '--export with filters: tree (default), list or a number, as ext:xrowextract:csv',
+        'depth-operator' => '--export with filters: eq, le or ge, as ext:xrowextract:csv',
+        'main-only'    => '--export with filters: only main locations',
+        'offset'       => '--export with filters: skip this many objects',
+        'limit'        => '--export with filters: take at most this many objects',
+        'date-field'   => '--export with filters: the date the date filters use, as ext:xrowextract:csv',
+        'since'        => '--export with filters: only objects dated on or after this, as ext:xrowextract:csv',
+        'before'       => '--export with filters: only objects dated on or before this',
+        'date'         => '--export with filters: today, 7, 30, 90, 365, future or past',
+        'section'      => '--export with filters: only this section (id or identifier)',
+        'state'        => '--export with filters: only this object state (id)',
+        'visibility'   => '--export with filters: visible or hidden',
+        'name-contains' => '--export with filters: only objects whose name contains this (ext:xrowextract:csv --name)',
+        'where'        => '--export with filters: conditions, exactly as ext:xrowextract:csv --where',
+        'sort'         => '--export with filters: sort field, as ext:xrowextract:csv',
+        'order'        => '--export with filters: asc or desc',
+        'sort2'        => '--export with filters: a second sort field',
+        'order2'       => '--export with filters: asc or desc, for --sort2',
+        'extended-filter' => '--export with filters: an extendedattributefilter.ini id',
+        'extended-params' => '--export with filters: its params as JSON',
+        'fetch-alias'  => '--export with filters: a fetchalias.ini named fetch',
+        'alias-param'  => '--export with filters: key=value for the named fetch (repeatable)',
+        'preset'       => '--export: a saved export preset (user:<id> or site:<id>; ext:xrowextract:csv --list-presets): its node, class, languages, filters and sort',
+        'param'        => '--export with --preset: key=value for the preset\'s placeholders (repeatable)',
+        'changed-since' => '--export with filters: only objects modified after this (a delta)',
+        'lenient'      => '--export with filters: skip what no longer resolves with a WARNING line, as ext:xrowextract:csv',
         'list'         => 'List the packages in the repository that carry a content class or content object',
         'inspect'      => 'Package name: show what it carries and what installing it would do (nothing is written)',
         'install'      => 'Package name: install it (through the same eZPackage::install() the web view uses)',
@@ -56,7 +98,7 @@ $options = $script->getOptions(
         'class'        => '--export: only this class below --node (id or identifier, --node only, not --nodes); --template: the class to build a sample for (required)',
         'variant'      => '--template: class, content or both (default both)',
         'object-count' => '--template: how many sample content objects to create (default 3, max 5)',
-        'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages)',
+        'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages); --export: all or a comma list of locales, as ext:xrowextract:csv',
         'name'         => '--export: package name (default: a name derived from the node)',
         'file'         => '--export/--template: file to write the .ezpkg to (default: --output, set by a background job)',
         'keep'         => '--export/--template: also register the package in the repository (default: write the .ezpkg file only, remove it from the repository again)',
@@ -71,6 +113,16 @@ $fail = function ( $message ) use ( $cli, $script )
 {
     $cli->error( $message );
     $script->shutdown( 1 );
+};
+
+// The datatype check: one WARNING line per datatype the package uses that this site does not have
+// (bin/php/job.php collects "WARNING: " lines for the Jobs page and the install history), or a PASS line
+$datatypeCheck = function ( array $missing ) use ( $cli )
+{
+    foreach ( XrowExtractPackage::missingDatatypeLines( $missing ) as $line )
+        $cli->output( 'WARNING: ' . $line );
+    if ( !$missing )
+        $cli->output( 'Datatypes: every datatype the package uses exists on this site.' );
 };
 
 $login = $options['user'] ? $options['user'] : 'admin';
@@ -136,8 +188,70 @@ if ( $options['inspect'] )
     $c = $inspection['counts'];
     $cli->output( sprintf( 'classes: %d create, %d update  |  objects: %d create, %d update, %d unchanged, %d class missing',
                            $c['classes_create'], $c['classes_update'], $c['objects_create'], $c['objects_update'], $c['objects_unchanged'], $c['objects_class_missing'] ) );
+    $datatypeCheck( $inspection['missing_datatypes'] );
     if ( $options['output'] )
         file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'inspect', 'inspection' => $inspection ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    $script->shutdown( 0 );
+}
+
+if ( $options['compare'] )
+{
+    // Two packages with each other (--compare=<a> --with=<b>), or one with the site (--compare=<a> alone:
+    // the dry run's view per object, down to the fields that differ where the dry run can tell)
+    $package = eZPackage::fetch( $options['compare'] );
+    if ( !$package instanceof eZPackage )
+        $fail( "No package '{$options['compare']}' in the repository (--list shows them)." );
+    if ( $options['with'] )
+    {
+        $other = eZPackage::fetch( $options['with'] );
+        if ( !$other instanceof eZPackage )
+            $fail( "No package '{$options['with']}' in the repository (--with)." );
+        $comparison = XrowExtractPackage::comparePackages( $package, $other );
+        $cli->output( sprintf( '%s -> %s', $package->attribute( 'name' ), $other->attribute( 'name' ) ) );
+        foreach ( array( 'classes', 'objects' ) as $kind )
+        {
+            $k = $comparison['counts'][$kind];
+            $cli->output( sprintf( '%s: %d only in %s, %d only in %s, %d changed, %d the same', $kind, $k['removed'], $package->attribute( 'name' ),
+                                   $k['added'], $other->attribute( 'name' ), $k['changed'], $k['unchanged'] ) );
+            foreach ( $comparison[$kind] as $row )
+            {
+                $cli->output( sprintf( '  %-8s %-24s %s', $row['change'], $kind === 'classes' ? $row['identifier'] : $row['class_identifier'], $row['name'] ) );
+                foreach ( $row['differences'] as $difference )
+                    $cli->output( sprintf( '           %s %s%s: %s -> %s', $difference['kind'], $difference['field'],
+                                           !empty( $difference['language'] ) ? ' (' . $difference['language'] . ')' : '', $difference['old'], $difference['new'] ) );
+            }
+        }
+        if ( $options['output'] )
+            file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'compare', 'comparison' => $comparison ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+        $script->shutdown( 0 );
+    }
+    $inspection = XrowExtractPackage::inspect( $package, $options['parent'] ? (int)$options['parent'] : false );
+    $cli->output( sprintf( '%s compared with this site:', $package->attribute( 'name' ) ) );
+    foreach ( $inspection['classes'] as $row )
+    {
+        $cli->output( sprintf( '  class  %-10s %s', $row['state'], $row['identifier'] ) );
+        if ( $row['diff'] )
+        {
+            foreach ( $row['diff']['added'] as $d )
+                $cli->output( sprintf( '           added %s (%s)', $d['identifier'], $d['datatype'] ) );
+            foreach ( $row['diff']['removed'] as $d )
+                $cli->output( sprintf( '           not in the package %s (%s)', $d['identifier'], $d['datatype'] ) );
+            foreach ( $row['diff']['changed'] as $d )
+                $cli->output( sprintf( '           changed %s: %s -> %s', $d['identifier'], $d['old_datatype'], $d['new_datatype'] ) );
+        }
+    }
+    foreach ( $inspection['objects'] as $row )
+    {
+        if ( !in_array( $row['state'], array( 'create', 'update', 'class_missing' ), true ) )
+            continue;
+        $cli->output( sprintf( '  object %-14s %-24s %s', $row['state'], $row['class_identifier'], $row['name'] ) );
+        foreach ( $row['field_changes'] as $change )
+            $cli->output( sprintf( '           %s (%s): %s -> %s', $change['identifier'], $change['language'], $change['old'], $change['new'] ) );
+    }
+    $c = $inspection['counts'];
+    $cli->output( sprintf( 'classes: %d create, %d update  |  objects: %d create, %d update, %d unchanged, %d class missing',
+                           $c['classes_create'], $c['classes_update'], $c['objects_create'], $c['objects_update'], $c['objects_unchanged'], $c['objects_class_missing'] ) );
+    $datatypeCheck( $inspection['missing_datatypes'] );
     $script->shutdown( 0 );
 }
 
@@ -162,6 +276,7 @@ if ( $options['install'] )
         $c = $inspection['counts'];
         $cli->output( sprintf( 'Dry run for %s: classes: %d create, %d update  |  objects: %d create, %d update, %d unchanged, %d class missing',
                                $package->attribute( 'name' ), $c['classes_create'], $c['classes_update'], $c['objects_create'], $c['objects_update'], $c['objects_unchanged'], $c['objects_class_missing'] ) );
+        $datatypeCheck( $inspection['missing_datatypes'] );
         if ( $options['output'] )
             file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'dry-run', 'inspection' => $inspection ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
         if ( $options['progress-file'] )
@@ -190,10 +305,17 @@ if ( $options['install'] )
     // whether that item was new or already there), so this is the only place counts split that way
     // come from. bin/php/job.php reads it straight from the report for the Jobs page.
     $cli->output( sprintf( '[%s] Checking which classes and objects already exist ...', date( 'H:i:s' ) ) );
-    $preInstallCounts = XrowExtractPackage::inspect( $package )['counts'];
+    $preInstallInspection = XrowExtractPackage::inspect( $package );
+    $preInstallCounts = $preInstallInspection['counts'];
     $cli->output( sprintf( '[%s] To install: classes %d new, %d existing  |  objects %d new, %d existing, %d unchanged, %d with a missing class',
                            date( 'H:i:s' ), $preInstallCounts['classes_create'], $preInstallCounts['classes_update'],
                            $preInstallCounts['objects_create'], $preInstallCounts['objects_update'], $preInstallCounts['objects_unchanged'], $preInstallCounts['objects_class_missing'] ) );
+    // The datatype check: installing goes ahead, but every datatype this site lacks is a WARNING line
+    // (bin/php/job.php collects those for the Jobs page and the install history)
+    $cli->output( sprintf( '[%s] Checking the datatypes the package uses against this site ...', date( 'H:i:s' ) ) );
+    $missingDatatypes = $preInstallInspection['missing_datatypes'];
+    $datatypeCheck( $missingDatatypes );
+    unset( $preInstallInspection );
 
     if ( $options['progress-file'] )
     {
@@ -205,6 +327,7 @@ if ( $options['install'] )
     }
 
     $installStarted = microtime( true );
+    $installStartedAt = time();
     $report = XrowExtractPackage::install( $package, $parentNodeID, $siteAccess, $objectMode, $classMode, $user->attribute( 'contentobject_id' ) );
     // The site now differs from any cached dry run of this package
     XrowExtractPackage::forgetInspections( $package->attribute( 'name' ) );
@@ -239,7 +362,19 @@ if ( $options['install'] )
         file_put_contents( (string)$options['output'], json_encode( array(
             'ok' => (bool)$report['ok'], 'action' => 'install', 'report' => $report,
             'package_name' => $package->attribute( 'name' ), 'counts' => $preInstallCounts,
+            'missing_datatypes' => $missingDatatypes,
         ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+    }
+    else
+    {
+        // Run by hand, not as a background job (a job's runner records it when the job ends): the install history
+        XrowExtractHistory::recordInstall( array(
+            'owner_login' => $login, 'trigger_type' => 'cli',
+            'started_at' => $installStartedAt, 'ended_at' => time(),
+            'package' => $package->attribute( 'name' ), 'parent_node_id' => $parentNodeID, 'site_access' => $siteAccess,
+            'object_mode' => $objectMode, 'class_mode' => $classMode,
+            'counts' => $preInstallCounts, 'report' => $report, 'missing_datatypes' => $missingDatatypes,
+        ) );
     }
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], max( 1, $total ), max( 1, $total ), 'done' );
@@ -261,6 +396,63 @@ if ( $options['export'] )
     $exportFile = $options['file'] ? (string)$options['file'] : (string)$options['output'];
     if ( !$exportFile )
         $fail( 'Missing --file (or --output, set automatically for a background job).' );
+
+    // With a filter option of ext:xrowextract:csv or a --preset: that export, as a content package - the
+    // same selection code (bin/php/csv.php --format=ezpkg), not a second copy of it here
+    $valueFilters = array( 'scope', 'depth', 'depth-operator', 'offset', 'limit', 'languages', 'date-field', 'since', 'before', 'date', 'section',
+                           'state', 'visibility', 'where', 'sort', 'order', 'sort2', 'order2', 'extended-filter', 'extended-params',
+                           'fetch-alias', 'preset', 'changed-since' );
+    $filterArgs = array();
+    foreach ( $valueFilters as $name )
+        if ( $options[$name] !== null && $options[$name] !== false && $options[$name] !== '' )
+            $filterArgs[] = '--' . $name . '=' . $options[$name];
+    if ( $options['name-contains'] )
+        $filterArgs[] = '--name=' . $options['name-contains'];
+    foreach ( array( 'main-only', 'lenient' ) as $name )
+        if ( $options[$name] )
+            $filterArgs[] = '--' . $name;
+    foreach ( array( 'alias-param', 'param' ) as $name )
+        foreach ( (array)$options[$name] as $value )
+            if ( (string)$value !== '' )
+                $filterArgs[] = '--' . $name . '=' . $value;
+    if ( $filterArgs )
+    {
+        if ( $options['nodes'] )
+            $fail( 'Filters and --preset work on one --node (or the preset\'s own), not --nodes.' );
+        if ( !$options['class'] && !$options['preset'] && !$options['fetch-alias'] )
+            $fail( 'Filters need --class (one class, as ext:xrowextract:csv), or a --preset or --fetch-alias that names one.' );
+        if ( $options['name'] )
+            $cli->output( 'Note: --name is not used with filters; the package is named after the class and node (ext:xrowextract:csv --format=ezpkg).' );
+        $phpCli = XrowExtractJob::phpCliBinary();
+        if ( !$phpCli )
+            $fail( 'No PHP command line binary found (csv.ini [Jobs] PhpCli).' );
+        $argv = array( $phpCli, XrowExtractJob::scriptFor( 'csv' ), '--format=ezpkg', '--output=' . $exportFile, '--user=' . $login );
+        if ( $options['class'] )
+            $argv[] = '--class=' . $options['class'];
+        if ( $options['node'] )
+            $argv[] = '--node=' . (int)$options['node'];
+        if ( $options['keep'] )
+            $argv[] = '--keep';
+        if ( $options['progress-file'] )
+            $argv[] = '--progress-file=' . $options['progress-file'];
+        $argv = array_merge( $argv, $filterArgs );
+        if ( XrowExtractJob::runningAsRoot() )
+            $argv[] = '--allow-root-user';
+        $cli->output( 'Exporting through ext:xrowextract:csv --format=ezpkg with: ' . implode( ' ', array_merge( $options['class'] ? array( '--class=' . $options['class'] ) : array(), $filterArgs ) ) );
+        // The child's output (stdout and stderr together) is passed on through this process's own output, so it
+        // comes after the line above in a file or a job log too, never over it
+        $process = proc_open( $argv, array( 0 => array( 'file', '/dev/null', 'r' ), 1 => array( 'pipe', 'w' ), 2 => array( 'redirect', 1 ) ), $pipes, eZSys::rootDir() );
+        if ( !is_resource( $process ) )
+            $fail( 'Could not start ext:xrowextract:csv.' );
+        while ( !feof( $pipes[1] ) )
+        {
+            $chunk = fread( $pipes[1], 8192 );
+            if ( $chunk !== false && $chunk !== '' )
+                print $chunk;
+        }
+        fclose( $pipes[1] );
+        $script->shutdown( proc_close( $process ) );
+    }
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 3, 'collecting' );
 
@@ -435,4 +627,4 @@ if ( $options['template'] )
     $script->shutdown( 0 );
 }
 
-$fail( 'Nothing to do: pass one of --list, --inspect, --install, --export, --template, --clean (see --help).' );
+$fail( 'Nothing to do: pass one of --list, --inspect, --install, --export, --template, --compare, --clean (see --help).' );

@@ -181,6 +181,26 @@ if ( $perPage !== '' )
     eZPreferences::setValue( 'admin_xrowextract_pkg_per_page', $perPage );
 else
     $perPage = in_array( (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ), $perPageChoices, true ) ? (string)eZPreferences::value( 'admin_xrowextract_pkg_per_page' ) : '50';
+// ... narrowed by the filters first (what the install would do, the class, a part of the name or remote id),
+// all worked out on the cached dry run - no new inspect() for a filter or a page
+$inspectionStates = array( 'create', 'update', 'unchanged', 'class_missing' );
+$filterState = isset( $_GET['state'] ) && in_array( (string)$_GET['state'], $inspectionStates, true ) ? (string)$_GET['state'] : '';
+$filterClass = isset( $_GET['class'] ) && preg_match( '/^[A-Za-z0-9_]{1,100}$/', (string)$_GET['class'] ) ? (string)$_GET['class'] : '';
+$filterText = isset( $_GET['q'] ) ? mb_substr( trim( (string)$_GET['q'] ), 0, 100 ) : '';
+$allObjectsTotal = $inspection ? count( $inspection['objects'] ) : 0;
+$objectClasses = $inspection ? XrowExtractPackage::inspectionObjectClasses( $inspection['objects'] ) : array();
+if ( $inspection )
+    $inspection['objects'] = XrowExtractPackage::filterInspectionObjects( $inspection['objects'], $filterState, $filterClass, $filterText );
+$filterQuery = array();
+foreach ( array( 'state' => $filterState, 'class' => $filterClass, 'q' => $filterText ) as $key => $value )
+    if ( $value !== '' )
+        $filterQuery[$key] = $value;
+$tpl->setVariable( 'InspectionFilter', array(
+    'state' => $filterState, 'class' => $filterClass, 'q' => $filterText, 'active' => (bool)$filterQuery,
+    'classes' => $objectClasses, 'all_total' => $allObjectsTotal,
+    // For the pager and per-page links, which are query-only (href="?page=..."): every filter, url-encoded
+    'query' => $filterQuery ? '&' . http_build_query( $filterQuery ) : '',
+) );
 $objectTotal = $inspection ? count( $inspection['objects'] ) : 0;
 $pageSize = $perPage === 'all' ? max( 1, $objectTotal ) : (int)$perPage;
 $pageCount = max( 1, (int)ceil( $objectTotal / $pageSize ) );
@@ -188,10 +208,26 @@ $pageNumber = isset( $_GET['page'] ) && ctype_digit( (string)$_GET['page'] ) ? m
 $tpl->setVariable( 'InspectionPager', array(
     'per_page' => $perPage, 'choices' => $perPageChoices, 'page' => $pageNumber, 'pages' => $pageCount, 'total' => $objectTotal,
     'from' => $objectTotal ? ( $pageNumber - 1 ) * $pageSize + 1 : 0, 'to' => min( $objectTotal, $pageNumber * $pageSize ),
+    'prev' => max( 1, $pageNumber - 1 ), 'next' => min( $pageCount, $pageNumber + 1 ),
 ) );
 if ( $inspection )
     $inspection['objects'] = array_slice( $inspection['objects'], ( $pageNumber - 1 ) * $pageSize, $pageSize );
 $tpl->setVariable( 'Inspection', $inspection );
+
+// The install history of this package: who installed it, when, how and with what result (kept after the
+// job files expire), the viewer's own installs or, with xrowextract/all_jobs, everyone's
+$packageInstalls = array();
+$packageInstallCount = 0;
+if ( $package instanceof eZPackage && XrowExtractSchema::exists() )
+{
+    $viewerLogin = eZUser::currentUser()->attribute( 'login' );
+    foreach ( XrowExtractHistory::fetchInstalls( $viewerLogin, XrowExtractJob::allowAllJobs(), $packageName, 0, 10 ) as $historyRow )
+        $packageInstalls[] = $historyRow->installRow( $viewerLogin );
+    $packageInstallCount = XrowExtractHistory::countInstalls( $viewerLogin, XrowExtractJob::allowAllJobs(), $packageName );
+}
+$tpl->setVariable( 'PackageInstalls', $packageInstalls );
+$tpl->setVariable( 'PackageInstallCount', $packageInstallCount );
+$tpl->setVariable( 'JobsAvailable', XrowExtractJob::available() );
 
 $availableSiteAccesses = eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );
 $tpl->setVariable( 'AvailableSiteAccesses', $availableSiteAccesses );
@@ -264,7 +300,17 @@ if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage && Xro
 elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage )
 {
     // No background jobs on this installation (XrowExtractJob::available() is false): install in the request
+    $installStartedAt = time();
+    $preInstall = XrowExtractPackage::cachedInspection( $package, $ParentNodeID );
     $installReport = XrowExtractPackage::install( $package, $ParentNodeID, $SiteAccess, $ObjectMode, $ClassMode );
+    XrowExtractHistory::recordInstall( array(
+        'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'trigger_type' => 'manual',
+        'started_at' => $installStartedAt, 'ended_at' => time(),
+        'package' => $package->attribute( 'name' ), 'parent_node_id' => (int)$ParentNodeID, 'site_access' => $SiteAccess,
+        'object_mode' => $ObjectMode, 'class_mode' => $ClassMode,
+        'counts' => $preInstall['counts'], 'report' => $installReport,
+        'missing_datatypes' => isset( $preInstall['missing_datatypes'] ) ? $preInstall['missing_datatypes'] : array(),
+    ) );
     if ( $installReport['ok'] )
     {
         eZContentObject::clearCache();
