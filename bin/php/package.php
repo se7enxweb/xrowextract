@@ -473,6 +473,8 @@ if ( $options['export'] )
         $fail( 'Missing --node or --nodes.' );
     }
     $nodeIDs = array_values( array_unique( array_filter( $nodeIDs ) ) );
+    if ( !$nodeIDs )
+        $fail( 'No node id in --node/--nodes.' );
     $firstNode = null;
     foreach ( $nodeIDs as $nodeID )
     {
