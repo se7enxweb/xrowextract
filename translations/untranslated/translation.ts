@@ -6526,4 +6526,15 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>design/admin/pagelayout</name>
+    <message>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export CSV</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>
