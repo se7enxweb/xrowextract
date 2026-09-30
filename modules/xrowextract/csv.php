@@ -1467,7 +1467,7 @@ if ( $OutputFormat === 'ezpkg' && !$isPreview && ( $http->hasPostVariable( 'Down
     $packageNodeIDs = array_keys( $packageNodeIDs );
     if ( !$packageNodeIDs )
     {
-        $PresetNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Nothing matches this selection (node/class/filters); nothing to export as a package.' ) );
+        $DownloadNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Nothing matches this selection (node/class/filters); nothing to export as a package.' ) );
     }
     else
     {
@@ -1493,7 +1493,7 @@ if ( $OutputFormat === 'ezpkg' && !$isPreview && ( $http->hasPostVariable( 'Down
         $package->remove();
         if ( $exportPath === false )
         {
-            $PresetNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Could not write the package file.' ) );
+            $DownloadNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Could not write the package file.' ) );
         }
         else
         {
@@ -1510,9 +1510,11 @@ if ( $OutputFormat === 'ezpkg' && !$isPreview && ( $http->hasPostVariable( 'Down
         }
     }
 }
+// Shown next to the download buttons: the page's other notices were handed to the template further up
+$tpl->setVariable( 'DownloadNotice', isset( $DownloadNotice ) ? $DownloadNotice : false );
 
 // Format ezpkg already had its own branch above for a real download/auto-download (returned via
-// cleanExit() on success, or fell through with $PresetNotice set on error) - never reaches
+// cleanExit() on success, or fell through with $DownloadNotice set on error) - never reaches
 // XrowExtractWriter, which has no row-writing logic of its own for a package. A column manifest does not apply
 // to a package either, so the two manifest downloads are left out for it as well.
 if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloadManifestOnly || $isPreview || $AutoDownloadAfterLoad )
