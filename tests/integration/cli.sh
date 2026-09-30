@@ -233,6 +233,12 @@ t 'job: run an id that is not one' fail 'Not a job id' job.php --run=zzz
 t 'job: run a job that does not exist' fail '' job.php --run=0123456789abcdef0123456789abcdef
 t 'job: run a path' fail '' job.php --run=../../../etc/passwd
 
+# ext:xrowextract:requirements (a test installation has every required one; the optional ones vary)
+t 'requirements' ok '^PASS requirements: every required one' requirements.php
+t 'requirements --json' ok '"exit_code": 0' requirements.php --json
+t 'requirements --feature=core' ok '^PASS feature core' requirements.php --feature=core
+t 'requirements: unknown feature' fail 'No feature' requirements.php --feature=no_such_feature
+
 echo
 if [ "$failed" = 0 ]; then echo "PASS all $pass cases"; exit 0; fi
 echo "FAIL $failed of $((pass + failed)) cases"; exit 1

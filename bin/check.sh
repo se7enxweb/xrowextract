@@ -2,7 +2,7 @@
 # The release gate of xrowextract: every check a release has to pass, one PASS/FAIL line per part, exit
 # code 1 when any part fails (2 for a usage error). Run it from anywhere; it works on the clone it is in.
 #
-#   bin/check.sh [--php=/path/to/php] [--only=lint,ts,dup,phpstan,unit,cli,views,posts]
+#   bin/check.sh [--php=/path/to/php] [--only=lint,ts,dup,phpstan,unit,req,cli,views,posts]
 #
 #   lint     php -l on every PHP file of the extension with that PHP binary, with every error level on,
 #            so a compile-time deprecation (e.g. an implicitly nullable parameter) fails as well
@@ -10,6 +10,10 @@
 #   dup      no <source> twice in the same <context> of a .ts file
 #   phpstan  PHPStan with phpstan.neon.dist (level and baseline there)
 #   unit     the PHPUnit tests in tests/unit (no database needed)
+#   req      the requirements check (XrowExtractRequirements): with XROWEXTRACT_TEST_ROOT set, bin/php/requirements.php
+#            in that installation as the owner of its var/ (the real PHP configuration and folders); else the
+#            checkout's check against EXPONENTIAL_ROOT. FAIL when a required one is missing; a missing optional
+#            one (it only takes some features away) is listed as WARN and counted in the PASS line
 #   cli      tests/integration/cli.sh: every command against a test installation (only with
 #            XROWEXTRACT_TEST_ROOT set; it writes to that installation's content and database)
 #   views    tests/integration/views.py: every admin view by GET in a browser (only with
@@ -42,7 +46,7 @@ for arg in "$@"; do
   case "$arg" in
     --php=*) PHP_BIN=${arg#--php=} ;;
     --only=*) ONLY=${arg#--only=} ;;
-    -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,34p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "FAIL unknown option $arg (see --help)"; exit 2 ;;
   esac
 done
@@ -132,6 +136,36 @@ if want unit; then
       printf '%s\n' "$out" | tail -40 | sed 's/^/  /'
       fail "unit"
     fi
+  fi
+fi
+
+if want req; then
+  if [ -n "${XROWEXTRACT_TEST_ROOT:-}" ] && [ -f "$XROWEXTRACT_TEST_ROOT/extension/xrowextract/bin/php/requirements.php" ]; then
+    where="$XROWEXTRACT_TEST_ROOT"
+    runas=${XROWEXTRACT_TEST_USER:-$(stat -c %U "$XROWEXTRACT_TEST_ROOT/var")}
+    if [ "$(id -u)" = 0 ] && [ "$runas" != root ]; then
+      out=$(cd "$XROWEXTRACT_TEST_ROOT" && runuser -u "$runas" -- "$PHP_BIN" -d error_reporting=-1 extension/xrowextract/bin/php/requirements.php 2>&1 < /dev/null)
+    else
+      out=$(cd "$XROWEXTRACT_TEST_ROOT" && "$PHP_BIN" -d error_reporting=-1 extension/xrowextract/bin/php/requirements.php 2>&1 < /dev/null)
+    fi
+    rc=$?
+  elif [ -n "$ROOT" ]; then
+    where="$ROOT (checkout's check)"
+    out=$(EXPONENTIAL_ROOT=$ROOT "$PHP_BIN" -d error_reporting=-1 tests/tools/check_requirements.php 2>&1)
+    rc=$?
+  else
+    out=""; rc=2
+  fi
+  warn=$(printf '%s\n' "$out" | grep -c '^WARN ')
+  summary=$(printf '%s\n' "$out" | grep -E '^(PASS|FAIL) requirements:' | tail -1)
+  if [ "$rc" = 2 ] && [ -z "$out" ]; then
+    fail "req: no Exponential root (set EXPONENTIAL_ROOT or XROWEXTRACT_TEST_ROOT)"
+  elif [ "$rc" = 0 ] && [ -n "$summary" ]; then
+    printf '%s\n' "$out" | grep '^WARN ' | sed 's/^/  /'
+    pass "req: ${summary#PASS requirements: } ($where)"
+  else
+    printf '%s\n' "$out" | grep -vE '^(PASS|INFO) ' | head -20 | sed 's/^/  /'
+    fail "req: ${summary:-the check did not run} ($where)"
   fi
 fi
 
