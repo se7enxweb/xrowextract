@@ -115,7 +115,7 @@ class XrowExtractPreset
             'created' => $existing ? $existing['created'] : $now,
             'modified' => $now,
         );
-        $json = json_encode( $record );
+        $json = self::encodeRecord( $record );
         $name = self::siteDataName( $id );
         $row = eZSiteData::fetchByName( $name );
         if ( $row instanceof eZSiteData )
@@ -128,6 +128,21 @@ class XrowExtractPreset
             eZSiteData::create( $name, $json )->store();
         }
         return $id;
+    }
+
+    /**
+     * A user preset as the JSON it is stored as. Text that is not valid UTF-8 (a name or a condition value sent
+     * in another encoding) is kept with U+FFFD in place of the bytes it cannot read, instead of json_encode()
+     * failing and the preset being stored empty. Throws when the record cannot be encoded at all.
+     *
+     * @param array<string, mixed> $record
+     */
+    public static function encodeRecord( array $record ): string
+    {
+        $json = json_encode( $record, JSON_INVALID_UTF8_SUBSTITUTE );
+        if ( $json === false )
+            throw new RuntimeException( 'The preset cannot be stored: ' . json_last_error_msg() );
+        return $json;
     }
 
     /** @param mixed $id */
