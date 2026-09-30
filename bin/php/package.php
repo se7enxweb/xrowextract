@@ -267,6 +267,13 @@ if ( $options['install'] )
     $parentNode = eZContentObjectTreeNode::fetch( $parentNodeID );
     if ( !$parentNode instanceof eZContentObjectTreeNode )
         $fail( "No node $parentNodeID (--parent)." );
+    // Checked before the dry run too, so a dry run does not pass what the real install then refuses
+    $objectMode = $options['object-mode'] ? $options['object-mode'] : XrowExtractPackage::OBJECT_UPDATE;
+    $classMode = $options['class-mode'] ? $options['class-mode'] : XrowExtractPackage::CLASS_SKIP;
+    if ( !in_array( $objectMode, array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true ) )
+        $fail( '--object-mode is skip, update or new.' );
+    if ( !in_array( $classMode, array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true ) )
+        $fail( '--class-mode is skip, replace or new.' );
 
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 2, 'inspecting' );
@@ -285,12 +292,6 @@ if ( $options['install'] )
         $script->shutdown( 0 );
     }
 
-    $objectMode = $options['object-mode'] ? $options['object-mode'] : XrowExtractPackage::OBJECT_UPDATE;
-    $classMode = $options['class-mode'] ? $options['class-mode'] : XrowExtractPackage::CLASS_SKIP;
-    if ( !in_array( $objectMode, array( XrowExtractPackage::OBJECT_SKIP, XrowExtractPackage::OBJECT_UPDATE, XrowExtractPackage::OBJECT_NEW ), true ) )
-        $fail( '--object-mode is skip, update or new.' );
-    if ( !in_array( $classMode, array( XrowExtractPackage::CLASS_SKIP, XrowExtractPackage::CLASS_REPLACE, XrowExtractPackage::CLASS_NEW ), true ) )
-        $fail( '--class-mode is skip, replace or new.' );
     $siteAccess = $options['site-access'] ? $options['site-access'] : eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
 
     // What this install is about to write: the Jobs page counts these in the database while the
