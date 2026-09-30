@@ -966,12 +966,21 @@ class XrowExtractImport
         $path = $raw;
         if ( preg_match( '#^https?://#i', $raw ) )
         {
-            if ( strpos( $raw, $publicHost ) !== 0 )
+            // The scheme, host and port must be the site's exactly: a prefix test would also let
+            // https://site.example.attacker.test through for https://site.example
+            $rawParts = parse_url( $raw );
+            $siteParts = parse_url( $publicHost );
+            $origin = function ( $parts )
+            {
+                return strtolower( $parts['scheme'] ) . '://' . strtolower( $parts['host'] ) . ( isset( $parts['port'] ) ? ':' . (int)$parts['port'] : '' );
+            };
+            if ( !is_array( $rawParts ) || !is_array( $siteParts ) || empty( $rawParts['host'] ) || empty( $siteParts['host'] )
+                 || isset( $rawParts['user'] ) || $origin( $rawParts ) !== $origin( $siteParts ) )
                 return array( false, null, "not a URL of this site: $raw" );
             $data = @file_get_contents( $raw );
             if ( $data === false )
                 return array( false, null, "could not download $raw" );
-            $name = basename( parse_url( $raw, PHP_URL_PATH ) );
+            $name = basename( (string)parse_url( $raw, PHP_URL_PATH ) ); // null for a URL without a path
             $name = preg_replace( '/[^A-Za-z0-9._-]+/', '_', $name !== '' ? $name : 'file' );
             $target = rtrim( $importDir, '/' ) . '/' . uniqid( 'dl_', true ) . '_' . $name;
             file_put_contents( $target, $data );
