@@ -14,6 +14,15 @@
  *   php extension/xrowextract/bin/php/package.php --export --node=130 --file=var/tmp/ng_news_130.ezpkg
  *   php extension/xrowextract/bin/php/package.php --export --node=2 --subtree --class=ng_article --file=var/tmp/articles.ezpkg
  *   php extension/xrowextract/bin/php/package.php --template --class=ng_article --variant=both --file=var/tmp/ng_article_template.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --export --node=2 --class=ng_article --since=30d --section=standard --file=var/tmp/recent.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --export --preset=site:news_last_30_days --file=var/tmp/news.ezpkg
+ *   php extension/xrowextract/bin/php/package.php --compare=package_a --with=package_b
+ *   php extension/xrowextract/bin/php/package.php --compare=package_a
+ *
+ * --export with any of the filter options of ext:xrowextract:csv (--since, --before, --date, --section,
+ * --state, --visibility, --where, --sort, --depth, --languages, --extended-filter, --fetch-alias, ...) or
+ * with --preset runs exactly that export (bin/php/csv.php --format=ezpkg): one class, every filter the
+ * same as there. Only the name filter is spelled --name-contains here (--name is the package's name).
  *
  * --output writes a JSON report alongside the normal text output, for
  * --inspect and --install: how xrowextract/jobs.php (type "package") runs a
@@ -89,7 +98,7 @@ $options = $script->getOptions(
         'class'        => '--export: only this class below --node (id or identifier, --node only, not --nodes); --template: the class to build a sample for (required)',
         'variant'      => '--template: class, content or both (default both)',
         'object-count' => '--template: how many sample content objects to create (default 3, max 5)',
-        'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages)',
+        'languages'    => '--template: comma list of locales for the sample content (default: up to 2 of the site\'s content languages); --export: all or a comma list of locales, as ext:xrowextract:csv',
         'name'         => '--export: package name (default: a name derived from the node)',
         'file'         => '--export/--template: file to write the .ezpkg to (default: --output, set by a background job)',
         'keep'         => '--export/--template: also register the package in the repository (default: write the .ezpkg file only, remove it from the repository again)',
@@ -387,6 +396,63 @@ if ( $options['export'] )
     $exportFile = $options['file'] ? (string)$options['file'] : (string)$options['output'];
     if ( !$exportFile )
         $fail( 'Missing --file (or --output, set automatically for a background job).' );
+
+    // With a filter option of ext:xrowextract:csv or a --preset: that export, as a content package - the
+    // same selection code (bin/php/csv.php --format=ezpkg), not a second copy of it here
+    $valueFilters = array( 'scope', 'depth', 'depth-operator', 'offset', 'limit', 'languages', 'date-field', 'since', 'before', 'date', 'section',
+                           'state', 'visibility', 'where', 'sort', 'order', 'sort2', 'order2', 'extended-filter', 'extended-params',
+                           'fetch-alias', 'preset', 'changed-since' );
+    $filterArgs = array();
+    foreach ( $valueFilters as $name )
+        if ( $options[$name] !== null && $options[$name] !== false && $options[$name] !== '' )
+            $filterArgs[] = '--' . $name . '=' . $options[$name];
+    if ( $options['name-contains'] )
+        $filterArgs[] = '--name=' . $options['name-contains'];
+    foreach ( array( 'main-only', 'lenient' ) as $name )
+        if ( $options[$name] )
+            $filterArgs[] = '--' . $name;
+    foreach ( array( 'alias-param', 'param' ) as $name )
+        foreach ( (array)$options[$name] as $value )
+            if ( (string)$value !== '' )
+                $filterArgs[] = '--' . $name . '=' . $value;
+    if ( $filterArgs )
+    {
+        if ( $options['nodes'] )
+            $fail( 'Filters and --preset work on one --node (or the preset\'s own), not --nodes.' );
+        if ( !$options['class'] && !$options['preset'] && !$options['fetch-alias'] )
+            $fail( 'Filters need --class (one class, as ext:xrowextract:csv), or a --preset or --fetch-alias that names one.' );
+        if ( $options['name'] )
+            $cli->output( 'Note: --name is not used with filters; the package is named after the class and node (ext:xrowextract:csv --format=ezpkg).' );
+        $phpCli = XrowExtractJob::phpCliBinary();
+        if ( !$phpCli )
+            $fail( 'No PHP command line binary found (csv.ini [Jobs] PhpCli).' );
+        $argv = array( $phpCli, XrowExtractJob::scriptFor( 'csv' ), '--format=ezpkg', '--output=' . $exportFile, '--user=' . $login );
+        if ( $options['class'] )
+            $argv[] = '--class=' . $options['class'];
+        if ( $options['node'] )
+            $argv[] = '--node=' . (int)$options['node'];
+        if ( $options['keep'] )
+            $argv[] = '--keep';
+        if ( $options['progress-file'] )
+            $argv[] = '--progress-file=' . $options['progress-file'];
+        $argv = array_merge( $argv, $filterArgs );
+        if ( XrowExtractJob::runningAsRoot() )
+            $argv[] = '--allow-root-user';
+        $cli->output( 'Exporting through ext:xrowextract:csv --format=ezpkg with: ' . implode( ' ', array_merge( $options['class'] ? array( '--class=' . $options['class'] ) : array(), $filterArgs ) ) );
+        // The child's output (stdout and stderr together) is passed on through this process's own output, so it
+        // comes after the line above in a file or a job log too, never over it
+        $process = proc_open( $argv, array( 0 => array( 'file', '/dev/null', 'r' ), 1 => array( 'pipe', 'w' ), 2 => array( 'redirect', 1 ) ), $pipes, eZSys::rootDir() );
+        if ( !is_resource( $process ) )
+            $fail( 'Could not start ext:xrowextract:csv.' );
+        while ( !feof( $pipes[1] ) )
+        {
+            $chunk = fread( $pipes[1], 8192 );
+            if ( $chunk !== false && $chunk !== '' )
+                print $chunk;
+        }
+        fclose( $pipes[1] );
+        $script->shutdown( proc_close( $process ) );
+    }
     if ( $options['progress-file'] )
         XrowExtractJob::writeProgress( (string)$options['progress-file'], 0, 3, 'collecting' );
 

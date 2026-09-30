@@ -92,6 +92,24 @@ if ( $http->hasPostVariable( 'NewImport' ) )
     return $module->redirectTo( 'xrowextract/import' );
 }
 
+// "Open in Import" from the Package tab: a content package already in the repository becomes this page's
+// file, exactly as an uploaded one (the same session shape the upload below leaves), then its review step
+if ( $http->hasPostVariable( 'OpenRepositoryPackage' ) )
+{
+    $openName = $http->hasPostVariable( 'PackageName' ) ? (string)$http->postVariable( 'PackageName' ) : '';
+    $openPackage = $openName !== '' ? eZPackage::fetch( $openName ) : false;
+    $isContentPackage = false;
+    if ( $openPackage instanceof eZPackage )
+        foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
+            $isContentPackage = $isContentPackage || $repositoryPackage['name'] === $openName;
+    if ( $isContentPackage )
+    {
+        $forgetFile();
+        $_SESSION[$SESSION_KEY] = array( 'name' => $openName, 'format' => 'package', 'kind' => 'package', 'package_name' => $openName, 'source' => 'repository' );
+    }
+    return $module->redirectTo( 'xrowextract/import' );
+}
+
 // A new upload: the plain (no JavaScript) whole-file fallback, or a finished chunked upload
 // adopted by its UploadID (XrowExtractUpload::path() only returns a path for the current user's
 // own, complete upload). Either way, a content package (.ezpkg/.tar.gz) or a standalone

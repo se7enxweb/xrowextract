@@ -61,21 +61,30 @@
                         {/foreach}
                     </select>
                     <input class="button" type="submit" name="ChoosePackage" value="{'Open'|i18n('design/standard/extract')}" />
+                    <input class="button" type="submit" name="OpenRepositoryPackage" formaction={'xrowextract/import'|ezurl} value="{'Open in Import'|i18n('design/standard/extract')}" title="{'Review and install it on the Import page, the same way as an uploaded file'|i18n('design/standard/extract')|wash}" />
                 </div>
                 </form>
             </div>
             {/if}
 
             {if $Package}
-            <p class="xe-note">{'Current package: %name'|i18n('design/standard/extract',, hash( '%name', concat( '<strong>', $PackageName|wash, '</strong>' ) ))}
+            <div class="xe-note xe-current-package">
+                <p>{'Current package: %name'|i18n('design/standard/extract',, hash( '%name', concat( '<strong>', $PackageName|wash, '</strong>' ) ))}
                 <a href={concat( 'package/view/full/', $PackageName )|ezurl} target="_blank" rel="noopener">{'full package view'|i18n('design/standard/extract')}</a>
                 &middot; <a href={concat( 'xrowextract/browse/', $PackageName, '/', 0 )|ezurl}>{'browse its files'|i18n('design/standard/extract')}</a>
+                &middot; <a href={concat( 'xrowextract/compare/', $PackageName )|ezurl}>{'compare'|i18n('design/standard/extract')}</a>
                 &middot; <a href={concat( 'package/export/', $PackageName )|ezurl}>{'download .ezpkg'|i18n('design/standard/extract')}</a>
-                &middot; <a href={concat( 'package/install/', $PackageName )|ezurl}>{'full install wizard'|i18n('design/standard/extract')}</a>
-                <form name="eZPackageForget" method="post" action={'xrowextract/package'|ezurl} style="display:inline">
-                    <input class="button" type="submit" name="ForgetPackage" value="{'Forget'|i18n('design/standard/extract')}" />
-                </form>
-            </p>
+                &middot; <a href={concat( 'package/install/', $PackageName )|ezurl}>{'full install wizard'|i18n('design/standard/extract')}</a></p>
+                <div class="xe-inline">
+                    <form name="eZPackageOpenInImport" method="post" action={'xrowextract/import'|ezurl}>
+                        <input type="hidden" name="PackageName" value="{$PackageName|wash}" />
+                        <input class="button" type="submit" name="OpenRepositoryPackage" value="{'Open in Import'|i18n('design/standard/extract')}" />
+                    </form>
+                    <form name="eZPackageForget" method="post" action={'xrowextract/package'|ezurl}>
+                        <input class="button" type="submit" name="ForgetPackage" value="{'Forget'|i18n('design/standard/extract')}" />
+                    </form>
+                </div>
+            </div>
             {/if}
         </section>
 
