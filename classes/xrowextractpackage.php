@@ -718,6 +718,117 @@ class XrowExtractPackage
         return $out;
     }
 
+    // ------------------------------------------------------------ package contents browser (#26)
+    //
+    // Every file the package's own directory carries, recursively - not only the attached binaries
+    // packageFiles() above lists, but package.xml itself, every ezcontentclass/ezcontentobject item
+    // file, documents/*.txt, settings/* and so on. The list itself carries no limit; xrowextract/
+    // browse paginates over it. Shared by the Import page, the Package tab (a short preview, "browse
+    // all N files" beyond it) and xrowextract/browse (the full, paginated page a link from the
+    // kernel's own package/view/full reaches).
+
+    /** Every regular file under the package's own directory, recursively, sorted by path. No limit: paginate the result, do not slice it here. */
+    public static function allPackageFiles( eZPackage $package )
+    {
+        $out = array();
+        $base = rtrim( (string)$package->path(), '/' );
+        if ( !is_dir( $base ) )
+            return $out;
+        $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $base, FilesystemIterator::SKIP_DOTS ) );
+        foreach ( $iterator as $file )
+        {
+            if ( !$file->isFile() )
+                continue;
+            $relative = ltrim( str_replace( $base, '', $file->getPathname() ), '/' );
+            $out[] = array(
+                'path' => $relative, 'size' => $file->getSize(),
+                'size_human' => XrowExtractUpload::humanSize( $file->getSize() ),
+                'kind' => self::fileKind( $relative ),
+            );
+        }
+        usort( $out, function ( $a, $b ) { return strcasecmp( $a['path'], $b['path'] ); } );
+        return $out;
+    }
+
+    /**
+     * The first $limit rows of allPackageFiles(), each with its 'index' into the whole (not just
+     * this slice's own position - see modules/xrowextract/browse.php's own comment on why an index,
+     * not a path, identifies a file in a URL), for the short preview embedded on the Import page and
+     * the Package tab (design:xrowextract/package_files_preview.tpl). Returns array( 'files',
+     * 'total' ) - 'total' is allPackageFiles()'s own count, always, not count( 'files' ).
+     */
+    public static function packageFilesPreview( eZPackage $package, $limit = 10 )
+    {
+        $all = self::allPackageFiles( $package );
+        $slice = array_slice( $all, 0, $limit );
+        foreach ( $slice as $i => &$row )
+            $row['index'] = $i;
+        unset( $row );
+        return array( 'files' => $slice, 'total' => count( $all ) );
+    }
+
+    /** 'xml', 'image', 'text' or 'binary' by extension - what the browser shows inline, and how. */
+    public static function fileKind( $relativePath )
+    {
+        $ext = strtolower( (string)pathinfo( $relativePath, PATHINFO_EXTENSION ) );
+        if ( $ext === 'xml' )
+            return 'xml';
+        if ( in_array( $ext, array( 'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg' ), true ) )
+            return 'image';
+        if ( in_array( $ext, array( 'txt', 'md', 'csv', 'json', 'ini' ), true ) )
+            return 'text';
+        return 'binary';
+    }
+
+    /**
+     * The content type xrowextract/browse_file answers a file with. An image's own real type; every
+     * other kind (including xml) as text/plain - an .xml or .txt item is shown as data here, never
+     * served as a type a browser would try to render as markup or execute.
+     */
+    public static function fileMimeType( $relativePath )
+    {
+        $ext = strtolower( (string)pathinfo( $relativePath, PATHINFO_EXTENSION ) );
+        $map = array(
+            'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml',
+        );
+        return isset( $map[$ext] ) ? $map[$ext] : 'text/plain; charset=utf-8';
+    }
+
+    /**
+     * Resolves $relativePath against $package's own directory, refusing an absolute path, a ".."
+     * component, or anything realpath() follows (a symlink included) outside it. Returns the real,
+     * safe, absolute path to an existing regular file, or false - the one gate both the inline
+     * viewer and the raw-byte view (xrowextract/browse_file) read a package file through.
+     */
+    public static function packageFilePath( eZPackage $package, $relativePath )
+    {
+        $relativePath = ltrim( (string)$relativePath, '/' );
+        if ( $relativePath === '' || strpos( $relativePath, "\0" ) !== false || preg_match( '#(^|/)\.\.(/|$)#', $relativePath ) )
+            return false;
+        $base = realpath( (string)$package->path() );
+        if ( $base === false )
+            return false;
+        $real = realpath( $base . '/' . $relativePath );
+        // Containment by the real, resolved paths, not a string prefix check ("/x/pkg2" starting
+        // with the characters "/x/pkg" would wrongly pass a bare substr/strpos-at-0 test)
+        if ( $real === false || !is_file( $real ) || strpos( $real . '/', $base . '/' ) !== 0 )
+            return false;
+        return $real;
+    }
+
+    /** Pretty-printed XML (indented, no run-together text nodes), or the original bytes unchanged if they do not parse as XML. */
+    public static function prettyPrintXML( $bytes )
+    {
+        $dom = new DOMDocument( '1.0', 'utf-8' );
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        if ( !@$dom->loadXML( (string)$bytes ) )
+            return (string)$bytes;
+        $pretty = $dom->saveXML();
+        return $pretty !== false ? $pretty : (string)$bytes;
+    }
+
     protected static function inspectClassItem( eZPackage $package, array $item )
     {
         if ( empty( $item['filename'] ) )
@@ -773,7 +884,17 @@ class XrowExtractPackage
             'attributes'  => $attributeRows,
             'attribute_count' => count( $attributeRows ),
             'diff'        => $existing instanceof eZContentClass ? self::classAttributeDiff( $attributeRows, $existing ) : null,
+            'file_path'   => self::itemRelativePath( $item ),
         );
+    }
+
+    /** The item's own file, relative to the package's root - what fetchItemDOM() reads, and the same path allPackageFiles() reports it under. */
+    protected static function itemRelativePath( array $item )
+    {
+        if ( empty( $item['filename'] ) )
+            return null;
+        $subdirectory = isset( $item['sub-directory'] ) ? $item['sub-directory'] : false;
+        return ( $subdirectory ? $subdirectory . '/' : '' ) . $item['filename'] . '.xml';
     }
 
     /** Attributes added, removed or changed datatype, package vs. the installed class of the same identifier/remote id. */
@@ -810,8 +931,9 @@ class XrowExtractPackage
     protected static function inspectObjectItem( eZPackage $package, array $item, array $classRemoteIDsInPackage, array $classIdentifiersInPackage, $parentNodeID = false )
     {
         $rows = array();
-        foreach ( self::objectDOMNodes( $package, $item ) as $objectNode )
+        foreach ( self::objectDOMNodesWithPaths( $package, $item ) as $pair )
         {
+            $objectNode = $pair['node'];
             $name = $objectNode->getAttribute( 'name' );
             $remoteID = $objectNode->getAttribute( 'remote_id' );
             $classRemoteID = $objectNode->getAttribute( 'class_remote_id' );
@@ -891,6 +1013,7 @@ class XrowExtractPackage
                 'existing'         => $existingInfo,
                 'placement'        => $placement,
                 'field_changes'    => $fieldChanges,
+                'file_path'        => $pair['file_path'],
             );
         }
         return $rows;
@@ -996,6 +1119,47 @@ class XrowExtractPackage
             }
         }
         return false;
+    }
+
+    /**
+     * The same as objectDOMNodes() below, paired with the file each node actually lives in
+     * (relative to the package's own root, the same path allPackageFiles() reports it under) - for
+     * the package contents browser's own "view this item's file" link (#26), where an inline
+     * object-list's every object shares the item's own file, but an object-files-list gives each
+     * object a separate one.
+     */
+    protected static function objectDOMNodesWithPaths( eZPackage $package, array $item )
+    {
+        if ( empty( $item['filename'] ) )
+            return array();
+        $dom = self::fetchItemDOM( $package, $item );
+        if ( !$dom )
+            return array();
+
+        $itemPath = self::itemRelativePath( $item );
+        $objectListNode = $dom->getElementsByTagName( 'object-list' )->item( 0 );
+        if ( $objectListNode )
+        {
+            $pairs = array();
+            foreach ( $objectListNode->getElementsByTagName( 'object' ) as $node )
+                $pairs[] = array( 'node' => $node, 'file_path' => $itemPath );
+            return $pairs;
+        }
+
+        $pairs = array();
+        $objectFilesListNode = $dom->getElementsByTagName( 'object-files-list' )->item( 0 );
+        if ( !$objectFilesListNode )
+            return $pairs;
+        $handler = eZPackage::packageHandler( 'ezcontentobject' );
+        $directory = $handler ? $handler->contentObjectDirectory() : 'ezcontentobject';
+        foreach ( $objectFilesListNode->getElementsByTagName( 'object-file' ) as $fileNode )
+        {
+            $relativePath = $directory . '/' . $fileNode->getAttribute( 'filename' );
+            $objectDOM = $package->fetchDOMFromFile( $package->path() . '/' . $relativePath );
+            if ( $objectDOM )
+                $pairs[] = array( 'node' => $objectDOM->documentElement, 'file_path' => $relativePath );
+        }
+        return $pairs;
     }
 
     /** DOM nodes for every content object an install item carries, inline or in separate files. */

@@ -859,17 +859,42 @@ elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $h
     // jobs are available on this installation, or for Preview, which is always quick enough to run
     // in the request.
     $apply = $http->hasPostVariable( 'Apply' );
+    $forceFreshInspection = false;
     if ( $apply && $Package instanceof eZPackage )
     {
         $installReport = XrowExtractPackage::install( $Package, $ParentNodeID, eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ),
                                                        $PkgObjectMode, $PkgClassMode );
         if ( $installReport['ok'] )
+        {
             eZContentObject::clearCache();
+            // What "already exists" means just changed; a cached dry run from before the install
+            // would still say "create" for what this just installed.
+            XrowExtractPackage::forgetInspections( $Package->attribute( 'name' ) );
+            $forceFreshInspection = true;
+        }
         $tpl->setVariable( 'PackageInstallErrors', $installReport['errors'] );
     }
-    $inspection = $Package instanceof eZPackage ? XrowExtractPackage::inspect( $Package, $ParentNodeID ) : array( 'classes' => array(), 'objects' => array() );
+    // Cached (#26): see XrowExtractPackage::cachedInspection()'s own comment - a large package makes
+    // a fresh inspect() too slow to redo on every reload of what is otherwise only ever a read of
+    // its own last result.
+    $inspection = $Package instanceof eZPackage
+                ? XrowExtractPackage::cachedInspection( $Package, $ParentNodeID, $forceFreshInspection )
+                : array( 'classes' => array(), 'objects' => array() );
     $result = XrowExtractPackage::inspectionToResultRows( $inspection );
     $publishResult( $result, $apply );
+    // The package contents browser (#26): a short preview of the package's own files here
+    // (design:xrowextract/package_files_preview.tpl), "Browse all N files" linking to the full
+    // paginated xrowextract/browse/<name> for the rest - the same include the Package tab uses.
+    // Skipped once $forgetFile() below has already cleared $Package for an applied, non-kept
+    // transient package: nothing left to browse.
+    if ( $Package instanceof eZPackage )
+    {
+        $filesPreview = XrowExtractPackage::packageFilesPreview( $Package );
+        $tpl->setVariable( 'Files', $filesPreview['files'] );
+        $tpl->setVariable( 'FilesTotal', $filesPreview['total'] );
+        $tpl->setVariable( 'FilesOffset', 0 );
+        $tpl->setVariable( 'ViewedFile', false );
+    }
     if ( $apply )
         $forgetFile();
 }

@@ -4,6 +4,42 @@
 <context>
     <name>design/standard/extract</name>
     <message>
+        <source>View</source>
+        <translation>View</translation>
+    </message>
+    <message>
+        <source>Package contents</source>
+        <translation>Package contents</translation>
+    </message>
+    <message>
+        <source>%count files</source>
+        <translation>%count files</translation>
+    </message>
+    <message>
+        <source>%count files, %from to %to shown.</source>
+        <translation>%count files, %from to %to shown.</translation>
+    </message>
+    <message>
+        <source>Browse all %count files</source>
+        <translation>Browse all %count files</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <source>Package contents: %name</source>
+        <translation>Package contents: %name</translation>
+    </message>
+    <message>
+        <source>No package %name in the repository.</source>
+        <translation>No package %name in the repository.</translation>
+    </message>
+    <message>
+        <source>browse its files</source>
+        <translation>browse its files</translation>
+    </message>
+    <message>
         <source>One class of content export</source>
         <translation>One class of content export</translation>
     </message>

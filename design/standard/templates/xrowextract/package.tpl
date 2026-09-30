@@ -69,6 +69,7 @@
             {if $Package}
             <p class="xe-note">{'Current package: %name'|i18n('design/standard/extract',, hash( '%name', concat( '<strong>', $PackageName|wash, '</strong>' ) ))}
                 <a href={concat( 'package/view/full/', $PackageName )|ezurl} target="_blank" rel="noopener">{'full package view'|i18n('design/standard/extract')}</a>
+                &middot; <a href={concat( 'xrowextract/browse/', $PackageName, '/', 0 )|ezurl}>{'browse its files'|i18n('design/standard/extract')}</a>
                 &middot; <a href={concat( 'package/export/', $PackageName )|ezurl}>{'download .ezpkg'|i18n('design/standard/extract')}</a>
                 &middot; <a href={concat( 'package/install/', $PackageName )|ezurl}>{'full install wizard'|i18n('design/standard/extract')}</a>
                 <form name="eZPackageForget" method="post" action={'xrowextract/package'|ezurl} style="display:inline">
@@ -222,6 +223,14 @@
             {/if}
             {/if}
         </section>
+        {/if}
+
+        {if $Package}
+        {* The package contents browser (#26): every file the package carries (not only its
+           class/object items above - simplefiles, documents, package.xml itself too), a short
+           preview here, "Browse all N files" linking to the full paginated xrowextract/browse for
+           the rest. Same include the Import page's package review uses. *}
+        {include uri='design:xrowextract/package_files_preview.tpl'}
         {/if}
 
         {if $InstallReport}
