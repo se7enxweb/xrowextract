@@ -289,11 +289,11 @@ class XrowExtractImport
         $header = array();
         foreach ( $root->childNodes as $child )
         {
-            if ( $child->nodeType !== XML_ELEMENT_NODE || $child->nodeName !== 'columns' )
+            if ( !$child instanceof DOMElement || $child->nodeName !== 'columns' )
                 continue;
             foreach ( $child->childNodes as $columnNode )
             {
-                if ( $columnNode->nodeType !== XML_ELEMENT_NODE || $columnNode->nodeName !== 'column' )
+                if ( !$columnNode instanceof DOMElement || $columnNode->nodeName !== 'column' )
                     continue;
                 $key = $columnNode->getAttribute( 'name' );
                 if ( $key === '' )
@@ -306,12 +306,12 @@ class XrowExtractImport
         $rows = array();
         foreach ( $root->childNodes as $child )
         {
-            if ( $child->nodeType !== XML_ELEMENT_NODE || $child->nodeName !== 'object' )
+            if ( !$child instanceof DOMElement || $child->nodeName !== 'object' )
                 continue;
             $row = array();
             foreach ( $child->childNodes as $fieldNode )
             {
-                if ( $fieldNode->nodeType !== XML_ELEMENT_NODE || $fieldNode->nodeName !== 'field' )
+                if ( !$fieldNode instanceof DOMElement || $fieldNode->nodeName !== 'field' )
                     continue;
                 $key = $fieldNode->getAttribute( 'name' );
                 if ( $key === '' )
@@ -447,7 +447,7 @@ class XrowExtractImport
                 {
                     foreach ( $objectDoc->documentElement->childNodes as $fieldNode )
                     {
-                        if ( $fieldNode->nodeType !== XML_ELEMENT_NODE || $fieldNode->nodeName !== 'field' )
+                        if ( !$fieldNode instanceof DOMElement || $fieldNode->nodeName !== 'field' )
                             continue;
                         $key = $fieldNode->getAttribute( 'name' );
                         if ( $key === '' )
