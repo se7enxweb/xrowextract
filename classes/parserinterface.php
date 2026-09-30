@@ -8,7 +8,7 @@
 class ParserInterface
 {
     //holds the lookup map for the handler mapings
-    /** @var array<string, array{handler: XrowBaseHandler, exportable: bool}> */
+    /** @var array<string, array{handler: object, exportable: bool}> a handler is usually a XrowBaseHandler; any class with exportAttribute() works */
     public $handlerMap=array();
     /** @var list<string> csv.ini [General] ExportableDatatypes[] */
     public $exportableDatatypes;
@@ -43,18 +43,29 @@ class ParserInterface
             {
                  //#include_once("extension/extract/classes/parsers/".$ini->variable( $typename, 'HandlerFile' ) );
                  $classname = $ini->variable( $typename, 'HandlerClass' );
-                 // Every handler extends XrowBaseHandler (exportAttribute(), escape()); anything else is refused like a missing file
-                 if ( !is_string( $classname ) || !class_exists( $classname ) || !is_subclass_of( $classname, 'XrowBaseHandler' ) )
+                 // A class that is not there would be a fatal error for the whole export: logged and left out, like a missing file
+                 if ( !is_string( $classname ) || !class_exists( $classname ) || !method_exists( $classname, 'exportAttribute' ) )
                  {
-                     eZDebug::writeError( "Handler class of $typename is not a XrowBaseHandler: " . ( is_string( $classname ) ? $classname : '' ), "Extract" );
+                     eZDebug::writeError( "Handler class of $typename is missing or has no exportAttribute(): " . ( is_string( $classname ) ? $classname : '' ), "Extract" );
                      continue;
                  }
                  $handler = new $classname();
-                 // Every XrowBaseHandler has these settings; the parser's own apply to all of its handlers
-                 $handler->separationChar = $this->separationChar;
-                 $handler->escape = $this->escape;
-                 $handler->neutralizeFormulas = $this->neutralizeFormulas;
-                 $handler->raw = $this->raw;
+                 if( isset( $handler->separationChar ) )
+                 {
+                     $handler->separationChar = $this->separationChar;
+                 }
+                 if( isset( $handler->escape ) )
+                 {
+                     $handler->escape = $this->escape;
+                 }
+                 if( property_exists( $handler, 'neutralizeFormulas' ) )
+                 {
+                     $handler->neutralizeFormulas = $this->neutralizeFormulas;
+                 }
+                 if( property_exists( $handler, 'raw' ) )
+                 {
+                     $handler->raw = $this->raw;
+                 }
                  $this->handlerMap[$typename] = array( "handler" => $handler,
                                                        "exportable" => true );
             }
@@ -80,7 +91,7 @@ class ParserInterface
     {
         $handler = isset( $this->handlerMap[$attribute->DataTypeString]['handler'] )
                  ? $this->handlerMap[$attribute->DataTypeString]['handler'] : null;
-        if ( is_object( $handler ) )
+        if ( is_object( $handler ) && method_exists( $handler, 'exportAttribute' ) )
         {
             return (string)$handler->exportAttribute( $attribute );
         }
