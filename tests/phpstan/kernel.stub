@@ -68,3 +68,14 @@ class eZContentObject extends eZPersistentObject
      */
     function name( $version = false , $lang = false ) {}
 }
+
+class eZExecution
+{
+    /**
+     * cleanExit() never returns: it ends with exit (lib/ezutils/classes/ezexecution.php); under
+     * Velocity the exit is turned into an exception the server catches. Code after it is not reached.
+     *
+     * @return never
+     */
+    static function cleanExit() {}
+}

@@ -32,7 +32,6 @@ if ( $fileRow === null || $realPath === false )
 {
     header( 'HTTP/1.1 404 Not Found' );
     eZExecution::cleanExit();
-    return; // not reached: cleanExit() exits (or throws, under Velocity)
 }
 
 $type = XrowExtractPackage::fileMimeType( $fileRow['path'] );
