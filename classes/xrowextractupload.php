@@ -26,7 +26,7 @@ class XrowExtractUpload
     const DATA_FILE = 'data.bin';
 
     /** The folder every chunked upload lives in, created (and handed to the var directory's owner) if missing. */
-    public static function baseDir()
+    public static function baseDir(): string
     {
         $dir = eZSys::varDirectory() . '/xrowextract/uploads';
         if ( !is_dir( $dir ) )
@@ -39,18 +39,29 @@ class XrowExtractUpload
         return $dir;
     }
 
-    public static function isValidID( $id )
+    /**
+     * @param mixed $id
+     */
+    public static function isValidID( $id ): bool
     {
         return is_string( $id ) && preg_match( self::ID_PATTERN, $id ) === 1;
     }
 
-    public static function dir( $id )
+    /**
+     * @param string $id
+     */
+    public static function dir( $id ): string
     {
         return self::baseDir() . '/' . $id;
     }
 
-    /** A new upload for $login. Returns the new upload id. */
-    public static function create( $login, $originalName, $totalSize )
+    /**
+     * A new upload for $login. Returns the new upload id.
+     * @param string|null $login
+     * @param string|null $originalName
+     * @param int|string|null $totalSize
+     */
+    public static function create( $login, $originalName, $totalSize ): string
     {
         $id = bin2hex( random_bytes( 16 ) );
         $dir = self::dir( $id );
@@ -68,7 +79,11 @@ class XrowExtractUpload
         return $id;
     }
 
-    public static function loadMeta( $id )
+    /**
+     * @param mixed $id
+     * @return array<string, mixed>|null
+     */
+    public static function loadMeta( $id ): ?array
     {
         if ( !self::isValidID( $id ) || !is_file( self::dir( $id ) . '/' . self::META_FILE ) )
             return null;
@@ -77,7 +92,11 @@ class XrowExtractUpload
         return is_array( $meta ) ? $meta : null;
     }
 
-    public static function saveMeta( $id, array $meta )
+    /**
+     * @param string $id
+     * @param array<string, mixed> $meta
+     */
+    public static function saveMeta( $id, array $meta ): void
     {
         $meta['updated'] = time();
         $file = self::dir( $id ) . '/' . self::META_FILE;
@@ -88,8 +107,13 @@ class XrowExtractUpload
         XrowExtractJob::fixOwnership( $file );
     }
 
-    /** The upload's meta, only when $login started it; null otherwise (no such upload, or someone else's). */
-    public static function verifyOwner( $id, $login )
+    /**
+     * The upload's meta, only when $login started it; null otherwise (no such upload, or someone else's).
+     * @param mixed $id
+     * @param string|null $login
+     * @return array<string, mixed>|null
+     */
+    public static function verifyOwner( $id, $login ): ?array
     {
         $meta = self::loadMeta( $id );
         if ( !$meta || !isset( $meta['owner'] ) || $meta['owner'] !== (string)$login )
@@ -105,8 +129,14 @@ class XrowExtractUpload
      * a new tab, both self-heal this way). Returns:
      *   array( 'ok' => true,  'received' => int, 'complete' => bool )
      *   array( 'ok' => false, 'error' => 'not_found'|'offset_mismatch'|'too_large'|'write_failed', 'received' => int|null )
+     * @param mixed $id
+     * @param string|null $login
+     * @param int|string|null $offset
+     * @param string $chunkTmpPath
+     * @param int $chunkSize
+     * @return array{ok: bool, received: int|false|null, complete?: bool, error?: string}
      */
-    public static function appendChunk( $id, $login, $offset, $chunkTmpPath, $chunkSize )
+    public static function appendChunk( $id, $login, $offset, $chunkTmpPath, $chunkSize ): array
     {
         $meta = self::verifyOwner( $id, $login );
         if ( !$meta )
@@ -147,7 +177,12 @@ class XrowExtractUpload
         return array( 'ok' => true, 'received' => $received, 'complete' => $complete );
     }
 
-    /** Bytes received so far for $login's upload, or null when it does not exist or is not theirs. */
+    /**
+     * Bytes received so far for $login's upload, or null when it does not exist or is not theirs.
+     * @param mixed $id
+     * @param string|null $login
+     * @return int|false|null
+     */
     public static function receivedBytes( $id, $login )
     {
         $meta = self::verifyOwner( $id, $login );
@@ -162,8 +197,9 @@ class XrowExtractUpload
      * no such upload, not this user's, or not yet complete. The small,
      * self-contained API a package-inspection or other consumer of a
      * finished upload needs, independent of how it got there.
+     * @param mixed $id
      */
-    public static function path( $id )
+    public static function path( $id ): string|false
     {
         if ( !self::isValidID( $id ) )
             return false;
@@ -175,16 +211,22 @@ class XrowExtractUpload
         return is_file( $path ) ? $path : false;
     }
 
-    /** The original file name of a (the current user's) upload, or ''. */
-    public static function originalName( $id )
+    /**
+     * The original file name of a (the current user's) upload, or ''.
+     * @param mixed $id
+     */
+    public static function originalName( $id ): string
     {
         $login = eZUser::currentUser()->attribute( 'login' );
         $meta = self::verifyOwner( $id, $login );
         return $meta && isset( $meta['name'] ) ? (string)$meta['name'] : '';
     }
 
-    /** Deletes one upload's folder. */
-    public static function delete( $id )
+    /**
+     * Deletes one upload's folder.
+     * @param mixed $id
+     */
+    public static function delete( $id ): bool
     {
         if ( !self::isValidID( $id ) )
             return false;
@@ -203,7 +245,7 @@ class XrowExtractUpload
     }
 
     /** How many hours an incomplete (or complete but unclaimed) upload is kept: csv.ini [Uploads] RetentionHours, default 24. */
-    public static function retentionHours()
+    public static function retentionHours(): int
     {
         $ini = eZINI::instance( 'csv.ini' );
         if ( $ini->hasVariable( 'Uploads', 'RetentionHours' ) )
@@ -216,7 +258,7 @@ class XrowExtractUpload
     }
 
     /** Removes upload folders untouched for longer than the retention. Returns how many. */
-    public static function cleanupStale()
+    public static function cleanupStale(): int
     {
         $cutoff = time() - self::retentionHours() * 3600;
         $removed = 0;
@@ -241,14 +283,14 @@ class XrowExtractUpload
      * $marginBytes free afterwards. There is no fixed file size cap - only
      * this: real capacity, checked before the first byte is accepted.
      */
-    public static function freeDiskSpace()
+    public static function freeDiskSpace(): ?float
     {
         $dir = self::baseDir();
         $free = @disk_free_space( $dir );
         return $free === false ? null : (float)$free;
     }
 
-    public static function marginBytes()
+    public static function marginBytes(): int
     {
         $ini = eZINI::instance( 'csv.ini' );
         if ( $ini->hasVariable( 'Uploads', 'MinFreeMarginMB' ) )
@@ -260,8 +302,12 @@ class XrowExtractUpload
         return 256 * 1024 * 1024; // 256 MB headroom left after the file, for everything else on the same filesystem
     }
 
-    /** array( ok, message|null, free|null ): whether $incomingSize more bytes still fit with the margin. */
-    public static function hasRoomFor( $incomingSize )
+    /**
+     * array( ok, message|null, free|null ): whether $incomingSize more bytes still fit with the margin.
+     * @param int|float|string $incomingSize
+     * @return array{bool, string|null, float|null}
+     */
+    public static function hasRoomFor( $incomingSize ): array
     {
         $free = self::freeDiskSpace();
         if ( $free === null )
@@ -277,7 +323,10 @@ class XrowExtractUpload
         return array( true, null, $free );
     }
 
-    public static function humanSize( $bytes )
+    /**
+     * @param int|float|string $bytes
+     */
+    public static function humanSize( $bytes ): string
     {
         $bytes = (float)$bytes;
         foreach ( array( 'B', 'KB', 'MB', 'GB', 'TB' ) as $unit )

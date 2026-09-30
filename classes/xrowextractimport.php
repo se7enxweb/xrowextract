@@ -21,8 +21,11 @@
  */
 class XrowExtractImport
 {
-    /** Datatypes importable from their plain (no format) column. */
-    public static function baseImportableDatatypes()
+    /**
+     * Datatypes importable from their plain (no format) column.
+     * @return list<string>
+     */
+    public static function baseImportableDatatypes(): array
     {
         return array(
             'ezstring', 'eztext', 'ezinteger', 'ezfloat', 'ezboolean', 'ezemail', 'ezidentifier',
@@ -31,8 +34,12 @@ class XrowExtractImport
         );
     }
 
-    /** Attribute formats (identifier:format columns) this importer understands, by datatype. */
-    public static function importableFormats( $datatype )
+    /**
+     * Attribute formats (identifier:format columns) this importer understands, by datatype.
+     * @param string $datatype
+     * @return list<string>
+     */
+    public static function importableFormats( $datatype ): array
     {
         switch ( $datatype )
         {
@@ -50,14 +57,20 @@ class XrowExtractImport
         return array();
     }
 
-    /** Whether a datatype can be imported at all, in some form (base column or a format column). */
-    public static function isImportable( $datatype )
+    /**
+     * Whether a datatype can be imported at all, in some form (base column or a format column).
+     * @param string $datatype
+     */
+    public static function isImportable( $datatype ): bool
     {
         return in_array( $datatype, self::baseImportableDatatypes(), true ) || count( self::importableFormats( $datatype ) ) > 0;
     }
 
-    /** Why a datatype cannot be imported, for the mapping screen and --list-columns-like reporting. */
-    public static function unsupportedReason( $datatype )
+    /**
+     * Why a datatype cannot be imported, for the mapping screen and --list-columns-like reporting.
+     * @param string $datatype
+     */
+    public static function unsupportedReason( $datatype ): string
     {
         $known = array(
             'ezenhancedobjectrelation' => 'not supported yet: map the class to use ezobjectrelationlist, or edit these by hand',
@@ -76,7 +89,7 @@ class XrowExtractImport
     // ---------------------------------------------------------------- files
 
     /** The private upload folder: 0700, outside every path the web server answers directly. */
-    public static function uploadDir()
+    public static function uploadDir(): string
     {
         $dir = eZSys::cacheDirectory() . '/xrowextract_import';
         if ( !is_dir( $dir ) )
@@ -92,8 +105,11 @@ class XrowExtractImport
         return $dir;
     }
 
-    /** Removes uploaded files older than a day; called opportunistically from the view and the CLI. */
-    public static function cleanupOldUploads( $maxAgeSeconds = 86400 )
+    /**
+     * Removes uploaded files older than a day; called opportunistically from the view and the CLI.
+     * @param int $maxAgeSeconds
+     */
+    public static function cleanupOldUploads( $maxAgeSeconds = 86400 ): void
     {
         $dir = self::uploadDir();
         foreach ( (array)@scandir( $dir ) as $name )
@@ -106,8 +122,12 @@ class XrowExtractImport
         }
     }
 
-    /** A random file name inside the upload dir, keeping the original extension. */
-    public static function storeUpload( $sourcePath, $originalName )
+    /**
+     * A random file name inside the upload dir, keeping the original extension.
+     * @param string $sourcePath
+     * @param string|null $originalName
+     */
+    public static function storeUpload( $sourcePath, $originalName ): string|false
     {
         $dir = self::uploadDir();
         $ext = preg_match( '/\.([A-Za-z0-9]{1,8})$/', (string)$originalName, $m ) ? '.' . strtolower( $m[1] ) : '';
@@ -122,8 +142,12 @@ class XrowExtractImport
         return $target;
     }
 
-    /** A generated file (a sample) written into the upload dir as if it had been uploaded. */
-    public static function storeGenerated( $text, $suggestedName )
+    /**
+     * A generated file (a sample) written into the upload dir as if it had been uploaded.
+     * @param string $text
+     * @param string|null $suggestedName
+     */
+    public static function storeGenerated( $text, $suggestedName ): string|false
     {
         $dir = self::uploadDir();
         $ext = preg_match( '/\.([A-Za-z0-9]{1,8})$/', (string)$suggestedName, $m ) ? '.' . strtolower( $m[1] ) : '';
@@ -135,8 +159,11 @@ class XrowExtractImport
         return $target;
     }
 
-    /** Streams a built eZPackage as a .ezpkg download and exits; the temporary archive file is removed again straight after. */
-    public static function streamPackageDownload( eZPackage $package, $downloadName )
+    /**
+     * Streams a built eZPackage as a .ezpkg download and exits; the temporary archive file is removed again straight after.
+     * @param string $downloadName
+     */
+    public static function streamPackageDownload( eZPackage $package, $downloadName ): void
     {
         $dir = realpath( self::uploadDir() ) ?: self::uploadDir(); // compress.zlib:// needs an absolute path
         $archivePath = $dir . '/pkgdl_' . date( 'Ymd_His' ) . '_' . substr( md5( uniqid( '', true ) ), 0, 12 ) . '.ezpkg';
@@ -155,8 +182,12 @@ class XrowExtractImport
         eZExecution::cleanExit();
     }
 
-    /** Streams a raw content-class or content-object XML file as a download and exits. */
-    public static function streamXMLDownload( $xmlBytes, $downloadName )
+    /**
+     * Streams a raw content-class or content-object XML file as a download and exits.
+     * @param string $xmlBytes
+     * @param string $downloadName
+     */
+    public static function streamXMLDownload( $xmlBytes, $downloadName ): void
     {
         header( 'Cache-Control: private, no-store, max-age=0' );
         header( 'X-Content-Type-Options: nosniff' );
@@ -170,7 +201,11 @@ class XrowExtractImport
 
     // --------------------------------------------------------------- parse
 
-    /** UTF-8 text with a leading BOM removed. */
+    /**
+     * UTF-8 text with a leading BOM removed.
+     * @param string $text
+     * @return string
+     */
     public static function stripBOM( $text )
     {
         if ( substr( $text, 0, 3 ) === "\xEF\xBB\xBF" )
@@ -178,8 +213,11 @@ class XrowExtractImport
         return $text;
     }
 
-    /** 'xml' for a '<', 'json' for a '[' or '{', else 'csv' - the first non-blank byte. */
-    public static function detectFormat( $text )
+    /**
+     * 'xml' for a '<', 'json' for a '[' or '{', else 'csv' - the first non-blank byte.
+     * @param string|null $text
+     */
+    public static function detectFormat( $text ): string
     {
         $trimmed = ltrim( self::stripBOM( (string)$text ) );
         if ( $trimmed === '' )
@@ -191,8 +229,11 @@ class XrowExtractImport
         return 'csv';
     }
 
-    /** The separator most likely used in a CSV sample: whichever of , ; tab | appears most in the header line. */
-    public static function detectSeparator( $text )
+    /**
+     * The separator most likely used in a CSV sample: whichever of , ; tab | appears most in the header line.
+     * @param string|null $text
+     */
+    public static function detectSeparator( $text ): string
     {
         $firstLine = strtok( (string)$text, "\r\n" );
         $firstLine = $firstLine === false ? '' : $firstLine;
@@ -210,8 +251,13 @@ class XrowExtractImport
         return $best;
     }
 
-    /** header (array of names) and rows (array of header=>value maps), from CSV text. */
-    public static function parseCSV( $text, $separator )
+    /**
+     * header (array of names) and rows (array of header=>value maps), from CSV text.
+     * @param string|null $text
+     * @param string $separator
+     * @return array{header: list<string>, rows: list<array<string, string>>}
+     */
+    public static function parseCSV( $text, $separator ): array
     {
         $text = self::stripBOM( (string)$text );
         $fh = fopen( 'php://temp', 'r+' );
@@ -233,8 +279,12 @@ class XrowExtractImport
         return array( 'header' => $header, 'rows' => $rows );
     }
 
-    /** header and rows from JSON text (an array of flat objects, as XrowExtractWriter writes). */
-    public static function parseJSON( $text )
+    /**
+     * header and rows from JSON text (an array of flat objects, as XrowExtractWriter writes).
+     * @param string|null $text
+     * @return array{header: list<int|string>, rows: list<array<int|string, string|false>>, error?: string}
+     */
+    public static function parseJSON( $text ): array
     {
         $data = self::jsonRows( json_decode( self::stripBOM( (string)$text ), true ) );
         if ( !is_array( $data ) )
@@ -265,8 +315,10 @@ class XrowExtractImport
      *   <object><field name="key">value</field>...</object>...</export>
      * Refuses a DOCTYPE outright (never written by this project, and the classic XXE vector) before
      * the parser ever sees it, and parses with LIBXML_NONET and no DTD loading regardless.
+     * @param string|null $text
+     * @return array{header: list<string>, rows: list<array<string, string>>, columnIDs?: array<string, string>, class?: string|null, error?: string}
      */
-    public static function parseXML( $text )
+    public static function parseXML( $text ): array
     {
         $text = self::stripBOM( (string)$text );
         if ( preg_match( '/<!DOCTYPE/i', $text ) )
@@ -325,8 +377,12 @@ class XrowExtractImport
         return array( 'header' => $header, 'rows' => $rows, 'columnIDs' => $columnIDs, 'class' => $classIdentifier );
     }
 
-    /** The first $bytes bytes of a file, UTF-8 - enough to sniff its format/separator without reading it whole. */
-    public static function sniff( $path, $bytes = 65536 )
+    /**
+     * The first $bytes bytes of a file, UTF-8 - enough to sniff its format/separator without reading it whole.
+     * @param string $path
+     * @param int $bytes
+     */
+    public static function sniff( $path, $bytes = 65536 ): string
     {
         $fh = @fopen( $path, 'rb' );
         if ( !$fh )
@@ -337,7 +393,7 @@ class XrowExtractImport
     }
 
     /** How many rows a JSON file is read in one go for, above which memory use grows with the file (see streamJSON()). */
-    public static function jsonOneShotThresholdBytes()
+    public static function jsonOneShotThresholdBytes(): int
     {
         $ini = eZINI::instance( 'csv.ini' );
         if ( $ini->hasVariable( 'Uploads', 'JsonOneShotThresholdMB' ) )
@@ -357,8 +413,12 @@ class XrowExtractImport
      * had - CSV and XML never have this limitation, and a large JSON file logs a clear memory estimate
      * when it takes this path). Throws RuntimeException with a human message on a DOCTYPE or malformed
      * input, exactly the errors parseFile() used to return - the caller decides how to show them.
+     * @param string $path
+     * @param string $format
+     * @param string $separator
+     * @return Generator<int, array<int|string, string|false>>
      */
-    public static function streamRows( $path, $format, $separator )
+    public static function streamRows( $path, $format, $separator ): Generator
     {
         if ( $format === 'xml' )
             return self::streamXML( $path );
@@ -367,7 +427,12 @@ class XrowExtractImport
         return self::streamCSV( $path, $separator );
     }
 
-    protected static function streamCSV( $path, $separator )
+    /**
+     * @param string $path
+     * @param string $separator
+     * @return Generator<int, array<string, string>>
+     */
+    protected static function streamCSV( $path, $separator ): Generator
     {
         $fh = fopen( $path, 'rb' );
         if ( !$fh )
@@ -390,7 +455,7 @@ class XrowExtractImport
     }
 
     /** A DOCTYPE anywhere in an XML file, checked by streaming (XMLReader::DOC_TYPE), not just near the top. */
-    protected static function checkXMLReaderForDoctype( XMLReader $reader )
+    protected static function checkXMLReaderForDoctype( XMLReader $reader ): void
     {
         if ( $reader->nodeType === XMLReader::DOC_TYPE )
         {
@@ -399,7 +464,11 @@ class XrowExtractImport
         }
     }
 
-    protected static function streamXML( $path )
+    /**
+     * @param string $path
+     * @return Generator<int, array<string, string>>
+     */
+    protected static function streamXML( $path ): Generator
     {
         // Fast, cheap defense in depth: a DOCTYPE is required by the XML spec to precede the document
         // element, so it is always within the first few KB - reject it before XMLReader even opens the
@@ -468,8 +537,10 @@ class XrowExtractImport
      * case: JSON exports of this size are already fine in memory); above it, it is *still* decoded in
      * one go (see streamRows()'s note) but a clear memory estimate is written to the debug log first,
      * so a slow or memory-heavy run has an explanation on record instead of looking unexplained.
+     * @param string $path
+     * @return Generator<int, array<int|string, string|false>>
      */
-    protected static function streamJSON( $path )
+    protected static function streamJSON( $path ): Generator
     {
         $size = @filesize( $path );
         if ( $size !== false && $size > self::jsonOneShotThresholdBytes() )
@@ -496,8 +567,10 @@ class XrowExtractImport
     /**
      * The rows of decoded JSON: a plain array of objects, or the envelope XrowExtractWriter writes when it
      * embeds a manifest ({"manifest": ..., "rows": [...], "summary": ...}). null when it is neither.
+     * @param mixed $data
+     * @return array<mixed>|null
      */
-    public static function jsonRows( $data )
+    public static function jsonRows( $data ): ?array
     {
         if ( !is_array( $data ) )
             return null;
@@ -511,8 +584,12 @@ class XrowExtractImport
      * When the file has a typed column manifest (a "<file>.manifest.json" sidecar, or one embedded in an
      * XML/JSON export), its column ids settle the mapping exactly and its class is the file's class;
      * 'manifest' then says where it came from and what it matched (XrowExtractManifest::importMapping()).
+     * @param string $path
+     * @param string $format
+     * @param string $separator
+     * @return array{header: list<int|string>, columnIDs: array<string, string>, class: string|null, manifest: array<string, mixed>|null}
      */
-    public static function fileHeader( $path, $format, $separator )
+    public static function fileHeader( $path, $format, $separator ): array
     {
         $info = self::fileHeaderFromFile( $path, $format, $separator );
         $info['manifest'] = null;
@@ -531,7 +608,13 @@ class XrowExtractImport
         return $info;
     }
 
-    protected static function fileHeaderFromFile( $path, $format, $separator )
+    /**
+     * @param string $path
+     * @param string $format
+     * @param string $separator
+     * @return array{header: list<int|string>, columnIDs: array<string, string>, class: string|null}
+     */
+    protected static function fileHeaderFromFile( $path, $format, $separator ): array
     {
         if ( $format === 'xml' )
         {
@@ -635,8 +718,13 @@ class XrowExtractImport
         return array( 'header' => $header, 'columnIDs' => array(), 'class' => null );
     }
 
-    /** An exact row count, streamed (constant memory regardless of file size - JSON's one-shot exception aside). */
-    public static function countRows( $path, $format, $separator )
+    /**
+     * An exact row count, streamed (constant memory regardless of file size - JSON's one-shot exception aside).
+     * @param string $path
+     * @param string $format
+     * @param string $separator
+     */
+    public static function countRows( $path, $format, $separator ): int
     {
         $n = 0;
         foreach ( self::streamRows( $path, $format, $separator ) as $row )
@@ -649,8 +737,13 @@ class XrowExtractImport
      * large file is never read past that many, so building the preview is always fast), and the exact
      * total row count (one full streaming pass - still constant memory for CSV/XML). Format and
      * separator are auto-detected unless given.
+     * @param string $path
+     * @param string|null $format
+     * @param string|null $separator
+     * @param int $previewLimit
+     * @return array<string, mixed>
      */
-    public static function parseFile( $path, $format = null, $separator = null, $previewLimit = 200 )
+    public static function parseFile( $path, $format = null, $separator = null, $previewLimit = 200 ): array
     {
         $format = $format ?: self::detectFormat( self::sniff( $path ) );
         $separator = ( $format === 'csv' ) ? ( $separator ?: self::detectSeparator( self::sniff( $path ) ) ) : ',';
@@ -680,8 +773,12 @@ class XrowExtractImport
 
     // ------------------------------------------------------------- mapping
 
-    /** exportname (as written in a header: '_' turned to '-') => special column id, for the columns matching() can use plus a few more useful ones. */
-    protected static function specialColumnsByExportName( $allowPasswordHash = false )
+    /**
+     * exportname (as written in a header: '_' turned to '-') => special column id, for the columns matching() can use plus a few more useful ones.
+     * @param bool $allowPasswordHash
+     * @return array<string, string>
+     */
+    protected static function specialColumnsByExportName( $allowPasswordHash = false ): array
     {
         $byName = array();
         foreach ( XrowExtractColumns::extraAttributes( $allowPasswordHash ) as $id => $column )
@@ -697,8 +794,12 @@ class XrowExtractImport
      * file column name => the export's column id, e.g. "authors-ids" =>
      * "authors:ids") comes from an XML file's own <columns> block - when given,
      * it settles a column's target exactly, without guessing from its name.
+     * @param list<int|string> $header
+     * @param int|string|null $classID
+     * @param array<string, string>|null $columnIDs
+     * @return list<array{column: int|string, target: string, reason: string}>
      */
-    public static function suggestMapping( array $header, $classID, ?array $columnIDs = null )
+    public static function suggestMapping( array $header, $classID, ?array $columnIDs = null ): array
     {
         $specials = self::specialColumnsByExportName( false );
         $knownSpecialIDs = array_flip( $specials );
@@ -792,8 +893,12 @@ class XrowExtractImport
         return $mapping;
     }
 
-    /** 'ignore' | array('kind'=>'special'|'attr'|'attrfmt', 'id'=>..., 'format'=>...|null) */
-    public static function parseTarget( $value )
+    /**
+     * 'ignore' | array('kind'=>'special'|'attr'|'attrfmt', 'id'=>..., 'format'=>...|null)
+     * @param mixed $value
+     * @return array{kind: string, id?: string, format?: string|null}
+     */
+    public static function parseTarget( $value ): array
     {
         $value = (string)$value;
         if ( $value === '' || $value === 'ignore' )
@@ -820,8 +925,9 @@ class XrowExtractImport
      * quotes (its own convention, unlike every other datatype's double
      * quotes), so a CSV round trip reads e.g. 'autoplay' back as "'0'" -
      * strip a matching pair before comparing.
+     * @param mixed $raw
      */
-    public static function normalizeBoolean( $raw )
+    public static function normalizeBoolean( $raw ): string
     {
         $value = trim( (string)$raw );
         if ( strlen( $value ) >= 2 && $value[0] === "'" && substr( $value, -1 ) === "'" )
@@ -839,8 +945,11 @@ class XrowExtractImport
     /**
      * A date/time column (Y-m-d, Y-m-d H:i:s, ISO 8601, or a Unix timestamp) as
      * the timestamp string ezdate/ezdatetime's fromString() expects.
+     * @param mixed $raw
+     * @param bool $withTime
+     * @return array{bool, string|null, string|null}
      */
-    public static function convertDate( $raw, $withTime )
+    public static function convertDate( $raw, $withTime ): array
     {
         $raw = trim( (string)$raw );
         if ( $raw === '' )
@@ -853,8 +962,13 @@ class XrowExtractImport
         return array( true, (string)$time , null );
     }
 
-    /** Option names (as fromString expects, '|' separated) from names or numeric option ids. */
-    public static function convertSelection( array $options, $raw )
+    /**
+     * Option names (as fromString expects, '|' separated) from names or numeric option ids.
+     * @param list<array<string, mixed>> $options
+     * @param mixed $raw
+     * @return array{bool, string|null, string|null}
+     */
+    public static function convertSelection( array $options, $raw ): array
     {
         $raw = trim( (string)$raw );
         if ( $raw === '' )
@@ -887,8 +1001,11 @@ class XrowExtractImport
      * existing tag (unambiguous, already created via the tags admin). Anything
      * else (no match, several matches, a "/" path) is too complex here and is
      * refused with a warning instead of guessing.
+     * @param mixed $raw
+     * @param string|null $language
+     * @return array{bool, string|null, string|null}
      */
-    public static function convertTags( $raw, $language )
+    public static function convertTags( $raw, $language ): array
     {
         $raw = trim( (string)$raw );
         if ( $raw === '' )
@@ -920,8 +1037,11 @@ class XrowExtractImport
      * that extension is active (its parser is what the editor itself uses to
      * turn typed/pasted HTML into the stored format), else one paragraph per
      * non-empty line of the plain text stripped from the HTML.
+     * @param mixed $raw
+     * @param bool|null $usedEzoe
+     * @return array{bool, string|false|null, string|null}
      */
-    public static function convertXmlText( $raw, &$usedEzoe )
+    public static function convertXmlText( $raw, &$usedEzoe ): array
     {
         $raw = (string)$raw;
         if ( trim( $raw ) === '' )
@@ -956,8 +1076,12 @@ class XrowExtractImport
      * already inside var/storage (as the export writes it) is used as is; an
      * absolute http(s) URL of this installation is downloaded into the private
      * upload folder first. Anything else is refused.
+     * @param mixed $raw
+     * @param string $datatype
+     * @param string $importDir
+     * @return array{bool, string|null, string|null}
      */
-    public static function convertFile( $raw, $datatype, $importDir )
+    public static function convertFile( $raw, $datatype, $importDir ): array
     {
         $raw = trim( (string)$raw );
         if ( $raw === '' )
@@ -996,8 +1120,14 @@ class XrowExtractImport
         return array( true, $path , null );
     }
 
-    /** ids or remote_ids (comma/pipe separated) as the '-'-joined id string fromString() expects. */
-    public static function convertRelation( $raw, $format, $isList )
+    /**
+     * ids or remote_ids (comma/pipe separated) as the '-'-joined id string fromString() expects.
+     * @param mixed $raw
+     * @param string|null $format
+     * @param bool $isList
+     * @return array{bool, string|null, string|null}
+     */
+    public static function convertRelation( $raw, $format, $isList ): array
     {
         $raw = trim( (string)$raw );
         if ( $format !== 'ids' && $format !== 'remote_ids' )
@@ -1020,8 +1150,13 @@ class XrowExtractImport
         return array( true, implode( '-', $ids ) , null );
     }
 
-    /** The stored xrowmetadata XML from the :json format's fields. */
-    public static function convertMetadata( $raw, $format )
+    /**
+     * The stored xrowmetadata XML from the :json format's fields.
+     * @param mixed $raw
+     * @param string|null $format
+     * @return array{bool, string|false|null, string|null}
+     */
+    public static function convertMetadata( $raw, $format ): array
     {
         if ( $format !== 'json' )
             return array( false, null, 'only the :json column of xrowmetadata can be imported' );
@@ -1052,8 +1187,13 @@ class XrowExtractImport
 
     // -------------------------------------------------------------- match
 
-    /** The object a row's identity columns point to, or null when none match (a create). */
-    public static function findMatch( $matchMode, $remoteID, $objectID )
+    /**
+     * The object a row's identity columns point to, or null when none match (a create).
+     * @param string $matchMode
+     * @param string $remoteID
+     * @param int|string $objectID
+     */
+    public static function findMatch( $matchMode, $remoteID, $objectID ): ?eZContentObject
     {
         if ( $matchMode === 'remote_id' && $remoteID !== '' )
         {
@@ -1068,8 +1208,13 @@ class XrowExtractImport
         return null;
     }
 
-    /** The parent node id for a new object: a remote id column, a node id column, or the fallback node. */
-    public static function resolveParent( $parentRemoteID, $parentNodeID, $fallbackNodeID )
+    /**
+     * The parent node id for a new object: a remote id column, a node id column, or the fallback node.
+     * @param string $parentRemoteID
+     * @param int|string $parentNodeID
+     * @param int|string $fallbackNodeID
+     */
+    public static function resolveParent( $parentRemoteID, $parentNodeID, $fallbackNodeID ): int|false
     {
         if ( $parentRemoteID !== '' )
         {
@@ -1087,8 +1232,10 @@ class XrowExtractImport
      * A section id from a numeric id, or the section name as the "section" special
      * column is exported (XrowExtractColumns::extraValue() writes the name, not the
      * id). array(ok, id, warning).
+     * @param mixed $raw
+     * @return array{bool, int|null, string|null}
      */
-    public static function resolveSectionID( $raw )
+    public static function resolveSectionID( $raw ): array
     {
         $raw = trim( (string)$raw );
         if ( ctype_digit( $raw ) )
@@ -1112,8 +1259,10 @@ class XrowExtractImport
      *   in file column order), classID (fallback), match ('remote_id'|'object_id'|'none'),
      *   language (fallback locale), parentNodeID (fallback), apply (bool).
      * Returns array('rows'=>[...], 'counts'=>[...], 'ezoe'=>bool|null).
+     * @param array<string, mixed> $options
+     * @return array{rows: list<array<string, mixed>>, counts: array<string, int>, ezoe: bool|null}
      */
-    public static function run( array $options )
+    public static function run( array $options ): array
     {
         $rows = $options['rows'];
         $mapping = $options['mapping'];
@@ -1494,8 +1643,13 @@ class XrowExtractImport
 
     // ------------------------------------------------------- sample & docs
 
-    /** Up to $limit real, readable, published objects of a class - for the sample and the documentation examples. */
-    public static function realObjects( $classID, $limit = 2 )
+    /**
+     * Up to $limit real, readable, published objects of a class - for the sample and the documentation examples.
+     * @param int|string $classID
+     * @param int $limit
+     * @return list<eZContentObject>
+     */
+    public static function realObjects( $classID, $limit = 2 ): array
     {
         $objects = array();
         foreach ( (array)eZContentObject::fetchSameClassList( (int)$classID, true, 0, max( 10, $limit * 3 ) ) as $object )
@@ -1509,13 +1663,21 @@ class XrowExtractImport
         return $objects;
     }
 
-    /** The Migration column set of a class, resolved - the same columns "Download a template" writes. */
-    public static function migrationColumns( $classID )
+    /**
+     * The Migration column set of a class, resolved - the same columns "Download a template" writes.
+     * @param int|string $classID
+     * @return list<array<string, mixed>>
+     */
+    public static function migrationColumns( $classID ): array
     {
         return XrowExtractCatalogue::resolveColumns( XrowExtractCatalogue::setColumnIDs( 'migration', $classID ), $classID, XrowExtractColumns::extraAttributes( false ) );
     }
 
-    /** The first base (no format) ezstring/eztext attribute of a class: what the sample edits and titles. */
+    /**
+     * The first base (no format) ezstring/eztext attribute of a class: what the sample edits and titles.
+     * @param int|string $classID
+     * @return string|int|null
+     */
     public static function titleColumn( $classID )
     {
         $info = self::classInfo( $classID );
@@ -1529,8 +1691,11 @@ class XrowExtractImport
         return null;
     }
 
-    /** A small, valid placeholder for a required attribute the sample's new object fills in. */
-    public static function placeholderValue( $datatype, ?eZContentClassAttribute $classAttribute = null )
+    /**
+     * A small, valid placeholder for a required attribute the sample's new object fills in.
+     * @param string $datatype
+     */
+    public static function placeholderValue( $datatype, ?eZContentClassAttribute $classAttribute = null ): string
     {
         switch ( $datatype )
         {
@@ -1560,8 +1725,13 @@ class XrowExtractImport
      * and - when the class has an importable date attribute - one row with a deliberately bad date (an
      * "error" row). Uses the real export code (XrowExtractColumns/XrowExtractCatalogue/XrowExtractWriter)
      * throughout, so every value is exactly what a real export of this class would write.
+     * @param int|string $classID
+     * @param int|string|null $parentNodeID
+     * @param string $language
+     * @param string $format
+     * @return array<string, mixed>
      */
-    public static function buildSample( $classID, $parentNodeID, $language, $format )
+    public static function buildSample( $classID, $parentNodeID, $language, $format ): array
     {
         $classID = (int)$classID;
         $class = eZContentClass::fetch( $classID );
@@ -1681,8 +1851,12 @@ class XrowExtractImport
     /**
      * A small file of real rows for the file format reference (no synthetic rows - genuine site content,
      * exactly as a real export would write it). Null when the class has no readable published objects.
+     * @param int|string $classID
+     * @param string $format
+     * @param int $limit
+     * @return array<string, mixed>|null
      */
-    public static function referenceExampleRows( $classID, $format, $limit = 2 )
+    public static function referenceExampleRows( $classID, $format, $limit = 2 ): ?array
     {
         $classID = (int)$classID;
         $class = eZContentClass::fetch( $classID );
@@ -1718,8 +1892,10 @@ class XrowExtractImport
      * matching attribute) - the file format reference shows these instead of made-up values wherever it
      * can. datatype => array('identifier' => the attribute, 'value' => the real cell text, or null when
      * the class has the datatype but the value is empty).
+     * @param int|string $classID
+     * @return array<string, array{identifier: int|string, value: string|null}>
      */
-    public static function datatypeExamples( $classID )
+    public static function datatypeExamples( $classID ): array
     {
         $classID = (int)$classID;
         $info = self::classInfo( $classID );
@@ -1751,8 +1927,12 @@ class XrowExtractImport
         return $examples;
     }
 
-    /** Class info cached per run: identifier and attribute meta by identifier (datatype, class attribute id, selection options). */
-    public static function classInfo( $classID )
+    /**
+     * Class info cached per run: identifier and attribute meta by identifier (datatype, class attribute id, selection options).
+     * @param int|string $classID
+     * @return array{identifier: string, name: string, attributes: array<string, array{datatype: string, options: list<array<string, mixed>>}>}|null
+     */
+    public static function classInfo( $classID ): ?array
     {
         $class = eZContentClass::fetch( $classID );
         if ( !$class instanceof eZContentClass )
@@ -1773,15 +1953,28 @@ class XrowExtractImport
         return array( 'identifier' => $class->attribute( 'identifier' ), 'name' => $class->attribute( 'name' ), 'attributes' => $attributes );
     }
 
-    public static function columnIsImportable( $datatype, $format )
+    /**
+     * @param string $datatype
+     * @param string|null $format
+     */
+    public static function columnIsImportable( $datatype, $format ): bool
     {
         if ( $format === null )
             return in_array( $datatype, self::baseImportableDatatypes(), true );
         return in_array( $format, self::importableFormats( $datatype ), true );
     }
 
-    /** Dispatches one attribute value to its converter; returns array(ok, value, warning). */
-    protected static function convertOne( array $attrInfo, $raw, $format, $language, $importDir, &$usedEzoe )
+    /**
+     * Dispatches one attribute value to its converter; returns array(ok, value, warning).
+     * @param array{datatype: string, options: list<array<string, mixed>>} $attrInfo
+     * @param mixed $raw
+     * @param string|null $format
+     * @param string|null $language
+     * @param string $importDir
+     * @param bool|null $usedEzoe
+     * @return array{bool, string|false|null, string|null}
+     */
+    protected static function convertOne( array $attrInfo, $raw, $format, $language, $importDir, &$usedEzoe ): array
     {
         $datatype = $attrInfo['datatype'];
         switch ( $datatype )
