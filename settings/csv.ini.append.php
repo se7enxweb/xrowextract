@@ -51,6 +51,14 @@ RetentionDays=7
 # next to it, else "php" on the PATH). Set this when detection guesses wrong.
 PhpCli=
 
+[Manifest]
+# Every export carries a typed column manifest (<file>.manifest.json next to it; inside archives next to
+# every class file). In XML and JSON files the same information is also in the file itself: a <manifest>
+# element after <columns>, and for JSON an envelope {"manifest": ..., "rows": [...], "summary": ...}.
+# disabled writes a JSON file as a plain array of objects again (the sidecar still exists).
+EmbedInJSON=enabled
+EmbedInXML=enabled
+
 # you can place the handler files in your extension
 # just enter the full path to the handler
 

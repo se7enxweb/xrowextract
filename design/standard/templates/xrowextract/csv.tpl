@@ -718,6 +718,8 @@
             <input class="button" name="RunInBackground" type="submit" value="{'Run in the background'|i18n('design/standard/extract')}" title="{'Start this export as a job and come back to it: see the Jobs tab'|i18n('design/standard/extract')|wash}" />
             <input class="button" name="ExportAsPackage" type="submit" value="{'Export as package'|i18n('design/standard/extract')}" title="{'This class, below the node chosen above, as a real content package (.ezpkg) - installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.'|i18n('design/standard/extract')|wash}" />
             {/if}
+            <input class="button" name="DownloadManifest" type="submit" value="{'Manifest only'|i18n('design/standard/extract')}" title="{'The typed column manifest of this export (manifest.json): the id, datatype, format and language of every column, the row count and the checksum'|i18n('design/standard/extract')|wash}" />
+            <input class="button" name="DownloadWithManifest" type="submit" value="{'Download with manifest (.zip)'|i18n('design/standard/extract')}" title="{'The file and its typed column manifest in one zip: the importer reads it back with every column mapped exactly'|i18n('design/standard/extract')|wash}" />
             <input class="defaultbutton" name="Download" type="submit" value="{'Download %type'|i18n('design/standard/extract',, hash( '%type', $OutputFormat|upcase ))}" />
         </div>
     </div>

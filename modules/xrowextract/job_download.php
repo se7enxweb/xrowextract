@@ -35,6 +35,18 @@ if ( $what === 'errors' && $job['type'] === 'import' )
     }
 }
 
+// The typed column manifest next to the file (the second download of a single file export)
+if ( $what === 'manifest' )
+{
+    $manifestName = $outputName . XrowExtractManifest::SIDECAR_SUFFIX;
+    if ( !is_file( XrowExtractJob::path( $id ) . '/' . $manifestName ) )
+    {
+        header( 'HTTP/1.1 404 Not Found' );
+        eZExecution::cleanExit();
+    }
+    $outputName = $manifestName;
+}
+
 $path = XrowExtractJob::path( $id ) . '/' . $outputName;
 if ( !is_file( $path ) )
 {
@@ -50,7 +62,9 @@ $types = array(
     'ezpkg' => 'application/gzip',
 );
 $ext = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
-if ( preg_match( '/\.(tar\.(gz|bz2|xz))$/i', $path, $m ) )
+if ( $what === 'manifest' )
+    $ext = 'json';
+elseif ( preg_match( '/\.(tar\.(gz|bz2|xz))$/i', $path, $m ) )
     $ext = strtolower( $m[1] );
 $type = isset( $types[$ext] ) ? $types[$ext] : 'application/octet-stream';
 

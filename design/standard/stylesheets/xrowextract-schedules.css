@@ -1,0 +1,81 @@
+/* xrowextract: the Schedules tab (schedules, destinations, history). Builds on xrowextract.css: the same
+   cards, job rows, user bubble, timeline and totals; only what those three pages add is here. */
+
+.xe-subnav { display: flex; flex-wrap: wrap; gap: .4em; margin: -.3em 0 1em; }
+.xe-subnav a {
+    padding: .35em .9em;
+    border: 1px solid var(--xe-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--xe-text);
+    text-decoration: none;
+}
+.xe-subnav a:hover { border-color: var(--xe-accent); }
+.xe-subnav a.xe-subnav-active { border-color: var(--xe-accent); background: var(--xe-accent-bg); color: var(--xe-accent); font-weight: bold; }
+
+.xe-tab-badge-bad { background: var(--xe-bad, #b42318); color: #fff; }
+
+.xe-wide { width: 100%; max-width: 100%; box-sizing: border-box; }
+.xe-mono { font-family: monospace; }
+.xe-field textarea { width: 100%; max-width: 100%; box-sizing: border-box; }
+.xe-field input[type="number"] { width: 7em; max-width: 100%; }
+.xe-field input[type="url"], .xe-field input[type="password"], .xe-field input[type="time"], .xe-field input[type="date"] { max-width: 100%; box-sizing: border-box; }
+.xe-kinds { margin: 1em 0; }
+.xe-kind-panel { margin-top: .5em; padding: .8em; border: 1px dashed var(--xe-line); border-radius: 6px; }
+.xe-kind-panel + .xe-kind-panel { margin-top: .8em; }
+/* With the script, only the chosen kind's panel and frequency fields are shown */
+.xe-js .xe-kind-panel[hidden], .xe-js .xe-frequency-fields [hidden] { display: none; }
+.xe-frequency-fields { margin-top: .8em; }
+.xe-schedule-save { padding-left: 0; padding-right: 0; }
+.xe-segmented { max-width: 100%; }
+
+.xe-schedule-off { background: #fafafa; }
+.xe-schedule-off .xe-colinfo strong { color: var(--xe-muted); }
+.xe-schedule-meta code, .xe-code-line {
+    padding: .1em .35em;
+    border-radius: 3px;
+    background: var(--xe-head);
+    font-family: monospace;
+    font-size: .88em;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+.xe-code-line { display: block; margin: .4em 0; padding: .4em .6em; white-space: pre-wrap; }
+.xe-crontab { margin-top: .5em; font-size: .9em; }
+.xe-crontab summary { cursor: pointer; color: var(--xe-muted); }
+
+.xe-new-destination { margin: 0 0 1em; }
+.xe-new-destination label { font-weight: bold; }
+.xe-secrets { margin-top: 1em; padding: .8em; border: 1px solid var(--xe-line); border-radius: 6px; }
+.xe-secret .xe-badge { margin-left: .4em; font-weight: normal; }
+.xe-secret .xe-label { display: flex; flex-wrap: wrap; align-items: center; gap: .2em .4em; overflow-wrap: anywhere; }
+.xe-secret .xe-label .xe-badge { margin-left: 0; }
+/* Long paths, URLs and hosts wrap instead of widening the page (phone width) */
+.xe-destinations code, .xe-history code, .xe-schedules code, .xe-colinfo small { overflow-wrap: anywhere; word-break: break-word; }
+.xe-destinations .xe-colinfo small code { word-break: break-all; }
+.xe-hostkeys { margin: .6em 0; padding: .6em .8em; border: 1px solid var(--xe-line); border-radius: 6px; background: var(--xe-head); }
+.xe-hostkeys p { margin: 0 0 .4em; }
+.xe-hostkeys form { margin: .3em 0; }
+.xe-hostkeys .xe-code-line { flex: 1 1 18em; margin: 0; }
+
+.xe-alert-note { display: flex; flex-wrap: wrap; align-items: center; gap: .5em 1em; margin: 0 0 1em; }
+.xe-history-filter { margin: 0 0 1em; }
+.xe-history-filter .xe-toolbar { padding-left: 0; padding-right: 0; }
+.xe-job-stats dt a { color: inherit; text-decoration: none; }
+.xe-job-stats dt a:hover { text-decoration: underline; }
+.xe-history-details { margin-top: .5em; font-size: .9em; }
+.xe-history-details summary { cursor: pointer; }
+.xe-warning-list, .xe-delivery-list { margin: .4em 0 0 1.2em; padding: 0; }
+.xe-warning-list li, .xe-delivery-list li { margin: .15em 0; overflow-wrap: anywhere; }
+.xe-delivery-bad { color: var(--xe-bad, #b42318); }
+.xe-job-skipped .xe-job-type, .xe-job-warning .xe-job-type { opacity: .85; }
+.xe-state-skipped { background: #eaf1ff; color: #1d4ed8; }
+.xe-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6em 1em; margin: 1em 0 0; }
+.xe-pager .button-disabled { opacity: .45; pointer-events: none; }
+
+@media (max-width: 720px) {
+    .xe-segmented { display: flex; }
+    .xe-segmented label { flex: 1 1 auto; }
+    .xe-segmented span { white-space: normal; text-align: center; }
+    .xe-job-buttons .xe-inline { flex-wrap: wrap; }
+}

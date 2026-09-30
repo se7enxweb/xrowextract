@@ -6,7 +6,7 @@ $ViewList = array();
 $ViewList['csv'] = array( 'script' => 'csv.php',
                           'functions' => array( 'csv' ),
             			  'default_navigation_part' => 'ezextractnavigationpart',
-            			  'post_actions' => array( 'Download', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData', 'RunInBackground', 'ExportAsPackage' ),
+            			  'post_actions' => array( 'Download', 'DownloadManifest', 'DownloadWithManifest', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData', 'RunInBackground', 'ExportAsPackage' ),
             			  'params' => array() );
 
 $ViewList['archive'] = array( 'script' => 'archive.php',
@@ -53,7 +53,34 @@ $ViewList['package'] = array( 'script' => 'package.php',
                               'post_actions' => array( 'UploadPackage', 'ForgetPackage', 'BrowseParent', 'Install', 'BuildTemplate' ),
                               'params' => array( 'PackageName' ) );
 
+// Scheduled exports and imports; the destinations they deliver to (and their encrypted credentials);
+// the export history. Three policy functions, so a role can allow running schedules without seeing
+// or changing any destination's credentials, or reading the history alone.
+$ViewList['schedules'] = array( 'script' => 'schedules.php',
+                                'functions' => array( 'schedule' ),
+                                'default_navigation_part' => 'ezextractnavigationpart',
+                                'post_actions' => array( 'SaveSchedule', 'NewSchedule', 'EditScheduleID', 'DeleteScheduleID', 'RunScheduleID',
+                                                         'EnableScheduleID', 'DisableScheduleID', 'CancelEdit' ),
+                                'params' => array( 'ScheduleID' ) );
+$ViewList['destinations'] = array( 'script' => 'destinations.php',
+                                   'functions' => array( 'destinations' ),
+                                   'default_navigation_part' => 'ezextractnavigationpart',
+                                   'post_actions' => array( 'SaveDestination', 'NewDestination', 'EditDestinationID', 'DeleteDestinationID',
+                                                            'TestDestinationID', 'TrustHostKey', 'CancelEdit' ),
+                                   'params' => array( 'DestinationID' ) );
+$ViewList['history'] = array( 'script' => 'history.php',
+                              'functions' => array( 'history' ),
+                              'default_navigation_part' => 'ezextractnavigationpart',
+                              'post_actions' => array( 'AcknowledgeAlerts' ),
+                              'params' => array() );
+
 $FunctionList = array();
+// Create, change, run, enable and disable schedules (your own; with xrowextract/all_jobs everyone's)
+$FunctionList['schedule'] = array();
+// Manage delivery destinations and set/replace/clear their credentials
+$FunctionList['destinations'] = array();
+// See the export history (your own runs; with xrowextract/all_jobs everyone's)
+$FunctionList['history'] = array();
 $FunctionList['csv'] = array();
 // Export the password hash and hash type of user accounts (special columns, site archive option)
 $FunctionList['password_hash'] = array();

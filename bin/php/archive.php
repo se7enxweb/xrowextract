@@ -27,7 +27,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][date-field:][since:][before:][date:][section:][visibility:][name:][output:][dry-run][list-sets][list-formats][list-classes][user:][progress-file:]',
+    '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][date-field:][since:][before:][date:][section:][visibility:][name:][output:][dry-run][list-sets][list-formats][list-classes][user:][progress-file:][changed-since:][lenient][no-manifest][schedule:][run-mode:]',
     '',
     array(
         'set'             => 'A ready-made node set (default sites: the default site, see export.ini [SiteArchive]); --list-sets shows them',
@@ -57,6 +57,11 @@ $options = $script->getOptions(
         'list-classes'    => 'List the classes with how many objects each has below the nodes',
         'user'            => 'Export with the read access of this login (default: admin)',
         'progress-file'   => 'Write {"done":n,"total":m,"phase":"<class>"} to this path after every batch (for a background job)',
+        'changed-since'   => 'Only objects modified after this Unix time or date (replaces --since/--date): a delta run',
+        'lenient'         => 'Skip nodes and classes that no longer exist with a WARNING line instead of failing; exit code 3 when nothing is left',
+        'no-manifest'     => 'Do not write <archive>.manifest.json next to the archive (the manifests inside it are always written)',
+        'schedule'        => 'The schedule this run belongs to (recorded in the manifest)',
+        'run-mode'        => 'full or delta (recorded in the manifest)',
     )
 );
 $script->initialize();
@@ -66,6 +71,26 @@ $fail = function ( $message ) use ( $cli, $script )
     $cli->error( $message );
     $script->shutdown( 1 );
 };
+$warnings = array();
+$lenient = (bool)$options['lenient'];
+$warn = function ( $message ) use ( $cli, &$warnings )
+{
+    $warnings[] = $message;
+    $cli->output( 'WARNING: ' . $message );
+};
+$skipRun = function ( $message ) use ( $cli, $script, $warn )
+{
+    $warn( $message );
+    $cli->output( 'Nothing left to export; skipped.' );
+    $script->shutdown( 3 );
+};
+$changedSince = false;
+if ( $options['changed-since'] )
+{
+    $changedSince = ctype_digit( (string)$options['changed-since'] ) ? (int)$options['changed-since'] : XrowExtractFilters::timestamp( $options['changed-since'] );
+    if ( !$changedSince )
+        $fail( "Cannot read the date in --changed-since: {$options['changed-since']}" );
+}
 
 $login = $options['user'] ? $options['user'] : 'admin';
 $user = eZUser::fetchByName( $login );
@@ -104,11 +129,22 @@ else
     $nodeIDs = $sets[$setID]['nodes'];
 }
 $resolved = XrowExtractArchive::resolveNodes( $nodeIDs );
-foreach ( $resolved as $item )
+foreach ( $resolved as $index => $item )
 {
     if ( !$item['node'] )
+    {
+        if ( $lenient )
+        {
+            $warn( "Node {$item['id']} was skipped: it no longer exists or $login may not read it." );
+            unset( $resolved[$index] );
+            continue;
+        }
         $fail( "Node {$item['id']} does not exist or $login may not read it." );
+    }
 }
+$resolved = array_values( $resolved );
+if ( !$resolved )
+    $skipRun( 'None of the nodes exist any more.' );
 $roots = XrowExtractArchive::exportRoots( $resolved );
 // Filters that work for every class
 $filterValues = array( 'date_field' => $options['date-field'] === 'published' ? 'published' : 'modified' );
@@ -137,6 +173,16 @@ if ( $options['visibility'] && !in_array( $options['visibility'], array( 'visibl
     $fail( '--visibility is visible or hidden.' );
 $filterValues['visibility'] = $options['visibility'] ? $options['visibility'] : 'any';
 $filterValues['name'] = (string)$options['name'];
+if ( $changedSince )
+{
+    // A delta run: only what changed since the last successful run (the one date filter the fetch has)
+    if ( $filterValues['date_mode'] !== 'any' )
+        $warn( 'The delta run replaces the date filter (' . $filterValues['date_mode'] . ').' );
+    $filterValues['date_mode'] = 'since';
+    $filterValues['date_from'] = (string)$changedSince;
+    $filterValues['date_to'] = '';
+    $filterValues['date_field'] = 'modified';
+}
 $archiveFilters = new XrowExtractFilters( $filterValues );
 XrowExtractArchive::$attributeFilter = $archiveFilters->attributeFilter( false );
 $contentLanguages = array_keys( XrowExtractColumns::contentLanguages() );
@@ -158,16 +204,23 @@ if ( !XrowExtractWriter::isFormat( $files ) )
 $counts = XrowExtractArchive::classCounts( $roots, $languages );
 
 // Classes
-$classID = function ( $value ) use ( $fail )
+$classID = function ( $value ) use ( $fail, $lenient, $warn )
 {
     $class = ctype_digit( $value ) ? eZContentClass::fetch( (int)$value ) : eZContentClass::fetchByIdentifier( $value );
     if ( !$class instanceof eZContentClass )
+    {
+        if ( $lenient )
+        {
+            $warn( "The class $value was skipped: it no longer exists." );
+            return 0;
+        }
         $fail( "No class $value." );
+    }
     return (int)$class->attribute( 'id' );
 };
 $list = function ( $option ) use ( $classID )
 {
-    return array_map( $classID, array_filter( array_map( 'trim', explode( ',', (string)$option ) ) ) );
+    return array_values( array_filter( array_map( $classID, array_filter( array_map( 'trim', explode( ',', (string)$option ) ) ) ) ) );
 };
 $selected = $options['classes'] ? array_values( array_intersect( $list( $options['classes'] ), array_keys( $counts ) ) ) : array_keys( $counts );
 if ( $options['exclude-classes'] )
@@ -192,7 +245,11 @@ if ( $options['list-classes'] || $options['dry-run'] )
     $script->shutdown( 0 );
 }
 if ( !$selected )
+{
+    if ( $lenient )
+        $skipRun( 'No classes left to export.' );
     $fail( 'No classes to export (--classes / --exclude-classes).' );
+}
 
 // Format
 $format = $options['format'] ? $options['format'] : 'zip';
@@ -212,7 +269,10 @@ if ( !isset( $lines[$lineKey] ) )
 
 // A running total across every selected class: build()'s progress callback only reports the rows
 // written so far within the class it is on, so the classes already finished need to be added in.
-$buildOptions = array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'], 'output' => $files );
+$buildOptions = array( 'languages' => $languages, 'columns' => $columnChoice, 'plain_text' => (bool)$options['plain-text'], 'output' => $files,
+                       'filters' => $filterValues, 'warnings' => $warnings,
+                       'schedule' => $options['schedule'] ? (int)$options['schedule'] : null,
+                       'run_mode' => $options['run-mode'] ? $options['run-mode'] : ( $changedSince ? 'delta' : 'full' ) );
 if ( $options['progress-file'] )
 {
     $progressFile = (string)$options['progress-file'];
@@ -256,4 +316,16 @@ XrowExtractArchive::removeWork( $result['work'] );
 $cli->output( sprintf( 'Wrote %s: %d files, %d rows, %.1f KB, %.1f s (read access of %s%s)', $target, count( $result['manifest']['classes'] ),
                        $result['manifest']['rows'], filesize( $target ) / 1024, microtime( true ) - $started, $login,
                        $result['manifest']['password_hashes'] ? ', with password hashes' : '' ) );
+if ( !$options['no-manifest'] )
+{
+    // The archive's own manifest next to it, with the archive's checksum (what a delivery or a receiving
+    // system checks before unpacking); the manifests inside cover each class file
+    $archiveManifest = $result['manifest'];
+    $archiveManifest['counts'] = array( 'rows' => (int)$result['manifest']['rows'], 'files' => count( $result['manifest']['classes'] ) );
+    $archiveManifest['file'] = array( 'name' => basename( $target ), 'bytes' => (int)filesize( $target ), 'sha256' => hash_file( 'sha256', $target ) );
+    $archiveManifest['warnings'] = $warnings;
+    $sidecar = XrowExtractManifest::writeSidecar( $target, $archiveManifest );
+    if ( $sidecar )
+        $cli->output( 'Manifest: ' . $sidecar );
+}
 $script->shutdown( 0 );

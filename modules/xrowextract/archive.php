@@ -181,6 +181,14 @@ if ( $http->hasPostVariable( 'DownloadArchive' ) )
             $types = array( 'zip' => 'application/zip', 'tar.gz' => 'application/gzip', 'tar.bz2' => 'application/x-bzip2',
                             'tar.xz' => 'application/x-xz', '7z' => 'application/x-7z-compressed', 'rar' => 'application/vnd.rar' );
             $size = filesize( $result['path'] );
+            // Every download is a row of the export history (no file is kept for it)
+            XrowExtractHistory::record( array(
+                'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'kind' => 'archive', 'trigger_type' => 'download', 'run_mode' => 'full',
+                'what' => ezpI18n::tr( 'design/standard/extract', 'Site archive' ) . ': ' . implode( ', ', array_map( function ( $root ) { return $root->attribute( 'name' ); }, $roots ) ),
+                'output_format' => $state['format'], 'started_at' => time() - (int)ceil( $result['manifest']['seconds'] ), 'ended_at' => time(),
+                'run_state' => 'done', 'row_count' => (int)$result['manifest']['rows'], 'byte_size' => $size,
+                'checksum' => hash_file( 'sha256', $result['path'] ), 'file_name' => $result['name'],
+            ) );
             header( 'Cache-Control: private, no-store, max-age=0' );
             header( 'Pragma: no-cache' );
             header( 'X-Content-Type-Options: nosniff' );

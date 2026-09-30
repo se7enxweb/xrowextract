@@ -40,6 +40,1070 @@
         <translation>Previous</translation>
     </message>
     <message>
+        <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.</source>
+        <translation>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet. No size limit: large files upload in chunks.</translation>
+    </message>
+    <message>
+        <source>%free free on the server for uploads.</source>
+        <translation>%free free on the server for uploads.</translation>
+    </message>
+    <message>
+        <source>Manifest only</source>
+        <translation>Manifest only</translation>
+    </message>
+    <message>
+        <source>The typed column manifest of this export (manifest.json): the id, datatype, format and language of every column, the row count and the checksum</source>
+        <translation>The typed column manifest of this export (manifest.json): the id, datatype, format and language of every column, the row count and the checksum</translation>
+    </message>
+    <message>
+        <source>Download with manifest (.zip)</source>
+        <translation>Download with manifest (.zip)</translation>
+    </message>
+    <message>
+        <source>The file and its typed column manifest in one zip: the importer reads it back with every column mapped exactly</source>
+        <translation>The file and its typed column manifest in one zip: the importer reads it back with every column mapped exactly</translation>
+    </message>
+    <message>
+        <source>The file has a typed column manifest: %exact of %all columns are mapped exactly from it, not guessed from their names.</source>
+        <translation>The file has a typed column manifest: %exact of %all columns are mapped exactly from it, not guessed from their names.</translation>
+    </message>
+    <message>
+        <source>The file was changed after the export (its checksum differs from the manifest).</source>
+        <translation>The file was changed after the export (its checksum differs from the manifest).</translation>
+    </message>
+    <message>
+        <source>The typed column manifest of the file: datatype, format and language of every column, row count and checksum</source>
+        <translation>The typed column manifest of the file: datatype, format and language of every column, row count and checksum</translation>
+    </message>
+    <message>
+        <source>Download manifest</source>
+        <translation>Download manifest</translation>
+    </message>
+    <message>
+        <source>Could not read %name: %reason</source>
+        <translation>Could not read %name: %reason</translation>
+    </message>
+    <message>
+        <source>Schedules</source>
+        <translation>Schedules</translation>
+    </message>
+    <message>
+        <source>Destinations</source>
+        <translation>Destinations</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>History</translation>
+    </message>
+    <message>
+        <source>Exports and imports that run on their own, their destinations and history</source>
+        <translation>Exports and imports that run on their own, their destinations and history</translation>
+    </message>
+    <message>
+        <source>Failed scheduled runs you have not seen yet</source>
+        <translation>Failed scheduled runs you have not seen yet</translation>
+    </message>
+    <message>
+        <source>%count scheduled run(s) failed, were skipped or could not be delivered since you last looked.</source>
+        <translation>%count scheduled run(s) failed, were skipped or could not be delivered since you last looked.</translation>
+    </message>
+    <message>
+        <source>Open the history</source>
+        <translation>Open the history</translation>
+    </message>
+    <message>
+        <source>Started by a schedule</source>
+        <translation>Started by a schedule</translation>
+    </message>
+    <message>
+        <source>skipped</source>
+        <translation>skipped</translation>
+    </message>
+    <message>
+        <source>delta</source>
+        <translation>delta</translation>
+    </message>
+    <message>
+        <source>full</source>
+        <translation>full</translation>
+    </message>
+    <message>
+        <source>%count warning(s)</source>
+        <translation>%count warning(s)</translation>
+    </message>
+    <message>
+        <source>delivered</source>
+        <translation>delivered</translation>
+    </message>
+    <message>
+        <source>partly delivered</source>
+        <translation>partly delivered</translation>
+    </message>
+    <message>
+        <source>not delivered</source>
+        <translation>not delivered</translation>
+    </message>
+    <message>
+        <source>Exports and imports that run on their own: a saved preset, a site archive, a package export or an import from a folder or a destination.</source>
+        <translation>Exports and imports that run on their own: a saved preset, a site archive, a package export or an import from a folder or a destination.</translation>
+    </message>
+    <message>
+        <source>Add a destination</source>
+        <translation>Add a destination</translation>
+    </message>
+    <message>
+        <source>SFTP, FTP/FTPS, a local or NAS folder, S3, WebDAV or an HTTP upload; test the connection first.</source>
+        <translation>SFTP, FTP/FTPS, a local or NAS folder, S3, WebDAV or an HTTP upload; test the connection first.</translation>
+    </message>
+    <message>
+        <source>Create a schedule</source>
+        <translation>Create a schedule</translation>
+    </message>
+    <message>
+        <source>What runs, when, full or only the changes, where the file goes and who hears about it.</source>
+        <translation>What runs, when, full or only the changes, where the file goes and who hears about it.</translation>
+    </message>
+    <message>
+        <source>Follow the history</source>
+        <translation>Follow the history</translation>
+    </message>
+    <message>
+        <source>Every run with its rows, size, checksum, delivery and warnings; failures also as a badge on the Jobs tab.</source>
+        <translation>Every run with its rows, size, checksum, delivery and warnings; failures also as a badge on the Jobs tab.</translation>
+    </message>
+    <message>
+        <source>A schedule runs with the read access of its owner.</source>
+        <translation>A schedule runs with the read access of its owner.</translation>
+    </message>
+    <message>
+        <source>What a schedule refers to and that no longer exists (a node, a class, an attribute) is skipped with a warning; the rest is still exported.</source>
+        <translation>What a schedule refers to and that no longer exists (a node, a class, an attribute) is skipped with a warning; the rest is still exported.</translation>
+    </message>
+    <message>
+        <source>Every export has a typed column manifest (manifest.json): the importer uses it to map every column exactly.</source>
+        <translation>Every export has a typed column manifest (manifest.json): the importer uses it to map every column exactly.</translation>
+    </message>
+    <message>
+        <source>Passwords and keys of destinations are stored encrypted and are never shown again.</source>
+        <translation>Passwords and keys of destinations are stored encrypted and are never shown again.</translation>
+    </message>
+    <message>
+        <source>Policies: xrowextract/schedule, xrowextract/destinations, xrowextract/history; with xrowextract/all_jobs you see those of everyone.</source>
+        <translation>Policies: xrowextract/schedule, xrowextract/destinations, xrowextract/history; with xrowextract/all_jobs you see those of everyone.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:schedule, ext:xrowextract:destination, ext:xrowextract:history.</source>
+        <translation>Command line: ext:xrowextract:schedule, ext:xrowextract:destination, ext:xrowextract:history.</translation>
+    </message>
+    <message>
+        <source>The schedule was not saved:</source>
+        <translation>The schedule was not saved:</translation>
+    </message>
+    <message>
+        <source>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled): schedules cannot run.</source>
+        <translation>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled): schedules cannot run.</translation>
+    </message>
+    <message>
+        <source>Change the schedule</source>
+        <translation>Change the schedule</translation>
+    </message>
+    <message>
+        <source>New schedule</source>
+        <translation>New schedule</translation>
+    </message>
+    <message>
+        <source>What runs, and under which name.</source>
+        <translation>What runs, and under which name.</translation>
+    </message>
+    <message>
+        <source>Enabled: runs on its own</source>
+        <translation>Enabled: runs on its own</translation>
+    </message>
+    <message>
+        <source>What it runs</source>
+        <translation>What it runs</translation>
+    </message>
+    <message>
+        <source>Saved preset</source>
+        <translation>Saved preset</translation>
+    </message>
+    <message>
+        <source>Import from a location</source>
+        <translation>Import from a location</translation>
+    </message>
+    <message>
+        <source>Preset</source>
+        <translation>Preset</translation>
+    </message>
+    <message>
+        <source>Choose a preset</source>
+        <translation>Choose a preset</translation>
+    </message>
+    <message>
+        <source>No presets yet: save one on the One class tab first.</source>
+        <translation>No presets yet: save one on the One class tab first.</translation>
+    </message>
+    <message>
+        <source>Placeholder values</source>
+        <translation>Placeholder values</translation>
+    </message>
+    <message>
+        <source>One name=value per line; the defaults of the preset are used for any left out.</source>
+        <translation>One name=value per line; the defaults of the preset are used for any left out.</translation>
+    </message>
+    <message>
+        <source>The class of the preset</source>
+        <translation>The class of the preset</translation>
+    </message>
+    <message>
+        <source>Only needed for a preset that leaves the class open.</source>
+        <translation>Only needed for a preset that leaves the class open.</translation>
+    </message>
+    <message>
+        <source>Node set</source>
+        <translation>Node set</translation>
+    </message>
+    <message>
+        <source>Or node ids</source>
+        <translation>Or node ids</translation>
+    </message>
+    <message>
+        <source>Comma separated; used instead of the set when given.</source>
+        <translation>Comma separated; used instead of the set when given.</translation>
+    </message>
+    <message>
+        <source>Class identifiers, comma separated; empty: every class with objects.</source>
+        <translation>Class identifiers, comma separated; empty: every class with objects.</translation>
+    </message>
+    <message>
+        <source>Plain text of rich text too</source>
+        <translation>Plain text of rich text too</translation>
+    </message>
+    <message>
+        <source>None ticked: every language.</source>
+        <translation>None ticked: every language.</translation>
+    </message>
+    <message>
+        <source>With its whole subtree</source>
+        <translation>With its whole subtree</translation>
+    </message>
+    <message>
+        <source>Only this class</source>
+        <translation>Only this class</translation>
+    </message>
+    <message>
+        <source>Every class</source>
+        <translation>Every class</translation>
+    </message>
+    <message>
+        <source>A package is always exported in full; a delta run is not available for packages.</source>
+        <translation>A package is always exported in full; a delta run is not available for packages.</translation>
+    </message>
+    <message>
+        <source>Read the file from</source>
+        <translation>Read the file from</translation>
+    </message>
+    <message>
+        <source>A folder on this server</source>
+        <translation>A folder on this server</translation>
+    </message>
+    <message>
+        <source>A destination</source>
+        <translation>A destination</translation>
+    </message>
+    <message>
+        <source>File on this server</source>
+        <translation>File on this server</translation>
+    </message>
+    <message>
+        <source>Allowed below: %roots</source>
+        <translation>Allowed below: %roots</translation>
+    </message>
+    <message>
+        <source>No folder is allowed yet: xrowextract.ini [Destinations] LocalPathRoots[].</source>
+        <translation>No folder is allowed yet: xrowextract.ini [Destinations] LocalPathRoots[].</translation>
+    </message>
+    <message>
+        <source>Destination</source>
+        <translation>Destination</translation>
+    </message>
+    <message>
+        <source>Choose a destination</source>
+        <translation>Choose a destination</translation>
+    </message>
+    <message>
+        <source>File there</source>
+        <translation>File there</translation>
+    </message>
+    <message>
+        <source>From the file (manifest or class column)</source>
+        <translation>From the file (manifest or class column)</translation>
+    </message>
+    <message>
+        <source>Parent node for new objects</source>
+        <translation>Parent node for new objects</translation>
+    </message>
+    <message>
+        <source>Object id</source>
+        <translation>Object id</translation>
+    </message>
+    <message>
+        <source>None: always create</source>
+        <translation>None: always create</translation>
+    </message>
+    <message>
+        <source>Language of rows without one</source>
+        <translation>Language of rows without one</translation>
+    </message>
+    <message>
+        <source>The site default</source>
+        <translation>The site default</translation>
+    </message>
+    <message>
+        <source>Every run does a dry run first; the import is applied only when the dry run found no errors. Both reports are kept with the job.</source>
+        <translation>Every run does a dry run first; the import is applied only when the dry run found no errors. Both reports are kept with the job.</translation>
+    </message>
+    <message>
+        <source>When it runs</source>
+        <translation>When it runs</translation>
+    </message>
+    <message>
+        <source>In the time zone of the server. The cronjob part &quot;xrowextract&quot; starts it, or system cron with the line shown below the list.</source>
+        <translation>In the time zone of the server. The cronjob part &quot;xrowextract&quot; starts it, or system cron with the line shown below the list.</translation>
+    </message>
+    <message>
+        <source>Hourly</source>
+        <translation>Hourly</translation>
+    </message>
+    <message>
+        <source>Daily</source>
+        <translation>Daily</translation>
+    </message>
+    <message>
+        <source>Weekly</source>
+        <translation>Weekly</translation>
+    </message>
+    <message>
+        <source>Monthly</source>
+        <translation>Monthly</translation>
+    </message>
+    <message>
+        <source>Cron expression</source>
+        <translation>Cron expression</translation>
+    </message>
+    <message>
+        <source>At minute</source>
+        <translation>At minute</translation>
+    </message>
+    <message>
+        <source>At</source>
+        <translation>At</translation>
+    </message>
+    <message>
+        <source>On</source>
+        <translation>On</translation>
+    </message>
+    <message>
+        <source>On day</source>
+        <translation>On day</translation>
+    </message>
+    <message>
+        <source>Sunday</source>
+        <translation>Sunday</translation>
+    </message>
+    <message>
+        <source>Monday</source>
+        <translation>Monday</translation>
+    </message>
+    <message>
+        <source>Tuesday</source>
+        <translation>Tuesday</translation>
+    </message>
+    <message>
+        <source>Wednesday</source>
+        <translation>Wednesday</translation>
+    </message>
+    <message>
+        <source>Thursday</source>
+        <translation>Thursday</translation>
+    </message>
+    <message>
+        <source>Friday</source>
+        <translation>Friday</translation>
+    </message>
+    <message>
+        <source>Saturday</source>
+        <translation>Saturday</translation>
+    </message>
+    <message>
+        <source>A month without that day (31 in April) is skipped, as in cron.</source>
+        <translation>A month without that day (31 in April) is skipped, as in cron.</translation>
+    </message>
+    <message>
+        <source>Five fields: minute, hour, day of month, month, day of week (0 or 7 is Sunday). Ranges 1-5, lists 1,15, steps */15.</source>
+        <translation>Five fields: minute, hour, day of month, month, day of week (0 or 7 is Sunday). Ranges 1-5, lists 1,15, steps */15.</translation>
+    </message>
+    <message>
+        <source>Each run exports</source>
+        <translation>Each run exports</translation>
+    </message>
+    <message>
+        <source>Everything (full)</source>
+        <translation>Everything (full)</translation>
+    </message>
+    <message>
+        <source>Only what changed since the last successful run (delta)</source>
+        <translation>Only what changed since the last successful run (delta)</translation>
+    </message>
+    <message>
+        <source>A delta run filters by modification date (it replaces a date filter of the preset); the first run is always full. &quot;Run now&quot; can still start a full run by hand.</source>
+        <translation>A delta run filters by modification date (it replaces a date filter of the preset); the first run is always full. &quot;Run now&quot; can still start a full run by hand.</translation>
+    </message>
+    <message>
+        <source>Delivery and notifications</source>
+        <translation>Delivery and notifications</translation>
+    </message>
+    <message>
+        <source>Where the finished file goes, who hears about it, and how long it is kept.</source>
+        <translation>Where the finished file goes, who hears about it, and how long it is kept.</translation>
+    </message>
+    <message>
+        <source>Deliver to</source>
+        <translation>Deliver to</translation>
+    </message>
+    <message>
+        <source>Add one</source>
+        <translation>Add one</translation>
+    </message>
+    <message>
+        <source>The file and its manifest; retried with a growing pause when a delivery fails. The job folder keeps its copy either way.</source>
+        <translation>The file and its manifest; retried with a growing pause when a delivery fails. The job folder keeps its copy either way.</translation>
+    </message>
+    <message>
+        <source>E-mail on failure, also to</source>
+        <translation>E-mail on failure, also to</translation>
+    </message>
+    <message>
+        <source>You (the owner) always get failures.</source>
+        <translation>You (the owner) always get failures.</translation>
+    </message>
+    <message>
+        <source>E-mail on success too</source>
+        <translation>E-mail on success too</translation>
+    </message>
+    <message>
+        <source>Also to</source>
+        <translation>Also to</translation>
+    </message>
+    <message>
+        <source>Webhook (POST of the result as JSON)</source>
+        <translation>Webhook (POST of the result as JSON)</translation>
+    </message>
+    <message>
+        <source>Show failures as a notice and a badge on the Jobs tab</source>
+        <translation>Show failures as a notice and a badge on the Jobs tab</translation>
+    </message>
+    <message>
+        <source>Keep</source>
+        <translation>Keep</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>days</translation>
+    </message>
+    <message>
+        <source>history</source>
+        <translation>history</translation>
+    </message>
+    <message>
+        <source>Empty: the defaults of csv.ini [Jobs] RetentionDays and xrowextract.ini [History] RetentionDays.</source>
+        <translation>Empty: the defaults of csv.ini [Jobs] RetentionDays and xrowextract.ini [History] RetentionDays.</translation>
+    </message>
+    <message>
+        <source>Save schedule</source>
+        <translation>Save schedule</translation>
+    </message>
+    <message>
+        <source>All schedules</source>
+        <translation>All schedules</translation>
+    </message>
+    <message>
+        <source>Your schedules</source>
+        <translation>Your schedules</translation>
+    </message>
+    <message>
+        <source>Every run is a background job on the Jobs tab and a row in the History.</source>
+        <translation>Every run is a background job on the Jobs tab and a row in the History.</translation>
+    </message>
+    <message>
+        <source>No schedules yet. A schedule runs a saved preset, a site archive, a package export or an import on its own.</source>
+        <translation>No schedules yet. A schedule runs a saved preset, a site archive, a package export or an import on its own.</translation>
+    </message>
+    <message>
+        <source>Owner: %name (%login)</source>
+        <translation>Owner: %name (%login)</translation>
+    </message>
+    <message>
+        <source>Delivers to</source>
+        <translation>Delivers to</translation>
+    </message>
+    <message>
+        <source>Last run</source>
+        <translation>Last run</translation>
+    </message>
+    <message>
+        <source>Next runs</source>
+        <translation>Next runs</translation>
+    </message>
+    <message>
+        <source>Run it from system cron instead</source>
+        <translation>Run it from system cron instead</translation>
+    </message>
+    <message>
+        <source>Only what changed since the last successful run</source>
+        <translation>Only what changed since the last successful run</translation>
+    </message>
+    <message>
+        <source>Run changes only</source>
+        <translation>Run changes only</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Edit</translation>
+    </message>
+    <message>
+        <source>Disable</source>
+        <translation>Disable</translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation>Enable</translation>
+    </message>
+    <message>
+        <source>Delete this schedule? Its history is kept.</source>
+        <translation>Delete this schedule? Its history is kept.</translation>
+    </message>
+    <message>
+        <source>How schedules are started</source>
+        <translation>How schedules are started</translation>
+    </message>
+    <message>
+        <source>Either line in the crontab of the user the site runs as; both can be used together (a run is never started twice at once).</source>
+        <translation>Either line in the crontab of the user the site runs as; both can be used together (a run is never started twice at once).</translation>
+    </message>
+    <message>
+        <source>The cronjob part, every few minutes: starts every due schedule and cleans up old files and history.</source>
+        <translation>The cronjob part, every few minutes: starts every due schedule and cleans up old files and history.</translation>
+    </message>
+    <message>
+        <source>Or one line per schedule (shown with each schedule above): system cron decides when it runs.</source>
+        <translation>Or one line per schedule (shown with each schedule above): system cron decides when it runs.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:schedule --list, --run=&lt;id&gt;, --enable=&lt;id&gt;, --disable=&lt;id&gt;, --cron, --crontab.</source>
+        <translation>Command line: ext:xrowextract:schedule --list, --run=&lt;id&gt;, --enable=&lt;id&gt;, --disable=&lt;id&gt;, --cron, --crontab.</translation>
+    </message>
+    <message>
+        <source>Schedule saved. Next run: %time</source>
+        <translation>Schedule saved. Next run: %time</translation>
+    </message>
+    <message>
+        <source>Every hour at minute %minute</source>
+        <translation>Every hour at minute %minute</translation>
+    </message>
+    <message>
+        <source>Every day at %time</source>
+        <translation>Every day at %time</translation>
+    </message>
+    <message>
+        <source>Every %day at %time</source>
+        <translation>Every %day at %time</translation>
+    </message>
+    <message>
+        <source>Every month on day %day at %time</source>
+        <translation>Every month on day %day at %time</translation>
+    </message>
+    <message>
+        <source>Cron expression %expression</source>
+        <translation>Cron expression %expression</translation>
+    </message>
+    <message>
+        <source>A schedule needs a name.</source>
+        <translation>A schedule needs a name.</translation>
+    </message>
+    <message>
+        <source>Choose what the schedule runs.</source>
+        <translation>Choose what the schedule runs.</translation>
+    </message>
+    <message>
+        <source>The cron expression is not valid: five fields, minute hour day-of-month month day-of-week.</source>
+        <translation>The cron expression is not valid: five fields, minute hour day-of-month month day-of-week.</translation>
+    </message>
+    <message>
+        <source>Choose a saved preset.</source>
+        <translation>Choose a saved preset.</translation>
+    </message>
+    <message>
+        <source>This preset does not name a class: choose the class to export.</source>
+        <translation>This preset does not name a class: choose the class to export.</translation>
+    </message>
+    <message>
+        <source>Choose a node set or node ids for the site archive.</source>
+        <translation>Choose a node set or node ids for the site archive.</translation>
+    </message>
+    <message>
+        <source>Unknown archive format.</source>
+        <translation>Unknown archive format.</translation>
+    </message>
+    <message>
+        <source>Unknown file format.</source>
+        <translation>Unknown file format.</translation>
+    </message>
+    <message>
+        <source>Choose the node to export as a package.</source>
+        <translation>Choose the node to export as a package.</translation>
+    </message>
+    <message>
+        <source>Choose the destination to read the file from.</source>
+        <translation>Choose the destination to read the file from.</translation>
+    </message>
+    <message>
+        <source>Enter the path of the file at the destination.</source>
+        <translation>Enter the path of the file at the destination.</translation>
+    </message>
+    <message>
+        <source>The schedule tables could not be created (see the debug log).</source>
+        <translation>The schedule tables could not be created (see the debug log).</translation>
+    </message>
+    <message>
+        <source>The destination was not saved:</source>
+        <translation>The destination was not saved:</translation>
+    </message>
+    <message>
+        <source>The PHP sodium extension is not available: passwords and keys cannot be stored.</source>
+        <translation>The PHP sodium extension is not available: passwords and keys cannot be stored.</translation>
+    </message>
+    <message>
+        <source>Change the destination</source>
+        <translation>Change the destination</translation>
+    </message>
+    <message>
+        <source>New destination</source>
+        <translation>New destination</translation>
+    </message>
+    <message>
+        <source>Passwords and keys are stored encrypted and never shown again: leave a field empty to keep what is stored.</source>
+        <translation>Passwords and keys are stored encrypted and never shown again: leave a field empty to keep what is stored.</translation>
+    </message>
+    <message>
+        <source>This kind of destination is not available on this server: %reason</source>
+        <translation>This kind of destination is not available on this server: %reason</translation>
+    </message>
+    <message>
+        <source>Plain FTP sends the user, the password and the file unencrypted. Choose FTPS whenever the server offers it, or use SFTP.</source>
+        <translation>Plain FTP sends the user, the password and the file unencrypted. Choose FTPS whenever the server offers it, or use SFTP.</translation>
+    </message>
+    <message>
+        <source>The folder must be below: %roots</source>
+        <translation>The folder must be below: %roots</translation>
+    </message>
+    <message>
+        <source>No folder is allowed yet: set xrowextract.ini [Destinations] LocalPathRoots[] first.</source>
+        <translation>No folder is allowed yet: set xrowextract.ini [Destinations] LocalPathRoots[] first.</translation>
+    </message>
+    <message>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <source>set</source>
+        <translation>set</translation>
+    </message>
+    <message>
+        <source>not set</source>
+        <translation>not set</translation>
+    </message>
+    <message>
+        <source>Paste a new one to replace it</source>
+        <translation>Paste a new one to replace it</translation>
+    </message>
+    <message>
+        <source>Paste it here</source>
+        <translation>Paste it here</translation>
+    </message>
+    <message>
+        <source>Type a new one to replace it</source>
+        <translation>Type a new one to replace it</translation>
+    </message>
+    <message>
+        <source>Set it</source>
+        <translation>Set it</translation>
+    </message>
+    <message>
+        <source>Clear it</source>
+        <translation>Clear it</translation>
+    </message>
+    <message>
+        <source>Save destination</source>
+        <translation>Save destination</translation>
+    </message>
+    <message>
+        <source>Where scheduled exports deliver their files, and where a scheduled import can read one from.</source>
+        <translation>Where scheduled exports deliver their files, and where a scheduled import can read one from.</translation>
+    </message>
+    <message>
+        <source>New destination of the kind</source>
+        <translation>New destination of the kind</translation>
+    </message>
+    <message>
+        <source>not available here</source>
+        <translation>not available here</translation>
+    </message>
+    <message>
+        <source>No destinations yet.</source>
+        <translation>No destinations yet.</translation>
+    </message>
+    <message>
+        <source>The connection is not encrypted</source>
+        <translation>The connection is not encrypted</translation>
+    </message>
+    <message>
+        <source>unencrypted</source>
+        <translation>unencrypted</translation>
+    </message>
+    <message>
+        <source>test ok</source>
+        <translation>test ok</translation>
+    </message>
+    <message>
+        <source>test failed</source>
+        <translation>test failed</translation>
+    </message>
+    <message>
+        <source>never tested</source>
+        <translation>never tested</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>none</translation>
+    </message>
+    <message>
+        <source>Host key</source>
+        <translation>Host key</translation>
+    </message>
+    <message>
+        <source>trusted</source>
+        <translation>trusted</translation>
+    </message>
+    <message>
+        <source>not trusted yet</source>
+        <translation>not trusted yet</translation>
+    </message>
+    <message>
+        <source>Used by</source>
+        <translation>Used by</translation>
+    </message>
+    <message>
+        <source>Not available on this server: %reason</source>
+        <translation>Not available on this server: %reason</translation>
+    </message>
+    <message>
+        <source>Compare the fingerprint with the one the server administrator gives you, then trust it:</source>
+        <translation>Compare the fingerprint with the one the server administrator gives you, then trust it:</translation>
+    </message>
+    <message>
+        <source>Trust this host key</source>
+        <translation>Trust this host key</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>Test connection</translation>
+    </message>
+    <message>
+        <source>Schedules still deliver here. Delete this destination anyway?</source>
+        <translation>Schedules still deliver here. Delete this destination anyway?</translation>
+    </message>
+    <message>
+        <source>Delete this destination and its stored credentials?</source>
+        <translation>Delete this destination and its stored credentials?</translation>
+    </message>
+    <message>
+        <source>Destination saved. Test the connection to be sure.</source>
+        <translation>Destination saved. Test the connection to be sure.</translation>
+    </message>
+    <message>
+        <source>Host key trusted.</source>
+        <translation>Host key trusted.</translation>
+    </message>
+    <message>
+        <source>The server no longer offers a host key with that fingerprint: nothing was trusted.</source>
+        <translation>The server no longer offers a host key with that fingerprint: nothing was trusted.</translation>
+    </message>
+    <message>
+        <source>A destination needs a name.</source>
+        <translation>A destination needs a name.</translation>
+    </message>
+    <message>
+        <source>Choose the kind of destination.</source>
+        <translation>Choose the kind of destination.</translation>
+    </message>
+    <message>
+        <source>The destination table could not be created (see the debug log).</source>
+        <translation>The destination table could not be created (see the debug log).</translation>
+    </message>
+    <message>
+        <source>SFTP</source>
+        <translation>SFTP</translation>
+    </message>
+    <message>
+        <source>FTP / FTPS</source>
+        <translation>FTP / FTPS</translation>
+    </message>
+    <message>
+        <source>Local or NAS folder</source>
+        <translation>Local or NAS folder</translation>
+    </message>
+    <message>
+        <source>S3 compatible (AWS, MinIO, Wasabi)</source>
+        <translation>S3 compatible (AWS, MinIO, Wasabi)</translation>
+    </message>
+    <message>
+        <source>WebDAV</source>
+        <translation>WebDAV</translation>
+    </message>
+    <message>
+        <source>HTTP POST (webhook upload)</source>
+        <translation>HTTP POST (webhook upload)</translation>
+    </message>
+    <message>
+        <source>Folder</source>
+        <translation>Folder</translation>
+    </message>
+    <message>
+        <source>File field name</source>
+        <translation>File field name</translation>
+    </message>
+    <message>
+        <source>Folder URL</source>
+        <translation>Folder URL</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>User</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Host</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Encryption</source>
+        <translation>Encryption</translation>
+    </message>
+    <message>
+        <source>FTPS, explicit (AUTH TLS)</source>
+        <translation>FTPS, explicit (AUTH TLS)</translation>
+    </message>
+    <message>
+        <source>FTPS, implicit (port 990)</source>
+        <translation>FTPS, implicit (port 990)</translation>
+    </message>
+    <message>
+        <source>None: plain FTP, unencrypted</source>
+        <translation>None: plain FTP, unencrypted</translation>
+    </message>
+    <message>
+        <source>Endpoint URL</source>
+        <translation>Endpoint URL</translation>
+    </message>
+    <message>
+        <source>Region</source>
+        <translation>Region</translation>
+    </message>
+    <message>
+        <source>Bucket</source>
+        <translation>Bucket</translation>
+    </message>
+    <message>
+        <source>Key prefix (folder)</source>
+        <translation>Key prefix (folder)</translation>
+    </message>
+    <message>
+        <source>Access key ID</source>
+        <translation>Access key ID</translation>
+    </message>
+    <message>
+        <source>Path-style URLs (MinIO)</source>
+        <translation>Path-style URLs (MinIO)</translation>
+    </message>
+    <message>
+        <source>Sign in with</source>
+        <translation>Sign in with</translation>
+    </message>
+    <message>
+        <source>Private key</source>
+        <translation>Private key</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Password</translation>
+    </message>
+    <message>
+        <source>Bearer token</source>
+        <translation>Bearer token</translation>
+    </message>
+    <message>
+        <source>HMAC signing key</source>
+        <translation>HMAC signing key</translation>
+    </message>
+    <message>
+        <source>Secret access key</source>
+        <translation>Secret access key</translation>
+    </message>
+    <message>
+        <source>Private key (OpenSSH format, without a passphrase)</source>
+        <translation>Private key (OpenSSH format, without a passphrase)</translation>
+    </message>
+    <message>
+        <source>Show the failed runs</source>
+        <translation>Show the failed runs</translation>
+    </message>
+    <message>
+        <source>Mark as seen</source>
+        <translation>Mark as seen</translation>
+    </message>
+    <message>
+        <source>Export history</source>
+        <translation>Export history</translation>
+    </message>
+    <message>
+        <source>Your export history</source>
+        <translation>Your export history</translation>
+    </message>
+    <message>
+        <source>Every run, kept %days days (a schedule can keep its own longer or shorter).</source>
+        <translation>Every run, kept %days days (a schedule can keep its own longer or shorter).</translation>
+    </message>
+    <message>
+        <source>Total runs</source>
+        <translation>Total runs</translation>
+    </message>
+    <message>
+        <source>With warnings</source>
+        <translation>With warnings</translation>
+    </message>
+    <message>
+        <source>Skipped</source>
+        <translation>Skipped</translation>
+    </message>
+    <message>
+        <source>Result</source>
+        <translation>Result</translation>
+    </message>
+    <message>
+        <source>Any</source>
+        <translation>Any</translation>
+    </message>
+    <message>
+        <source>Kind</source>
+        <translation>Kind</translation>
+    </message>
+    <message>
+        <source>Schedule</source>
+        <translation>Schedule</translation>
+    </message>
+    <message>
+        <source>Started by</source>
+        <translation>Started by</translation>
+    </message>
+    <message>
+        <source>System cron</source>
+        <translation>System cron</translation>
+    </message>
+    <message>
+        <source>By hand</source>
+        <translation>By hand</translation>
+    </message>
+    <message>
+        <source>Command line</source>
+        <translation>Command line</translation>
+    </message>
+    <message>
+        <source>Direct download</source>
+        <translation>Direct download</translation>
+    </message>
+    <message>
+        <source>Delivery</source>
+        <translation>Delivery</translation>
+    </message>
+    <message>
+        <source>Delivered</source>
+        <translation>Delivered</translation>
+    </message>
+    <message>
+        <source>Partly delivered</source>
+        <translation>Partly delivered</translation>
+    </message>
+    <message>
+        <source>Not delivered</source>
+        <translation>Not delivered</translation>
+    </message>
+    <message>
+        <source>from</source>
+        <translation>from</translation>
+    </message>
+    <message>
+        <source>to</source>
+        <translation>to</translation>
+    </message>
+    <message>
+        <source>User (login)</source>
+        <translation>User (login)</translation>
+    </message>
+    <message>
+        <source>Filter</source>
+        <translation>Filter</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Reset</translation>
+    </message>
+    <message>
+        <source>%count run(s)</source>
+        <translation>%count run(s)</translation>
+    </message>
+    <message>
+        <source>No runs match.</source>
+        <translation>No runs match.</translation>
+    </message>
+    <message>
+        <source>done, with warnings</source>
+        <translation>done, with warnings</translation>
+    </message>
+    <message>
+        <source>Delivery details</source>
+        <translation>Delivery details</translation>
+    </message>
+    <message>
+        <source>%count attempt(s)</source>
+        <translation>%count attempt(s)</translation>
+    </message>
+    <message>
+        <source>Show the job</source>
+        <translation>Show the job</translation>
+    </message>
+    <message>
+        <source>Pages</source>
+        <translation>Pages</translation>
+    </message>
+    <message>
+        <source>Newer</source>
+        <translation>Newer</translation>
+    </message>
+    <message>
         <source>Page %page of %pages</source>
         <translation>Page %page of %pages</translation>
     </message>
@@ -58,6 +1122,218 @@
     <message>
         <source>all</source>
         <translation>all</translation>
+    </message>
+    <message>
+        <source>Older</source>
+        <translation>Older</translation>
+    </message>
+    <message>
+        <source>This is a sample package built read-only from this site’s own content, for trying the importer - not a file you uploaded. It is not kept in the package repository and is removed again automatically unless you keep it. Installing it writes real content.</source>
+        <translation>This is a sample package built read-only from this site’s own content, for trying the importer - not a file you uploaded. It is not kept in the package repository and is removed again automatically unless you keep it. Installing it writes real content.</translation>
+    </message>
+    <message>
+        <source>Class(es)</source>
+        <translation>Class(es)</translation>
+    </message>
+    <message>
+        <source>new objects go under</source>
+        <translation>new objects go under</translation>
+    </message>
+    <message>
+        <source>language(s)</source>
+        <translation>language(s)</translation>
+    </message>
+    <message>
+        <source>matched by</source>
+        <translation>matched by</translation>
+    </message>
+    <message>
+        <source>Attribute changes</source>
+        <translation>Attribute changes</translation>
+    </message>
+    <message>
+        <source>+ %id (%type)</source>
+        <translation>+ %id (%type)</translation>
+    </message>
+    <message>
+        <source>- %id (%type)</source>
+        <translation>- %id (%type)</translation>
+    </message>
+    <message>
+        <source>~ %id: %old -&gt; %new</source>
+        <translation>~ %id: %old -&gt; %new</translation>
+    </message>
+    <message>
+        <source>no attribute changes</source>
+        <translation>no attribute changes</translation>
+    </message>
+    <message>
+        <source>Matched existing object</source>
+        <translation>Matched existing object</translation>
+    </message>
+    <message>
+        <source>Placement</source>
+        <translation>Placement</translation>
+    </message>
+    <message>
+        <source>Field changes</source>
+        <translation>Field changes</translation>
+    </message>
+    <message>
+        <source>current</source>
+        <translation>current</translation>
+    </message>
+    <message>
+        <source>no field changes among the comparable datatypes</source>
+        <translation>no field changes among the comparable datatypes</translation>
+    </message>
+    <message>
+        <source>Files this package carries</source>
+        <translation>Files this package carries</translation>
+    </message>
+    <message>
+        <source>Path</source>
+        <translation>Path</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>Size</translation>
+    </message>
+    <message>
+        <source>bytes</source>
+        <translation>bytes</translation>
+    </message>
+    <message>
+        <source>This is a sample package: installing it writes real content to the site. Continue?</source>
+        <translation>This is a sample package: installing it writes real content to the site. Continue?</translation>
+    </message>
+    <message>
+        <source>An Exponential content package (.ezpkg) is a portable archive: a content class, content objects, or both, that installs the same way anywhere. This page adds inspecting and installing one, and building a rich sample of one, to the same tools CSV/JSON import uses.</source>
+        <translation>An Exponential content package (.ezpkg) is a portable archive: a content class, content objects, or both, that installs the same way anywhere. This page adds inspecting and installing one, and building a rich sample of one, to the same tools CSV/JSON import uses.</translation>
+    </message>
+    <message>
+        <source>Upload an .ezpkg, or choose one already in the repository (package/list also lists every package, not only content ones).</source>
+        <translation>Upload an .ezpkg, or choose one already in the repository (package/list also lists every package, not only content ones).</translation>
+    </message>
+    <message>
+        <source>Read the inspection</source>
+        <translation>Read the inspection</translation>
+    </message>
+    <message>
+        <source>Every class and object it carries, and what installing it would do: create, update, unchanged, or class missing. Nothing is written yet.</source>
+        <translation>Every class and object it carries, and what installing it would do: create, update, unchanged, or class missing. Nothing is written yet.</translation>
+    </message>
+    <message>
+        <source>Choose where and how</source>
+        <translation>Choose where and how</translation>
+    </message>
+    <message>
+        <source>Parent node for the content, the site access its templates/overrides map to, and how to handle a class or object that already exists.</source>
+        <translation>Parent node for the content, the site access its templates/overrides map to, and how to handle a class or object that already exists.</translation>
+    </message>
+    <message>
+        <source>Runs through the same kernel package installer package/install uses; what was created is listed with links.</source>
+        <translation>Runs through the same kernel package installer package/install uses; what was created is listed with links.</translation>
+    </message>
+    <message>
+        <source>What is inside an .ezpkg</source>
+        <translation>What is inside an .ezpkg</translation>
+    </message>
+    <message>
+        <source>package.xml: name, summary, description, version, licence, dependencies, changelog, and the list of install items.</source>
+        <translation>package.xml: name, summary, description, version, licence, dependencies, changelog, and the list of install items.</translation>
+    </message>
+    <message>
+        <source>ezcontentclass/*.xml: one content class, every attribute with its datatype and settings.</source>
+        <translation>ezcontentclass/*.xml: one content class, every attribute with its datatype and settings.</translation>
+    </message>
+    <message>
+        <source>ezcontentobject/*.xml: one or more content objects, one XML file per object once there are many.</source>
+        <translation>ezcontentobject/*.xml: one or more content objects, one XML file per object once there are many.</translation>
+    </message>
+    <message>
+        <source>The Package template reference below has the full layout and an annotated real example.</source>
+        <translation>The Package template reference below has the full layout and an annotated real example.</translation>
+    </message>
+    <message>
+        <source>Matching on install</source>
+        <translation>Matching on install</translation>
+    </message>
+    <message>
+        <source>Classes match by remote id, then by identifier.</source>
+        <translation>Classes match by remote id, then by identifier.</translation>
+    </message>
+    <message>
+        <source>Objects match by remote id only.</source>
+        <translation>Objects match by remote id only.</translation>
+    </message>
+    <message>
+        <source>An object whose class is not on this site, and not carried by the same package, is refused (class missing) rather than half-installed.</source>
+        <translation>An object whose class is not on this site, and not carried by the same package, is refused (class missing) rather than half-installed.</translation>
+    </message>
+    <message>
+        <source>Existing class or object</source>
+        <translation>Existing class or object</translation>
+    </message>
+    <message>
+        <source>Classes: skip (default), replace, or keep both (a new copy with a new identifier).</source>
+        <translation>Classes: skip (default), replace, or keep both (a new copy with a new identifier).</translation>
+    </message>
+    <message>
+        <source>Objects: skip, update in place (default), or keep both (a new copy with a new remote id).</source>
+        <translation>Objects: skip, update in place (default), or keep both (a new copy with a new remote id).</translation>
+    </message>
+    <message>
+        <source>Builds a real sample package for a class you choose: the class definition, 2-3 real content objects with a valid value for every datatype the importer understands (several languages, relations, an image and a file where the class has them), or both. It is built through the kernel package handlers, so it installs like any other package.</source>
+        <translation>Builds a real sample package for a class you choose: the class definition, 2-3 real content objects with a valid value for every datatype the importer understands (several languages, relations, an image and a file where the class has them), or both. It is built through the kernel package handlers, so it installs like any other package.</translation>
+    </message>
+    <message>
+        <source>Your permissions apply: reading the package, creating below the chosen parent, editing a matched object.</source>
+        <translation>Your permissions apply: reading the package, creating below the chosen parent, editing a matched object.</translation>
+    </message>
+    <message>
+        <source>Inspect first: installing writes content objects and possibly a content class immediately, there is no separate preview/apply step.</source>
+        <translation>Inspect first: installing writes content objects and possibly a content class immediately, there is no separate preview/apply step.</translation>
+    </message>
+    <message>
+        <source>Command line: ext:xrowextract:package --inspect / --install / --export / --template.</source>
+        <translation>Command line: ext:xrowextract:package --inspect / --install / --export / --template.</translation>
+    </message>
+    <message>
+        <source>The full package system (upload, create, export, install wizard, uninstall) is still at package/list, for packages of any kind.</source>
+        <translation>The full package system (upload, create, export, install wizard, uninstall) is still at package/list, for packages of any kind.</translation>
+    </message>
+    <message>
+        <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree.</source>
+        <translation>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree.</translation>
+    </message>
+    <message>
+        <source>They are created below %path, hidden the moment a folder there is possible - never the public front page.</source>
+        <translation>They are created below %path, hidden the moment a folder there is possible - never the public front page.</translation>
+    </message>
+    <message>
+        <source>The result opens below for inspection.</source>
+        <translation>The result opens below for inspection.</translation>
+    </message>
+    <message>
+        <source>Where the sample content is created</source>
+        <translation>Where the sample content is created</translation>
+    </message>
+    <message>
+        <source>Currently: %path</source>
+        <translation>Currently: %path</translation>
+    </message>
+    <message>
+        <source>The sample objects are real, published content while a build runs - they need a real place to live. That place is never the public front page: export.ini [PackageTemplate] ScratchNodeID if set, otherwise content.ini [NodeSettings] MediaRootNode (the Media/Images-Files-Multimedia structure, which no shipped layout, search result or the static/content-view cache renders for a visitor).</source>
+        <translation>The sample objects are real, published content while a build runs - they need a real place to live. That place is never the public front page: export.ini [PackageTemplate] ScratchNodeID if set, otherwise content.ini [NodeSettings] MediaRootNode (the Media/Images-Files-Multimedia structure, which no shipped layout, search result or the static/content-view cache renders for a visitor).</translation>
+    </message>
+    <message>
+        <source>When a &quot;folder&quot; class exists and can be created there, the objects go inside a temporary folder that is explicitly hidden the moment it is created, one extra safety layer on top of the location itself; otherwise they go directly below the scratch node.</source>
+        <translation>When a &quot;folder&quot; class exists and can be created there, the objects go inside a temporary folder that is explicitly hidden the moment it is created, one extra safety layer on top of the location itself; otherwise they go directly below the scratch node.</translation>
+    </message>
+    <message>
+        <source>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</source>
+        <translation>Removal is final (no trash can), and takes the whole temporary folder - and everything in it - with it in one call; nothing is left in the search index or the URL alias table.</translation>
     </message>
     <message>
         <source>What was installed</source>

@@ -21,6 +21,8 @@ class XrowExtractWriter
     protected $meta;
     protected $rows = 0;
     protected $parser;
+    /** The typed column manifest to embed (XML: a <manifest> element; JSON: an envelope), or null. */
+    protected $manifest = null;
 
     /** The output formats: id => (name, extension, content type). */
     public static function formats()
@@ -44,6 +46,13 @@ class XrowExtractWriter
         $this->separator = $separator;
         $this->escape = $escape;
         $this->newLine = $newLine;
+        if ( isset( $meta['manifest'] ) && is_array( $meta['manifest'] ) )
+        {
+            $embed = ( $this->format === 'json' && XrowExtractManifest::embedInJSON() )
+                  || ( $this->format === 'xml' && XrowExtractManifest::embedInXML() );
+            $this->manifest = $embed ? XrowExtractManifest::headerCopy( $meta['manifest'] ) : null;
+        }
+        unset( $meta['manifest'] );
         $this->meta = $meta;
         // The names in the file, as in the CSV header; a name used twice gets a number
         $this->keys = array();
@@ -58,6 +67,18 @@ class XrowExtractWriter
             $this->keys[] = $key;
         }
         $this->parser = new ParserInterface( $separator, $escape, $this->format !== 'csv' );
+    }
+
+    /** How many rows have been written so far. */
+    public function rowCount()
+    {
+        return $this->rows;
+    }
+
+    /** Whether a manifest is embedded in this file. */
+    public function embedsManifest()
+    {
+        return $this->manifest !== null;
     }
 
     /** The parser to build rows with (raw for JSON and XML). */
@@ -89,6 +110,9 @@ class XrowExtractWriter
         switch ( $this->format )
         {
             case 'json':
+                if ( $this->manifest !== null )
+                    return "{\n\"manifest\": " . json_encode( $this->manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE )
+                         . ",\n\"rows\": [\n";
                 return "[\n";
             case 'xml':
                 $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<export';
@@ -98,9 +122,34 @@ class XrowExtractWriter
                         $out .= ' ' . $name . '="' . self::xml( (string)$value ) . '"';
                 }
                 $out .= ">\n  <columns>\n";
+                $typed = array();
+                if ( $this->manifest !== null )
+                {
+                    foreach ( $this->manifest['columns'] as $entry )
+                        $typed[$entry['key']] = $entry;
+                }
                 foreach ( $this->columns as $i => $column )
-                    $out .= '    <column name="' . self::xml( $this->keys[$i] ) . '" id="' . self::xml( $column['id'] ) . '">' . self::xml( $column['name'] ) . "</column>\n";
-                return $out . "  </columns>\n";
+                {
+                    $extra = '';
+                    if ( isset( $typed[$this->keys[$i]] ) )
+                    {
+                        $entry = $typed[$this->keys[$i]];
+                        foreach ( array( 'kind', 'datatype', 'format' ) as $name )
+                        {
+                            if ( isset( $entry[$name] ) && is_scalar( $entry[$name] ) && $entry[$name] !== '' )
+                                $extra .= ' ' . $name . '="' . self::xml( (string)$entry[$name] ) . '"';
+                        }
+                        if ( isset( $entry['language'] ) && is_string( $entry['language'] ) )
+                            $extra .= ' language="' . self::xml( $entry['language'] ) . '"';
+                        elseif ( isset( $entry['language']['per_row'] ) )
+                            $extra .= ' language="per-row"';
+                    }
+                    $out .= '    <column name="' . self::xml( $this->keys[$i] ) . '" id="' . self::xml( $column['id'] ) . '"' . $extra . '>' . self::xml( $column['name'] ) . "</column>\n";
+                }
+                $out .= "  </columns>\n";
+                if ( $this->manifest !== null )
+                    $out .= '  <manifest type="application/json">' . self::xml( json_encode( $this->manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE ) ) . "</manifest>\n";
+                return $out;
         }
         $cells = array();
         foreach ( $this->keys as $key )
@@ -133,8 +182,14 @@ class XrowExtractWriter
     {
         switch ( $this->format )
         {
-            case 'json': return ( $this->rows ? "\n" : '' ) . "]\n";
-            case 'xml':  return "</export>\n";
+            case 'json':
+                if ( $this->manifest !== null )
+                    return ( $this->rows ? "\n" : '' ) . "],\n\"summary\": " . json_encode( array( 'rows' => $this->rows ) ) . "\n}\n";
+                return ( $this->rows ? "\n" : '' ) . "]\n";
+            case 'xml':
+                if ( $this->manifest !== null )
+                    return '  <summary rows="' . (int)$this->rows . "\" />\n</export>\n";
+                return "</export>\n";
         }
         return '';
     }

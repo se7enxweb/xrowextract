@@ -28,7 +28,7 @@ $script = eZScript::instance( array(
 ) );
 $script->startup();
 $options = $script->getOptions(
-    '[file:][class:][parent:][match:][language:][map:][apply][user:][report:][output:][progress-file:][resume-from:][background][what:]',
+    '[file:][class:][parent:][match:][language:][map:][apply][user:][report:][output:][progress-file:][resume-from:][background][what:][manifest:][no-manifest]',
     '',
     array(
         'file'          => 'XML, CSV or JSON file to read (required); - for stdin',
@@ -46,6 +46,8 @@ $options = $script->getOptions(
         'resume-from'   => 'Row number to continue from (1-based): earlier rows are parsed and skipped, not processed again',
         'background'    => 'Queue this as a background job (XrowExtractJob, type import) and return at once instead of running now',
         'what'          => 'Free text describing this import, shown on the Jobs page (used with --background)',
+        'manifest'      => 'A typed column manifest (JSON) for --file; default: <file>.manifest.json next to it, or the one embedded in an XML/JSON export. Its column ids map every column exactly',
+        'no-manifest'   => 'Ignore any manifest and map the columns from their names, as for a file without one',
     )
 );
 $script->initialize();
@@ -80,6 +82,29 @@ elseif ( !is_file( $path ) )
     $fail( "No such file: $path (--file)." );
 }
 
+// The typed column manifest: an explicit --manifest, or none at all with --no-manifest; otherwise the
+// sidecar next to the file or the one embedded in it is found by XrowExtractImport::fileHeader()
+if ( $options['no-manifest'] )
+    XrowExtractManifest::$disabled = true;
+elseif ( $options['manifest'] )
+{
+    if ( !XrowExtractManifest::readFile( $options['manifest'] ) )
+        $fail( "Not a manifest: {$options['manifest']} (--manifest)." );
+    XrowExtractManifest::$explicitPath = $options['manifest'];
+}
+// A zip of one data file and its manifest (the One class view's "Download with manifest"): unpacked
+// into the private upload folder, the manifest next to the data file as its sidecar
+$unpacked = XrowExtractManifest::unpackZip( $path, XrowExtractImport::uploadDir() . '/cli_zip_' . bin2hex( random_bytes( 6 ) ) . '.dat' );
+if ( $unpacked['ok'] )
+{
+    $cli->output( "Read {$unpacked['name']} from the zip " . basename( $path ) . '.' );
+    $path = $unpacked['path'];
+}
+elseif ( $unpacked['error'] !== '' )
+{
+    $fail( 'Cannot read the zip ' . basename( $path ) . ': ' . $unpacked['error'] );
+}
+
 // --background: queue a job and return at once - bin/php/job.php runs this same script again with
 // --run=<id>, which supplies --output/--progress-file/--user itself
 if ( $options['background'] )
@@ -92,11 +117,13 @@ if ( $options['background'] )
     $args = array( '--file=' . $path );
     if ( $options['apply'] )
         $args[] = '--apply';
-    foreach ( array( 'class', 'parent', 'match', 'language', 'map', 'resume-from' ) as $key )
+    foreach ( array( 'class', 'parent', 'match', 'language', 'map', 'resume-from', 'manifest' ) as $key )
     {
         if ( $options[$key] )
             $args[] = "--$key=" . $options[$key];
     }
+    if ( $options['no-manifest'] )
+        $args[] = '--no-manifest';
     $jobID = XrowExtractJob::create( array(
         'type' => 'import', 'owner' => $login,
         'what' => $options['what'] ?: ( 'Import: ' . basename( $path ) ),
@@ -123,6 +150,14 @@ if ( !$parsed['header'] )
     $fail( 'No columns found in the file.' );
 $format = $parsed['format'];
 $separator = $parsed['separator'];
+$manifestUsed = isset( $parsed['manifest'] ) ? $parsed['manifest'] : null;
+if ( $manifestUsed )
+{
+    $cli->output( sprintf( 'Mapping from the manifest (%s): %d of %d column(s) exact%s%s.', $manifestUsed['source'],
+                           count( $manifestUsed['matched'] ), count( $parsed['header'] ),
+                           $manifestUsed['unknown'] ? ', not described: ' . implode( ', ', $manifestUsed['unknown'] ) : '',
+                           $manifestUsed['checksum'] === 'ok' ? ', checksum ok' : ( $manifestUsed['checksum'] === 'mismatch' ? ', WARNING: the file changed since the export (checksum mismatch)' : '' ) ) );
+}
 
 // Class (a fallback; a "class" column - or an XML file's own <export class="..."> - still wins per row)
 $classID = 0;
@@ -268,6 +303,9 @@ if ( $reportFile )
         'resumed_from' => $skipRows ? $resumeFrom : null, 'ezoe' => $result['ezoe'],
         'peak_memory_bytes' => $peakMemory, 'errors_file' => $errorsHeaderWritten ? basename( $errorsFile ) : null,
         'applied' => (bool)$options['apply'], 'file' => basename( $options['file'] ), 'format' => $format,
+        'manifest' => $manifestUsed ? array( 'source' => $manifestUsed['source'], 'exact_columns' => count( $manifestUsed['matched'] ),
+                                             'not_described' => $manifestUsed['unknown'], 'checksum' => $manifestUsed['checksum'] ) : null,
+        'mapping' => array_map( function ( $m ) { return array( 'column' => $m['column'], 'target' => $m['target'] ); }, $mapping ),
     );
     file_put_contents( $reportFile, json_encode( $report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
     @chmod( $reportFile, 0600 );

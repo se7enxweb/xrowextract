@@ -1,0 +1,450 @@
+<?php
+// This array contains the database schema of the xrowextract extension: scheduled exports,
+// delivery destinations (their credentials encrypted, see classes/xrowextractsecrets.php) and the
+// export history index. The tables are created lazily (XrowExtractSchema::ensure()) the first time
+// a schedule, destination or history row is written; sql/<engine>/schema.sql hold the same tables
+// for a manual install. Names stay within the 26 character table / 30 character identifier limit
+// of dbschema.ini [LintChecker] (Oracle), and no field is an Oracle reserved word.
+$schema = array (
+  'xrowextract_destination' =>
+  array (
+    'name' => 'xrowextract_destination',
+    'fields' =>
+    array (
+      'config' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'created' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'dest_type' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'id' =>
+      array (
+        'type' => 'auto_increment',
+        'default' => false,
+      ),
+      'last_test' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'last_test_result' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'modified' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'name' =>
+      array (
+        'length' => 150,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'owner_login' =>
+      array (
+        'length' => 150,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'secret' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+    ),
+    'indexes' =>
+    array (
+      'PRIMARY' =>
+      array (
+        'type' => 'primary',
+        'fields' =>
+        array (
+          0 => 'id',
+        ),
+      ),
+    ),
+  ),
+  'xrowextract_history' =>
+  array (
+    'name' => 'xrowextract_history',
+    'fields' =>
+    array (
+      'byte_size' =>
+      array (
+        'length' => 20,
+        'type' => 'bigint',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'checksum' =>
+      array (
+        'length' => 64,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'created' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'delivery' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'delivery_state' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'destinations' =>
+      array (
+        'length' => 255,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'ended_at' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'error_text' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'file_name' =>
+      array (
+        'length' => 255,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'id' =>
+      array (
+        'type' => 'auto_increment',
+        'default' => false,
+      ),
+      'job_id' =>
+      array (
+        'length' => 32,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'kind' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'output_format' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'owner_login' =>
+      array (
+        'length' => 150,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'preset_ref' =>
+      array (
+        'length' => 100,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'row_count' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'run_mode' =>
+      array (
+        'length' => 10,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'run_state' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'schedule_id' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'started_at' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'trigger_type' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'warning_count' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'warnings' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'what' =>
+      array (
+        'length' => 255,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+    ),
+    'indexes' =>
+    array (
+      'PRIMARY' =>
+      array (
+        'type' => 'primary',
+        'fields' =>
+        array (
+          0 => 'id',
+        ),
+      ),
+      'xrowextract_history_created' =>
+      array (
+        'type' => 'non-unique',
+        'fields' =>
+        array (
+          0 => 'created',
+        ),
+      ),
+      'xrowextract_history_job' =>
+      array (
+        'type' => 'non-unique',
+        'fields' =>
+        array (
+          0 => 'job_id',
+        ),
+      ),
+      'xrowextract_history_sched' =>
+      array (
+        'type' => 'non-unique',
+        'fields' =>
+        array (
+          0 => 'schedule_id',
+          1 => 'created',
+        ),
+      ),
+    ),
+  ),
+  'xrowextract_schedule' =>
+  array (
+    'name' => 'xrowextract_schedule',
+    'fields' =>
+    array (
+      'created' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'cron_expr' =>
+      array (
+        'length' => 100,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'definition' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'delta_mode' =>
+      array (
+        'length' => 10,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => 'full',
+      ),
+      'destination_ids' =>
+      array (
+        'length' => 255,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'enabled' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 1,
+      ),
+      'frequency' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'id' =>
+      array (
+        'type' => 'auto_increment',
+        'default' => false,
+      ),
+      'kind' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'last_job_id' =>
+      array (
+        'length' => 32,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'last_run' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'last_state' =>
+      array (
+        'length' => 20,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'last_success' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'modified' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'name' =>
+      array (
+        'length' => 150,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'next_run' =>
+      array (
+        'length' => 11,
+        'type' => 'int',
+        'not_null' => '1',
+        'default' => 0,
+      ),
+      'notify' =>
+      array (
+        'type' => 'longtext',
+        'default' => false,
+      ),
+      'owner_login' =>
+      array (
+        'length' => 150,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+      'retention' =>
+      array (
+        'length' => 100,
+        'type' => 'varchar',
+        'not_null' => '1',
+        'default' => '',
+      ),
+    ),
+    'indexes' =>
+    array (
+      'PRIMARY' =>
+      array (
+        'type' => 'primary',
+        'fields' =>
+        array (
+          0 => 'id',
+        ),
+      ),
+      'xrowextract_schedule_next' =>
+      array (
+        'type' => 'non-unique',
+        'fields' =>
+        array (
+          0 => 'enabled',
+          1 => 'next_run',
+        ),
+      ),
+    ),
+  ),
+  '_info' =>
+  array (
+    'format' => 'generic',
+  ),
+);
+
+?>

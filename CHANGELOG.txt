@@ -1,3 +1,8 @@
+Unreleased
+
+-  Added a typed column manifest to every export (sidecar, XML/JSON header); the importer maps columns exactly from it
+-  Added scheduled exports and imports, delivery destinations with encrypted credentials, and an export history
+
 Version 2.4
 
 -  Added some php8 improvments based on current project usage and refinements

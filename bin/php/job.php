@@ -85,65 +85,98 @@ XrowExtractJob::save( $id, $job );
 $phpCli = XrowExtractJob::phpCliBinary();
 if ( !$phpCli )
     $fail( 'No PHP command line binary found (csv.ini [Jobs] PhpCli).' );
-$exportScript = XrowExtractJob::scriptFor( $job['type'] );
-
-// csv jobs know their exact output file name already; archive jobs get a directory and pick up
-// whatever build() names the archive (the name carries a timestamp decided at run time)
-$outputArg = $job['type'] === 'archive' ? $dir : $dir . '/' . $job['output_file'];
-
-$argv = array_map( 'strval', (array)$job['args'] );
-$argv[] = '--output=' . $outputArg;
-$argv[] = '--progress-file=' . $progressPath;
-$argv[] = '--user=' . $job['owner'];
-// eZScript refuses to run as root without this flag; this process is root exactly when the child
-// it is about to start would be too (Velocity, or a root command line)
-if ( XrowExtractJob::runningAsRoot() )
-    $argv[] = '--allow-root-user';
-
-$commandParts = array( escapeshellarg( $phpCli ), escapeshellarg( $exportScript ) );
-foreach ( $argv as $arg )
-    $commandParts[] = escapeshellarg( $arg );
-$command = implode( ' ', $commandParts );
 
 $logHandle = @fopen( $logPath, 'a' );
 if ( $logHandle )
 {
-    fwrite( $logHandle, '[' . date( 'c' ) . "] $command\n" );
     fclose( $logHandle );
     @chmod( $logPath, 0600 );
     XrowExtractJob::fixOwnership( $logPath );
 }
 
-$descriptors = array(
-    0 => array( 'file', '/dev/null', 'r' ),
-    1 => array( 'file', $logPath, 'a' ),
-    2 => array( 'file', $logPath, 'a' ),
-);
-$process = @proc_open( $command, $descriptors, $pipes );
-$exitCode = 1;
-if ( is_resource( $process ) )
-    $exitCode = proc_close( $process );
+// One export/import script run as a child: an argument array for proc_open() (no shell), its output
+// appended to job.log. --user and, when this process is root, --allow-root-user are added (eZScript
+// refuses to run as root without it; this process is root exactly when the child would be too).
+$runScript = function ( $type, array $args ) use ( $phpCli, $logPath, $job )
+{
+    $argv = array_merge( array( $phpCli, XrowExtractJob::scriptFor( $type ) ), array_map( 'strval', $args ) );
+    $argv[] = '--user=' . $job['owner'];
+    if ( XrowExtractJob::runningAsRoot() )
+        $argv[] = '--allow-root-user';
+    $logHandle = @fopen( $logPath, 'a' );
+    if ( $logHandle )
+    {
+        fwrite( $logHandle, '[' . date( 'c' ) . '] ' . implode( ' ', array_map( 'escapeshellarg', $argv ) ) . "\n" );
+        fclose( $logHandle );
+    }
+    $descriptors = array(
+        0 => array( 'file', '/dev/null', 'r' ),
+        1 => array( 'file', $logPath, 'a' ),
+        2 => array( 'file', $logPath, 'a' ),
+    );
+    $process = @proc_open( $argv, $descriptors, $pipes, eZSys::rootDir() );
+    $code = is_resource( $process ) ? proc_close( $process ) : 1;
+    XrowExtractJob::fixOwnership( $logPath );
+    return $code;
+};
 
-XrowExtractJob::fixOwnership( $logPath );
+// What the log says: ANSI colours stripped (eZCLI colours error() output even when not run at a
+// terminal), and every "WARNING: " line the scripts wrote with --lenient collected for the history
+$readLog = function () use ( $logPath )
+{
+    $log = is_file( $logPath ) ? (string)@file_get_contents( $logPath ) : '';
+    return preg_replace( '/\x1b\[[0-9;]*m/', '', $log );
+};
+$logWarnings = function ( $log )
+{
+    $found = array();
+    if ( preg_match_all( '/^WARNING: (.+)$/m', $log, $m ) )
+        $found = array_map( 'trim', $m[1] );
+    return array_values( array_unique( $found ) );
+};
 
-$log = is_file( $logPath ) ? (string)@file_get_contents( $logPath ) : '';
-// eZCLI colours error() output with ANSI escapes even when not run at a terminal; strip them so the
-// error text shown on the Jobs page is plain
-$log = preg_replace( '/\x1b\[[0-9;]*m/', '', $log );
+if ( $job['type'] === 'import_schedule' )
+{
+    // A scheduled import: fetch, dry run, and apply only when the dry run found no errors
+    $patch = XrowExtractScheduler::runScheduledImport( $id, $runScript );
+    $job = XrowExtractJob::load( $id );
+    $job = array_merge( $job, $patch );
+    $job['ended'] = time();
+    $job['warnings'] = array_values( array_unique( array_merge( isset( $patch['warnings'] ) ? $patch['warnings'] : array(), $logWarnings( $readLog() ) ) ) );
+    if ( !empty( $job['output_file'] ) && is_file( $dir . '/' . $job['output_file'] ) )
+        $job['size'] = filesize( $dir . '/' . $job['output_file'] );
+    XrowExtractJob::save( $id, $job );
+    XrowExtractScheduler::afterJob( $id );
+    $job = XrowExtractJob::load( $id );
+    $cli->output( sprintf( 'Job %s: %s%s', $id, $job['state'], $job['error'] ? ' (' . $job['error'] . ')' : '' ) );
+    $script->shutdown( $job['state'] === 'failed' ? 1 : 0 );
+}
+
+// csv jobs know their exact output file name already; archive jobs get a directory and pick up
+// whatever build() names the archive (the name carries a timestamp decided at run time)
+$outputArg = $job['type'] === 'archive' ? $dir : $dir . '/' . $job['output_file'];
+$args = array_map( 'strval', (array)$job['args'] );
+$args[] = '--output=' . $outputArg;
+$args[] = '--progress-file=' . $progressPath;
+$exitCode = $runScript( $job['type'], $args );
+
+$log = $readLog();
 $job = XrowExtractJob::load( $id );
 if ( !$job )
     $script->shutdown( $exitCode === 0 ? 0 : 1 );
 $job['ended'] = time();
+$job['warnings'] = array_values( array_unique( array_merge( isset( $job['warnings'] ) ? (array)$job['warnings'] : array(), $logWarnings( $log ) ) ) );
 
 if ( $job['type'] === 'archive' )
 {
     // The archive's own name (a timestamp decided inside build()): whatever new file build() put
-    // in the job folder that is not one of ours
+    // in the job folder that is not one of ours (nor the archive's manifest next to it)
     $known = array( XrowExtractJob::JOB_FILE, XrowExtractJob::LOG_FILE, XrowExtractJob::PROGRESS_FILE );
     $found = null;
     foreach ( (array)@scandir( $dir ) as $entry )
     {
-        if ( $entry === '.' || $entry === '..' || in_array( $entry, $known, true ) || substr( $entry, -4 ) === '.tmp' )
+        if ( $entry === '.' || $entry === '..' || in_array( $entry, $known, true ) || substr( $entry, -4 ) === '.tmp'
+             || substr( $entry, -strlen( XrowExtractManifest::SIDECAR_SUFFIX ) ) === XrowExtractManifest::SIDECAR_SUFFIX )
             continue;
         if ( is_file( $dir . '/' . $entry ) )
             $found = $entry;
@@ -153,11 +186,22 @@ if ( $job['type'] === 'archive' )
 }
 
 $outputPath = $job['output_file'] ? $dir . '/' . $job['output_file'] : null;
+if ( $outputPath && is_file( XrowExtractManifest::sidecarPath( $outputPath ) ) )
+{
+    XrowExtractJob::fixOwnership( XrowExtractManifest::sidecarPath( $outputPath ) );
+    $job['has_manifest'] = true;
+}
+if ( $exitCode === 3 )
+{
+    // --lenient found nothing left to export (a deleted node, class or preset): skipped, not failed
+    $job['state'] = 'skipped';
+    $job['error'] = $job['warnings'] ? end( $job['warnings'] ) : 'Nothing left to export.';
+}
 // A package install can finish with some items rejected and still exit 1 (package.php's own 'ok'
 // covers every item, continue-on-error is always on) - exactly the "a few bad rows" case
 // bin/php/import.php already treats as a completed job with a report to read, not a failed one (see
 // its own comment), so a package job's report is read whenever it exists, not only on exit 0.
-if ( ( $exitCode === 0 || $job['type'] === 'package' ) && $outputPath && is_file( $outputPath ) )
+elseif ( ( $exitCode === 0 || $job['type'] === 'package' ) && $outputPath && is_file( $outputPath ) )
 {
     XrowExtractJob::fixOwnership( $outputPath );
     $job['state'] = 'done';
@@ -217,9 +261,13 @@ $current = XrowExtractJob::load( $id );
 if ( $current && !empty( $current['cancelled'] ) )
 {
     $cli->output( sprintf( 'Job %s: cancelled', $id ) );
+    XrowExtractScheduler::afterJob( $id ); // the history row (recorded as failed, with the cancel message)
     $script->shutdown( 1 );
 }
 XrowExtractJob::save( $id, $job );
 
-$cli->output( sprintf( 'Job %s: %s%s', $id, $job['state'], $job['state'] === 'failed' ? ' (' . $job['error'] . ')' : '' ) );
-$script->shutdown( $exitCode === 0 ? 0 : 1 );
+// The history row; for a scheduled job also the delivery and the notifications
+XrowExtractScheduler::afterJob( $id );
+
+$cli->output( sprintf( 'Job %s: %s%s', $id, $job['state'], in_array( $job['state'], array( 'failed', 'skipped' ), true ) ? ' (' . $job['error'] . ')' : '' ) );
+$script->shutdown( $exitCode === 0 || $exitCode === 3 ? 0 : 1 );

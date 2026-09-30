@@ -236,7 +236,7 @@ class XrowExtractImport
     /** header and rows from JSON text (an array of flat objects, as XrowExtractWriter writes). */
     public static function parseJSON( $text )
     {
-        $data = json_decode( self::stripBOM( (string)$text ), true );
+        $data = self::jsonRows( json_decode( self::stripBOM( (string)$text ), true ) );
         if ( !is_array( $data ) )
             return array( 'header' => array(), 'rows' => array(), 'error' => 'Not a JSON array of objects.' );
         $header = array();
@@ -479,7 +479,7 @@ class XrowExtractImport
                 XrowExtractUpload::humanSize( $size ), XrowExtractUpload::humanSize( $size * 4 )
             ), 'XrowExtractImport' );
         }
-        $data = json_decode( self::stripBOM( (string)file_get_contents( $path ) ), true );
+        $data = self::jsonRows( json_decode( self::stripBOM( (string)file_get_contents( $path ) ), true ) );
         if ( !is_array( $data ) )
             throw new RuntimeException( 'Not a JSON array of objects.' );
         foreach ( $data as $item )
@@ -493,8 +493,45 @@ class XrowExtractImport
         }
     }
 
-    /** The header, and (xml) columnIDs/class, without materialising every row - a cheap first look at a file. */
+    /**
+     * The rows of decoded JSON: a plain array of objects, or the envelope XrowExtractWriter writes when it
+     * embeds a manifest ({"manifest": ..., "rows": [...], "summary": ...}). null when it is neither.
+     */
+    public static function jsonRows( $data )
+    {
+        if ( !is_array( $data ) )
+            return null;
+        if ( isset( $data['rows'] ) && is_array( $data['rows'] ) && ( isset( $data['manifest'] ) || isset( $data['summary'] ) ) )
+            return $data['rows'];
+        return ( !$data || array_keys( $data ) === range( 0, count( $data ) - 1 ) ) ? $data : null;
+    }
+
+    /**
+     * The header, and columnIDs/class, without materialising every row - a cheap first look at a file.
+     * When the file has a typed column manifest (a "<file>.manifest.json" sidecar, or one embedded in an
+     * XML/JSON export), its column ids settle the mapping exactly and its class is the file's class;
+     * 'manifest' then says where it came from and what it matched (XrowExtractManifest::importMapping()).
+     */
     public static function fileHeader( $path, $format, $separator )
+    {
+        $info = self::fileHeaderFromFile( $path, $format, $separator );
+        $info['manifest'] = null;
+        $manifest = XrowExtractManifest::forDataFile( $path, $format );
+        if ( $manifest && $info['header'] )
+        {
+            $mapping = XrowExtractManifest::importMapping( $manifest, $info['header'], $path );
+            if ( $mapping['columnIDs'] )
+            {
+                $info['columnIDs'] = array_merge( (array)$info['columnIDs'], $mapping['columnIDs'] );
+                if ( empty( $info['class'] ) && $mapping['class'] )
+                    $info['class'] = $mapping['class'];
+                $info['manifest'] = $mapping;
+            }
+        }
+        return $info;
+    }
+
+    protected static function fileHeaderFromFile( $path, $format, $separator )
     {
         if ( $format === 'xml' )
         {
@@ -631,6 +668,7 @@ class XrowExtractImport
             return array(
                 'header' => $info['header'], 'rows' => $rows, 'total_rows' => $total,
                 'columnIDs' => $info['columnIDs'], 'class' => $info['class'],
+                'manifest' => isset( $info['manifest'] ) ? $info['manifest'] : null,
                 'format' => $format, 'separator' => $separator,
             );
         }
