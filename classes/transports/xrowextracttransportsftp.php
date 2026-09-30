@@ -86,7 +86,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
      * Runs a command given as an argument array (no shell). Returns array( exit code, stdout, stderr ).
      * $env: extra environment; $stdin: text for the child's stdin.
      *
-     * @param list<string|false> $argv
+     * @param list<string> $argv the program (an absolute path) and its arguments
      * @param array<string, string> $env
      * @param string $stdin
      * @param int $timeout
@@ -94,6 +94,9 @@ class XrowExtractTransportSftp extends XrowExtractTransport
      */
     public static function run( array $argv, array $env = array(), $stdin = '', $timeout = 120 ): array
     {
+        // proc_open() throws a ValueError for an empty program name (a binary that was not found)
+        if ( !isset( $argv[0] ) || !is_string( $argv[0] ) || $argv[0] === '' )
+            return array( 127, '', 'the program to run was not found' );
         $descriptors = array( 0 => array( 'pipe', 'r' ), 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
         $baseEnv = array( 'PATH' => '/usr/bin:/bin', 'LANG' => 'C', 'HOME' => sys_get_temp_dir() );
         $process = @proc_open( $argv, $descriptors, $pipes, null, array_merge( $baseEnv, $env ) );
@@ -151,10 +154,13 @@ class XrowExtractTransportSftp extends XrowExtractTransport
      */
     public function scanHostKeys(): array
     {
+        $reason = self::unavailableReason();
+        if ( $reason !== '' )
+            return array( 'ok' => false, 'message' => 'SFTP is not available: ' . $reason );
         $host = $this->host();
         if ( !$host )
             return array( 'ok' => false, 'message' => 'The host name is not valid.' );
-        list( $code, $out, $err ) = self::run( array( self::binary( 'ssh-keyscan' ), '-T', '10', '-p', (string)$this->port(), '--', $host ), array(), '', 30 );
+        list( $code, $out, $err ) = self::run( array( (string)self::binary( 'ssh-keyscan' ), '-T', '10', '-p', (string)$this->port(), '--', $host ), array(), '', 30 );
         $lines = array_values( array_filter( array_map( 'trim', explode( "\n", $out ) ), function ( $l ) { return $l !== '' && $l[0] !== '#'; } ) );
         if ( !$lines )
             return array( 'ok' => false, 'message' => 'No host key received from ' . $host . ':' . $this->port() . ( trim( $err ) !== '' ? ' (' . trim( $err ) . ')' : '' ) );
@@ -171,11 +177,18 @@ class XrowExtractTransportSftp extends XrowExtractTransport
      */
     public static function fingerprint( $line ): string
     {
+        $keygen = self::binary( 'ssh-keygen' );
+        if ( $keygen === false )
+            return '';
         $dir = self::privateTempDir();
         if ( !$dir )
             return '';
-        file_put_contents( $dir . '/key', $line . "\n" );
-        list( $code, $out ) = self::run( array( self::binary( 'ssh-keygen' ), '-l', '-E', 'sha256', '-f', $dir . '/key' ) );
+        if ( @file_put_contents( $dir . '/key', $line . "\n" ) === false )
+        {
+            self::removeDir( $dir );
+            return '';
+        }
+        list( $code, $out ) = self::run( array( $keygen, '-l', '-E', 'sha256', '-f', $dir . '/key' ) );
         self::removeDir( $dir );
         return $code === 0 && preg_match( '/(SHA256:\S+).*(\([A-Z0-9-]+\))/', $out, $m ) ? $m[1] . ' ' . $m[2] : '';
     }
