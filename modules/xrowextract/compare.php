@@ -19,8 +19,10 @@ $tpl = eZTemplate::factory();
 $packageName = isset( $Params['PackageName'] ) ? (string)$Params['PackageName'] : '';
 $otherName = isset( $Params['OtherName'] ) && $Params['OtherName'] ? (string)$Params['OtherName']
            : ( isset( $_GET['with'] ) ? trim( (string)$_GET['with'] ) : '' );
-$package = $packageName !== '' ? eZPackage::fetch( $packageName ) : false;
-$other = $otherName !== '' ? eZPackage::fetch( $otherName ) : false;
+// Only a plain package name reaches eZPackage::fetch() (which builds a repository path from it)
+$validName = function ( $name ) { return (bool)preg_match( '/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,199}$/', $name ) && strpos( $name, '..' ) === false; };
+$package = $packageName !== '' && $validName( $packageName ) ? eZPackage::fetch( $packageName ) : false;
+$other = $otherName !== '' && $validName( $otherName ) ? eZPackage::fetch( $otherName ) : false;
 
 $path = array(
     array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
@@ -30,8 +32,9 @@ $path = array(
 if ( !$package instanceof eZPackage || ( $otherName !== '' && !$other instanceof eZPackage ) )
 {
     $Result = array();
-    $Result['content'] = ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false,
-                                      array( '%name' => !$package instanceof eZPackage ? $packageName : $otherName ) );
+    // The page content is HTML: the name comes from the address, so it is escaped
+    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false,
+                                      array( '%name' => !$package instanceof eZPackage ? $packageName : $otherName ) ), ENT_QUOTES, 'UTF-8' );
     $Result['path'] = $path;
     return $Result;
 }
