@@ -80,8 +80,13 @@ class XrowExtractSecrets
     {
         if ( !XrowExtractJob::runningAsRoot() )
             return;
-        @chown( $path, fileowner( $dir ) );
-        @chgrp( $path, filegroup( $dir ) );
+        $owner = @fileowner( $dir );
+        $group = @filegroup( $dir );
+        // false (the folder cannot be read) would be taken as 0: root
+        if ( $owner !== false )
+            @chown( $path, $owner );
+        if ( $group !== false )
+            @chgrp( $path, $group );
     }
 
     /** Encrypts an array of secret values (JSON inside the box). An empty array is stored as ''. */
@@ -90,8 +95,12 @@ class XrowExtractSecrets
         $values = array_filter( $values, function ( $v ) { return $v !== null && $v !== ''; } );
         if ( !$values )
             return '';
+        $plain = json_encode( $values );
+        // json_encode() refuses a value that is not UTF-8; boxing its false would store an empty secret
+        if ( $plain === false )
+            throw new RuntimeException( 'A secret is not valid UTF-8 text and cannot be stored.' );
         $nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
-        $box = sodium_crypto_secretbox( json_encode( $values ), $nonce, self::key() );
+        $box = sodium_crypto_secretbox( $plain, $nonce, self::key() );
         return self::PREFIX . base64_encode( $nonce . $box );
     }
 
