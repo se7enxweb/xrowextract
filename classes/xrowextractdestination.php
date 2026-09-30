@@ -333,7 +333,7 @@ class XrowExtractDestination extends eZPersistentObject
         return array(
             'ok' => (bool)$result['ok'],
             'message' => (string)$result['message'],
-            'attempts' => isset( $attempt ) ? min( $attempt, $maxAttempts ) : 0,
+            'attempts' => $transport ? min( $attempt, $maxAttempts ) : 0,
             'location' => isset( $result['location'] ) ? $result['location'] : '',
             'destination' => $this->attribute( 'name' ),
             'destination_id' => (int)$this->attribute( 'id' ),
