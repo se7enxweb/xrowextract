@@ -231,7 +231,20 @@ class XrowExtractCatalogue
      */
     protected static function plainText( $html ): string
     {
-        return trim( preg_replace( '/\s+/u', ' ', html_entity_decode( strip_tags( preg_replace( '#<(br|/p|/li|/h\d|/td|/tr)[^>]*>#i', ' ', (string)$html ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+        $html = (string)$html;
+        $spaced = preg_replace( '#<(br|/p|/li|/h\d|/td|/tr)[^>]*>#i', ' ', $html ) ?? $html;
+        $text = html_entity_decode( strip_tags( $spaced ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        // Text that is not valid UTF-8 makes a /u pattern fail (null): its white space is collapsed byte by byte instead
+        return trim( preg_replace( '/\s+/u', ' ', $text ) ?? preg_replace( '/\s+/', ' ', $text ) ?? $text );
+    }
+
+    /** The number of words (runs of non white space) of a text, also of one that is not valid UTF-8. */
+    public static function wordCount( string $text ): int
+    {
+        $words = preg_split( '/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY );
+        if ( $words === false )
+            $words = preg_split( '/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY );
+        return $words === false ? 0 : count( $words );
     }
 
     /**
@@ -281,9 +294,9 @@ class XrowExtractCatalogue
             case 'ezxmltext:text':
             case 'ezxmltext:words':
                 $text = is_object( $content ) ? self::plainText( $content->attribute( 'output' )->attribute( 'output_text' ) ) : '';
-                return $format === 'text' ? $text : (string)count( preg_split( '/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY ) );
+                return $format === 'text' ? $text : (string)self::wordCount( $text );
             case 'eztext:words':
-                return (string)count( preg_split( '/\s+/u', (string)$content, -1, PREG_SPLIT_NO_EMPTY ) );
+                return (string)self::wordCount( (string)$content );
             case 'ezimage:url':
             case 'ezimage:size':
                 $alias = ( is_object( $content ) && $attribute->hasContent() ) ? $content->imageAlias( 'original' ) : false;
