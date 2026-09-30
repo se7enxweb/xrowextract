@@ -187,8 +187,8 @@ abstract class XrowExtractTransport
         $body = curl_exec( $ch );
         $error = $body === false ? curl_error( $ch ) : '';
         $status = (int)curl_getinfo( $ch, CURLINFO_RESPONSE_CODE );
-        if ( PHP_VERSION_ID < 80000 )
-            curl_close( $ch );
+        // No curl_close(): the handle is an object that is freed with $ch (PHP 8.0+), and the call is
+        // deprecated as of PHP 8.5
         if ( $handle )
             fclose( $handle );
         return array( 'ok' => $body !== false, 'status' => $status, 'body' => $body === false ? '' : (string)$body, 'headers' => $responseHeaders, 'error' => $error );
