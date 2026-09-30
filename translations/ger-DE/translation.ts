@@ -172,4 +172,15 @@
         <translation>CSV</translation>
     </message>
 </context>
+<context>
+    <name>design/admin/pagelayout</name>
+    <message>
+        <source>Export</source>
+        <translation>Export</translation>
+    </message>
+    <message>
+        <source>Export CSV</source>
+        <translation>CSV-Export</translation>
+    </message>
+</context>
 </TS>
