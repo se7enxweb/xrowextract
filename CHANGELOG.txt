@@ -1,3 +1,15 @@
+Version 2.5.4
+
+-  Added a requirements check of what the extension needs from PHP and the server (19 requirements, 12 features):
+   ext:xrowextract:requirements on the command line, part of bin/check.sh, and a notice on each page naming the
+   features this server cannot offer there
+-  Updated the code to pass PHPStan level 8, with parameter, return and property types throughout
+-  Fixed an empty XML file in a package, a manifest of an export whose class was deleted, a destination of an unknown
+   type and a missing csv.ini handler class ending in errors; each is now reported or left out
+-  Fixed text that is not valid UTF-8 being stored empty (schedules, presets, job errors) or failing word counts
+-  Fixed a scheduled import deleted while it runs, host key scans without the OpenSSH client, and a CSV download with
+   manifest when the zip cannot be written
+
 Version 2.5.3
 
 -  Added a typed column manifest to every export (sidecar, XML/JSON header); the importer maps columns exactly from it
