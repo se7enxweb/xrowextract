@@ -1,10 +1,22 @@
-Unreleased
+Version 2.5.3
 
 -  Added a typed column manifest to every export (sidecar, XML/JSON header); the importer maps columns exactly from it
 -  Added scheduled exports and imports, delivery destinations with encrypted credentials, and an export history
 -  Added a datatype check, object filters and a compare view (with the site, or with another package) for content packages
 -  Added an install history of content packages (Jobs page, Package tab, History), "Export these again" and "Open in Import"
 -  Added the filter options of ext:xrowextract:csv and --preset to ext:xrowextract:package --export, and --compare
+-  Added content packages (.ezpkg) as an export format and an import format: inspect, install as a background job with live
+   progress and log, cancel, a review step on the Import page, a paginated contents browser, and a cached, paged inspection
+-  Added 41 export presets grouped by audience, and chunked uploads of any size with resume
+-  Added a release gate (bin/check.sh: lint, translations, PHPStan level 6, unit, CLI and view tests) and a CI workflow for
+   PHP 8.1 to 8.5
+-  Updated the tabs: One class of content export, Multi class of content export, Import content file, Import content package,
+   Schedules and Jobs; the sidebars follow each page's cards; every text has German
+-  Fixed an import file address check that a look-alike host (site.example.other.test, site.example@other.test) passed
+-  Fixed crashes and HTTP 500s on bad input (node, class and record ids, arrays in place of a value, files that cannot be
+   opened, unknown destination types); refused mistyped CLI options (--match, --language, --parent, --resume-from, modes)
+-  Fixed background jobs that died (an error, the memory limit) staying "running"; request caches no longer outlive a request
+   under Velocity; disabled shell functions give a message instead of a fatal error
 
 Version 2.4
 
