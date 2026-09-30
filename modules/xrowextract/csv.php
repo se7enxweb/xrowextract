@@ -1695,6 +1695,13 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
         $finishedManifest = XrowExtractManifest::finish( $downloadManifest, null, $written );
         $finishedManifest['file'] = array( 'name' => $file, 'bytes' => strlen( $data ), 'sha256' => hash( 'sha256', $data ) );
         $manifestJSON = XrowExtractManifest::encode( $finishedManifest );
+        // A zip that cannot be written (no room in the cache folder) sends the file alone, never an empty download
+        $zipped = $downloadWithManifest && !$downloadManifestOnly ? XrowExtractManifest::zipWithManifest( $file, $data, $manifestJSON ) : false;
+        if ( $downloadWithManifest && !$downloadManifestOnly && $zipped === false )
+        {
+            eZDebug::writeError( 'The zip of ' . $file . ' and its manifest could not be written; the file is sent alone.', 'xrowextract' );
+            $downloadWithManifest = false;
+        }
         // Every download is a row of the export history (no file is kept for it)
         XrowExtractHistory::record( array(
             'owner_login' => eZUser::currentUser()->attribute( 'login' ), 'kind' => 'csv', 'trigger_type' => 'download', 'run_mode' => 'full',
@@ -1710,9 +1717,9 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
             $file .= XrowExtractManifest::SIDECAR_SUFFIX;
             header( 'Content-Type: application/json; charset=utf-8' );
         }
-        elseif ( $downloadWithManifest )
+        elseif ( $downloadWithManifest && $zipped !== false )
         {
-            $data = XrowExtractManifest::zipWithManifest( $file, $data, $manifestJSON );
+            $data = $zipped;
             $file .= '.zip';
             header( 'Content-Type: application/zip' );
         }
