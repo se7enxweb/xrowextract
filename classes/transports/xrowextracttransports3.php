@@ -154,6 +154,8 @@ class XrowExtractTransportS3 extends XrowExtractTransport
         if ( !$target || $target['key'] === '' )
             return array( 'ok' => false, 'message' => 'Not a key below the destination prefix.' );
         $out = fopen( $localPath, 'wb' );
+        if ( !$out )
+            return array( 'ok' => false, 'message' => 'Cannot write the local file ' . basename( (string)$localPath ) . '.' );
         $result = self::curl( $target['url'], array( 'method' => 'GET', 'headers' => $this->headersFor( 'GET', $target, hash( 'sha256', '' ) ),
                                                      'extra' => array( CURLOPT_RETURNTRANSFER => false, CURLOPT_FILE => $out ) ) );
         fclose( $out );

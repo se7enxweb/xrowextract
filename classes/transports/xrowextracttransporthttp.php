@@ -92,6 +92,8 @@ class XrowExtractTransportHttp extends XrowExtractTransport
             return array( 'ok' => false, 'message' => 'The path must be relative to the destination URL.' );
         $headers = $this->secret( 'bearer_token' ) !== '' ? array( 'Authorization: Bearer ' . $this->secret( 'bearer_token' ) ) : array();
         $out = fopen( $localPath, 'wb' );
+        if ( !$out )
+            return array( 'ok' => false, 'message' => 'Cannot write the local file ' . basename( (string)$localPath ) . '.' );
         $result = self::curl( $url, array( 'method' => 'GET', 'headers' => $headers, 'extra' => array( CURLOPT_RETURNTRANSFER => false, CURLOPT_FILE => $out ) ) );
         fclose( $out );
         if ( !$result['ok'] || $result['status'] < 200 || $result['status'] >= 300 )

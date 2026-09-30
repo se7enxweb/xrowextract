@@ -88,6 +88,8 @@ class XrowExtractTransportWebdav extends XrowExtractTransport
         if ( !$this->base() || strpos( (string)$remotePath, '..' ) !== false )
             return array( 'ok' => false, 'message' => 'Not a path below the destination folder.' );
         $out = fopen( $localPath, 'wb' );
+        if ( !$out )
+            return array( 'ok' => false, 'message' => 'Cannot write the local file ' . basename( (string)$localPath ) . '.' );
         $result = self::curl( $this->urlFor( $remotePath ), array( 'method' => 'GET', 'auth' => $this->auth(),
                                                                       'extra' => array( CURLOPT_RETURNTRANSFER => false, CURLOPT_FILE => $out ) ) );
         fclose( $out );

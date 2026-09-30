@@ -355,6 +355,8 @@ class XrowExtractArchive
                 $parser = $writer->parser();
                 $name = XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '.' . $writer->extension(), 'class_' . (int)$classID );
                 $fh = fopen( $dir . '/' . $name, 'w' );
+                if ( !$fh )
+                    throw new RuntimeException( 'Cannot write ' . $name . ' in the work directory' );
                 fwrite( $fh, $writer->begin() );
                 $rows = 0;
                 $rowsPerLanguage = array();

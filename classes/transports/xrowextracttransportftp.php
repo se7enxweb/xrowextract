@@ -100,6 +100,8 @@ class XrowExtractTransportFtp extends XrowExtractTransport
             return array( 'ok' => false, 'message' => 'Not a path below the destination folder.' );
         $segments = array_map( 'rawurlencode', array_filter( explode( '/', (string)$remotePath ), static function ( $part ) { return $part !== ''; } ) );
         $out = fopen( $localPath, 'wb' );
+        if ( !$out )
+            return array( 'ok' => false, 'message' => 'Cannot write the local file ' . basename( (string)$localPath ) . '.' );
         $result = self::curl( $url . implode( '/', $segments ), $this->options( array( CURLOPT_RETURNTRANSFER => false, CURLOPT_FILE => $out ) ) );
         fclose( $out );
         if ( !$result['ok'] )

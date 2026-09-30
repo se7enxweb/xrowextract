@@ -148,7 +148,9 @@ abstract class XrowExtractTransport
         $handle = null;
         if ( !empty( $options['upload_file'] ) )
         {
-            $handle = fopen( $options['upload_file'], 'rb' );
+            $handle = @fopen( $options['upload_file'], 'rb' );
+            if ( !$handle )
+                return array( 'ok' => false, 'status' => 0, 'body' => '', 'headers' => array(), 'error' => 'cannot read ' . basename( (string)$options['upload_file'] ) );
             $opts[CURLOPT_UPLOAD] = true;
             $opts[CURLOPT_INFILE] = $handle;
             $opts[CURLOPT_INFILESIZE] = filesize( $options['upload_file'] );
