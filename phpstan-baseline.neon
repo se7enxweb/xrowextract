@@ -1,2 +1,46 @@
+# Findings PHPStan cannot see past, each with the reason it is not a problem.
+# Nothing real belongs here: a finding that points at a bug is fixed in the code.
 parameters:
-    ignoreErrors: []
+    ignoreErrors:
+        # A module view is included by the kernel's eZModule::run(), which
+        # defines $Params (the view's parameters and the eZModule under
+        # 'Module') in the including scope just before the include.
+        -
+            identifier: variable.undefined
+            message: '#^Variable \$Params might not be defined\.$#'
+            path: modules/xrowextract/*.php
+
+        # A cronjob part is included by runcronjobs.php, which defines $cli
+        # (eZCLI) and $isQuiet in the including scope.
+        -
+            identifier: variable.undefined
+            message: '#^Variable \$(cli|isQuiet) might not be defined\.$#'
+            path: cronjobs/xrowextract.php
+            count: 4
+
+        # $attributeFilter is captured by reference and replaced by the class's
+        # filter once the class is known (further down the script), before the
+        # closure is called again; PHPStan keeps the value it had when the
+        # closure was created.
+        -
+            identifier: identical.alwaysTrue
+            message: '#^Strict comparison using \=\=\= between false and false will always evaluate to true\.$#'
+            path: bin/php/csv.php
+            count: 1
+
+        # array( 'redirect', 1 ) is a valid proc_open() descriptor since PHP 7.4
+        # (stderr to wherever stdout goes); PHPStan's signature of proc_open()
+        # does not list it.
+        -
+            identifier: argument.type
+            message: '#^Parameter \#2 \$descriptor_spec of function proc_open expects#'
+            path: bin/php/package.php
+            count: 1
+
+        # PHP_BINARY is '' when PHP cannot determine its own binary (some
+        # embedded SAPIs); PHPStan types the constant as non-empty.
+        -
+            identifier: notIdentical.alwaysTrue
+            message: '#^Strict comparison using \!\=\= between non\-falsy\-string and '''' will always evaluate to true\.$#'
+            path: classes/xrowextractjob.php
+            count: 1
