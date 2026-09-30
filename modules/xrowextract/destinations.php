@@ -54,7 +54,7 @@ if ( $http->hasPostVariable( 'NewDestination' ) )
 }
 elseif ( $http->hasPostVariable( 'EditDestinationID' ) )
 {
-    $destination = XrowExtractDestination::fetch( (int)$http->postVariable( 'EditDestinationID' ) );
+    $destination = XrowExtractDestination::fetch( XrowExtractColumns::dbID( $http->postVariable( 'EditDestinationID' ) ) );
     if ( $destination )
         $editValues = array( 'id' => (int)$destination->attribute( 'id' ), 'name' => $destination->attribute( 'name' ),
                              'form' => $formFor( $destination->attribute( 'dest_type' ), $destination->configArray(), $destination->secretNames() ) );
@@ -89,14 +89,14 @@ elseif ( $http->hasPostVariable( 'SaveDestination' ) )
 }
 elseif ( $http->hasPostVariable( 'DeleteDestinationID' ) )
 {
-    $destination = XrowExtractDestination::fetch( (int)$http->postVariable( 'DeleteDestinationID' ) );
+    $destination = XrowExtractDestination::fetch( XrowExtractColumns::dbID( $http->postVariable( 'DeleteDestinationID' ) ) );
     if ( $destination )
         $destination->remove();
     return $backTo();
 }
 elseif ( $http->hasPostVariable( 'TestDestinationID' ) )
 {
-    $destination = XrowExtractDestination::fetch( (int)$http->postVariable( 'TestDestinationID' ) );
+    $destination = XrowExtractDestination::fetch( XrowExtractColumns::dbID( $http->postVariable( 'TestDestinationID' ) ) );
     if ( $destination )
     {
         $result = $destination->test();
@@ -108,7 +108,7 @@ elseif ( $http->hasPostVariable( 'TrustHostKey' ) )
 {
     // The key is scanned again here and only trusted when its fingerprint is the one the admin saw:
     // nothing the browser sends back is ever written into known_hosts itself
-    $destination = XrowExtractDestination::fetch( (int)$http->postVariable( 'TrustHostKey' ) );
+    $destination = XrowExtractDestination::fetch( XrowExtractColumns::dbID( $http->postVariable( 'TrustHostKey' ) ) );
     $fingerprint = $http->hasPostVariable( 'HostKeyFingerprint' ) ? trim( (string)$http->postVariable( 'HostKeyFingerprint' ) ) : '';
     $transport = $destination ? $destination->transport() : null;
     if ( $transport instanceof XrowExtractTransportSftp && $fingerprint !== '' )

@@ -226,7 +226,7 @@ if ( $options['compare'] )
             file_put_contents( (string)$options['output'], json_encode( array( 'ok' => true, 'action' => 'compare', 'comparison' => $comparison ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
         $script->shutdown( 0 );
     }
-    $inspection = XrowExtractPackage::inspect( $package, $options['parent'] ? (int)$options['parent'] : false );
+    $inspection = XrowExtractPackage::inspect( $package, $options['parent'] ? XrowExtractColumns::dbID( $options['parent'] ) : false );
     $cli->output( sprintf( '%s compared with this site:', $package->attribute( 'name' ) ) );
     foreach ( $inspection['classes'] as $row )
     {
@@ -263,7 +263,7 @@ if ( $options['install'] )
         $fail( "No package '{$options['install']}' in the repository (--list shows them)." );
     if ( !$options['parent'] )
         $fail( 'Missing --parent (node id for the package\'s top-level objects).' );
-    $parentNodeID = (int)$options['parent'];
+    $parentNodeID = XrowExtractColumns::dbID( $options['parent'] );
     $parentNode = eZContentObjectTreeNode::fetch( $parentNodeID );
     if ( !$parentNode instanceof eZContentObjectTreeNode )
         $fail( "No node $parentNodeID (--parent)." );
@@ -463,11 +463,11 @@ if ( $options['export'] )
     {
         foreach ( explode( ',', (string)$options['nodes'] ) as $piece )
             if ( ctype_digit( trim( $piece ) ) )
-                $nodeIDs[] = (int)trim( $piece );
+                $nodeIDs[] = XrowExtractColumns::dbID( $piece );
     }
     elseif ( $options['node'] )
     {
-        $nodeIDs[] = (int)$options['node'];
+        $nodeIDs[] = XrowExtractColumns::dbID( $options['node'] );
     }
     else
     {
@@ -492,7 +492,7 @@ if ( $options['export'] )
     {
         if ( $options['nodes'] )
             $fail( '--class only works with a single --node, not --nodes.' );
-        $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)$options['class'] ) : eZContentClass::fetchByIdentifier( $options['class'] );
+        $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( XrowExtractColumns::dbID( $options['class'] ) ) : eZContentClass::fetchByIdentifier( $options['class'] );
         if ( !$class instanceof eZContentClass )
             $fail( "No class {$options['class']} (--class)." );
         $classID = (int)$class->attribute( 'id' );

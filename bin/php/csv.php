@@ -165,7 +165,7 @@ if ( $options['fetch-alias'] )
     if ( !$aliasDefinition )
         $fail( "No named fetch {$options['fetch-alias']} for content tree/list/tree_count/list_count (--fetch-alias)." );
     $aliasParamOverrides = $parseKeyValueOption( $options['alias-param'] );
-    $aliasResult = XrowExtractFetchAlias::apply( $aliasDefinition, $options['node'] ? (int)$options['node'] : 0, $aliasParamOverrides );
+    $aliasResult = XrowExtractFetchAlias::apply( $aliasDefinition, $options['node'] ? XrowExtractColumns::dbID( $options['node'] ) : 0, $aliasParamOverrides );
     $aliasApplied = $aliasResult['applied'];
     $aliasUnknown = $aliasResult['unknown'];
     $aliasValues = $aliasResult['values'];
@@ -206,7 +206,7 @@ $presetParamOverrides = array();
 if ( $options['preset'] )
 {
     $presetParamOverrides = $parseKeyValueOption( $options['param'] );
-    $resolvedForRun = XrowExtractPreset::resolve( $options['preset'], $options['node'] ? (int)$options['node'] : 0, $presetParamOverrides );
+    $resolvedForRun = XrowExtractPreset::resolve( $options['preset'], $options['node'] ? XrowExtractColumns::dbID( $options['node'] ) : 0, $presetParamOverrides );
     if ( $resolvedForRun['error'] !== '' )
     {
         if ( $lenient && strpos( $resolvedForRun['error'], 'not found' ) !== false )
@@ -269,8 +269,11 @@ if ( !$options['depth'] && isset( $presetDef['scope'] ) && $presetDef['scope'] =
 // --alias-param/--param and no --node to fall back on), resolves to 0 rather than a real node — that is
 // not "node 0", it is "no node was ever supplied", so it defaults the same way plain --node absent does,
 // instead of failing on a node id nothing meant to name.
+// A --node that is not a node id at all is refused rather than taken for "no node" (the default below)
+if ( $options['node'] && !XrowExtractColumns::dbID( $options['node'] ) )
+    $fail( "Not a node id: {$options['node']} (--node)." );
 $nodeID = isset( $aliasValues['parent_node_id'] ) && (int)$aliasValues['parent_node_id'] > 0 ? (int)$aliasValues['parent_node_id']
-        : ( $options['node'] ? (int)$options['node']
+        : ( $options['node'] ? XrowExtractColumns::dbID( $options['node'] )
           : (int)( $exportINI->variable( 'ExportSettings', 'StartNodeID' ) ?: $siteINI->variable( 'UserSettings', 'DefaultUserPlacement' ) ) );
 if ( $nodeID <= 0 )
     $nodeID = 2; // the content structure root, the same last-resort default the view falls back to
@@ -360,12 +363,12 @@ $filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtract
 $filterValues['date_field'] = $options['date-field'] ? $options['date-field'] : 'modified';
 if ( $options['section'] )
 {
-    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( (int)$options['section'] ) : eZSection::fetchByIdentifier( $options['section'] );
+    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( XrowExtractColumns::dbID( $options['section'] ) ) : eZSection::fetchByIdentifier( $options['section'] );
     if ( !$section )
         $fail( "No section {$options['section']} (--section)." );
     $filterValues['section'] = (int)$section->attribute( 'id' );
 }
-$filterValues['state'] = (int)$options['state'];
+$filterValues['state'] = XrowExtractColumns::dbID( $options['state'] );
 if ( $options['visibility'] && !in_array( $options['visibility'], array( 'visible', 'hidden' ), true ) )
     $fail( '--visibility is visible or hidden.' );
 $filterValues['visibility'] = $options['visibility'] ? $options['visibility'] : 'any';
@@ -480,7 +483,7 @@ elseif ( !$classOption && isset( $aliasValues['class_filter_array'] ) && $aliasV
     $classOption = reset( $aliasValues['class_filter_array'] );
 if ( !$classOption )
     $fail( 'Missing --class (id or identifier). --list-classes shows them.' );
-$class = ctype_digit( (string)$classOption ) ? eZContentClass::fetch( (int)$classOption ) : eZContentClass::fetchByIdentifier( $classOption );
+$class = ctype_digit( (string)$classOption ) ? eZContentClass::fetch( XrowExtractColumns::dbID( $classOption ) ) : eZContentClass::fetchByIdentifier( $classOption );
 if ( !$class instanceof eZContentClass )
 {
     if ( $lenient )

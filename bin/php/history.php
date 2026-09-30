@@ -64,7 +64,7 @@ $rowArray = function ( XrowExtractHistory $h )
 
 if ( $options['show'] )
 {
-    $row = eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => (int)$options['show'] ) );
+    $row = eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => XrowExtractColumns::dbID( $options['show'] ) ) );
     if ( !$row instanceof XrowExtractHistory )
     {
         $cli->error( 'No history row ' . (int)$options['show'] . '.' );
@@ -76,7 +76,7 @@ if ( $options['show'] )
 }
 
 $filter = array(
-    'state' => $options['state'], 'kind' => $options['kind'], 'schedule_id' => (int)$options['schedule'], 'owner' => $options['owner'],
+    'state' => $options['state'], 'kind' => $options['kind'], 'schedule_id' => XrowExtractColumns::dbID( $options['schedule'] ), 'owner' => $options['owner'],
     'trigger' => $options['trigger'], 'delivery' => $options['delivery'], 'from' => $options['from'], 'to' => $options['to'], 'text' => $options['text'],
 );
 $limit = $options['limit'] ? (int)$options['limit'] : 25;

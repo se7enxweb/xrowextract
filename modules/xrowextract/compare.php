@@ -71,7 +71,7 @@ else
 {
     // The package against the site: the Package tab's own cached dry run, for the parent chosen there
     // (the default content root when none was: where a new top-level object would land)
-    $parentNodeID = isset( $_GET['parent'] ) && ctype_digit( (string)$_GET['parent'] ) ? (int)$_GET['parent'] : 0;
+    $parentNodeID = isset( $_GET['parent'] ) && ctype_digit( (string)$_GET['parent'] ) ? XrowExtractColumns::dbID( $_GET['parent'] ) : 0;
     if ( !$parentNodeID )
     {
         $publicContentINI = eZSiteAccess::getIni( eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
@@ -121,7 +121,7 @@ foreach ( array( 'change' => $filterChange, 'class' => $filterClass, 'q' => $fil
     if ( $value !== '' )
         $filterQuery[$key] = $value;
 if ( $mode === 'site' && isset( $_GET['parent'] ) && ctype_digit( (string)$_GET['parent'] ) )
-    $filterQuery['parent'] = (int)$_GET['parent'];
+    $filterQuery['parent'] = XrowExtractColumns::dbID( $_GET['parent'] );
 
 $tpl->setVariable( 'Mode', $mode );
 $tpl->setVariable( 'PackageName', $packageName );

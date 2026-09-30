@@ -135,9 +135,12 @@ class XrowExtractSchedule extends eZPersistentObject
     /** @return XrowExtractSchedule|null */
     public static function fetch( $id )
     {
+        $id = XrowExtractColumns::dbID( $id ); // never an id the database cannot even compare
+        if ( !$id )
+            return null;
         if ( !XrowExtractSchema::exists() )
             return null;
-        $object = eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => (int)$id ) );
+        $object = eZPersistentObject::fetchObject( self::definition(), null, array( 'id' => $id ) );
         return $object instanceof self ? $object : null;
     }
 

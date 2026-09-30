@@ -21,7 +21,7 @@ $get = function ( $name, $pattern = '/^[A-Za-z0-9_ .:-]*$/' )
 $filter = array(
     'state' => $get( 'state', '/^[a-z]*$/' ),
     'kind' => $get( 'kind', '/^[a-z_]*$/' ),
-    'schedule_id' => (int)$get( 'schedule', '/^\d*$/' ),
+    'schedule_id' => XrowExtractColumns::dbID( $get( 'schedule', '/^\d*$/' ) ),
     'trigger' => $get( 'trigger', '/^[a-z_]*$/' ),
     'delivery' => $get( 'delivery', '/^[a-z]*$/' ),
     'from' => $get( 'from', '/^(\d{4}-\d{2}-\d{2})?$/' ),

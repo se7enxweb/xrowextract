@@ -32,6 +32,14 @@ class NamesAndIdsTest extends TestCase
             $this->assertFalse( XrowExtractPreset::isValidUserID( $bad ), var_export( $bad, true ) );
     }
 
+    public function testDatabaseIds(): void
+    {
+        foreach ( array( 1 => 1, '42' => 42, ' 7 ' => 7, '2147483647' => 2147483647 ) as $in => $want )
+            $this->assertSame( $want, XrowExtractColumns::dbID( is_int( $in ) ? $in : (string)$in ), var_export( $in, true ) );
+        foreach ( array( 0, -1, '0', '-5', '2147483648', '99999999999999999999', '1e3', '12abc', '', null, false, true, 1.5, array( 1 ), PHP_INT_MAX ) as $bad )
+            $this->assertSame( 0, XrowExtractColumns::dbID( $bad ), var_export( $bad, true ) );
+    }
+
     public function testUploadIds(): void
     {
         $this->assertTrue( XrowExtractUpload::isValidID( bin2hex( random_bytes( 16 ) ) ) );

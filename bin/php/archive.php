@@ -120,7 +120,7 @@ if ( $options['list-formats'] )
 // Nodes
 if ( $options['nodes'] )
 {
-    $nodeIDs = array_filter( array_map( 'intval', explode( ',', $options['nodes'] ) ) );
+    $nodeIDs = array_filter( array_map( 'XrowExtractColumns::dbID', explode( ',', $options['nodes'] ) ) );
 }
 else
 {
@@ -165,7 +165,7 @@ $filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', XrowExtrac
 $filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
 if ( $options['section'] )
 {
-    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( (int)$options['section'] ) : eZSection::fetchByIdentifier( $options['section'] );
+    $section = ctype_digit( (string)$options['section'] ) ? eZSection::fetch( XrowExtractColumns::dbID( $options['section'] ) ) : eZSection::fetchByIdentifier( $options['section'] );
     if ( !$section )
         $fail( "No section {$options['section']} (--section)." );
     $filterValues['section'] = (int)$section->attribute( 'id' );
@@ -207,7 +207,7 @@ $counts = XrowExtractArchive::classCounts( $roots, $languages );
 // Classes
 $classID = function ( $value ) use ( $fail, $lenient, $warn )
 {
-    $class = ctype_digit( $value ) ? eZContentClass::fetch( (int)$value ) : eZContentClass::fetchByIdentifier( $value );
+    $class = ctype_digit( $value ) ? eZContentClass::fetch( XrowExtractColumns::dbID( $value ) ) : eZContentClass::fetchByIdentifier( $value );
     if ( !$class instanceof eZContentClass )
     {
         if ( $lenient )

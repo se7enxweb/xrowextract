@@ -466,9 +466,9 @@ foreach ( $ClassChoices as $choice )
 // template, class/object XML) and step 2's own matching alike - one class choice, not two. Whichever
 // was actually posted wins; the File-card one takes priority so a visitor without JavaScript, who
 // only touched that one, still gets what they chose reflected everywhere, not just there.
-$ClassID = $http->hasPostVariable( 'SampleClassID' ) && (int)$http->postVariable( 'SampleClassID' )
-         ? (int)$http->postVariable( 'SampleClassID' )
-         : ( $http->hasPostVariable( 'ClassID' ) ? (int)$http->postVariable( 'ClassID' ) : 0 );
+$ClassID = $http->hasPostVariable( 'SampleClassID' ) && XrowExtractColumns::dbID( $http->postVariable( 'SampleClassID' ) )
+         ? XrowExtractColumns::dbID( $http->postVariable( 'SampleClassID' ) )
+         : ( $http->hasPostVariable( 'ClassID' ) ? XrowExtractColumns::dbID( $http->postVariable( 'ClassID' ) ) : 0 );
 if ( !$ClassID && !empty( $_SESSION[$SESSION_KEY]['classID'] ) )
 {
     // Right after "Try a sample"'s own redirect, no ClassID is posted yet; the class it was built for
@@ -507,7 +507,7 @@ $Language = $http->hasPostVariable( 'Language' ) ? (string)$http->postVariable( 
 $tpl->setVariable( 'Language', $Language );
 
 if ( $http->hasPostVariable( 'ParentNodeID' ) )
-    $ParentNodeID = (int)$http->postVariable( 'ParentNodeID' );
+    $ParentNodeID = XrowExtractColumns::dbID( $http->postVariable( 'ParentNodeID' ) );
 else
 {
     // New objects go below the public site's root by default (content, not the user placement)
@@ -529,7 +529,7 @@ if ( $parsed['header'] )
 {
     $suggested = XrowExtractImport::suggestMapping( $parsed['header'], $ClassID, $xmlColumnIDs );
     $keepPosted = $http->hasPostVariable( 'Mapping' ) && $http->hasPostVariable( 'MappingClassID' )
-                && (int)$http->postVariable( 'MappingClassID' ) === $ClassID;
+                && XrowExtractColumns::dbID( $http->postVariable( 'MappingClassID' ) ) === $ClassID;
     $postedMapping = $keepPosted ? (array)$http->postVariable( 'Mapping' ) : null;
     foreach ( $suggested as $i => $suggestion )
     {
@@ -645,8 +645,8 @@ if ( $http->hasPostVariable( 'TrySample' ) )
 {
     $sampleFormatIn = (string)$http->postVariable( 'TrySample' );
     // The sample box's own class choice: any class of the system
-    if ( $http->hasPostVariable( 'SampleClassID' ) && isset( $countsByClassID[(int)$http->postVariable( 'SampleClassID' )] ) )
-        $SampleClassID = (int)$http->postVariable( 'SampleClassID' );
+    if ( $http->hasPostVariable( 'SampleClassID' ) && isset( $countsByClassID[XrowExtractColumns::dbID( $http->postVariable( 'SampleClassID' ) )] ) )
+        $SampleClassID = XrowExtractColumns::dbID( $http->postVariable( 'SampleClassID' ) );
     $sampleFormat = in_array( $sampleFormatIn, array( 'xml', 'json', 'csv', 'package' ), true ) ? $sampleFormatIn : 'xml';
     if ( !$SampleClassID )
     {

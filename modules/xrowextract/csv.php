@@ -163,7 +163,7 @@ if ( $http->hasPostVariable( 'ApplyFetchAlias' ) && $fetchAliasName !== '' )
     {
         $FetchAliasFunction = $aliasDefinition['function'];
         $FetchAliasFillable = XrowExtractFetchAlias::fillableParameters( $aliasDefinition );
-        $currentNodeGuess = $http->hasPostVariable( 'Subtree' ) ? (int)$http->postVariable( 'Subtree' )
+        $currentNodeGuess = $http->hasPostVariable( 'Subtree' ) ? XrowExtractColumns::dbID( $http->postVariable( 'Subtree' ) )
                            : ( isset( $sessionConfig['Subtree'] ) ? (int)$sessionConfig['Subtree'] : 0 );
         $FetchAliasApplyResult = XrowExtractFetchAlias::apply( $aliasDefinition, $currentNodeGuess, $FetchAliasParamOverrides );
     }
@@ -276,7 +276,7 @@ if ( $http->hasPostVariable( 'RenamePreset' ) && $http->hasPostVariable( 'Preset
 if ( ( $http->hasPostVariable( 'LoadPreset' ) || $http->hasPostVariable( 'RunPresetInBackground' ) || $http->hasPostVariable( 'RunPresetNow' ) ) && $http->hasPostVariable( 'PresetRef' ) )
 {
     $presetRefToLoad = (string)$http->postVariable( 'PresetRef' );
-    $presetNodeGuess = $http->hasPostVariable( 'Subtree' ) ? (int)$http->postVariable( 'Subtree' )
+    $presetNodeGuess = $http->hasPostVariable( 'Subtree' ) ? XrowExtractColumns::dbID( $http->postVariable( 'Subtree' ) )
                       : ( isset( $sessionConfig['Subtree'] ) ? (int)$sessionConfig['Subtree'] : 0 );
     // Labelled placeholder inputs (one group of inputs per preset, PresetPlaceholder[<ref>][<name>]; only
     // the loaded preset's own group is read) plus the free-text "Advanced" field, which wins if both set
@@ -604,7 +604,7 @@ else
     $obj = eZContentObject::fetch( $preFilledIDs[0] );
     $Class_id = $obj ? $obj->attribute( 'contentclass_id' ) : 0;
 }
-$Class_id = (int)$Class_id;
+$Class_id = XrowExtractColumns::dbID( $Class_id ); // 0 (none) for anything that is not an id
 if ( !$hasPreFilledData && isset( $FetchAliasValues['class_id'] ) && $FetchAliasValues['class_id'] > 0 )
 {
     $Class_id = (int)$FetchAliasValues['class_id'];
@@ -626,7 +626,7 @@ if ( $http->hasPostVariable( 'SelectedNodeIDArray' ) )
     if ( isset( $nodes[0] ) )
         $Subtree = $nodes[0];
 }
-$Subtree = (int)$Subtree;
+$Subtree = XrowExtractColumns::dbID( $Subtree ); // 0 (no node) for anything that is not an id
 $sessionConfig['Subtree'] = $Subtree;
 
 // Scope: below the chosen node, or every object of the class in the whole site (read from the top of the
@@ -803,7 +803,7 @@ foreach ( $columnActions as $action )
 {
     $keepPosted = $keepPosted || $http->hasPostVariable( $action );
 }
-if ( $keepPosted && $http->hasPostVariable( 'AttributesClassID' ) && (int)$http->postVariable( 'AttributesClassID' ) !== $Class_id )
+if ( $keepPosted && $http->hasPostVariable( 'AttributesClassID' ) && XrowExtractColumns::dbID( $http->postVariable( 'AttributesClassID' ) ) !== $Class_id )
     $keepPosted = false;
 if ( $keepPosted && !$http->hasPostVariable( 'AttributesClassID' ) && $http->hasPostVariable( 'Update' ) )
     $keepPosted = false;

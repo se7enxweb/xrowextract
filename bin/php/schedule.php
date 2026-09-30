@@ -90,7 +90,7 @@ $fail = function ( $message ) use ( $cli, $script ): never
 $when = function ( $time ) { return $time ? date( 'Y-m-d H:i', $time ) : '-'; };
 $load = function ( $id ) use ( $fail )
 {
-    $schedule = XrowExtractSchedule::fetch( (int)$id );
+    $schedule = XrowExtractSchedule::fetch( XrowExtractColumns::dbID( $id ) );
     if ( !$schedule )
         $fail( "No schedule $id." );
     return $schedule;
@@ -241,7 +241,7 @@ if ( $options['create'] )
             break;
         case 'archive':
             $definition = array(
-                'nodes' => $options['nodes'] ? array_values( array_filter( array_map( 'intval', explode( ',', $options['nodes'] ) ) ) ) : array(),
+                'nodes' => $options['nodes'] ? array_values( array_filter( array_map( 'XrowExtractColumns::dbID', explode( ',', $options['nodes'] ) ) ) ) : array(),
                 'set' => $options['set'] ? $options['set'] : ( $options['nodes'] ? '' : 'sites' ),
                 'classes' => $options['classes'] ? array_values( array_filter( array_map( 'trim', explode( ',', $options['classes'] ) ) ) ) : array(),
                 'languages' => $options['languages'] ? array_values( array_filter( array_map( 'trim', explode( ',', $options['languages'] ) ) ) ) : 'all',
@@ -250,12 +250,12 @@ if ( $options['create'] )
             );
             break;
         case 'package':
-            $definition = array( 'node' => (int)$options['node'], 'subtree' => (bool)$options['subtree'], 'class' => (string)$options['class'] );
+            $definition = array( 'node' => XrowExtractColumns::dbID( $options['node'] ), 'subtree' => (bool)$options['subtree'], 'class' => (string)$options['class'] );
             break;
         case 'import':
             $definition = array( 'source' => $options['source'] === 'destination' ? 'destination' : 'local', 'local_path' => (string)$options['local-path'],
-                                 'destination_id' => (int)$options['destination'], 'remote_path' => (string)$options['remote-path'],
-                                 'class' => (string)$options['class'], 'parent' => (int)$options['parent'] ?: '', 'match' => (string)$options['match'],
+                                 'destination_id' => XrowExtractColumns::dbID( $options['destination'] ), 'remote_path' => (string)$options['remote-path'],
+                                 'class' => (string)$options['class'], 'parent' => XrowExtractColumns::dbID( $options['parent'] ) ?: '', 'match' => (string)$options['match'],
                                  'language' => (string)$options['language'] );
             break;
     }

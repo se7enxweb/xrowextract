@@ -18,7 +18,7 @@ $notice = false;
 
 $ownSchedule = function ( $id ) use ( $login, $allowAll )
 {
-    $schedule = XrowExtractSchedule::fetch( (int)$id );
+    $schedule = XrowExtractSchedule::fetch( XrowExtractColumns::dbID( $id ) );
     return $schedule && $schedule->canEdit( $login, $allowAll ) ? $schedule : null;
 };
 $backTo = function ( $anchor = '' ) use ( $module )
@@ -69,13 +69,13 @@ $postedValues = function () use ( $http )
                 $definition['set'] = '';
             break;
         case 'package':
-            $definition += array( 'node' => (int)$get( 'node' ), 'subtree' => (bool)$get( 'subtree', false ), 'class' => (string)$get( 'package_class' ) );
+            $definition += array( 'node' => XrowExtractColumns::dbID( $get( 'node' ) ), 'subtree' => (bool)$get( 'subtree', false ), 'class' => (string)$get( 'package_class' ) );
             break;
         case 'import':
             $definition += array(
                 'source' => $get( 'source' ) === 'destination' ? 'destination' : 'local', 'local_path' => trim( (string)$get( 'local_path' ) ),
-                'destination_id' => (int)$get( 'destination_id' ), 'remote_path' => trim( (string)$get( 'remote_path' ) ),
-                'class' => (string)$get( 'import_class' ), 'parent' => (int)$get( 'parent' ) ?: '', 'match' => (string)$get( 'match', 'remote_id' ),
+                'destination_id' => XrowExtractColumns::dbID( $get( 'destination_id' ) ), 'remote_path' => trim( (string)$get( 'remote_path' ) ),
+                'class' => (string)$get( 'import_class' ), 'parent' => XrowExtractColumns::dbID( $get( 'parent' ) ) ?: '', 'match' => (string)$get( 'match', 'remote_id' ),
                 'language' => (string)$get( 'language' ),
             );
             break;
@@ -83,7 +83,7 @@ $postedValues = function () use ( $http )
     $frequency = array( 'kind' => (string)$get( 'frequency', 'daily' ), 'time' => (string)$get( 'time', '02:00' ), 'minute' => (int)$get( 'minute', 0 ),
                         'weekday' => (int)$get( 'weekday', 1 ), 'monthday' => (int)$get( 'monthday', 1 ), 'expression' => trim( (string)$get( 'expression' ) ) );
     return array(
-        'id' => (int)$get( 'id', 0 ),
+        'id' => XrowExtractColumns::dbID( $get( 'id', 0 ) ),
         'name' => (string)$get( 'name' ), 'kind' => $kind, 'definition' => $definition, 'frequency' => $frequency,
         'delta_mode' => $get( 'delta_mode' ) === 'delta' ? 'delta' : 'full',
         'destination_ids' => array_map( 'intval', (array)$get( 'destinations', array() ) ),

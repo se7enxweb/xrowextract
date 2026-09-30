@@ -54,7 +54,7 @@ if ( $http->hasPostVariable( 'ExportAgainJobID' ) || $http->hasPostVariable( 'Ex
     }
     else
     {
-        $row = XrowExtractSchema::exists() ? eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => (int)$http->postVariable( 'ExportAgainHistoryID' ) ) ) : null;
+        $row = XrowExtractSchema::exists() ? eZPersistentObject::fetchObject( XrowExtractHistory::definition(), null, array( 'id' => XrowExtractColumns::dbID( $http->postVariable( 'ExportAgainHistoryID' ) ) ) ) : null;
         if ( $row instanceof XrowExtractHistory && $row->attribute( 'kind' ) === XrowExtractHistory::KIND_INSTALL
              && ( $allJobs || $row->attribute( 'owner_login' ) === $login ) )
         {

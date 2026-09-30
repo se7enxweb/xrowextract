@@ -23,6 +23,22 @@ class XrowExtractColumns
         return $GLOBALS['xrowExtractRequestCache'][$name];
     }
 
+    /**
+     * A database id (object, node, class, schedule ...) from a request, a file or a command line: a whole
+     * number from 1 to 2147483647, the range of the int columns the kernel keeps them in; 0 for anything
+     * else. (int) alone turns "99999999999999999999" into PHP_INT_MAX, which PostgreSQL refuses for an int
+     * column: the query fails and the kernel's fetch code then fails on the missing result.
+     */
+    public static function dbID( $value )
+    {
+        if ( is_int( $value ) )
+            return $value > 0 && $value <= 2147483647 ? $value : 0;
+        if ( !is_string( $value ) )
+            return 0;
+        $value = trim( $value );
+        return $value !== '' && strlen( $value ) <= 10 && ctype_digit( $value ) && (int)$value <= 2147483647 ? (int)$value : 0;
+    }
+
     /** The special columns. Only these exist; each value is computed in extraValue(). */
     public static function extraAttributes( $allowPasswordHash = null )
     {

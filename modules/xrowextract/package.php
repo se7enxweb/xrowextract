@@ -157,7 +157,7 @@ $tpl->setVariable( 'ViewedFile', false );
 // (ParentNodeID is resolved before the first inspect() call below, so the dry run can describe
 // where a new top-level object would land under the parent currently chosen on the page)
 
-$ParentNodeID = $http->hasPostVariable( 'ParentNodeID' ) ? (int)$http->postVariable( 'ParentNodeID' ) : 0;
+$ParentNodeID = $http->hasPostVariable( 'ParentNodeID' ) ? XrowExtractColumns::dbID( $http->postVariable( 'ParentNodeID' ) ) : 0;
 if ( !$ParentNodeID )
 {
     $publicContentINI = eZSiteAccess::getIni( eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
@@ -338,9 +338,9 @@ foreach ( eZContentClass::fetchList( eZContentClass::VERSION_STATUS_DEFINED, tru
 $tpl->setVariable( 'ClassChoices', $ClassChoices );
 
 if ( $http->hasPostVariable( 'TemplateClassID' ) )
-    $TemplateClassID = (int)$http->postVariable( 'TemplateClassID' );
+    $TemplateClassID = XrowExtractColumns::dbID( $http->postVariable( 'TemplateClassID' ) );
 elseif ( isset( $_GET['ClassID'] ) )
-    $TemplateClassID = (int)$_GET['ClassID'];
+    $TemplateClassID = XrowExtractColumns::dbID( $_GET['ClassID'] );
 else
     $TemplateClassID = 0;
 if ( !$TemplateClassID && $ClassChoices )

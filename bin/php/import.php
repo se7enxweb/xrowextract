@@ -175,7 +175,7 @@ if ( $manifestUsed )
 $classID = 0;
 if ( $options['class'] )
 {
-    $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( (int)$options['class'] ) : eZContentClass::fetchByIdentifier( $options['class'] );
+    $class = ctype_digit( (string)$options['class'] ) ? eZContentClass::fetch( XrowExtractColumns::dbID( $options['class'] ) ) : eZContentClass::fetchByIdentifier( $options['class'] );
     if ( !$class instanceof eZContentClass )
         $fail( "No class {$options['class']} (--class)." );
     $classID = (int)$class->attribute( 'id' );
@@ -269,7 +269,7 @@ $result = XrowExtractImport::run( array(
     'classID'      => $classID,
     'match'        => $options['match'] ?: 'remote_id',
     'language'     => $defaultLanguage,
-    'parentNodeID' => $options['parent'] ? (int)$options['parent'] : 0,
+    'parentNodeID' => XrowExtractColumns::dbID( $options['parent'] ),
     'apply'        => (bool)$options['apply'],
     'skipRows'     => $skipRows,
     'startNumber'  => $resumeFrom,

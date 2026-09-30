@@ -66,7 +66,7 @@ if ( $admin instanceof eZUser )
     $admin->loginCurrent();
 $load = function ( $id ) use ( $fail )
 {
-    $destination = XrowExtractDestination::fetch( (int)$id );
+    $destination = XrowExtractDestination::fetch( XrowExtractColumns::dbID( $id ) );
     if ( !$destination )
         $fail( "No destination $id." );
     return $destination;
