@@ -363,11 +363,16 @@ class XrowExtractScheduler
             $destination = XrowExtractDestination::fetch( isset( $def['destination_id'] ) ? $def['destination_id'] : 0 );
             if ( !$destination )
                 return array( 'state' => 'skipped', 'error' => 'The destination to read from no longer exists.', 'warnings' => $warnings );
-            $fetched = $destination->transport()->download( $remote, $local );
+            // No transport: the destination's type is not one this version knows (any more)
+            $transport = $destination->transport();
+            if ( !$transport )
+                return array( 'state' => 'failed', 'error' => 'The destination to read from has an unknown type: ' . $destination->attribute( 'dest_type' ) . '.',
+                              'warnings' => $warnings );
+            $fetched = $transport->download( $remote, $local );
             if ( $fetched['ok'] )
             {
                 // Its manifest, when the other side has one next to it (no error when it does not)
-                $destination->transport()->download( $remote . XrowExtractManifest::SIDECAR_SUFFIX, $local . XrowExtractManifest::SIDECAR_SUFFIX );
+                $transport->download( $remote . XrowExtractManifest::SIDECAR_SUFFIX, $local . XrowExtractManifest::SIDECAR_SUFFIX );
                 if ( is_file( $local . XrowExtractManifest::SIDECAR_SUFFIX ) && !XrowExtractManifest::readFile( $local . XrowExtractManifest::SIDECAR_SUFFIX ) )
                     @unlink( $local . XrowExtractManifest::SIDECAR_SUFFIX );
             }
