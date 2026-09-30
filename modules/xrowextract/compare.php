@@ -33,7 +33,7 @@ if ( !$package instanceof eZPackage || ( $otherName !== '' && !$other instanceof
 {
     $Result = array();
     // The page content is HTML: the name comes from the address, so it is escaped
-    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false,
+    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', null,
                                       array( '%name' => !$package instanceof eZPackage ? $packageName : $otherName ) ), ENT_QUOTES, 'UTF-8' );
     $Result['path'] = $path;
     return $Result;

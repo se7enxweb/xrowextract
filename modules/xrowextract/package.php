@@ -45,12 +45,12 @@ $finishUpload = function ( $stored, $ownedByUpload, $uploadID ) use ( $module, $
         if ( $result['renamed'] )
         {
             $_SESSION[$RENAME_NOTICE_KEY] = ezpI18n::tr( 'design/standard/extract',
-                'The package’s own name ("%from") is not a valid identifier; it was imported as "%to".', false,
+                'The package’s own name ("%from") is not a valid identifier; it was imported as "%to".', null,
                 array( '%from' => $result['renamed_from'], '%to' => $result['renamed_to'] ) );
         }
         return $module->redirectTo( 'xrowextract/package' );
     }
-    return ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', false, array( '%reason' => $result['error'] ) );
+    return ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', null, array( '%reason' => $result['error'] ) );
 };
 
 $uploadError = '';
@@ -282,7 +282,7 @@ if ( $http->hasPostVariable( 'Install' ) && $package instanceof eZPackage && Xro
     $parentForName = eZContentObjectTreeNode::fetch( (int)$ParentNodeID );
     $installJobID = XrowExtractJob::create( array(
         'type' => 'package', 'owner' => eZUser::currentUser()->attribute( 'login' ),
-        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name below %parent', false,
+        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name below %parent', null,
                                array( '%name' => $package->attribute( 'name' ),
                                       '%parent' => $parentForName instanceof eZContentObjectTreeNode ? $parentForName->attribute( 'name' ) : ( 'node ' . (int)$ParentNodeID ) ) ),
         'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,

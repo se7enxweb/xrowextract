@@ -85,7 +85,7 @@ if ( $http->hasPostVariable( 'ExportAgainJobID' ) || $http->hasPostVariable( 'Ex
             $args[] = '--name=' . XrowExtractPackage::validPackageName( $againPackage . '_again' );
         $againJobID = XrowExtractJob::create( array(
             'type' => 'package', 'owner' => $login,
-            'what' => ezpI18n::tr( 'design/standard/extract', 'Export again: %count object(s) installed from %name', false,
+            'what' => ezpI18n::tr( 'design/standard/extract', 'Export again: %count object(s) installed from %name', null,
                                    array( '%count' => count( $readable ), '%name' => $againPackage !== '' ? $againPackage : '?' ) ),
             'format' => 'ezpkg', 'output_file' => 'export.ezpkg', 'args' => $args,
         ) );

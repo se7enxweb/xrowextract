@@ -43,7 +43,7 @@ if ( !$package instanceof eZPackage )
 {
     $Result = array();
     // The page content is HTML: the name comes from the address, so it is escaped
-    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', false, array( '%name' => $packageName ) ), ENT_QUOTES, 'UTF-8' );
+    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', null, array( '%name' => $packageName ) ), ENT_QUOTES, 'UTF-8' );
     $Result['path'] = array(
         array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
         array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Package contents' ) ),

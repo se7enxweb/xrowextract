@@ -855,7 +855,7 @@ if ( $hasFile && $PackageMode && $http->hasPostVariable( 'Apply' ) && $Package i
         $installArgs[] = '--remove-after';
     $installJobID = XrowExtractJob::create( array(
         'type' => 'package', 'owner' => $login,
-        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name', false, array( '%name' => $Package->attribute( 'name' ) ) ),
+        'what' => ezpI18n::tr( 'design/standard/extract', 'Install package %name', null, array( '%name' => $Package->attribute( 'name' ) ) ),
         'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,
     ) );
     if ( !XrowExtractJob::start( $installJobID ) )
