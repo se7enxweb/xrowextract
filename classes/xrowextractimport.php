@@ -1085,6 +1085,8 @@ class XrowExtractImport
         if ( ctype_digit( $raw ) )
             return array( true, (int)$raw, null );
         $sections = eZPersistentObject::fetchObjectList( eZSection::definition(), null, array( 'name' => $raw ) );
+        if ( !is_array( $sections ) )
+            return array( false, null, "the sections could not be read" );
         if ( count( $sections ) === 1 )
             return array( true, (int)$sections[0]->attribute( 'id' ), null );
         if ( count( $sections ) > 1 )

@@ -68,7 +68,7 @@ class XrowExtractPreset
         $rows = eZPersistentObject::fetchObjectList( eZSiteData::definition(), null,
             array( 'name' => array( 'like', self::NAME_PREFIX . '%' ) ) );
         $presets = array();
-        foreach ( $rows as $row )
+        foreach ( is_array( $rows ) ? $rows : array() as $row ) // null when the query failed
         {
             $id = substr( $row->attribute( 'name' ), strlen( self::NAME_PREFIX ) );
             $record = self::fetchUser( $id );

@@ -547,6 +547,11 @@ class XrowExtractManifest
         for ( $i = 0; $i < $zip->numFiles; $i++ )
         {
             $stat = $zip->statIndex( $i );
+            if ( !is_array( $stat ) )
+            {
+                $zip->close();
+                return array( 'ok' => false, 'error' => 'the zip has an entry that cannot be read (#' . $i . ')' );
+            }
             $name = $stat['name'];
             if ( substr( $name, -1 ) === '/' )
                 continue;
