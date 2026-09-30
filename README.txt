@@ -180,3 +180,16 @@ zetacomponents/archive and zetacomponents/base). PHPSTAN names a phpstan
 binary; without it the pinned release is downloaded once into var/tools/
 and checked against its SHA-256. .github/workflows/check.yml runs the same
 on PHP 8.1, 8.2, 8.3, 8.4 and 8.5 for every push and pull request.
+
+Tests
+  tests/unit          PHPUnit, no database (bin/check.sh part "unit")
+  tests/integration/cli.sh <root>
+                      every command and the cronjob part against a TEST
+                      installation, valid and invalid input (part "cli",
+                      XROWEXTRACT_TEST_ROOT); it writes to that installation
+  tests/integration/views.py <base URL>
+                      every admin view by GET in Chromium (Playwright), with
+                      bad parameters too; fails on HTTP 500, PHP error text or
+                      a JavaScript error (part "views", XROWEXTRACT_TEST_URL
+                      and XROWEXTRACT_TEST_PASSWORD); works the same against
+                      Apache, php -S and Velocity
