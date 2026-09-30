@@ -6695,6 +6695,14 @@
         <source>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</source>
         <translation>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</translation>
     </message>
+    <message>
+        <source>A value of the schedule is not valid UTF-8 text and cannot be stored.</source>
+        <translation>A value of the schedule is not valid UTF-8 text and cannot be stored.</translation>
+    </message>
+    <message>
+        <source>A setting of the destination is not valid UTF-8 text and cannot be stored.</source>
+        <translation>A setting of the destination is not valid UTF-8 text and cannot be stored.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
