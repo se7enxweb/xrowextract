@@ -1,0 +1,29 @@
+# Static analysis of xrowextract with PHPStan 2 (https://phpstan.org).
+#
+#   EXPONENTIAL_ROOT=/path/to/exponential php phpstan.phar analyse
+#
+# EXPONENTIAL_ROOT names an Exponential 6 root (kernel/, lib/, autoload/). If it
+# is not set, the installation this extension is installed in is used. CI clones
+# se7enxweb/exponential for it; see .github/workflows/check.yml and bin/check.sh.
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 0
+    phpVersion:
+        min: 80100
+        max: 80599
+    paths:
+        - ezinfo.php
+        - classes
+        - modules
+        - bin
+        - cronjobs
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    tmpDir: var/phpstan
+    # The kernel's PHPDoc types are hints, not guarantees: eZContentObject::fetch()
+    # and eZContentObjectTreeNode::fetch() say they return an object and return
+    # null for a missing id, and so on. Checks this code makes against such a
+    # return (instanceof, is_object(), !== null) are necessary, not redundant.
+    treatPhpDocTypesAsCertain: false
