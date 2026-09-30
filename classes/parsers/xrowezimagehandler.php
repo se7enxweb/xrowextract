@@ -5,7 +5,7 @@ class XroweZImageExportHandler extends XrowBaseHandler
        function exportAttribute( &$attribute ): string
        {
             $imageHandler = $attribute->content();
-            $imageAlias = ( is_object( $imageHandler ) && $attribute->hasContent() ) ? $imageHandler->imageAlias( 'original' ) : false;
+            $imageAlias = ( $imageHandler instanceof eZImageAliasHandler && $attribute->hasContent() ) ? $imageHandler->imageAlias( 'original' ) : false;
             return $this->escape( is_array( $imageAlias ) && isset( $imageAlias['url'] ) ? $imageAlias['url'] : '' );
        }
 }

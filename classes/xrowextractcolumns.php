@@ -224,7 +224,7 @@ class XrowExtractColumns
             $extraCells[$id] = $column[2];
         foreach ( XrowExtractCatalogue::formatColumns( $classID ) as $id => $column )
         {
-            $base = $meta[substr( $id, 0, strpos( $id, ':' ) )];
+            $base = $meta[explode( ':', $id, 2 )[0]];
             $meta[$id] = array_merge( $base, array( 'format' => $column['format'], 'cell' => $column['format'], 'exportable' => true ) );
         }
         foreach ( self::extraAttributes() as $id => $column )
@@ -297,12 +297,12 @@ class XrowExtractColumns
             {
                 // An attribute format: identifier:format
                 list( $identifier, $format ) = explode( ':', $column['id'], 2 );
-                $cells[] = $parser->escape( isset( $datamap[$identifier] ) && is_object( $datamap[$identifier] )
+                $cells[] = $parser->escape( isset( $datamap[$identifier] ) && $datamap[$identifier] instanceof eZContentObjectAttribute
                                             ? XrowExtractCatalogue::formatValue( $datamap[$identifier], $format ) : '' );
             }
             elseif ( isset( $extras[$column['id']] ) )
                 $cells[] = $parser->escape( self::extraValue( $column['id'], $obj, $allowPasswordHash ) );
-            elseif ( isset( $datamap[$column['id']] ) && is_object( $datamap[$column['id']] ) )
+            elseif ( isset( $datamap[$column['id']] ) && $datamap[$column['id']] instanceof eZContentObjectAttribute )
                 $cells[] = $parser->exportValue( $datamap[$column['id']] );
             else
                 $cells[] = $parser->escape( '' );
@@ -331,7 +331,7 @@ class XrowExtractColumns
      */
     public static function fileName( $name, $suffix = '_export.csv', $fallback = 'export' ): string
     {
-        $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ), '._' );
+        $name = trim( preg_replace( '/[^A-Za-z0-9._-]+/', '_', (string)$name ) ?? '', '._' );
         return ( $name === '' ? $fallback : substr( $name, 0, 80 ) ) . $suffix;
     }
 

@@ -31,7 +31,7 @@ class XrowExtractSchema
         $list = $db->relationList();
         if ( !is_array( $list ) || !$list )
             $list = array_keys( (array)$db->eZTableList() );
-        return array_map( 'strtolower', (array)$list );
+        return array_values( array_map( 'strtolower', array_map( 'strval', (array)$list ) ) );
     }
 
     /**
@@ -104,9 +104,9 @@ class XrowExtractSchema
         if ( !is_file( $file ) )
             return false;
         $sql = (string)file_get_contents( $file );
-        foreach ( preg_split( '/;\s*\n/', $sql ) as $statement )
+        foreach ( preg_split( '/;\s*\n/', $sql ) ?: array() as $statement )
         {
-            $statement = trim( preg_replace( '/^--.*$/m', '', $statement ) );
+            $statement = trim( preg_replace( '/^--.*$/m', '', $statement ) ?? $statement );
             if ( $statement === '' )
                 continue;
             $concerns = false;

@@ -5,7 +5,7 @@ class XroweZBinaryfileExportHandler extends XrowBaseHandler
        function exportAttribute( &$attribute ): string
        {
             $content = $attribute->content();
-            return $this->escape( is_object( $content ) ? $content->filePath() : '' );
+            return $this->escape( $content instanceof eZBinaryFile ? $content->filePath() : '' );
        }
 }
 ?>

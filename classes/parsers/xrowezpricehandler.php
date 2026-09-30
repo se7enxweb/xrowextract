@@ -7,7 +7,7 @@ class XroweZPriceHandler extends XrowBaseHandler
     {
         $locale = eZLocale::instance();
         $price = $attribute->content();
-        $content = is_object( $price ) ? $locale->formatCleanCurrency( $price->attribute( 'inc_vat_price' ) ) : '';
+        $content = $price instanceof eZPrice ? $locale->formatCleanCurrency( $price->attribute( 'inc_vat_price' ) ) : '';
         return $this->escape( $content );
     }
 }

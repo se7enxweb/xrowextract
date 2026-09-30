@@ -102,7 +102,7 @@ class XrowExtractCatalogue
             case 'ezcontentobject.version':          return $obj->attribute( 'current_version' );
             case 'ezcontentobject.creator':
                 $version = $obj->currentVersion();
-                $creator = $version ? eZContentObject::fetch( $version->attribute( 'creator_id' ) ) : null;
+                $creator = $version instanceof eZContentObjectVersion ? eZContentObject::fetch( $version->attribute( 'creator_id' ) ) : null;
                 return ( $creator && $creator->canRead() ) ? $creator->attribute( 'name' ) : '';
             case 'ezcontentobject.owner_login':
             case 'ezcontentobject.owner_email':
@@ -293,30 +293,30 @@ class XrowExtractCatalogue
         {
             case 'ezxmltext:text':
             case 'ezxmltext:words':
-                $text = is_object( $content ) ? self::plainText( $content->attribute( 'output' )->attribute( 'output_text' ) ) : '';
+                $text = $content instanceof eZXMLText ? self::plainText( $content->attribute( 'output' )->attribute( 'output_text' ) ) : '';
                 return $format === 'text' ? $text : (string)self::wordCount( $text );
             case 'eztext:words':
                 return (string)self::wordCount( (string)$content );
             case 'ezimage:url':
             case 'ezimage:size':
-                $alias = ( is_object( $content ) && $attribute->hasContent() ) ? $content->imageAlias( 'original' ) : false;
+                $alias = ( $content instanceof eZImageAliasHandler && $attribute->hasContent() ) ? $content->imageAlias( 'original' ) : false;
                 if ( !is_array( $alias ) || empty( $alias['url'] ) )
                     return '';
                 return $format === 'url' ? XrowExtractColumns::publicHostURL() . '/' . ltrim( $alias['url'], '/' ) : $alias['width'] . '×' . $alias['height'];
             case 'ezimage:alt':
-                return is_object( $content ) ? (string)$content->attribute( 'alternative_text' ) : '';
+                return $content instanceof eZImageAliasHandler ? (string)$content->attribute( 'alternative_text' ) : '';
             case 'ezbinaryfile:url':
             case 'ezmedia:url':
-                if ( !is_object( $content ) || !$attribute->hasContent() )
+                if ( !( $content instanceof eZBinaryFile || $content instanceof eZMedia ) || !$attribute->hasContent() )
                     return '';
                 return XrowExtractColumns::publicSiteURL() . '/content/download/' . (int)$attribute->attribute( 'contentobject_id' ) . '/'
                        . (int)$attribute->attribute( 'id' ) . '/file/' . rawurlencode( $content->attribute( 'original_filename' ) );
             case 'ezbinaryfile:name':
-            case 'ezmedia:name':  return is_object( $content ) ? (string)$content->attribute( 'original_filename' ) : '';
+            case 'ezmedia:name':  return ( $content instanceof eZBinaryFile || $content instanceof eZMedia ) ? (string)$content->attribute( 'original_filename' ) : '';
             case 'ezbinaryfile:bytes':
-            case 'ezmedia:bytes': return is_object( $content ) && $attribute->hasContent() ? (string)(int)$content->attribute( 'filesize' ) : '';
+            case 'ezmedia:bytes': return ( $content instanceof eZBinaryFile || $content instanceof eZMedia ) && $attribute->hasContent() ? (string)(int)$content->attribute( 'filesize' ) : '';
             case 'ezbinaryfile:mime':
-            case 'ezmedia:mime':  return is_object( $content ) ? (string)$content->attribute( 'mime_type' ) : '';
+            case 'ezmedia:mime':  return ( $content instanceof eZBinaryFile || $content instanceof eZMedia ) ? (string)$content->attribute( 'mime_type' ) : '';
             case 'ezobjectrelation:ids':
             case 'ezobjectrelationlist:ids':
             case 'ezenhancedobjectrelation:ids':
@@ -348,13 +348,13 @@ class XrowExtractCatalogue
                 $time = (int)$attribute->attribute( 'data_int' );
                 return $time > 0 ? (string)$time : '';
             case 'ezprice:ex_vat':
-                return is_object( $content ) ? eZLocale::instance()->formatCleanCurrency( $content->attribute( 'ex_vat_price' ) ) : '';
+                return $content instanceof eZPrice ? eZLocale::instance()->formatCleanCurrency( $content->attribute( 'ex_vat_price' ) ) : '';
             case 'ezprice:vat':
-                return is_object( $content ) ? (string)$content->attribute( 'vat_percent' ) : '';
+                return $content instanceof eZPrice ? (string)$content->attribute( 'vat_percent' ) : '';
             case 'ezboolean:yesno':
                 return $attribute->attribute( 'data_int' ) ? ezpI18n::tr( 'design/standard/extract', 'Yes' ) : ezpI18n::tr( 'design/standard/extract', 'No' );
             case 'eztags:ids':
-                return is_object( $content ) ? implode( ',', (array)$content->attribute( 'tag_ids' ) ) : '';
+                return is_object( $content ) ? implode( ',', (array)self::objectAttribute( $content, 'tag_ids' ) ) : '';
             case 'ezurl:url':
                 return (string)$content;
             case 'ezurl:text':
@@ -367,7 +367,7 @@ class XrowExtractCatalogue
                     return (string)$content->attribute( 'email' );
                 return $content->attribute( 'is_enabled' ) ? ezpI18n::tr( 'design/standard/extract', 'enabled' ) : ezpI18n::tr( 'design/standard/extract', 'disabled' );
             case 'ezmatrix:json':
-                $rows = is_object( $content ) ? $content->attribute( 'rows' ) : array();
+                $rows = $content instanceof eZMatrix ? $content->attribute( 'rows' ) : array();
                 $out = array();
                 foreach ( isset( $rows['sequential'] ) ? $rows['sequential'] : array() as $row )
                     $out[] = array_values( $row['columns'] );
@@ -377,20 +377,33 @@ class XrowExtractCatalogue
         {
             if ( !is_object( $content ) )
                 return '';
+            // xrowMetaData (extension xrowmetadata) is a struct of public properties
+            $meta = get_object_vars( $content );
             switch ( $format )
             {
-                case 'keywords':     return implode( ', ', (array)$content->keywords );
-                case 'description':  return (string)$content->description;
-                case 'canonical':    return (string)$content->canonical_url;
-                case 'priority':     return (string)$content->priority;
-                case 'change':       return (string)$content->change;
-                case 'sitemap':      return $content->sitemap_use ? '1' : '0';
-                case 'og_image':     return $content->og_image ? (string)$content->og_image : '';
-                case 'og_image_alt': return (string)$content->og_image_alt;
-                case 'json':         return json_encode( get_object_vars( $content ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+                case 'keywords':     return implode( ', ', (array)( $meta['keywords'] ?? array() ) );
+                case 'description':  return (string)( $meta['description'] ?? '' );
+                case 'canonical':    return (string)( $meta['canonical_url'] ?? '' );
+                case 'priority':     return (string)( $meta['priority'] ?? '' );
+                case 'change':       return (string)( $meta['change'] ?? '' );
+                case 'sitemap':      return !empty( $meta['sitemap_use'] ) ? '1' : '0';
+                case 'og_image':     return !empty( $meta['og_image'] ) ? (string)$meta['og_image'] : '';
+                case 'og_image_alt': return (string)( $meta['og_image_alt'] ?? '' );
+                case 'json':         return json_encode( $meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
             }
         }
         return '';
+    }
+
+    /**
+     * attribute( $name ) of a datatype's content object of a class PHPStan does not know (another extension's),
+     * null when it has no attribute() method.
+     *
+     * @return mixed
+     */
+    protected static function objectAttribute( object $content, string $name )
+    {
+        return method_exists( $content, 'attribute' ) ? $content->attribute( $name ) : null;
     }
 
     /**
@@ -469,7 +482,7 @@ class XrowExtractCatalogue
                 foreach ( self::formatColumns( $classID ) as $formatID => $column )
                 {
                     if ( $column['datatype'] === 'xrowmetadata' && preg_match( '/:(keywords|description|canonical)$/', $formatID ) )
-                        $ids[] = substr( $formatID, 0, strpos( $formatID, ':' ) );   // the title (the attribute itself)
+                        $ids[] = explode( ':', $formatID, 2 )[0];   // the title (the attribute itself)
                     if ( $column['datatype'] === 'xrowmetadata' && preg_match( '/:(keywords|description|canonical)$/', $formatID ) )
                         $ids[] = $formatID;
                 }

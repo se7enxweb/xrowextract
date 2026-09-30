@@ -43,23 +43,18 @@ class ParserInterface
             {
                  //#include_once("extension/extract/classes/parsers/".$ini->variable( $typename, 'HandlerFile' ) );
                  $classname = $ini->variable( $typename, 'HandlerClass' );
+                 // Every handler extends XrowBaseHandler (exportAttribute(), escape()); anything else is refused like a missing file
+                 if ( !is_string( $classname ) || !class_exists( $classname ) || !is_subclass_of( $classname, 'XrowBaseHandler' ) )
+                 {
+                     eZDebug::writeError( "Handler class of $typename is not a XrowBaseHandler: " . ( is_string( $classname ) ? $classname : '' ), "Extract" );
+                     continue;
+                 }
                  $handler = new $classname();
-                 if( isset( $handler->separationChar ) )
-                 {
-                     $handler->separationChar = $this->separationChar;
-                 }
-                 if( isset( $handler->escape ) )
-                 {
-                     $handler->escape = $this->escape;
-                 }
-                 if( property_exists( $handler, 'neutralizeFormulas' ) )
-                 {
-                     $handler->neutralizeFormulas = $this->neutralizeFormulas;
-                 }
-                 if( property_exists( $handler, 'raw' ) )
-                 {
-                     $handler->raw = $this->raw;
-                 }
+                 // Every XrowBaseHandler has these settings; the parser's own apply to all of its handlers
+                 $handler->separationChar = $this->separationChar;
+                 $handler->escape = $this->escape;
+                 $handler->neutralizeFormulas = $this->neutralizeFormulas;
+                 $handler->raw = $this->raw;
                  $this->handlerMap[$typename] = array( "handler" => $handler,
                                                        "exportable" => true );
             }

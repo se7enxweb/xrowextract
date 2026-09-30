@@ -6,7 +6,7 @@ class XroweZUserHandler extends XrowBaseHandler
 	public function exportAttribute( &$attribute ): string
 	{
 		$content = $attribute->content();
-		return $this->escape( is_object( $content ) ? $content->attribute( 'login' ) : '' );
+		return $this->escape( $content instanceof eZUser ? $content->attribute( 'login' ) : '' );
 	}
 }
 ?>

@@ -18,6 +18,8 @@ if ( !function_exists( 'xrowExtractPreview' ) ) {
 function xrowExtractPreview( $data, $separator, $escape, $offset, $total, $file, $seconds ): array
 {
     $fh = fopen( 'php://temp', 'r+' );
+    if ( $fh === false )
+        throw new RuntimeException( 'Cannot open a temporary stream to read the preview back.' );
     fwrite( $fh, $data );
     rewind( $fh );
     $header = fgetcsv( $fh, 0, $separator, '"', '' );
@@ -1148,7 +1150,8 @@ $tpl->setVariable( 'ClassChoices', $ClassChoices );
 
 // The script's URL carries a hash of its content: a changed script is a new URL, never a stale cached copy
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$scriptHash = is_file( $scriptFile ) ? md5_file( $scriptFile ) : false;
+$tpl->setVariable( 'ScriptVersion', $scriptHash !== false ? substr( $scriptHash, 0, 12 ) : '0' );
 $tpl->setVariable( 'ExportableDatatypes', (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) );
 // The exported datatypes by name, for the sidebar
 $datatypeNames = array();
@@ -1669,7 +1672,7 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
         $tpl->setVariable( 'preview_sample', $sampleWriter ? $sampleWriter->begin() . $sample . $sampleWriter->end() : '' );
         $tpl->setVariable( 'preview_sample_format', $sampleWriter ? strtoupper( $OutputFormat ) : '' );
         $tpl->setVariable( 'PreviewColumns', $ExportColumns );
-        $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, preg_replace( '/\.csv$/', '.' . $sampleWriterExtension, $file ), microtime( true ) - $started ) );
+        $tpl->setVariable( 'preview', xrowExtractPreview( $data, $Separator, $Escape, $Offset, $exportTotal, preg_replace( '/\.csv$/', '.' . $sampleWriterExtension, $file ) ?? $file, microtime( true ) - $started ) );
         if ( $http->hasPostVariable( 'PreviewOnly' ) )
         {
             // The preview panel alone, for the view's script
@@ -1690,7 +1693,7 @@ if ( ( $http->hasPostVariable( 'Download' ) || $downloadWithManifest || $downloa
         header( 'Cache-Control: private, no-store, max-age=0' );
         header( 'Pragma: no-cache' );
         header( 'X-Content-Type-Options: nosniff' );
-        $file = preg_replace( '/\.csv$/', '.' . $writer->extension(), $file );
+        $file = preg_replace( '/\.csv$/', '.' . $writer->extension(), $file ) ?? $file;
         // The manifest, finished: rows, size and checksum of exactly the bytes sent
         $finishedManifest = XrowExtractManifest::finish( $downloadManifest, null, $written );
         $finishedManifest['file'] = array( 'name' => $file, 'bytes' => strlen( $data ), 'sha256' => hash( 'sha256', $data ) );

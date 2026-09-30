@@ -358,8 +358,11 @@ foreach ( array( 'since', 'before' ) as $dateOption )
     if ( $options[$dateOption] && XrowExtractFilters::timestamp( $options[$dateOption] ) === false )
         $fail( "Cannot read the date in --$dateOption: {$options[$dateOption]}" );
 $filterValues['date_mode'] = $dateMode;
-$filterValues['date_from'] = $options['since'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['since'] ) ) : '';
-$filterValues['date_to'] = $options['before'] ? date( 'Y-m-d H:i:s', XrowExtractFilters::timestamp( $options['before'], true ) ) : '';
+// Both were checked above: a date that cannot be read has already ended the command
+$sinceTime = $options['since'] ? XrowExtractFilters::timestamp( $options['since'] ) : false;
+$beforeTime = $options['before'] ? XrowExtractFilters::timestamp( $options['before'], true ) : false;
+$filterValues['date_from'] = $sinceTime !== false ? date( 'Y-m-d H:i:s', $sinceTime ) : '';
+$filterValues['date_to'] = $beforeTime !== false ? date( 'Y-m-d H:i:s', $beforeTime ) : '';
 $filterValues['date_field'] = $options['date-field'] ? $options['date-field'] : 'modified';
 if ( $options['section'] )
 {
@@ -382,7 +385,7 @@ if ( $options['where'] )
     if ( $hasAnd && $hasOr )
         $fail( '--where: a single value cannot mix " && " and " || " (the fetch has one join for the whole condition set).' );
     $join = $hasOr ? 'or' : 'and';
-    $pieces = preg_split( $hasOr ? '/\s*\|\|\s*/' : '/\s*&&\s*/', $whereText );
+    $pieces = preg_split( $hasOr ? '/\s*\|\|\s*/' : '/\s*&&\s*/', $whereText ) ?: array( $whereText );
     $opAlt = 'not_between|between|not_in|in|not_like|like|contains|starts|empty|filled|gte|lte|eq|ne|gt|lt|>=|<=|!=|=|>|<';
     $symbolMap = array( '=' => 'eq', '!=' => 'ne', '>' => 'gt', '<' => 'lt', '>=' => 'gte', '<=' => 'lte' );
     foreach ( $pieces as $piece )
@@ -851,11 +854,13 @@ if ( $previewRows )
 {
     // A table in the terminal: the file read back as a spreadsheet would
     $in = fopen( 'php://temp', 'r+' );
+    if ( $in === false )
+        $fail( 'Cannot open a temporary stream to show the preview.' );
     fwrite( $in, $buffer );
     rewind( $in );
     $table = array();
     while ( ( $row = fgetcsv( $in, 0, $separator, '"', '' ) ) !== false )
-        $table[] = array_map( function ( $v ) { return mb_substr( preg_replace( '/\s+/', ' ', (string)$v ), 0, 24 ); }, $row );
+        $table[] = array_map( function ( $v ) { $v = (string)$v; return mb_substr( preg_replace( '/\s+/', ' ', $v ) ?? $v, 0, 24 ); }, $row );
     fclose( $in );
     $widths = array();
     foreach ( $table as $row )
@@ -872,7 +877,8 @@ if ( $previewRows )
     $script->shutdown( 0 );
 }
 
-if ( $file !== '-' )
+// $fh is only null for a preview, which ended above
+if ( $file !== '-' && $fh )
 {
     fclose( $fh );
     $cli->output( sprintf( 'Wrote %s: %d rows, %d columns, %.1f KB, %.1f s (%s, class %s, read access of %s)', $file, $written, count( $columns ),

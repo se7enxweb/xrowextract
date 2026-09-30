@@ -5,7 +5,7 @@ class XroweZKeywordHandler extends XrowBaseHandler
     public function exportAttribute( &$attribute ): string
     {
         $content = $attribute->content();
-        return $this->escape( is_object( $content ) ? self::utf8( $content->keywordString( ', ' ) ) : '' );
+        return $this->escape( $content instanceof eZKeyword ? self::utf8( $content->keywordString() ) : '' );
     }
 }
 ?>

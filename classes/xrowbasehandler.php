@@ -61,7 +61,8 @@ class XrowBaseHandler
             return $text;
         }
         $from = mb_detect_encoding( $text, array( 'UTF-8', 'ISO-8859-1', 'Windows-1252' ), true );
-        return $from ? mb_convert_encoding( $text, 'UTF-8', $from ) : $text;
+        $converted = $from ? mb_convert_encoding( $text, 'UTF-8', $from ) : false;
+        return is_string( $converted ) ? $converted : $text;
     }
 
     /**
