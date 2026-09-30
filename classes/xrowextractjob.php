@@ -23,7 +23,7 @@ class XrowExtractJob
     const INSTALL_WATCH_FILE = 'install-watch.json';
 
     /** The folder all jobs live in, created (and handed to the var directory's owner) if missing. */
-    public static function baseDir()
+    public static function baseDir(): string
     {
         $dir = eZSys::varDirectory() . '/xrowextract-jobs';
         if ( !is_dir( $dir ) )
@@ -36,17 +36,20 @@ class XrowExtractJob
         return $dir;
     }
 
-    public static function isValidID( $id )
+    /** @param mixed $id */
+    public static function isValidID( $id ): bool
     {
         return is_string( $id ) && preg_match( self::ID_PATTERN, $id ) === 1;
     }
 
-    public static function path( $id )
+    /** @param string $id */
+    public static function path( $id ): string
     {
         return self::baseDir() . '/' . $id;
     }
 
-    public static function exists( $id )
+    /** @param mixed $id */
+    public static function exists( $id ): bool
     {
         return self::isValidID( $id ) && is_dir( self::path( $id ) ) && is_file( self::path( $id ) . '/' . self::JOB_FILE );
     }
@@ -59,8 +62,9 @@ class XrowExtractJob
      * arguments for bin/php/<type>.php, without --output, --progress-file
      * or --user: those are added when the job runs).
      * Returns the new job id.
+     * @param array<string, mixed> $data
      */
-    public static function create( array $data )
+    public static function create( array $data ): string
     {
         $id = bin2hex( random_bytes( 16 ) );
         $dir = self::path( $id );
@@ -91,8 +95,12 @@ class XrowExtractJob
         return $id;
     }
 
-    /** The job's data, or null when the id is not one of ours. */
-    public static function load( $id )
+    /**
+     * The job's data, or null when the id is not one of ours.
+     * @param mixed $id
+     * @return array<string, mixed>|null
+     */
+    public static function load( $id ): ?array
     {
         if ( !self::exists( $id ) )
             return null;
@@ -101,8 +109,12 @@ class XrowExtractJob
         return is_array( $job ) ? $job : null;
     }
 
-    /** Writes job.json (atomically: a temp file, then a rename). */
-    public static function save( $id, array $job )
+    /**
+     * Writes job.json (atomically: a temp file, then a rename).
+     * @param string $id
+     * @param array<string, mixed> $job
+     */
+    public static function save( $id, array $job ): void
     {
         $file = self::path( $id ) . '/' . self::JOB_FILE;
         $tmp = $file . '.tmp-' . getmypid();
@@ -112,8 +124,13 @@ class XrowExtractJob
         self::fixOwnership( $file );
     }
 
-    /** Loads, merges $patch over the stored job, saves. Returns the merged job, or null if it does not exist. */
-    public static function update( $id, array $patch )
+    /**
+     * Loads, merges $patch over the stored job, saves. Returns the merged job, or null if it does not exist.
+     * @param mixed $id
+     * @param array<string, mixed> $patch
+     * @return array<string, mixed>|null
+     */
+    public static function update( $id, array $patch ): ?array
     {
         $job = self::load( $id );
         if ( $job === null )
@@ -127,8 +144,10 @@ class XrowExtractJob
      * Marks a job that is still queued or running as failed, with $message as its error (and as the
      * last line of its log, where the Jobs page shows it). A job in any other state (done, skipped,
      * already failed or cancelled) is left alone. True when it was marked.
+     * @param mixed $id
+     * @param mixed $message
      */
-    public static function markFailed( $id, $message )
+    public static function markFailed( $id, $message ): bool
     {
         if ( !self::isValidID( $id ) )
             return false;
@@ -149,8 +168,11 @@ class XrowExtractJob
         return true;
     }
 
-    /** Every job, newest first. */
-    public static function listAll()
+    /**
+     * Every job, newest first.
+     * @return list<array<string, mixed>>
+     */
+    public static function listAll(): array
     {
         $jobs = array();
         foreach ( (array)@scandir( self::baseDir() ) as $entry )
@@ -165,8 +187,13 @@ class XrowExtractJob
         return $jobs;
     }
 
-    /** The jobs a viewer may see: everyone's with $allJobs, else only their own. */
-    public static function forViewer( $login, $allJobs )
+    /**
+     * The jobs a viewer may see: everyone's with $allJobs, else only their own.
+     * @param string $login
+     * @param bool $allJobs
+     * @return list<array<string, mixed>>
+     */
+    public static function forViewer( $login, $allJobs ): array
     {
         $jobs = self::listAll();
         if ( $allJobs )
@@ -176,13 +203,22 @@ class XrowExtractJob
         } ) );
     }
 
-    public static function canSee( array $job, $login, $allJobs )
+    /**
+     * @param array<string, mixed> $job
+     * @param string $login
+     * @param bool $allJobs
+     */
+    public static function canSee( array $job, $login, $allJobs ): bool
     {
         return $allJobs || ( isset( $job['owner'] ) && $job['owner'] === $login );
     }
 
-    /** How many of the viewer's jobs are queued or running (for the Jobs tab badge). */
-    public static function countRunning( $login, $allJobs )
+    /**
+     * How many of the viewer's jobs are queued or running (for the Jobs tab badge).
+     * @param string $login
+     * @param bool $allJobs
+     */
+    public static function countRunning( $login, $allJobs ): int
     {
         $count = 0;
         foreach ( self::forViewer( $login, $allJobs ) as $job )
@@ -200,9 +236,11 @@ class XrowExtractJob
      * A process started by another system user (a job started from :8080 runs as root, from :443 as the
      * web user) may not be stoppable from here; that is reported, and the job is still marked cancelled so
      * its runner does not overwrite the state when it ends.
+     * @param mixed $id
+     * @param string $login
      * @return array{0: bool, 1: string} ok, message
      */
-    public static function cancel( $id, $login )
+    public static function cancel( $id, $login ): array
     {
         $job = self::load( $id );
         if ( !$job || !in_array( $job['state'], array( 'queued', 'running' ), true ) )
@@ -242,8 +280,11 @@ class XrowExtractJob
         return array( !$notStopped, $notStopped ? 'The job was marked cancelled, but its process could not be stopped from here.' : 'The job was cancelled.' );
     }
 
-    /** Removes a job's folder (its files, then itself). */
-    public static function delete( $id )
+    /**
+     * Removes a job's folder (its files, then itself).
+     * @param mixed $id
+     */
+    public static function delete( $id ): bool
     {
         if ( !self::isValidID( $id ) )
             return false;
@@ -262,7 +303,7 @@ class XrowExtractJob
     }
 
     /** Jobs older (by their end time, or their start time when they never finished) than the retention: removed, count returned. */
-    public static function clean()
+    public static function clean(): int
     {
         $cutoff = time() - self::retentionDays() * 86400;
         $removed = 0;
@@ -278,7 +319,7 @@ class XrowExtractJob
         return $removed;
     }
 
-    public static function retentionDays()
+    public static function retentionDays(): int
     {
         $ini = eZINI::instance( 'csv.ini' );
         if ( $ini->hasVariable( 'Jobs', 'RetentionDays' ) )
@@ -291,7 +332,7 @@ class XrowExtractJob
     }
 
     /** Whether the current user may see and act on every user's jobs (policy xrowextract/all_jobs). */
-    public static function allowAllJobs()
+    public static function allowAllJobs(): bool
     {
         $access = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'all_jobs' );
         return $access['accessWord'] !== 'no';
@@ -301,8 +342,10 @@ class XrowExtractJob
      * Who a login is, for the Jobs page's and the Presets card's user bubble: the login resolved once to
      * the user's name, initials, a colour that stays the same for that login, and the user's node in the
      * admin (false when the account no longer exists).
+     * @param string $ownerLogin
+     * @return array{login: string, name: string, initials: string, hue: int, node_id: int|false}
      */
-    public static function ownerInfo( $ownerLogin )
+    public static function ownerInfo( $ownerLogin ): array
     {
         // Per request: a name or an account can change between two requests of one Velocity worker
         $owners =& XrowExtractColumns::requestCache( 'owner_info' );
@@ -341,8 +384,12 @@ class XrowExtractJob
      * Writes progress.json (or another path) atomically. $phase is free text:
      * a class identifier (archive) or a locale (csv), whatever is being
      * written when the progress was last reported.
+     * @param string $path
+     * @param int|numeric-string $done
+     * @param int|numeric-string $total
+     * @param string $phase
      */
-    public static function writeProgress( $path, $done, $total, $phase = '' )
+    public static function writeProgress( $path, $done, $total, $phase = '' ): void
     {
         $tmp = $path . '.tmp-' . getmypid();
         $written = @file_put_contents( $tmp, json_encode( array(
@@ -355,7 +402,11 @@ class XrowExtractJob
         self::fixOwnership( $path );
     }
 
-    public static function readProgress( $path )
+    /**
+     * @param string $path
+     * @return array<string, mixed>|null
+     */
+    public static function readProgress( $path ): ?array
     {
         if ( !is_file( $path ) )
             return null;
@@ -372,8 +423,10 @@ class XrowExtractJob
      * kept: the first line of each phase, then one line each time the phase passes another 10 %.
      * $state carries the phase and 10 % step already written between calls (the Jobs page appends a running
      * log in pieces), so the timeline does not start over with every piece.
+     * @param mixed $text
+     * @param array{phase: string, step: int}|null $state
      */
-    public static function cleanLog( $text, ?array &$state = null )
+    public static function cleanLog( $text, ?array &$state = null ): string
     {
         if ( !is_array( $state ) )
             $state = array( 'phase' => '', 'step' => -1 );
@@ -410,8 +463,11 @@ class XrowExtractJob
      * A whole job log, cleaned (cleanLog()), read line by line so a long log costs no memory: the text, the
      * timeline state reached at its end (for the page to continue from) and the byte size read.
      * Beyond $maxBytes (default 8 MB) only the last $maxBytes are read, after a marker line.
+     * @param string $path
+     * @param int $maxBytes
+     * @return array{text: string, state: array{phase: string, step: int}, size: int}
      */
-    public static function cleanLogFile( $path, $maxBytes = 8388608 )
+    public static function cleanLogFile( $path, $maxBytes = 8388608 ): array
     {
         $state = null;
         $size = is_file( $path ) ? (int)@filesize( $path ) : 0;
@@ -442,8 +498,12 @@ class XrowExtractJob
         return array( 'text' => trim( $out, "\n" ), 'state' => $state ? $state : array( 'phase' => '', 'step' => -1 ), 'size' => $size );
     }
 
-    /** One eZCLI progress bar line, as array( phase, percent, done, total, elapsed, end_at ), or null. */
-    public static function parseProgressLine( $line )
+    /**
+     * One eZCLI progress bar line, as array( phase, percent, done, total, elapsed, end_at ), or null.
+     * @param mixed $line
+     * @return array{phase: string, percent: float, done: int, total: int, elapsed: string, end_at: string}|null
+     */
+    public static function parseProgressLine( $line ): ?array
     {
         $line = preg_replace( '/\x1b?\[[0-9;?]*m/', '', (string)$line );
         if ( !preg_match( '/^\s*(?:(.*?)\s*\|\s*)?([\d.]+)%\s*\((\d+)\/(\d+)\)(?:.*?elapsed\s*([\d:]+))?(?:.*?end\s*@\s*([\d:]+))?/', $line, $m ) )
@@ -456,8 +516,10 @@ class XrowExtractJob
      * The latest progress a job's own output reported (the kernel's installers draw eZCLI progress bars:
      * "Installing content objects | 40% (1736/4339) | elapsed 00:10:13 | end @ 16:16"), read from the end of
      * its log: the exact count, a percentage, the time spent and the expected end. Null when there is none.
+     * @param string $logPath
+     * @return array{done: int, total: int, phase: string}|null
      */
-    public static function logProgress( $logPath )
+    public static function logProgress( $logPath ): ?array
     {
         if ( !is_file( $logPath ) )
             return null;
@@ -481,8 +543,11 @@ class XrowExtractJob
         return array( 'done' => $found['done'], 'total' => $found['total'], 'phase' => implode( ' · ', $details ) );
     }
 
-    /** bin/php/csv.php, archive.php or package.php, the scripts a job runs. */
-    public static function scriptFor( $type )
+    /**
+     * bin/php/csv.php, archive.php or package.php, the scripts a job runs.
+     * @param string $type
+     */
+    public static function scriptFor( $type ): string
     {
         $files = array( 'archive' => 'archive.php', 'import' => 'import.php', 'package' => 'package.php' );
         $file = isset( $files[$type] ) ? $files[$type] : 'csv.php';
@@ -491,7 +556,7 @@ class XrowExtractJob
     }
 
     /** bin/php/job.php itself, to launch a job's run. */
-    public static function runnerScript()
+    public static function runnerScript(): string
     {
         $path = realpath( dirname( __FILE__ ) . '/../bin/php/job.php' );
         return $path !== false ? $path : dirname( __FILE__ ) . '/../bin/php/job.php';
@@ -503,7 +568,7 @@ class XrowExtractJob
      * Plesk-style .../sbin/php-fpm is mapped to .../bin/php -- else whatever
      * "php" resolves to on the PATH. False when none of these is executable.
      */
-    public static function phpCliBinary()
+    public static function phpCliBinary(): string|false
     {
         $ini = eZINI::instance( 'csv.ini' );
         if ( $ini->hasVariable( 'Jobs', 'PhpCli' ) )
@@ -534,7 +599,7 @@ class XrowExtractJob
     }
 
     /** Whether this process may launch a detached child (exec() available and not disabled). */
-    public static function canRunDetached()
+    public static function canRunDetached(): bool
     {
         if ( !function_exists( 'exec' ) || !function_exists( 'proc_open' ) )
             return false;
@@ -543,7 +608,7 @@ class XrowExtractJob
     }
 
     /** Whether a background export can be offered at all on this server. */
-    public static function available()
+    public static function available(): bool
     {
         return self::canRunDetached() && self::phpCliBinary() !== false;
     }
@@ -552,8 +617,9 @@ class XrowExtractJob
      * Launches "<php cli> bin/php/job.php --run=<id>" detached: the request
      * does not wait for it. bin/php/job.php itself carries the job out and
      * updates job.json as it goes.
+     * @param string $id
      */
-    public static function start( $id )
+    public static function start( $id ): bool
     {
         if ( !self::available() )
             return false;
@@ -576,8 +642,9 @@ class XrowExtractJob
      * folder or file it creates must stay usable by the alpha user PHP-FPM
      * runs as. A no-op for anything else, and errors are swallowed: a
      * failed chown must never break the export itself.
+     * @param string $path
      */
-    public static function fixOwnership( $path )
+    public static function fixOwnership( $path ): void
     {
         if ( !self::runningAsRoot() )
             return;
@@ -589,7 +656,7 @@ class XrowExtractJob
     }
 
     /** Whether this process is running as root (Velocity, or a root command line). */
-    public static function runningAsRoot()
+    public static function runningAsRoot(): bool
     {
         if ( function_exists( 'posix_getuid' ) )
             return posix_getuid() === 0;
@@ -598,8 +665,11 @@ class XrowExtractJob
         return trim( (string)@shell_exec( 'id -u 2>/dev/null' ) ) === '0';
     }
 
-    /** array( uid, gid ) of the var directory's owner, or false when it cannot be read. */
-    protected static function varOwner()
+    /**
+     * array( uid, gid ) of the var directory's owner, or false when it cannot be read.
+     * @return array{0: int|false, 1: int|false}|false
+     */
+    protected static function varOwner(): array|false
     {
         static $owner = null;
         if ( $owner === null )

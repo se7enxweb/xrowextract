@@ -28,24 +28,32 @@ class XrowExtractPreset
     const MAX_EXTENDS_DEPTH = 5;
 
     /** A fresh preset id (the eZSiteData row name, without the prefix). */
-    public static function newID()
+    public static function newID(): string
     {
         return bin2hex( random_bytes( 10 ) );
     }
 
-    public static function isValidUserID( $id )
+    /** @param mixed $id */
+    public static function isValidUserID( $id ): bool
     {
         return is_string( $id ) && preg_match( '/^[0-9a-f]{20}$/', $id ) === 1;
     }
 
-    /** One user preset's eZSiteData row name. */
-    protected static function siteDataName( $id )
+    /**
+     * One user preset's eZSiteData row name.
+     * @param string $id
+     */
+    protected static function siteDataName( $id ): string
     {
         return self::NAME_PREFIX . $id;
     }
 
-    /** array('id'=>..., 'ref'=>'user:<id>', ...record...) or false. */
-    public static function fetchUser( $id )
+    /**
+     * array('id'=>..., 'ref'=>'user:<id>', ...record...) or false.
+     * @param mixed $id
+     * @return array<string, mixed>|false
+     */
+    public static function fetchUser( $id ): array|false
     {
         if ( !self::isValidUserID( $id ) )
             return false;
@@ -62,8 +70,11 @@ class XrowExtractPreset
         return $record;
     }
 
-    /** Every user preset (both layers use the same record shape); newest first. */
-    public static function fetchUserList()
+    /**
+     * Every user preset (both layers use the same record shape); newest first.
+     * @return list<array<string, mixed>>
+     */
+    public static function fetchUserList(): array
     {
         $rows = eZPersistentObject::fetchObjectList( eZSiteData::definition(), null,
             array( 'name' => array( 'like', self::NAME_PREFIX . '%' ) ) );
@@ -82,6 +93,10 @@ class XrowExtractPreset
     /**
      * Save (id given: update; else: create) a user preset. $data: name, description, view (csv|archive),
      * shared (bool), extends ('' or a ref), placeholders (array), definition (array). Returns the id.
+     * @param string $ownerLogin
+     * @param array<string, mixed> $data
+     * @param string|false $id
+     * @return string
      */
     public static function saveUser( $ownerLogin, array $data, $id = false )
     {
@@ -115,7 +130,8 @@ class XrowExtractPreset
         return $id;
     }
 
-    public static function deleteUser( $id )
+    /** @param mixed $id */
+    public static function deleteUser( $id ): bool
     {
         if ( !self::isValidUserID( $id ) )
             return false;
@@ -126,8 +142,11 @@ class XrowExtractPreset
         return true;
     }
 
-    /** Every `[Preset_*]` block of xrowextract.ini (this siteaccess's merged copy, extensions included). */
-    public static function fetchSiteList()
+    /**
+     * Every `[Preset_*]` block of xrowextract.ini (this siteaccess's merged copy, extensions included).
+     * @return list<array<string, mixed>>
+     */
+    public static function fetchSiteList(): array
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $presets = array();
@@ -144,7 +163,11 @@ class XrowExtractPreset
         return $presets;
     }
 
-    public static function fetchSite( $id )
+    /**
+     * @param string $id
+     * @return array<string, mixed>|false
+     */
+    public static function fetchSite( $id ): array|false
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $group = 'Preset_' . $id;
@@ -153,7 +176,12 @@ class XrowExtractPreset
         return self::siteRecordFromVars( $id, $ini->group( $group ) );
     }
 
-    protected static function siteRecordFromVars( $id, array $vars )
+    /**
+     * @param string $id
+     * @param array<string, mixed> $vars
+     * @return array<string, mixed>
+     */
+    protected static function siteRecordFromVars( $id, array $vars ): array
     {
         $definition = array();
         if ( isset( $vars['Definition'] ) )
@@ -193,13 +221,17 @@ class XrowExtractPreset
     }
 
     /** The fixed display order of site-preset audience groups; anything else sorts after, alphabetically. */
-    public static function audienceOrder()
+    /** @return list<string> */
+    public static function audienceOrder(): array
     {
         return array( 'Site', 'Editors', 'Developers', 'Partners', 'Users', 'Maintenance' );
     }
 
-    /** Site presets only, grouped and ordered by Audience: array( audience => array(preset, ...) ). */
-    public static function fetchSiteListByAudience()
+    /**
+     * Site presets only, grouped and ordered by Audience: array( audience => array(preset, ...) ).
+     * @return array<string, list<array<string, mixed>>>
+     */
+    public static function fetchSiteListByAudience(): array
     {
         $groups = array();
         foreach ( self::fetchSiteList() as $preset )
@@ -218,8 +250,12 @@ class XrowExtractPreset
         return $groups;
     }
 
-    /** A preset by its ref ("user:<id>" or "site:<id>"), or false. */
-    public static function fetch( $ref )
+    /**
+     * A preset by its ref ("user:<id>" or "site:<id>"), or false.
+     * @param string $ref
+     * @return array<string, mixed>|false
+     */
+    public static function fetch( $ref ): array|false
     {
         if ( strpos( $ref, 'user:' ) === 0 )
             return self::fetchUser( substr( $ref, 5 ) );
@@ -228,15 +264,24 @@ class XrowExtractPreset
         return false;
     }
 
-    /** A preset's name by its ref, for the Jobs page (a deleted preset still shows its ref). */
+    /**
+     * A preset's name by its ref, for the Jobs page (a deleted preset still shows its ref).
+     * @param string $ref
+     * @return string
+     */
     public static function presetName( $ref )
     {
         $preset = self::fetch( $ref );
         return $preset ? $preset['name'] : $ref;
     }
 
-    /** Every preset the current user may see: their own, every shared one, and the site's. */
-    public static function fetchVisible( $login, $allowAll )
+    /**
+     * Every preset the current user may see: their own, every shared one, and the site's.
+     * @param string $login
+     * @param bool $allowAll
+     * @return list<array<string, mixed>>
+     */
+    public static function fetchVisible( $login, $allowAll ): array
     {
         $visible = array();
         foreach ( self::fetchUserList() as $preset )
@@ -249,8 +294,13 @@ class XrowExtractPreset
         return $visible;
     }
 
-    /** Whether $login may change or delete this preset. */
-    public static function canEdit( array $preset, $login, $allowAll )
+    /**
+     * Whether $login may change or delete this preset.
+     * @param array<string, mixed> $preset
+     * @param string $login
+     * @param bool $allowAll
+     */
+    public static function canEdit( array $preset, $login, $allowAll ): bool
     {
         if ( $preset['site'] )
             return false; // site presets are read only from the view; edit xrowextract.ini instead
@@ -265,8 +315,12 @@ class XrowExtractPreset
      * also use for the preset's own {placeholder} substitution, forwarded to XrowExtractFetchAlias::apply()
      * when the chain ends in "alias:..." — so a param such as "limit" fills the alias's own
      * Parameter[limit] exactly as choosing that named fetch directly would.
+     * @param string $ref
+     * @param int $nodeIDForAlias
+     * @param array<string, mixed> $paramOverrides
+     * @return array{definition: array<mixed>, placeholders: array<mixed>, chain: list<string>, error: string}
      */
-    public static function resolve( $ref, $nodeIDForAlias = 0, array $paramOverrides = array() )
+    public static function resolve( $ref, $nodeIDForAlias = 0, array $paramOverrides = array() ): array
     {
         $chain = array();
         $definition = array();
@@ -306,8 +360,12 @@ class XrowExtractPreset
         return array( 'definition' => $definition, 'placeholders' => $placeholders, 'chain' => $chain, 'error' => '' );
     }
 
-    /** XrowExtractFetchAlias::apply()'s 'values' as a preset definition fragment. */
-    protected static function definitionFromAliasValues( array $values )
+    /**
+     * XrowExtractFetchAlias::apply()'s 'values' as a preset definition fragment.
+     * @param array<string, mixed> $values
+     * @return array<string, mixed>
+     */
+    protected static function definitionFromAliasValues( array $values ): array
     {
         $definition = array();
         if ( isset( $values['parent_node_id'] ) )
@@ -343,8 +401,12 @@ class XrowExtractPreset
      * (overrides $placeholders' defaults). Returns array( 'definition' => ..., 'unresolved' => array of
      * placeholder names left with no value — an empty string is written in their place, which almost
      * always resolves to "matches nothing" rather than silently exporting the wrong rows ).
+     * @param mixed $definition
+     * @param array<string, mixed> $placeholders
+     * @param array<string, mixed> $params
+     * @return array{definition: mixed, unresolved: list<string>}
      */
-    public static function fillPlaceholders( $definition, array $placeholders, array $params )
+    public static function fillPlaceholders( $definition, array $placeholders, array $params ): array
     {
         $unresolved = array();
         $values = array();
@@ -376,8 +438,9 @@ class XrowExtractPreset
     /**
      * A short, one-line "what this sets" summary for the picker — from the preset's own definition only
      * (never resolves an Extends chain, so listing many presets stays cheap).
+     * @param array<string, mixed> $preset
      */
-    public static function summaryLine( array $preset )
+    public static function summaryLine( array $preset ): string
     {
         $def = $preset['definition'];
         $parts = array();
@@ -402,8 +465,11 @@ class XrowExtractPreset
         return $parts ? implode( ', ', $parts ) : 'no settings of its own';
     }
 
-    /** The preset as a `[Preset_<id>]` xrowextract.ini block, to copy into settings. */
-    public static function toIniBlock( array $preset )
+    /**
+     * The preset as a `[Preset_<id>]` xrowextract.ini block, to copy into settings.
+     * @param array<string, mixed> $preset
+     */
+    public static function toIniBlock( array $preset ): string
     {
         $lines = array( '[Preset_' . ( $preset['site'] ? $preset['id'] : $preset['id'] ) . ']' );
         $lines[] = 'Name=' . str_replace( "\n", ' ', $preset['name'] );

@@ -11,12 +11,14 @@
  */
 class XrowExtractHistory extends eZPersistentObject
 {
+    /** @param array<string, mixed> $row */
     public function __construct( $row = array() )
     {
         parent::__construct( $row );
     }
 
-    public static function definition()
+    /** @return array<string, mixed> */
+    public static function definition(): array
     {
         $int = function ( $name, $default = 0 ) { return array( 'name' => $name, 'datatype' => 'integer', 'default' => $default, 'required' => true ); };
         $str = function ( $name, $default = '' ) { return array( 'name' => $name, 'datatype' => 'string', 'default' => $default, 'required' => true ); };
@@ -65,18 +67,21 @@ class XrowExtractHistory extends eZPersistentObject
         );
     }
 
-    public static function states()
+    /** @return list<string> */
+    public static function states(): array
     {
         return array( 'done', 'warning', 'skipped', 'failed' );
     }
 
-    public function warningList()
+    /** @return array<mixed> */
+    public function warningList(): array
     {
         $data = json_decode( (string)$this->attribute( 'warnings' ), true );
         return is_array( $data ) ? $data : array();
     }
 
-    public function deliveryList()
+    /** @return array<mixed> */
+    public function deliveryList(): array
     {
         // A package install is never delivered anywhere; its 'delivery' column holds installDetails()
         if ( $this->attribute( 'kind' ) === self::KIND_INSTALL )
@@ -99,8 +104,11 @@ class XrowExtractHistory extends eZPersistentObject
     const KIND_INSTALL = 'install';
     const INSTALL_NODE_ID_LIMIT = 5000;
 
-    /** The details of an install row (see above), or an empty array for any other kind. */
-    public function installDetails()
+    /**
+     * The details of an install row (see above), or an empty array for any other kind.
+     * @return array<mixed>
+     */
+    public function installDetails(): array
     {
         if ( $this->attribute( 'kind' ) !== self::KIND_INSTALL )
             return array();
@@ -114,8 +122,9 @@ class XrowExtractHistory extends eZPersistentObject
      * class_mode, counts (inspect()'s counts just before installing), report (install()'s report: ok,
      * errors, created_classes, created_objects), missing_datatypes (rows of XrowExtractPackage::missingDatatypes()),
      * what (optional text). A row for the same job id is updated, as for every other run.
+     * @param array<string, mixed> $data
      */
-    public static function recordInstall( array $data )
+    public static function recordInstall( array $data ): ?XrowExtractHistory
     {
         $report = isset( $data['report'] ) && is_array( $data['report'] ) ? $data['report'] : array();
         $counts = isset( $data['counts'] ) && is_array( $data['counts'] ) ? $data['counts'] : array();
@@ -174,19 +183,36 @@ class XrowExtractHistory extends eZPersistentObject
         ) );
     }
 
-    /** The install rows the viewer may see, newest first ($package: only that package's). */
-    public static function fetchInstalls( $viewerLogin, $allowAll, $package = '', $offset = 0, $limit = 25 )
+    /**
+     * The install rows the viewer may see, newest first ($package: only that package's).
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     * @param string $package
+     * @param int $offset
+     * @param int $limit
+     * @return array<XrowExtractHistory>
+     */
+    public static function fetchInstalls( $viewerLogin, $allowAll, $package = '', $offset = 0, $limit = 25 ): array
     {
         return self::fetchPage( array( 'kind' => self::KIND_INSTALL, 'package' => (string)$package ), $viewerLogin, $allowAll, $offset, $limit );
     }
 
-    public static function countInstalls( $viewerLogin, $allowAll, $package = '' )
+    /**
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     * @param string $package
+     */
+    public static function countInstalls( $viewerLogin, $allowAll, $package = '' ): int
     {
         return self::countFor( array( 'kind' => self::KIND_INSTALL, 'package' => (string)$package ), $viewerLogin, $allowAll );
     }
 
-    /** One install row as the Jobs page and the Package tab show it. */
-    public function installRow( $viewerLogin )
+    /**
+     * One install row as the Jobs page and the Package tab show it.
+     * @param string $viewerLogin
+     * @return array<string, mixed>
+     */
+    public function installRow( $viewerLogin ): array
     {
         $details = $this->installDetails();
         return array(
@@ -220,11 +246,13 @@ class XrowExtractHistory extends eZPersistentObject
         );
     }
 
-    public function ownerUser()
+    /** @return array{login: string, name: string, initials: string, hue: int, node_id: int|false} */
+    public function ownerUser(): array
     {
         return XrowExtractJob::ownerInfo( (string)$this->attribute( 'owner_login' ) );
     }
 
+    /** @return string */
     public function scheduleName()
     {
         // Per request: a schedule can be renamed or deleted between two requests of one Velocity worker
@@ -240,7 +268,7 @@ class XrowExtractHistory extends eZPersistentObject
         return $names[$id];
     }
 
-    public function durationText()
+    public function durationText(): string
     {
         $start = (int)$this->attribute( 'started_at' );
         $end = (int)$this->attribute( 'ended_at' );
@@ -254,12 +282,12 @@ class XrowExtractHistory extends eZPersistentObject
         return floor( $seconds / 3600 ) . ' h' . ( floor( $seconds % 3600 / 60 ) ? ' ' . floor( $seconds % 3600 / 60 ) . ' min' : '' );
     }
 
-    public function sizeKB()
+    public function sizeKB(): int
     {
         return (int)$this->attribute( 'byte_size' ) > 0 ? (int)ceil( $this->attribute( 'byte_size' ) / 1024 ) : 0;
     }
 
-    public function jobExists()
+    public function jobExists(): bool
     {
         return $this->attribute( 'job_id' ) !== '' && XrowExtractJob::exists( $this->attribute( 'job_id' ) );
     }
@@ -267,13 +295,15 @@ class XrowExtractHistory extends eZPersistentObject
     /**
      * Records one run. $data: the fields above (unknown keys ignored). A row for the same job id is
      * updated instead of added (a job recorded when it ends, and again when its delivery finishes).
+     * @param array<string, mixed> $data
      */
-    public static function record( array $data )
+    public static function record( array $data ): ?XrowExtractHistory
     {
         if ( !XrowExtractSchema::ensure() )
             return null;
         $row = null;
         if ( !empty( $data['job_id'] ) )
+            /** @var XrowExtractHistory|null $row */
             $row = eZPersistentObject::fetchObject( self::definition(), null, array( 'job_id' => (string)$data['job_id'] ) );
         if ( !$row )
             $row = new XrowExtractHistory( array( 'created' => time() ) );
@@ -296,8 +326,14 @@ class XrowExtractHistory extends eZPersistentObject
         return $row;
     }
 
-    /** The conditions for a filter array: state, kind, schedule_id, owner, trigger, from, to (Y-m-d), text. */
-    protected static function conditions( array $filter, $viewerLogin, $allowAll )
+    /**
+     * The conditions for a filter array: state, kind, schedule_id, owner, trigger, from, to (Y-m-d), text.
+     * @param array<string, mixed> $filter
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     * @return array<string, mixed>|null
+     */
+    protected static function conditions( array $filter, $viewerLogin, $allowAll ): ?array
     {
         $conds = array();
         if ( !$allowAll )
@@ -330,25 +366,45 @@ class XrowExtractHistory extends eZPersistentObject
         return $conds ? $conds : null;
     }
 
-    /** One page of rows, newest first. */
-    public static function fetchPage( array $filter, $viewerLogin, $allowAll, $offset = 0, $limit = 25 )
+    /**
+     * One page of rows, newest first.
+     * @param array<string, mixed> $filter
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     * @param int $offset
+     * @param int $limit
+     * @return array<XrowExtractHistory>
+     */
+    public static function fetchPage( array $filter, $viewerLogin, $allowAll, $offset = 0, $limit = 25 ): array
     {
         if ( !XrowExtractSchema::exists() )
             return array();
+        /** @var array<XrowExtractHistory>|null $list */
         $list = eZPersistentObject::fetchObjectList( self::definition(), null, self::conditions( $filter, $viewerLogin, $allowAll ),
                                                      array( 'created' => 'desc', 'id' => 'desc' ), array( 'offset' => max( 0, (int)$offset ), 'length' => max( 1, min( 200, (int)$limit ) ) ) );
         return is_array( $list ) ? $list : array();
     }
 
-    public static function countFor( array $filter, $viewerLogin, $allowAll )
+    /**
+     * @param array<string, mixed> $filter
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     */
+    public static function countFor( array $filter, $viewerLogin, $allowAll ): int
     {
         if ( !XrowExtractSchema::exists() )
             return 0;
         return (int)eZPersistentObject::count( self::definition(), self::conditions( $filter, $viewerLogin, $allowAll ) );
     }
 
-    /** Counts per run state for the totals row (the same filter, state left out). */
-    public static function stateCounts( array $filter, $viewerLogin, $allowAll )
+    /**
+     * Counts per run state for the totals row (the same filter, state left out).
+     * @param array<string, mixed> $filter
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     * @return array<string, int>
+     */
+    public static function stateCounts( array $filter, $viewerLogin, $allowAll ): array
     {
         $counts = array( 'total' => 0 );
         unset( $filter['state'] );
@@ -360,8 +416,13 @@ class XrowExtractHistory extends eZPersistentObject
         return $counts;
     }
 
-    /** Failed (or skipped) scheduled runs since $since that the viewer may see: the Jobs tab badge. */
-    public static function alertCount( $since, $viewerLogin, $allowAll )
+    /**
+     * Failed (or skipped) scheduled runs since $since that the viewer may see: the Jobs tab badge.
+     * @param int $since
+     * @param string $viewerLogin
+     * @param bool $allowAll
+     */
+    public static function alertCount( $since, $viewerLogin, $allowAll ): int
     {
         if ( !XrowExtractSchema::exists() )
             return 0;
@@ -379,11 +440,15 @@ class XrowExtractHistory extends eZPersistentObject
         return $count + (int)eZPersistentObject::count( self::definition(), $conds );
     }
 
-    /** The last successful run of a schedule (done or with warnings), or null. */
-    public static function lastSuccess( $scheduleID )
+    /**
+     * The last successful run of a schedule (done or with warnings), or null.
+     * @param int $scheduleID
+     */
+    public static function lastSuccess( $scheduleID ): ?XrowExtractHistory
     {
         if ( !XrowExtractSchema::exists() )
             return null;
+        /** @var array<XrowExtractHistory>|null $list */
         $list = eZPersistentObject::fetchObjectList( self::definition(), null,
             array( 'schedule_id' => (int)$scheduleID, 'run_state' => array( array( 'done', 'warning' ) ) ),
             array( 'started_at' => 'desc' ), array( 'offset' => 0, 'length' => 1 ) );
@@ -393,8 +458,9 @@ class XrowExtractHistory extends eZPersistentObject
     /**
      * Removes rows older than their retention: a schedule's own history_days, else xrowextract.ini
      * [History] RetentionDays (default 365). Returns how many were removed.
+     * @param int|null $now
      */
-    public static function clean( $now = null )
+    public static function clean( $now = null ): int
     {
         if ( !XrowExtractSchema::exists() )
             return 0;
@@ -423,7 +489,7 @@ class XrowExtractHistory extends eZPersistentObject
         return $removed;
     }
 
-    public static function retentionDays()
+    public static function retentionDays(): int
     {
         $ini = eZINI::instance( 'xrowextract.ini' );
         $days = $ini->hasVariable( 'History', 'RetentionDays' ) ? (int)$ini->variable( 'History', 'RetentionDays' ) : 365;
@@ -431,7 +497,7 @@ class XrowExtractHistory extends eZPersistentObject
     }
 
     /** Whether the current user may see the history (policy xrowextract/history). */
-    public static function canView()
+    public static function canView(): bool
     {
         $access = eZUser::currentUser()->hasAccessTo( 'xrowextract', 'history' );
         return $access['accessWord'] !== 'no';

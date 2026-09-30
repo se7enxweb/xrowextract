@@ -22,34 +22,43 @@ class XrowExtractManifest
     const VERSION = 1;
     const SIDECAR_SUFFIX = '.manifest.json';
 
-    /** A manifest file given explicitly (bin/php/import.php --manifest), used before any sidecar or embedded one. */
+    /**
+     * A manifest file given explicitly (bin/php/import.php --manifest), used before any sidecar or embedded one.
+     * @var string|null
+     */
     public static $explicitPath = null;
 
-    /** true: no manifest is read at all (bin/php/import.php --no-manifest). */
+    /**
+     * true: no manifest is read at all (bin/php/import.php --no-manifest).
+     * @var bool
+     */
     public static $disabled = false;
 
-    /** The sidecar path of a data file. */
-    public static function sidecarPath( $dataPath )
+    /**
+     * The sidecar path of a data file.
+     * @param string $dataPath
+     */
+    public static function sidecarPath( $dataPath ): string
     {
         return $dataPath . self::SIDECAR_SUFFIX;
     }
 
     /** Whether manifests are embedded in JSON files (csv.ini [Manifest] EmbedInJSON, default enabled). */
-    public static function embedInJSON()
+    public static function embedInJSON(): bool
     {
         $ini = eZINI::instance( 'csv.ini' );
         return !( $ini->hasVariable( 'Manifest', 'EmbedInJSON' ) && $ini->variable( 'Manifest', 'EmbedInJSON' ) === 'disabled' );
     }
 
     /** Whether manifests are embedded in XML files (csv.ini [Manifest] EmbedInXML, default enabled). */
-    public static function embedInXML()
+    public static function embedInXML(): bool
     {
         $ini = eZINI::instance( 'csv.ini' );
         return !( $ini->hasVariable( 'Manifest', 'EmbedInXML' ) && $ini->variable( 'Manifest', 'EmbedInXML' ) === 'disabled' );
     }
 
     /** The version of this extension, for "generator". */
-    protected static function extensionVersion()
+    protected static function extensionVersion(): string
     {
         if ( class_exists( 'xrowextractInfo' ) )
         {
@@ -62,8 +71,9 @@ class XrowExtractManifest
     /**
      * Where an export comes from: the public site name, the siteaccess the export ran in, the host
      * and the installation's var directory name (tells two installations on one host apart).
+     * @return array{site: string, siteaccess: mixed, host: string, var_dir: string}
      */
-    public static function source()
+    public static function source(): array
     {
         $access = eZSiteAccess::current();
         $siteName = '';
@@ -94,8 +104,10 @@ class XrowExtractManifest
      * The class part: identifier, name, id, remote id, a version (the class's modified time, and a
      * signature of its attribute identifiers and datatypes: two sites with the same signature agree on
      * every attribute), and every attribute's meta.
+     * @param int|string $classID
+     * @return array<string, mixed>|null
      */
-    public static function classInfo( $classID )
+    public static function classInfo( $classID ): ?array
     {
         $class = eZContentClass::fetch( (int)$classID );
         if ( !$class instanceof eZContentClass )
@@ -123,8 +135,11 @@ class XrowExtractManifest
         );
     }
 
-    /** One class attribute's meta: flags, selection options, relation targets. */
-    public static function attributeInfo( eZContentClassAttribute $attribute )
+    /**
+     * One class attribute's meta: flags, selection options, relation targets.
+     * @return array<string, mixed>
+     */
+    public static function attributeInfo( eZContentClassAttribute $attribute ): array
     {
         $datatype = $attribute->attribute( 'data_type_string' );
         $info = array(
@@ -181,8 +196,13 @@ class XrowExtractManifest
      * The typed column list for $columns (the export's own column arrays: id, name, exportname) of a
      * class, with the keys the writer puts in the file. $languages: the locales the rows are in (one:
      * every row is that language; several: the "language" column says which, per row).
+     * @param array<array<string, mixed>> $columns
+     * @param int|string|null $classID
+     * @param array<string> $languages
+     * @param bool $allowPasswordHash
+     * @return list<array<string, mixed>>
      */
-    public static function columns( array $columns, $classID, array $languages, $allowPasswordHash = false )
+    public static function columns( array $columns, $classID, array $languages, $allowPasswordHash = false ): array
     {
         $meta = $classID ? XrowExtractColumns::attributeMeta( $classID ) : array();
         $formatColumns = $classID ? XrowExtractCatalogue::formatColumns( $classID ) : array();
@@ -251,8 +271,13 @@ class XrowExtractManifest
         return $out;
     }
 
-    /** How the importer maps a column back: its target (the same strings XrowExtractImport::parseTarget() reads) and a note. */
-    protected static function importHint( array $entry, array $classAttributes )
+    /**
+     * How the importer maps a column back: its target (the same strings XrowExtractImport::parseTarget() reads) and a note.
+     * @param array<string, mixed> $entry
+     * @param array<string, eZContentClassAttribute> $classAttributes
+     * @return array{target: string, note: string}
+     */
+    protected static function importHint( array $entry, array $classAttributes ): array
     {
         if ( $entry['kind'] === 'special' )
         {
@@ -278,8 +303,12 @@ class XrowExtractManifest
                       'note' => $ok ? 'attribute ' . $entry['id'] : ( $entry['datatype'] ? XrowExtractImport::unsupportedReason( $entry['datatype'] ) : 'unknown column' ) );
     }
 
-    /** The keys XrowExtractWriter gives these columns in the file ('_' to '-', a repeated name numbered). */
-    public static function fileKeys( array $columns )
+    /**
+     * The keys XrowExtractWriter gives these columns in the file ('_' to '-', a repeated name numbered).
+     * @param array<array<string, mixed>> $columns
+     * @return list<string>
+     */
+    public static function fileKeys( array $columns ): array
     {
         $keys = array();
         $used = array();
@@ -299,8 +328,10 @@ class XrowExtractManifest
      * A single-class manifest. $params: type (csv|archive-class), format, separator, quoted, line_endings,
      * languages, filters (an XrowExtractFilters values array or CLI arguments), preset, schedule,
      * selection (node/scope text), columns (as for columns()), class_id, allow_password_hash.
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
      */
-    public static function build( array $params )
+    public static function build( array $params ): array
     {
         $classID = isset( $params['class_id'] ) ? (int)$params['class_id'] : 0;
         $languages = isset( $params['languages'] ) ? array_values( (array)$params['languages'] ) : array();
@@ -338,8 +369,16 @@ class XrowExtractManifest
         );
     }
 
-    /** $manifest completed with what is known once the file is written: row counts, size and sha256. */
-    public static function finish( array $manifest, $dataPath, $rows, array $rowsPerLanguage = array(), array $warnings = array() )
+    /**
+     * $manifest completed with what is known once the file is written: row counts, size and sha256.
+     * @param array<string, mixed> $manifest
+     * @param string|null $dataPath
+     * @param int|numeric-string $rows
+     * @param array<string, int> $rowsPerLanguage
+     * @param array<string> $warnings
+     * @return array<string, mixed>
+     */
+    public static function finish( array $manifest, $dataPath, $rows, array $rowsPerLanguage = array(), array $warnings = array() ): array
     {
         $manifest['counts'] = array( 'rows' => (int)$rows );
         if ( $rowsPerLanguage )
@@ -359,20 +398,29 @@ class XrowExtractManifest
         return $manifest;
     }
 
-    /** The manifest as it is embedded in a file header: without the parts only the finished file knows. */
-    public static function headerCopy( array $manifest )
+    /**
+     * The manifest as it is embedded in a file header: without the parts only the finished file knows.
+     * @param array<string, mixed> $manifest
+     * @return array<string, mixed>
+     */
+    public static function headerCopy( array $manifest ): array
     {
         unset( $manifest['file'], $manifest['counts'], $manifest['finished'] );
         return $manifest;
     }
 
-    public static function encode( array $manifest )
+    /** @param array<string, mixed> $manifest */
+    public static function encode( array $manifest ): string
     {
         return json_encode( $manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE ) . "\n";
     }
 
-    /** Writes the sidecar next to $dataPath (0600, handed to the var directory's owner). Returns its path. */
-    public static function writeSidecar( $dataPath, array $manifest )
+    /**
+     * Writes the sidecar next to $dataPath (0600, handed to the var directory's owner). Returns its path.
+     * @param string $dataPath
+     * @param array<string, mixed> $manifest
+     */
+    public static function writeSidecar( $dataPath, array $manifest ): string|false
     {
         $path = self::sidecarPath( $dataPath );
         if ( @file_put_contents( $path, self::encode( $manifest ) ) === false )
@@ -382,8 +430,12 @@ class XrowExtractManifest
         return $path;
     }
 
-    /** A manifest read from a JSON file, or null. */
-    public static function readFile( $path )
+    /**
+     * A manifest read from a JSON file, or null.
+     * @param string $path
+     * @return array<string, mixed>|null
+     */
+    public static function readFile( $path ): ?array
     {
         if ( !is_file( $path ) || filesize( $path ) > 16 * 1024 * 1024 )
             return null;
@@ -391,15 +443,21 @@ class XrowExtractManifest
         return self::isManifest( $data ) ? $data : null;
     }
 
-    /** A single file's manifest (with its typed "columns"), or a site archive's (with its "classes"). */
-    public static function isManifest( $data )
+    /**
+     * A single file's manifest (with its typed "columns"), or a site archive's (with its "classes").
+     * @param mixed $data
+     */
+    public static function isManifest( $data ): bool
     {
         return is_array( $data ) && isset( $data['manifest_version'] )
                && ( ( isset( $data['columns'] ) && is_array( $data['columns'] ) ) || ( isset( $data['classes'] ) && is_array( $data['classes'] ) ) );
     }
 
-    /** A single file's manifest: one the importer can map columns from. */
-    public static function isColumnManifest( $data )
+    /**
+     * A single file's manifest: one the importer can map columns from.
+     * @param mixed $data
+     */
+    public static function isColumnManifest( $data ): bool
     {
         return is_array( $data ) && isset( $data['manifest_version'] ) && isset( $data['columns'] ) && is_array( $data['columns'] );
     }
@@ -407,8 +465,11 @@ class XrowExtractManifest
     /**
      * The manifest that belongs to a data file: the sidecar "<file>.manifest.json" first (it has the
      * checksum), else the one embedded in the file. null when there is none.
+     * @param string $path
+     * @param string|null $format
+     * @return array<string, mixed>|null
      */
-    public static function forDataFile( $path, $format = null )
+    public static function forDataFile( $path, $format = null ): ?array
     {
         if ( self::$disabled )
             return null;
@@ -438,8 +499,12 @@ class XrowExtractManifest
         return $embedded;
     }
 
-    /** The <manifest> element of an XML export (read with XMLReader, DOCTYPE refused as everywhere else). */
-    public static function readEmbeddedXML( $path )
+    /**
+     * The <manifest> element of an XML export (read with XMLReader, DOCTYPE refused as everywhere else).
+     * @param string $path
+     * @return array<string, mixed>|null
+     */
+    public static function readEmbeddedXML( $path ): ?array
     {
         if ( preg_match( '/<!DOCTYPE/i', XrowExtractImport::sniff( $path, 65536 ) ) )
             return null;
@@ -467,8 +532,12 @@ class XrowExtractManifest
         return $found;
     }
 
-    /** The "manifest" of a JSON export's envelope. */
-    public static function readEmbeddedJSON( $path )
+    /**
+     * The "manifest" of a JSON export's envelope.
+     * @param string $path
+     * @return array<string, mixed>|null
+     */
+    public static function readEmbeddedJSON( $path ): ?array
     {
         $fh = @fopen( $path, 'rb' );
         if ( !$fh )
@@ -487,8 +556,12 @@ class XrowExtractManifest
      *   'class' => class identifier or null, 'matched' => keys found, 'unknown' => header keys the
      *   manifest does not describe, 'missing' => manifest keys not in the header,
      *   'checksum' => 'ok' | 'mismatch' | null, 'source' => sidecar|embedded ).
+     * @param array<string, mixed> $manifest
+     * @param array<string> $header
+     * @param string|null $dataPath
+     * @return array{columnIDs: array<string, mixed>, class: mixed, matched: list<string>, unknown: list<string>, missing: list<mixed>, checksum: 'ok'|'mismatch'|null, source: mixed}
      */
-    public static function importMapping( array $manifest, array $header, $dataPath = null )
+    public static function importMapping( array $manifest, array $header, $dataPath = null ): array
     {
         $byKey = array();
         foreach ( $manifest['columns'] as $column )
@@ -530,8 +603,11 @@ class XrowExtractManifest
      * and its manifest to "$target.manifest.json". Returns array( 'ok' => bool, 'name' => the data file's
      * name in the zip, 'error' => ... ); ok false with an empty error when the file is not such a zip.
      * Refuses anything else in the zip (a folder, a path with "..", a second data file).
+     * @param string $zipPath
+     * @param string $target
+     * @return array{ok: bool, error: string, name?: string, path?: string, has_manifest?: bool}
      */
-    public static function unpackZip( $zipPath, $target )
+    public static function unpackZip( $zipPath, $target ): array
     {
         $fh = @fopen( $zipPath, 'rb' );
         $magic = $fh ? fread( $fh, 4 ) : '';
@@ -592,8 +668,13 @@ class XrowExtractManifest
                       'error' => $ok ? '' : 'the data file could not be extracted' );
     }
 
-    /** A zip of a data file and its manifest ($manifestJSON), for a single download. Returns the zip bytes. */
-    public static function zipWithManifest( $dataName, $dataBytes, $manifestJSON )
+    /**
+     * A zip of a data file and its manifest ($manifestJSON), for a single download. Returns the zip bytes.
+     * @param string $dataName
+     * @param string $dataBytes
+     * @param string $manifestJSON
+     */
+    public static function zipWithManifest( $dataName, $dataBytes, $manifestJSON ): string|false
     {
         $tmp = tempnam( eZSys::cacheDirectory(), 'xezip' );
         $zip = new ZipArchive();

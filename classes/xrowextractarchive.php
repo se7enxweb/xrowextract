@@ -13,11 +13,17 @@ class XrowExtractArchive
 {
     const BATCH = 100;
 
-    /** The kernel AttributeFilter every count and fetch of the archive uses (XrowExtractFilters), or false. */
+    /**
+     * The kernel AttributeFilter every count and fetch of the archive uses (XrowExtractFilters), or false.
+     * @var array<mixed>|false
+     */
     public static $attributeFilter = false;
 
-    /** The archive formats, each with whether this server can write it and why not. */
-    public static function formats()
+    /**
+     * The archive formats, each with whether this server can write it and why not.
+     * @return array<string, array{name: string, extension: string, available: bool, needs: string, id: string}>
+     */
+    public static function formats(): array
     {
         $tar = self::binary( array( 'tar' ) );
         $formats = array(
@@ -33,8 +39,11 @@ class XrowExtractArchive
         return $formats;
     }
 
-    /** The first of the programs found in the usual system paths, else false. */
-    public static function binary( array $names )
+    /**
+     * The first of the programs found in the usual system paths, else false.
+     * @param array<string> $names
+     */
+    public static function binary( array $names ): string|false
     {
         foreach ( $names as $name )
         {
@@ -48,12 +57,12 @@ class XrowExtractArchive
     }
 
     /** PharData needs the phar:// stream wrapper, which an installation may switch off. */
-    protected static function pharUsable()
+    protected static function pharUsable(): bool
     {
         return class_exists( 'PharData' ) && in_array( 'phar', stream_get_wrappers(), true );
     }
 
-    protected static function canRun()
+    protected static function canRun(): bool
     {
         $disabled = array_map( 'trim', explode( ',', (string)ini_get( 'disable_functions' ) ) );
         return function_exists( 'exec' ) && !in_array( 'exec', $disabled, true );
@@ -62,8 +71,9 @@ class XrowExtractArchive
     /**
      * Ready-made node selections of a default installation, from content.ini:
      * id => (name, node ids).
+     * @return array<string, array{name: string, nodes: array<int>}>
      */
-    public static function nodeSets()
+    public static function nodeSets(): array
     {
         $content = eZINI::instance( 'content.ini' );
         $root  = self::topLevelNodeID( (int)$content->variable( 'NodeSettings', 'RootNode' ) );
@@ -80,7 +90,7 @@ class XrowExtractArchive
     }
 
     /** export.ini [SiteArchive] SitesParentNodeID: the node whose children are the sites (default: the content structure). */
-    public static function sitesParentNodeID()
+    public static function sitesParentNodeID(): int
     {
         $ini = eZINI::instance( 'export.ini' );
         $parent = $ini->hasVariable( 'SiteArchive', 'SitesParentNodeID' ) ? (int)$ini->variable( 'SiteArchive', 'SitesParentNodeID' ) : 0;
@@ -90,8 +100,9 @@ class XrowExtractArchive
     /**
      * The sites the "Sites" set selects: export.ini [SiteArchive] DefaultSiteNodeIDs[], else the root node of
      * the default (public) siteaccess, else every site.
+     * @return list<int>
      */
-    public static function defaultSiteNodeIDs()
+    public static function defaultSiteNodeIDs(): array
     {
         $ini = eZINI::instance( 'export.ini' );
         $ids = $ini->hasVariable( 'SiteArchive', 'DefaultSiteNodeIDs' ) ? array_filter( array_map( 'intval', (array)$ini->variable( 'SiteArchive', 'DefaultSiteNodeIDs' ) ) ) : array();
@@ -111,8 +122,11 @@ class XrowExtractArchive
         return array_values( array_unique( $ids ) );
     }
 
-    /** The sites: the children of SitesParentNodeID the user may read, with object counts. */
-    public static function siteList()
+    /**
+     * The sites: the children of SitesParentNodeID the user may read, with object counts.
+     * @return list<array{node_id: int, name: mixed, class_name: mixed, count: int}>
+     */
+    public static function siteList(): array
     {
         $parent = eZContentObjectTreeNode::fetch( self::sitesParentNodeID() );
         $sites = array();
@@ -131,8 +145,9 @@ class XrowExtractArchive
     /**
      * The top-level node (a child of the tree's top node 1) a node is in: a siteaccess may set RootNode to a
      * site below the content structure, the sets mean the whole tree.
+     * @param int $nodeID
      */
-    public static function topLevelNodeID( $nodeID )
+    public static function topLevelNodeID( $nodeID ): int
     {
         $node = $nodeID > 0 ? eZContentObjectTreeNode::fetch( $nodeID ) : null;
         if ( !$node instanceof eZContentObjectTreeNode )
@@ -144,8 +159,10 @@ class XrowExtractArchive
     /**
      * The selected nodes the user may read, in the given order. A node below
      * another selected node is marked as covered by it and is not read again.
+     * @param array<int|string> $nodeIDs
+     * @return list<array{id: int, node: eZContentObjectTreeNode|null, covered_by: eZContentObjectTreeNode|null}>
      */
-    public static function resolveNodes( array $nodeIDs )
+    public static function resolveNodes( array $nodeIDs ): array
     {
         $nodes = array();
         foreach ( array_unique( array_map( 'intval', $nodeIDs ) ) as $nodeID )
@@ -174,8 +191,12 @@ class XrowExtractArchive
         return $nodes;
     }
 
-    /** The nodes that are read: readable and not below another selected node. */
-    public static function exportRoots( array $resolved )
+    /**
+     * The nodes that are read: readable and not below another selected node.
+     * @param array<array{id: int, node: eZContentObjectTreeNode|null, covered_by: eZContentObjectTreeNode|null}> $resolved
+     * @return list<eZContentObjectTreeNode>
+     */
+    public static function exportRoots( array $resolved ): array
     {
         $roots = array();
         foreach ( $resolved as $item )
@@ -186,7 +207,14 @@ class XrowExtractArchive
         return $roots;
     }
 
-    protected static function treeParams( $classID, $offset = 0, $limit = null, $language = null )
+    /**
+     * @param int|string $classID
+     * @param int $offset
+     * @param int|null $limit
+     * @param string|null $language
+     * @return array<string, mixed>
+     */
+    protected static function treeParams( $classID, $offset = 0, $limit = null, $language = null ): array
     {
         $params = array(
             'ClassFilterType' => 'include',
@@ -215,8 +243,11 @@ class XrowExtractArchive
     /**
      * How many rows every class has below the roots: class id => count (classes with rows only). With
      * languages, a row is one object in one of them (a translation); without, one object.
+     * @param array<eZContentObjectTreeNode> $roots
+     * @param array<string>|string|null $languages
+     * @return array<int, int>
      */
-    public static function classCounts( array $roots, $languages = null )
+    public static function classCounts( array $roots, $languages = null ): array
     {
         $counts = array();
         if ( !$roots )
@@ -234,8 +265,12 @@ class XrowExtractArchive
         return $counts;
     }
 
-    /** Translations per language below the roots (any class, main locations): locale => count. */
-    public static function languageCounts( array $roots )
+    /**
+     * Translations per language below the roots (any class, main locations): locale => count.
+     * @param array<eZContentObjectTreeNode> $roots
+     * @return array<string, int>
+     */
+    public static function languageCounts( array $roots ): array
     {
         $counts = array();
         foreach ( XrowExtractColumns::contentLanguages() as $locale => $language )
@@ -250,8 +285,11 @@ class XrowExtractArchive
         return $counts;
     }
 
-    /** The column choices of an archive: id => (name, description). */
-    public static function columnChoices()
+    /**
+     * The column choices of an archive: id => (name, description).
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function columnChoices(): array
     {
         $t = function ( $text ) { return ezpI18n::tr( 'design/standard/extract', $text ); };
         return array(
@@ -262,7 +300,7 @@ class XrowExtractArchive
     }
 
     /** How many objects (any class, main locations) a node holds below it, the node itself included. */
-    public static function subtreeCount( eZContentObjectTreeNode $node )
+    public static function subtreeCount( eZContentObjectTreeNode $node ): int
     {
         return 1 + (int)eZContentObjectTreeNode::subTreeCountByNodeID( array( 'MainNodeOnly' => true, 'IgnoreVisibility' => true ), $node->attribute( 'node_id' ) );
     }
@@ -270,8 +308,17 @@ class XrowExtractArchive
     /**
      * Write the archive. Returns array( 'path' => archive file, 'name' => download name,
      * 'work' => the work directory to remove afterwards, 'manifest' => ... ).
+     * @param array<eZContentObjectTreeNode> $roots
+     * @param array<int|string> $classIDs
+     * @param string $format
+     * @param string $separator
+     * @param bool|int $escape
+     * @param string $newLine
+     * @param bool $passwordHashes
+     * @param array<string, mixed> $options
+     * @return array{path: string, name: string, work: string, manifest: array<string, mixed>}
      */
-    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false, array $options = array() )
+    public static function build( array $roots, array $classIDs, $format, $separator, $escape, $newLine, $passwordHashes = false, array $options = array() ): array
     {
         // Languages (default: every content language), columns (standard, migration, attributes), plain text of rich text
         $languages = isset( $options['languages'] ) && is_array( $options['languages'] ) ? array_values( $options['languages'] )
@@ -451,7 +498,8 @@ class XrowExtractArchive
         return array( 'path' => $archive, 'name' => basename( $archive ), 'work' => $work, 'manifest' => $manifest );
     }
 
-    protected static function readme( array $manifest )
+    /** @param array<string, mixed> $manifest */
+    protected static function readme( array $manifest ): string
     {
         $lines = array(
             'Content export of ' . $manifest['site'] . ', ' . $manifest['created'],
@@ -482,7 +530,14 @@ class XrowExtractArchive
         return implode( "\n", $lines ) . "\n";
     }
 
-    protected static function pack( $format, $work, $folder, array $files, $archive )
+    /**
+     * @param string $format
+     * @param string $work
+     * @param string $folder
+     * @param array<string> $files
+     * @param string $archive
+     */
+    protected static function pack( $format, $work, $folder, array $files, $archive ): void
     {
         switch ( $format )
         {
@@ -529,7 +584,8 @@ class XrowExtractArchive
             throw new RuntimeException( 'The archive was not written' );
     }
 
-    protected static function run( $command )
+    /** @param string $command */
+    protected static function run( $command ): void
     {
         $output = array();
         $status = 0;
@@ -539,7 +595,7 @@ class XrowExtractArchive
     }
 
     /** Whether a class has a user account attribute (ezuser). */
-    public static function hasUserAccount( eZContentClass $class )
+    public static function hasUserAccount( eZContentClass $class ): bool
     {
         foreach ( $class->dataMap() as $attribute )
         {
@@ -549,8 +605,11 @@ class XrowExtractArchive
         return false;
     }
 
-    /** Remove a work folder made by build(): only an xrowextract-<hex> folder directly in the cache directory. */
-    public static function removeWork( $work )
+    /**
+     * Remove a work folder made by build(): only an xrowextract-<hex> folder directly in the cache directory.
+     * @param string $work
+     */
+    public static function removeWork( $work ): void
     {
         $base = realpath( eZSys::cacheDirectory() );
         $real = realpath( $work );
