@@ -282,7 +282,7 @@ class XrowExtractHistory extends eZPersistentObject
             if ( $key === 'id' || !isset( $fields[$key] ) )
                 continue;
             if ( is_array( $value ) )
-                $value = json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+                $value = json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE );
             if ( $fields[$key]['datatype'] === 'integer' )
                 $value = (int)$value;
             elseif ( in_array( $key, array( 'what', 'file_name', 'destinations' ), true ) )
