@@ -29,7 +29,7 @@ $options = $script->getOptions(
     '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
     '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
     '[extended-filter:][extended-params:][fetch-alias:][alias-param:*][preset:][param:*][list-presets][show-preset:]' .
-    '[output:][preview;][list-classes][list-columns][user:][progress-file:]',
+    '[output:][preview;][list-classes][list-columns][user:][progress-file:][keep]',
     '',
     array(
         'class'        => 'Class id or identifier (required to export, unless --fetch-alias names one)',
@@ -48,7 +48,7 @@ $options = $script->getOptions(
         'line-endings' => 'win32/crlf, unix/lf (default), mac/cr',
         'unquoted'     => 'Do not quote cells (line breaks are removed; a separator in a value shifts the columns)',
         'languages'    => 'all (default) or a comma list of locales (eng-US,ger-DE): one row per object per language',
-        'format'       => 'csv (default), json (an array of objects), xml',
+        'format'       => 'csv (default), json (an array of objects), xml, ezpkg (a real content package — this class, node/scope and filters, no columns; --output names the .ezpkg file)',
         'date-field'   => 'The date the date filters use: modified (default), published, or a date attribute identifier',
         'since'        => 'Only objects dated on or after this: 2026-09-01, 2026-09-01 12:00, or 7d / 2w / 3m / 1y ago',
         'before'       => 'Only objects dated on or before this (same forms)',
@@ -78,6 +78,7 @@ $options = $script->getOptions(
         'list-columns' => 'List the attributes of --class with datatype and meta information, and the special columns',
         'user'         => 'Export with the read access of this login (default: admin)',
         'progress-file' => 'Write {"done":n,"total":m,"phase":"<locale>"} to this path after every batch (for a background job)',
+        'keep'         => '--format=ezpkg only: also register the package in the local repository instead of just writing the file',
     )
 );
 $script->initialize();
@@ -551,6 +552,67 @@ $newLine = $lines[$lineKey];
 $outputFormat = $options['format'] ? $options['format'] : ( isset( $presetDef['output_format'] ) ? $presetDef['output_format'] : 'csv' );
 if ( !XrowExtractWriter::isFormat( $outputFormat ) )
     $fail( "Unknown format $outputFormat (--format). Formats: " . implode( ', ', array_keys( XrowExtractWriter::formats() ) ) . '.' );
+
+// --format=ezpkg: this class, below the node/scope chosen above, with every filter/sort/language already
+// resolved into $fetchNode/$classID/$attributeFilter/$depth/$mainOnly/$languages - a real content package
+// instead of rows. Handled here, before any column/writer setup (a package has no columns), by collecting
+// the exact matching node ids in the same paged fetchObjectTree() the row loop below uses, then handing
+// them to XrowExtractPackage::exportNodeIDsIntoPackage() - the same generatePackage()/exportToArchive()
+// code path bin/php/package.php --export and "Export as package" (One class/Site archive) already use.
+if ( $outputFormat === 'ezpkg' )
+{
+    $packageNodeIDs = array();
+    $packageWant = $limit ? $limit : PHP_INT_MAX;
+    foreach ( $languages as $locale )
+    {
+        if ( count( $packageNodeIDs ) >= $packageWant )
+            break;
+        for ( $batchOffset = 0; count( $packageNodeIDs ) < $packageWant; $batchOffset += 500 )
+        {
+            $take = min( 500, $packageWant - count( $packageNodeIDs ) );
+            $result = eZContentFunctionCollection::fetchObjectTree( $fetchNode, array( 'name', true ), true, $locale, $batchOffset, $take,
+                $depth, $depthOperator, $classID, $attributeFilter,
+                XrowExtractTranslationFilter::chainedParams( $locale, $filters->values['extended_filter'], $filters->extendedParamsArray() ),
+                'include', array( $classID ), false, $mainOnly, true, false, true, false, true );
+            $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
+            foreach ( $batch as $treeNode )
+                $packageNodeIDs[(int)$treeNode->attribute( 'node_id' )] = true;
+            if ( count( $batch ) < $take )
+                break;
+        }
+    }
+    $packageNodeIDs = array_keys( $packageNodeIDs );
+    if ( !$packageNodeIDs )
+        $fail( 'Nothing matches this selection (node/class/filters); nothing to export as a package.' );
+
+    $packageName = XrowExtractPackage::validPackageName( 'xrowextract_export_' . $class->attribute( 'identifier' ) . '_' . ( $scope === 'all' ? 'all' : $nodeID ) );
+    $summary = 'Exported ' . count( $packageNodeIDs ) . ' ' . $class->attribute( 'identifier' ) . ' object(s), matching the selection below node ' . $fetchNode . '.';
+    $package = eZPackage::create( $packageName, array( 'summary' => $summary, 'vendor' => 'xrowextract' ) );
+    XrowExtractPackage::attachAboutDocument( $package, 'Exported by ext:xrowextract:csv --format=ezpkg (or the "Content package (.ezpkg)" file format on xrowextract/csv), ' . $summary );
+    XrowExtractPackage::exportNodeIDsIntoPackage( $package, $packageNodeIDs, $languages, true );
+    $package->setAttribute( 'is_active', true );
+    $package->store();
+
+    $file = $options['output'] ? $options['output']
+          : ( $scope === 'all' ? XrowExtractColumns::fileName( $class->attribute( 'identifier' ), '_all_export.ezpkg' )
+                                : XrowExtractColumns::fileName( $node->attribute( 'name' ), '_export.ezpkg' ) );
+    $toStdout = $file === '-';
+    $archiveTarget = $toStdout ? XrowExtractImport::uploadDir() . '/xrowextract_stdout_' . getmypid() . '.ezpkg' : $file;
+    $exportPath = $package->exportToArchive( $archiveTarget );
+    if ( $options['keep'] )
+        $cli->output( "PASS wrote $exportPath (package '$packageName', " . count( $packageNodeIDs ) . ' object(s), kept in the repository)' );
+    else
+        $package->remove();
+    if ( $toStdout )
+    {
+        readfile( $exportPath );
+        @unlink( $exportPath );
+    }
+    elseif ( !$options['keep'] )
+        $cli->output( "PASS wrote $exportPath: " . count( $packageNodeIDs ) . ' object(s) (not registered in the repository; --keep to do that)' );
+    $script->shutdown( 0 );
+}
+
 $unquoted = $options['unquoted'] || ( !$options['separator'] && isset( $presetDef['escape'] ) && !$presetDef['escape'] );
 $parser = new ParserInterface( $separator, !$unquoted );
 

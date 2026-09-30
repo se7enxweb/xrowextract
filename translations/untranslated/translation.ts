@@ -4223,6 +4223,382 @@
         <source>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Site</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Editors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Developers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partners</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Users</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Maintenance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hidden content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything hidden below the chosen node, newest changes first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent content of a class</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The newest objects of a class you choose, below a node you choose (extends the xrowextract_recent_content named fetch).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All site content (Fit &amp; Healthy)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All site content (Bold Agency)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything under the Bold Agency site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All content in the content tree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose, anywhere in the content tree.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All articles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every article, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent articles (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Articles changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All recipes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every recipe, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent recipes (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recipes changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every video, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent videos (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Videos changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All blog posts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every blog post, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent blog posts (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blog posts changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All news</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every news item, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent news (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>News changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All images</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every image in the media library, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent images (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Images changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All comments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every comment on the site.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent comments (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comments posted or changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All reviews</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every review on the site.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent reviews (last 30 days)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reviews posted or changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All products</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every product, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every downloadable file, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All galleries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every image gallery, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All topics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every topic used to categorise content on the site, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every category, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All people</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every person/team-member profile, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All folders</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every folder in the content tree, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything changed in the last 7 days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose that was changed in the last 7 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything changed in the last 30 days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose that was changed in the last 30 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Orphaned/unused images</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Images that nothing on the site links to, embeds, or relates to.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Orphaned/unused files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Files that nothing on the site links to, embeds, or relates to.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SEO: titles and URLs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A class you choose, A to Z — apply the "urls" column set after loading to keep only the title and URL columns.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Users: all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every user account, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Users: all groups</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every user group, A to Z.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Users: active</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enabled user accounts only.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Users: by group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every user below a group's node — enter the group's node id after loading (the default is the content root).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Editor: my own content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything you (or the login you enter) created, of a class you choose, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Editor: recently published</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Objects of a class you choose first published in the last 7 days, newest first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Developer: class structure for migration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every field of a class you choose, as XML with remote IDs — apply the "migration" column set after loading, or leave the columns as they are for everything.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Partner: site content for syndication (XML)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Published content of a class you choose, below a node you choose, as XML for a partner feed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All site content (Fit &amp; Healthy)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Content package (.ezpkg): a real Exponential package, installable on another site through xrowextract/import or Setup/Package management, holding the class definition and the matching objects with every field and image, exactly as this node, class and filters select them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Columns do not apply to a content package export: every field of every exported object is included, as the class defines it. This is greyed out because the File type above is set to Content package (.ezpkg); choose CSV, JSON or XML to pick columns again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nothing matches this selection (node/class/filters); nothing to export as a package.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not write the package file.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

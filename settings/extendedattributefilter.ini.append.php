@@ -15,12 +15,19 @@ FileName=classes/xrowextracthaschildrenfilter.php
 ClassName=XrowExtractHasChildrenFilter
 MethodName=createSqlParts
 
-# Only objects that relate to a given object, or, reversed, that a given object relates to; see
-# classes/xrowextractrelationfilter.php
+# Only objects that relate to a given object, or, reversed, that a given object relates to (or, with
+# 'unrelated', objects nothing else relates to at all); see classes/xrowextractrelationfilter.php
 [XrowExtractRelation]
 ExtensionName=xrowextract
 FileName=classes/xrowextractrelationfilter.php
 ClassName=XrowExtractRelationFilter
+MethodName=createSqlParts
+
+# Only user objects that are enabled, or only ones that are disabled; see classes/xrowextractuserstatusfilter.php
+[XrowExtractUserStatus]
+ExtensionName=xrowextract
+FileName=classes/xrowextractuserstatusfilter.php
+ClassName=XrowExtractUserStatusFilter
 MethodName=createSqlParts
 
 */ ?>

@@ -16,6 +16,10 @@
  *       // optional, to chain a second extended filter:
  *       'chain_id' => 'TagsAttributeFilter', 'chain_params' => array( 'tag_id' => 12 ),
  *   ) )
+ *
+ * 'missing' => true inverts the test: only objects that do NOT have a translation in the given language
+ * ("content with no translation in <language>"). An unknown language still matches nothing either way,
+ * since a missing language bit is not a meaningful gap to report.
  */
 class XrowExtractTranslationFilter
 {
@@ -25,9 +29,23 @@ class XrowExtractTranslationFilter
         $language = isset( $params['language'] ) ? eZContentLanguage::fetchByLocale( $params['language'] ) : false;
         // An unknown language matches nothing, rather than everything
         $bit = $language instanceof eZContentLanguage ? (int)$language->attribute( 'id' ) : 0;
-        $parts['joins'] = eZDB::instance()->databaseName() === 'oracle'
-                        ? " bitand( ezcontentobject.language_mask, $bit ) > 0 AND "
-                        : " ( ezcontentobject.language_mask & $bit ) > 0 AND ";
+        $missing = !empty( $params['missing'] );
+        if ( $bit === 0 )
+        {
+            $parts['joins'] = ' ( 1 = 0 ) AND ';
+        }
+        elseif ( eZDB::instance()->databaseName() === 'oracle' )
+        {
+            $parts['joins'] = $missing
+                             ? " bitand( ezcontentobject.language_mask, $bit ) = 0 AND "
+                             : " bitand( ezcontentobject.language_mask, $bit ) > 0 AND ";
+        }
+        else
+        {
+            $parts['joins'] = $missing
+                             ? " ( ezcontentobject.language_mask & $bit ) = 0 AND "
+                             : " ( ezcontentobject.language_mask & $bit ) > 0 AND ";
+        }
 
         if ( !empty( $params['chain_id'] ) )
         {

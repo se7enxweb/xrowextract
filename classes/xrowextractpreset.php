@@ -58,6 +58,7 @@ class XrowExtractPreset
         $record['id'] = $id;
         $record['ref'] = 'user:' . $id;
         $record['site'] = false;
+        $record['audience'] = 'Personal';
         return $record;
     }
 
@@ -168,12 +169,18 @@ class XrowExtractPreset
             if ( is_array( $decoded ) )
                 $placeholders = $decoded;
         }
+        // Site presets are shipped text (xrowextract.ini), so their Name/Description are run through the
+        // same translation context as the rest of the view; a string with no matching translation.ts entry
+        // simply falls back to the ini's own (English) text, exactly as ezpI18n::tr always does.
+        $rawName = isset( $vars['Name'] ) ? $vars['Name'] : $id;
+        $rawDescription = isset( $vars['Description'] ) ? $vars['Description'] : '';
         return array(
             'id' => $id,
             'ref' => 'site:' . $id,
             'site' => true,
-            'name' => isset( $vars['Name'] ) ? $vars['Name'] : $id,
-            'description' => isset( $vars['Description'] ) ? $vars['Description'] : '',
+            'name' => $rawName !== '' ? ezpI18n::tr( 'design/standard/extract', $rawName ) : $rawName,
+            'description' => $rawDescription !== '' ? ezpI18n::tr( 'design/standard/extract', $rawDescription ) : $rawDescription,
+            'audience' => isset( $vars['Audience'] ) && $vars['Audience'] !== '' ? $vars['Audience'] : 'Site',
             'view' => isset( $vars['View'] ) && in_array( $vars['View'], array( 'csv', 'archive' ), true ) ? $vars['View'] : 'csv',
             'owner_login' => '',
             'shared' => true,
@@ -183,6 +190,32 @@ class XrowExtractPreset
             'created' => 0,
             'modified' => 0,
         );
+    }
+
+    /** The fixed display order of site-preset audience groups; anything else sorts after, alphabetically. */
+    public static function audienceOrder()
+    {
+        return array( 'Site', 'Editors', 'Developers', 'Partners', 'Users', 'Maintenance' );
+    }
+
+    /** Site presets only, grouped and ordered by Audience: array( audience => array(preset, ...) ). */
+    public static function fetchSiteListByAudience()
+    {
+        $groups = array();
+        foreach ( self::fetchSiteList() as $preset )
+            $groups[$preset['audience']][] = $preset;
+        $order = self::audienceOrder();
+        uksort( $groups, function ( $a, $b ) use ( $order )
+        {
+            $ia = array_search( $a, $order, true );
+            $ib = array_search( $b, $order, true );
+            if ( $ia === false ) $ia = count( $order ) + strcmp( $a, '' );
+            if ( $ib === false ) $ib = count( $order ) + strcmp( $b, '' );
+            if ( $ia === $ib )
+                return strcasecmp( $a, $b );
+            return $ia - $ib;
+        } );
+        return $groups;
     }
 
     /** A preset by its ref ("user:<id>" or "site:<id>"), or false. */
@@ -376,6 +409,8 @@ class XrowExtractPreset
         $lines[] = 'Name=' . str_replace( "\n", ' ', $preset['name'] );
         if ( $preset['description'] !== '' )
             $lines[] = 'Description=' . str_replace( "\n", ' ', $preset['description'] );
+        if ( !empty( $preset['audience'] ) && $preset['audience'] !== 'Site' )
+            $lines[] = 'Audience=' . $preset['audience'];
         $lines[] = 'View=' . $preset['view'];
         if ( $preset['extends'] !== '' )
             $lines[] = 'Extends=' . $preset['extends'];

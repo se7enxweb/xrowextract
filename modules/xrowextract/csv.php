@@ -1251,6 +1251,32 @@ foreach ( XrowExtractPreset::fetchSiteList() as $preset )
     ) );
 $tpl->setVariable( 'UserPresets', $UserPresets );
 $tpl->setVariable( 'SitePresets', $SitePresets );
+// Site presets grouped by Audience (Site/Editors/Developers/Partners/Users/Maintenance, in that fixed
+// order, anything else after) — the Presets card shows one collapsible section per group instead of one
+// long flat list, now that the catalogue ships 40+ of them.
+$xeAudienceLabels = array(
+    'Site' => ezpI18n::tr( 'design/standard/extract', 'Site' ),
+    'Editors' => ezpI18n::tr( 'design/standard/extract', 'Editors' ),
+    'Developers' => ezpI18n::tr( 'design/standard/extract', 'Developers' ),
+    'Partners' => ezpI18n::tr( 'design/standard/extract', 'Partners' ),
+    'Users' => ezpI18n::tr( 'design/standard/extract', 'Users' ),
+    'Maintenance' => ezpI18n::tr( 'design/standard/extract', 'Maintenance' ),
+);
+$SitePresetsByAudience = array();
+foreach ( XrowExtractPreset::audienceOrder() as $xeAudienceKey )
+    $SitePresetsByAudience[$xeAudienceKey] = array( 'key' => $xeAudienceKey,
+        'label' => isset( $xeAudienceLabels[$xeAudienceKey] ) ? $xeAudienceLabels[$xeAudienceKey] : $xeAudienceKey, 'presets' => array() );
+foreach ( $SitePresets as $sitePreset )
+{
+    $xeAudienceKey = $sitePreset['audience'];
+    if ( !isset( $SitePresetsByAudience[$xeAudienceKey] ) )
+        $SitePresetsByAudience[$xeAudienceKey] = array( 'key' => $xeAudienceKey,
+            'label' => isset( $xeAudienceLabels[$xeAudienceKey] ) ? $xeAudienceLabels[$xeAudienceKey] : $xeAudienceKey, 'presets' => array() );
+    $SitePresetsByAudience[$xeAudienceKey]['presets'][] = $sitePreset;
+}
+// Empty groups are dropped rather than shown as a section with nothing in it
+$SitePresetsByAudience = array_values( array_filter( $SitePresetsByAudience, function ( $group ) { return count( $group['presets'] ) > 0; } ) );
+$tpl->setVariable( 'SitePresetsByAudience', $SitePresetsByAudience );
 
 if ( $http->hasPostVariable( 'RunInBackground' ) || $AutoRunPresetInBackground )
 {
@@ -1406,7 +1432,85 @@ if ( $http->hasPostVariable( 'ExportAsPackage' ) )
     }
 }
 
-if ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoad )
+// Download, format Content package (.ezpkg): the same filtered node id collection and
+// XrowExtractPackage::exportNodeIDsIntoPackage() call as --format=ezpkg on the command line (see
+// bin/php/csv.php) - a preview click still shows CSV rows (harmless; a package has no row preview), only
+// a real Download/auto-download takes this branch. "Run in the background" needs no branch of its own:
+// its job args already include --format=ezpkg (built below, format-agnostic), and bin/php/csv.php does
+// the rest.
+if ( $OutputFormat === 'ezpkg' && !$isPreview && ( $http->hasPostVariable( 'Download' ) || $AutoDownloadAfterLoad ) )
+{
+    $packageNodeIDs = array();
+    $packageWant = $Limit ? $Limit : PHP_INT_MAX;
+    foreach ( $SelectedLanguages as $locale )
+    {
+        if ( count( $packageNodeIDs ) >= $packageWant )
+            break;
+        for ( $batchOffset = 0; count( $packageNodeIDs ) < $packageWant; $batchOffset += 500 )
+        {
+            $take = min( 500, $packageWant - count( $packageNodeIDs ) );
+            $result = eZContentFunctionCollection::fetchObjectTree( $FetchSubtree, array( 'name', true ), true, $locale, $batchOffset, $take,
+                $depth, $depthOperator, $Class_id, $AttributeFilter,
+                XrowExtractTranslationFilter::chainedParams( $locale, $Filters->values['extended_filter'], $Filters->extendedParamsArray() ),
+                'include', array( $Class_id ), false, (bool)$FetchMainnodeonly, true, false, true, false, true );
+            $batch = isset( $result['result'] ) && is_array( $result['result'] ) ? $result['result'] : array();
+            foreach ( $batch as $treeNode )
+                $packageNodeIDs[(int)$treeNode->attribute( 'node_id' )] = true;
+            if ( count( $batch ) < $take )
+                break;
+        }
+    }
+    $packageNodeIDs = array_keys( $packageNodeIDs );
+    if ( !$packageNodeIDs )
+    {
+        $PresetNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Nothing matches this selection (node/class/filters); nothing to export as a package.' ) );
+    }
+    else
+    {
+        $packageIdentifier = $chosenClass ? $chosenClass->attribute( 'identifier' ) : ( 'class_' . $Class_id );
+        $packageName = XrowExtractPackage::validPackageName( 'xrowextract_export_' . $packageIdentifier . '_' . ( $Scope === 'all' ? 'all' : $Subtree ) );
+        $packageSummary = 'Exported ' . count( $packageNodeIDs ) . ' ' . $packageIdentifier . ' object(s), matching the selection below node ' . $FetchSubtree . '.';
+        $package = eZPackage::create( $packageName, array( 'summary' => $packageSummary, 'vendor' => 'xrowextract' ) );
+        XrowExtractPackage::attachAboutDocument( $package, 'Exported by the "Content package (.ezpkg)" file format on xrowextract/csv, ' . $packageSummary );
+        XrowExtractPackage::exportNodeIDsIntoPackage( $package, $packageNodeIDs, $SelectedLanguages, true );
+        $package->setAttribute( 'is_active', true );
+        $package->store();
+        if ( $Scope === 'all' )
+        {
+            $packageFileBase = $packageIdentifier;
+        }
+        else
+        {
+            $chosenNode = eZContentObjectTreeNode::fetch( $Subtree );
+            $packageFileBase = $chosenNode instanceof eZContentObjectTreeNode ? $chosenNode->attribute( 'name' ) : ( 'node_' . $Subtree );
+        }
+        $packageFile = XrowExtractColumns::fileName( $packageFileBase, $Scope === 'all' ? '_all_export.ezpkg' : '_export.ezpkg' );
+        $exportPath = XrowExtractPackage::exportToPrivateFile( $package, $packageIdentifier );
+        $package->remove();
+        if ( $exportPath === false )
+        {
+            $PresetNotice = array( 'error' => true, 'text' => ezpI18n::tr( 'design/standard/extract', 'Could not write the package file.' ) );
+        }
+        else
+        {
+            header( 'Cache-Control: private, no-store, max-age=0' );
+            header( 'Pragma: no-cache' );
+            header( 'X-Content-Type-Options: nosniff' );
+            header( 'Content-Type: application/gzip' );
+            header( 'Content-Length: ' . filesize( $exportPath ) );
+            header( 'Content-Disposition: attachment; filename="' . $packageFile . '"' );
+            while ( @ob_end_clean() );
+            readfile( $exportPath );
+            @unlink( $exportPath );
+            eZExecution::cleanExit();
+        }
+    }
+}
+
+// Format ezpkg already had its own branch above for a real download/auto-download (returned via
+// cleanExit() on success, or fell through with $PresetNotice set on error) - never reaches
+// XrowExtractWriter, which has no row-writing logic of its own for a package.
+if ( ( $http->hasPostVariable( 'Download' ) || $isPreview || $AutoDownloadAfterLoad ) && !( $OutputFormat === 'ezpkg' && !$isPreview ) )
 {
     $started = microtime( true );
     $newLine = $isPreview ? "\n" : $LineSeparatorArray[$LineSeparator]['value'];

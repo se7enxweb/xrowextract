@@ -9,12 +9,24 @@
  *
  *   'ExtendedAttributeFilter' => array( 'id' => 'XrowExtractRelation', 'params' => array( 'object_id' => 91 ) )
  *   'ExtendedAttributeFilter' => array( 'id' => 'XrowExtractRelation', 'params' => array( 'object_id' => 91, 'reverse' => true ) )
+ *
+ * 'unrelated' => true ignores object_id and instead matches objects that NO other object relates to at all
+ * ("orphaned/unused images or files" — nothing embeds or references them via an object relation, an
+ * object-relation-list attribute, or an embedded ezxmltext/ezxmltags link).
  */
 class XrowExtractRelationFilter
 {
     public function createSqlParts( $params )
     {
         $parts = array( 'tables' => '', 'joins' => '', 'columns' => '' );
+        if ( !empty( $params['unrelated'] ) )
+        {
+            $parts['joins'] = ' ( NOT EXISTS ( SELECT 1 FROM ezcontentobject_link xerl'
+                             . ' WHERE xerl.to_contentobject_id = ezcontentobject.id'
+                             . ' AND xerl.from_contentobject_id != ezcontentobject.id'
+                             . ' AND xerl.from_contentobject_version > 0 ) ) AND ';
+            return $parts;
+        }
         $objectID = isset( $params['object_id'] ) ? (int)$params['object_id'] : 0;
         if ( $objectID <= 0 )
         {

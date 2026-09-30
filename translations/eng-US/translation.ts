@@ -4223,6 +4223,382 @@
         <source>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</source>
         <translation>Saving with a preset already loaded overwrites it (only its owner or a user with all_jobs can); a new name always creates a new one instead.</translation>
     </message>
+    <message>
+        <source>Site</source>
+        <translation>Site</translation>
+    </message>
+    <message>
+        <source>Editors</source>
+        <translation>Editors</translation>
+    </message>
+    <message>
+        <source>Developers</source>
+        <translation>Developers</translation>
+    </message>
+    <message>
+        <source>Partners</source>
+        <translation>Partners</translation>
+    </message>
+    <message>
+        <source>Users</source>
+        <translation>Users</translation>
+    </message>
+    <message>
+        <source>Maintenance</source>
+        <translation>Maintenance</translation>
+    </message>
+    <message>
+        <source>Hidden content</source>
+        <translation>Hidden content</translation>
+    </message>
+    <message>
+        <source>Everything hidden below the chosen node, newest changes first.</source>
+        <translation>Everything hidden below the chosen node, newest changes first.</translation>
+    </message>
+    <message>
+        <source>Recent content of a class</source>
+        <translation>Recent content of a class</translation>
+    </message>
+    <message>
+        <source>The newest objects of a class you choose, below a node you choose (extends the xrowextract_recent_content named fetch).</source>
+        <translation>The newest objects of a class you choose, below a node you choose (extends the xrowextract_recent_content named fetch).</translation>
+    </message>
+    <message>
+        <source>All site content (Fit &amp; Healthy)</source>
+        <translation>All site content (Fit &amp; Healthy)</translation>
+    </message>
+    <message>
+        <source>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</translation>
+    </message>
+    <message>
+        <source>All site content (Bold Agency)</source>
+        <translation>All site content (Bold Agency)</translation>
+    </message>
+    <message>
+        <source>Everything under the Bold Agency site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation>Everything under the Bold Agency site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</translation>
+    </message>
+    <message>
+        <source>All content in the content tree</source>
+        <translation>All content in the content tree</translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose, anywhere in the content tree.</source>
+        <translation>Every object of a class you choose, anywhere in the content tree.</translation>
+    </message>
+    <message>
+        <source>All articles</source>
+        <translation>All articles</translation>
+    </message>
+    <message>
+        <source>Every article, A to Z.</source>
+        <translation>Every article, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent articles (last 30 days)</source>
+        <translation>Recent articles (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Articles changed in the last 30 days, newest first.</source>
+        <translation>Articles changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All recipes</source>
+        <translation>All recipes</translation>
+    </message>
+    <message>
+        <source>Every recipe, A to Z.</source>
+        <translation>Every recipe, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent recipes (last 30 days)</source>
+        <translation>Recent recipes (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Recipes changed in the last 30 days, newest first.</source>
+        <translation>Recipes changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All videos</source>
+        <translation>All videos</translation>
+    </message>
+    <message>
+        <source>Every video, A to Z.</source>
+        <translation>Every video, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent videos (last 30 days)</source>
+        <translation>Recent videos (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Videos changed in the last 30 days, newest first.</source>
+        <translation>Videos changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All blog posts</source>
+        <translation>All blog posts</translation>
+    </message>
+    <message>
+        <source>Every blog post, A to Z.</source>
+        <translation>Every blog post, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent blog posts (last 30 days)</source>
+        <translation>Recent blog posts (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Blog posts changed in the last 30 days, newest first.</source>
+        <translation>Blog posts changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All news</source>
+        <translation>All news</translation>
+    </message>
+    <message>
+        <source>Every news item, A to Z.</source>
+        <translation>Every news item, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent news (last 30 days)</source>
+        <translation>Recent news (last 30 days)</translation>
+    </message>
+    <message>
+        <source>News changed in the last 30 days, newest first.</source>
+        <translation>News changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All images</source>
+        <translation>All images</translation>
+    </message>
+    <message>
+        <source>Every image in the media library, A to Z.</source>
+        <translation>Every image in the media library, A to Z.</translation>
+    </message>
+    <message>
+        <source>Recent images (last 30 days)</source>
+        <translation>Recent images (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Images changed in the last 30 days, newest first.</source>
+        <translation>Images changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All comments</source>
+        <translation>All comments</translation>
+    </message>
+    <message>
+        <source>Every comment on the site.</source>
+        <translation>Every comment on the site.</translation>
+    </message>
+    <message>
+        <source>Recent comments (last 30 days)</source>
+        <translation>Recent comments (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Comments posted or changed in the last 30 days, newest first.</source>
+        <translation>Comments posted or changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All reviews</source>
+        <translation>All reviews</translation>
+    </message>
+    <message>
+        <source>Every review on the site.</source>
+        <translation>Every review on the site.</translation>
+    </message>
+    <message>
+        <source>Recent reviews (last 30 days)</source>
+        <translation>Recent reviews (last 30 days)</translation>
+    </message>
+    <message>
+        <source>Reviews posted or changed in the last 30 days, newest first.</source>
+        <translation>Reviews posted or changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>All products</source>
+        <translation>All products</translation>
+    </message>
+    <message>
+        <source>Every product, A to Z.</source>
+        <translation>Every product, A to Z.</translation>
+    </message>
+    <message>
+        <source>All files</source>
+        <translation>All files</translation>
+    </message>
+    <message>
+        <source>Every downloadable file, A to Z.</source>
+        <translation>Every downloadable file, A to Z.</translation>
+    </message>
+    <message>
+        <source>All galleries</source>
+        <translation>All galleries</translation>
+    </message>
+    <message>
+        <source>Every image gallery, A to Z.</source>
+        <translation>Every image gallery, A to Z.</translation>
+    </message>
+    <message>
+        <source>All topics</source>
+        <translation>All topics</translation>
+    </message>
+    <message>
+        <source>Every topic used to categorise content on the site, A to Z.</source>
+        <translation>Every topic used to categorise content on the site, A to Z.</translation>
+    </message>
+    <message>
+        <source>All categories</source>
+        <translation>All categories</translation>
+    </message>
+    <message>
+        <source>Every category, A to Z.</source>
+        <translation>Every category, A to Z.</translation>
+    </message>
+    <message>
+        <source>All people</source>
+        <translation>All people</translation>
+    </message>
+    <message>
+        <source>Every person/team-member profile, A to Z.</source>
+        <translation>Every person/team-member profile, A to Z.</translation>
+    </message>
+    <message>
+        <source>All folders</source>
+        <translation>All folders</translation>
+    </message>
+    <message>
+        <source>Every folder in the content tree, A to Z.</source>
+        <translation>Every folder in the content tree, A to Z.</translation>
+    </message>
+    <message>
+        <source>Everything changed in the last 7 days</source>
+        <translation>Everything changed in the last 7 days</translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose that was changed in the last 7 days, newest first.</source>
+        <translation>Every object of a class you choose that was changed in the last 7 days, newest first.</translation>
+    </message>
+    <message>
+        <source>Everything changed in the last 30 days</source>
+        <translation>Everything changed in the last 30 days</translation>
+    </message>
+    <message>
+        <source>Every object of a class you choose that was changed in the last 30 days, newest first.</source>
+        <translation>Every object of a class you choose that was changed in the last 30 days, newest first.</translation>
+    </message>
+    <message>
+        <source>Orphaned/unused images</source>
+        <translation>Orphaned/unused images</translation>
+    </message>
+    <message>
+        <source>Images that nothing on the site links to, embeds, or relates to.</source>
+        <translation>Images that nothing on the site links to, embeds, or relates to.</translation>
+    </message>
+    <message>
+        <source>Orphaned/unused files</source>
+        <translation>Orphaned/unused files</translation>
+    </message>
+    <message>
+        <source>Files that nothing on the site links to, embeds, or relates to.</source>
+        <translation>Files that nothing on the site links to, embeds, or relates to.</translation>
+    </message>
+    <message>
+        <source>SEO: titles and URLs</source>
+        <translation>SEO: titles and URLs</translation>
+    </message>
+    <message>
+        <source>A class you choose, A to Z — apply the "urls" column set after loading to keep only the title and URL columns.</source>
+        <translation>A class you choose, A to Z — apply the "urls" column set after loading to keep only the title and URL columns.</translation>
+    </message>
+    <message>
+        <source>Users: all</source>
+        <translation>Users: all</translation>
+    </message>
+    <message>
+        <source>Every user account, A to Z.</source>
+        <translation>Every user account, A to Z.</translation>
+    </message>
+    <message>
+        <source>Users: all groups</source>
+        <translation>Users: all groups</translation>
+    </message>
+    <message>
+        <source>Every user group, A to Z.</source>
+        <translation>Every user group, A to Z.</translation>
+    </message>
+    <message>
+        <source>Users: active</source>
+        <translation>Users: active</translation>
+    </message>
+    <message>
+        <source>Enabled user accounts only.</source>
+        <translation>Enabled user accounts only.</translation>
+    </message>
+    <message>
+        <source>Users: by group</source>
+        <translation>Users: by group</translation>
+    </message>
+    <message>
+        <source>Every user below a group's node — enter the group's node id after loading (the default is the content root).</source>
+        <translation>Every user below a group's node — enter the group's node id after loading (the default is the content root).</translation>
+    </message>
+    <message>
+        <source>Editor: my own content</source>
+        <translation>Editor: my own content</translation>
+    </message>
+    <message>
+        <source>Everything you (or the login you enter) created, of a class you choose, newest first.</source>
+        <translation>Everything you (or the login you enter) created, of a class you choose, newest first.</translation>
+    </message>
+    <message>
+        <source>Editor: recently published</source>
+        <translation>Editor: recently published</translation>
+    </message>
+    <message>
+        <source>Objects of a class you choose first published in the last 7 days, newest first.</source>
+        <translation>Objects of a class you choose first published in the last 7 days, newest first.</translation>
+    </message>
+    <message>
+        <source>Developer: class structure for migration</source>
+        <translation>Developer: class structure for migration</translation>
+    </message>
+    <message>
+        <source>Every field of a class you choose, as XML with remote IDs — apply the "migration" column set after loading, or leave the columns as they are for everything.</source>
+        <translation>Every field of a class you choose, as XML with remote IDs — apply the "migration" column set after loading, or leave the columns as they are for everything.</translation>
+    </message>
+    <message>
+        <source>Partner: site content for syndication (XML)</source>
+        <translation>Partner: site content for syndication (XML)</translation>
+    </message>
+    <message>
+        <source>Published content of a class you choose, below a node you choose, as XML for a partner feed.</source>
+        <translation>Published content of a class you choose, below a node you choose, as XML for a partner feed.</translation>
+    </message>
+    <message>
+        <source>All site content (Fit &amp; Healthy)</source>
+        <translation>All site content (Fit &amp; Healthy)</translation>
+    </message>
+    <message>
+        <source>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</source>
+        <translation>Everything under the Fit &amp; Healthy site root, newest changes first. Choose a class after loading, or run as-is to use its most common one.</translation>
+    </message>
+    <message>
+        <source>Content package (.ezpkg): a real Exponential package, installable on another site through xrowextract/import or Setup/Package management, holding the class definition and the matching objects with every field and image, exactly as this node, class and filters select them.</source>
+        <translation>Content package (.ezpkg): a real Exponential package, installable on another site through xrowextract/import or Setup/Package management, holding the class definition and the matching objects with every field and image, exactly as this node, class and filters select them.</translation>
+    </message>
+    <message>
+        <source>Columns do not apply to a content package export: every field of every exported object is included, as the class defines it. This is greyed out because the File type above is set to Content package (.ezpkg); choose CSV, JSON or XML to pick columns again.</source>
+        <translation>Columns do not apply to a content package export: every field of every exported object is included, as the class defines it. This is greyed out because the File type above is set to Content package (.ezpkg); choose CSV, JSON or XML to pick columns again.</translation>
+    </message>
+    <message>
+        <source>Nothing matches this selection (node/class/filters); nothing to export as a package.</source>
+        <translation>Nothing matches this selection (node/class/filters); nothing to export as a package.</translation>
+    </message>
+    <message>
+        <source>Could not write the package file.</source>
+        <translation>Could not write the package file.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
