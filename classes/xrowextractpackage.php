@@ -1560,6 +1560,46 @@ class XrowExtractPackage
     }
 
     /**
+     * Builds $package from an explicit, already-resolved list of node ids — the same class+node+filters+
+     * languages selection the One class (xrowextract/csv) or Site archive view/CLI just resolved for a
+     * CSV/JSON/XML export, exported as a real content package instead. Unlike exportExistingObjectsIntoPackage()
+     * above (every current object of a class, all site languages, used by the sample/template builders),
+     * this is: exactly these nodes (a caller-filtered set - date, visibility, conditions, sort, limit,
+     * whatever XrowExtractFilters resolved), and only the languages the export itself was asked for -
+     * "columns don't apply to a package" is true of the row-level output, but scope, class, filters and
+     * languages still do, and this is the method that keeps that true. See bin/php/csv.php --format=ezpkg.
+     */
+    public static function exportNodeIDsIntoPackage( eZPackage $package, array $nodeIDs, array $languages, $includeClasses = true )
+    {
+        if ( !$nodeIDs )
+            return false;
+        $languages = $languages ?: array_keys( XrowExtractColumns::contentLanguages() );
+        if ( !$languages )
+            $languages = array( 'eng-US' );
+
+        // Same worker-reuse reset as exportExistingObjectsIntoPackage() - see its own comment above.
+        $objectHandler = eZPackage::packageHandler( 'ezcontentobject' );
+        $objectHandler->NodeIDArray = array();
+        $objectHandler->RootNodeIDArray = array();
+        $objectHandler->NodeObjectArray = array();
+        $objectHandler->ObjectArray = array();
+        $objectHandler->RootNodeObjectArray = array();
+        foreach ( $nodeIDs as $nodeID )
+            $objectHandler->addNode( (int)$nodeID, false );
+        $objectHandler->generatePackage( $package, array(
+            'include_classes'   => $includeClasses,
+            'include_templates' => false,
+            'site_access_array' => array(),
+            'versions'          => 'current',
+            'language_array'    => $languages,
+            'node_assignment'   => 'selected',
+            'related_objects'   => 'selected',
+            'embed_objects'     => 'selected',
+        ) );
+        return true;
+    }
+
+    /**
      * Alters a just-exported object item on disk (never the live objects) so
      * its dry run shows every outcome: object 0 stays untouched (unchanged),
      * object 1 (if there is one) gets an edited name and an older modified

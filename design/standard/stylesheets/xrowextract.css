@@ -369,6 +369,13 @@
     white-space: pre-wrap;
     word-break: break-word;
 }
+.xe-preset-audience-group { margin: .8em 0 0; border: 1px solid var(--xe-line); border-radius: 6px; }
+.xe-preset-audience-group + .xe-preset-audience-group { margin-top: .6em; }
+.xe-preset-audience-group summary { cursor: pointer; list-style: none; padding: .5em .7em; font-weight: 600; background: var(--xe-head); border-radius: 6px; display: flex; align-items: center; gap: .5em; }
+.xe-preset-audience-group summary::-webkit-details-marker { display: none; }
+.xe-preset-audience-group summary::before { content: '▸'; display: inline-block; transition: transform .1s; }
+.xe-preset-audience-group[open] summary::before { transform: rotate(90deg); }
+.xe-preset-audience-group .xe-preset-list { border: 0; border-top: 1px solid var(--xe-line); border-radius: 0 0 6px 6px; margin-top: 0; }
 .xe-preset-list { margin: .6em 0 0; padding: 0; list-style: none; border: 1px solid var(--xe-line); border-radius: 6px; overflow: hidden; }
 .xe-preset-row { margin: 0; padding: .6em .7em; border-bottom: 1px solid var(--xe-line); background: #fff; }
 .xe-preset-row:last-child { border-bottom: 0; }

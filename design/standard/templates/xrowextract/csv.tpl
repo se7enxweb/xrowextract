@@ -80,40 +80,49 @@
                     {/if}
                 </li>
                 {/foreach}
-                {foreach $SitePresets as $preset}
-                <li class="xe-preset-row{if $LoadedPresetRef|eq( $preset.ref )} xe-preset-row-loaded{/if}">
-                    <div class="xe-preset-row-main">
-                        <span class="xe-badge" title="{'Defined in xrowextract.ini; edit it there'|i18n('design/standard/extract')|wash}">{'site'|i18n('design/standard/extract')}</span>
-                        <span class="xe-colinfo">
-                            <strong>{$preset.name|wash}</strong>
-                            <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
-                        </span>
-                        <span class="xe-preset-buttons">
-                            <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
-                            <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
-                            {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
-                            <details class="xe-preset-more">
-                                <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
-                                <div class="xe-preset-more-menu">
-                                    <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Duplicate as your own'|i18n('design/standard/extract')}</button>
-                                    <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
-                                </div>
-                            </details>
-                        </span>
-                    </div>
-                    {if $preset.extends|ne( '' )}<p class="xe-help xe-meta">{'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}</p>{/if}
-                    {if $preset.placeholder_list|count}
-                    <div class="xe-preset-placeholders">
-                        {foreach $preset.placeholder_list as $placeholder}
-                        <label class="xe-preset-placeholder">{$placeholder.name|wash}
-                            <input type="text" name="PresetPlaceholder[{$preset.ref|wash}][{$placeholder.name|wash}]" value="{$placeholder.default|wash}" />
-                        </label>
-                        {/foreach}
-                    </div>
-                    {/if}
-                </li>
-                {/foreach}
             </ul>
+            {/if}
+            {if $SitePresetsByAudience|count}
+            {foreach $SitePresetsByAudience as $group}
+            <details class="xe-preset-audience-group" open="open">
+                <summary>{$group.label|wash} <span class="xe-count">{$group.presets|count}</span></summary>
+                <ul class="xe-preset-list">
+                    {foreach $group.presets as $preset}
+                    <li class="xe-preset-row{if $LoadedPresetRef|eq( $preset.ref )} xe-preset-row-loaded{/if}">
+                        <div class="xe-preset-row-main">
+                            <span class="xe-badge" title="{'Defined in xrowextract.ini; edit it there'|i18n('design/standard/extract')|wash}">{'site'|i18n('design/standard/extract')}</span>
+                            <span class="xe-colinfo">
+                                <strong>{$preset.name|wash}</strong>
+                                <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
+                            </span>
+                            <span class="xe-preset-buttons">
+                                <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
+                                <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
+                                {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
+                                <details class="xe-preset-more">
+                                    <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
+                                    <div class="xe-preset-more-menu">
+                                        <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Duplicate as your own'|i18n('design/standard/extract')}</button>
+                                        <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
+                                    </div>
+                                </details>
+                            </span>
+                        </div>
+                        {if $preset.extends|ne( '' )}<p class="xe-help xe-meta">{'extends %ref'|i18n('design/standard/extract',, hash( '%ref', $preset.extends ))}</p>{/if}
+                        {if $preset.placeholder_list|count}
+                        <div class="xe-preset-placeholders">
+                            {foreach $preset.placeholder_list as $placeholder}
+                            <label class="xe-preset-placeholder">{$placeholder.name|wash}
+                                <input type="text" name="PresetPlaceholder[{$preset.ref|wash}][{$placeholder.name|wash}]" value="{$placeholder.default|wash}" />
+                            </label>
+                            {/foreach}
+                        </div>
+                        {/if}
+                    </li>
+                    {/foreach}
+                </ul>
+            </details>
+            {/foreach}
             {/if}
             <details class="xe-preset-advanced">
                 <summary>{'Advanced'|i18n('design/standard/extract')}</summary>
@@ -558,7 +567,7 @@
                     <label><input type="radio" name="OutputFormat" value="{$format.id|wash}" class="xe-autosubmit"{if $format.id|eq( $OutputFormat )} checked{/if} /><span>{$format.name|wash}</span></label>
                     {/foreach}
                 </div>
-                <p class="xe-help">{if $OutputFormat|eq( 'json' )}{'JSON: an array of objects, one per row, keyed by the column names; values as they are.'|i18n('design/standard/extract')}{elseif $OutputFormat|eq( 'xml' )}{'XML: an export element with the columns, then one object element per row with a field element per column.'|i18n('design/standard/extract')}{else}{'CSV for spreadsheets; the settings below apply to it.'|i18n('design/standard/extract')}{/if}</p>
+                <p class="xe-help">{if $OutputFormat|eq( 'json' )}{'JSON: an array of objects, one per row, keyed by the column names; values as they are.'|i18n('design/standard/extract')}{elseif $OutputFormat|eq( 'xml' )}{'XML: an export element with the columns, then one object element per row with a field element per column.'|i18n('design/standard/extract')}{elseif $OutputFormat|eq( 'ezpkg' )}{'Content package (.ezpkg): a real Exponential package, installable on another site through xrowextract/import or Setup/Package management, holding the class definition and the matching objects with every field and image, exactly as this node, class and filters select them.'|i18n('design/standard/extract')}{else}{'CSV for spreadsheets; the settings below apply to it.'|i18n('design/standard/extract')}{/if}</p>
             </div>
             <div class="xe-grid{if $OutputFormat|ne( 'csv' )} xe-inactive{/if}">
                 <div class="xe-field">
@@ -609,6 +618,10 @@
                 </div>
                 <span class="xe-count"><strong>{$Attributes|count}</strong> {'columns'|i18n('design/standard/extract')}</span>
             </header>
+            {if $OutputFormat|eq( 'ezpkg' )}
+            <p class="xe-help">{'Columns do not apply to a content package export: every field of every exported object is included, as the class defines it. This is greyed out because the File type above is set to Content package (.ezpkg); choose CSV, JSON or XML to pick columns again.'|i18n('design/standard/extract')}</p>
+            {/if}
+            <div class="{if $OutputFormat|eq( 'ezpkg' )}xe-grid xe-inactive{/if}">
             <div class="xe-field">
                 <label class="xe-label" for="xe-add">{'Add a column'|i18n('design/standard/extract')}</label>
                 <input type="search" class="xe-picker-filter xe-add-filter" placeholder="{'Filter the columns: name, identifier, datatype, format'|i18n('design/standard/extract')|wash}" autocomplete="off" aria-controls="xe-add" />
@@ -695,6 +708,7 @@
                 </li>
                 {/foreach}
             </ol>
+            </div>
         </section>
     </div>
     </div>

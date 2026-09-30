@@ -24,13 +24,20 @@ class XrowExtractWriter
     /** The typed column manifest to embed (XML: a <manifest> element; JSON: an envelope), or null. */
     protected $manifest = null;
 
-    /** The output formats: id => (name, extension, content type). */
+    /**
+     * The output formats: id => (name, extension, content type). 'ezpkg' is not a row format this class
+     * itself ever writes (a package has no columns) - it is handled as an early special case, before a
+     * writer is ever constructed, in both bin/php/csv.php and modules/xrowextract/csv.php (see
+     * XrowExtractPackage::exportNodeIDsIntoPackage()). It is listed here only so it validates and shows
+     * up in the File format choice exactly like the row formats do, from the same one list.
+     */
     public static function formats()
     {
         return array(
-            'csv'  => array( 'id' => 'csv',  'name' => 'CSV',  'extension' => 'csv',  'type' => 'text/csv' ),
-            'json' => array( 'id' => 'json', 'name' => 'JSON', 'extension' => 'json', 'type' => 'application/json' ),
-            'xml'  => array( 'id' => 'xml',  'name' => 'XML',  'extension' => 'xml',  'type' => 'application/xml' ),
+            'csv'   => array( 'id' => 'csv',   'name' => 'CSV',   'extension' => 'csv',   'type' => 'text/csv' ),
+            'json'  => array( 'id' => 'json',  'name' => 'JSON',  'extension' => 'json',  'type' => 'application/json' ),
+            'xml'   => array( 'id' => 'xml',   'name' => 'XML',   'extension' => 'xml',   'type' => 'application/xml' ),
+            'ezpkg' => array( 'id' => 'ezpkg', 'name' => 'Content package (.ezpkg)', 'extension' => 'ezpkg', 'type' => 'application/gzip', 'is_package' => true ),
         );
     }
 
