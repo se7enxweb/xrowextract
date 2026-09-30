@@ -118,7 +118,22 @@ class XrowExtractJob
     {
         $file = self::path( $id ) . '/' . self::JOB_FILE;
         $tmp = $file . '.tmp-' . getmypid();
-        file_put_contents( $tmp, json_encode( $job, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . "\n" );
+        // Text that is not UTF-8 (the last line of a failing command's output becomes the job's error)
+        // made json_encode() return false, and job.json a bare line break: the job was gone from the
+        // Jobs page. Such text is written with U+FFFD in place of the bytes that are not UTF-8.
+        $json = json_encode( $job, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE );
+        if ( $json === false )
+        {
+            eZDebug::writeError( 'Job ' . $id . ' not saved: ' . json_last_error_msg(), __METHOD__ );
+            return;
+        }
+        // A job.json that cannot be written leaves the one there in place, never a partial one
+        if ( @file_put_contents( $tmp, $json . "\n" ) === false )
+        {
+            @unlink( $tmp );
+            eZDebug::writeError( 'Job ' . $id . ' not saved: ' . $tmp . ' cannot be written', __METHOD__ );
+            return;
+        }
         @chmod( $tmp, 0600 );
         rename( $tmp, $file );
         self::fixOwnership( $file );
