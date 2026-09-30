@@ -1104,13 +1104,17 @@ class XrowExtractPackage
      */
     public static function prettyPrintXML( $bytes ): string
     {
+        $bytes = (string)$bytes;
+        // DOMDocument::loadXML() throws a ValueError for an empty string (the @ does not silence it)
+        if ( trim( $bytes ) === '' )
+            return $bytes;
         $dom = new DOMDocument( '1.0', 'utf-8' );
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
-        if ( !@$dom->loadXML( (string)$bytes ) )
-            return (string)$bytes;
+        if ( !@$dom->loadXML( $bytes ) )
+            return $bytes;
         $pretty = $dom->saveXML();
-        return $pretty !== false ? $pretty : (string)$bytes;
+        return $pretty !== false ? $pretty : $bytes;
     }
 
     /**
