@@ -216,7 +216,8 @@ class XrowExtractJob
             for ( $i = 0; $i < count( $tree ) && $i < 64; $i++ )
             {
                 $children = array();
-                @exec( 'pgrep -P ' . (int)$tree[$i], $children );
+                if ( function_exists( 'exec' ) ) // disabled: it does not exist in PHP 8
+                    @exec( 'pgrep -P ' . (int)$tree[$i], $children );
                 foreach ( $children as $child )
                     if ( ctype_digit( trim( $child ) ) )
                         $tree[] = (int)trim( $child );
@@ -224,7 +225,7 @@ class XrowExtractJob
             foreach ( $tree as $process )
             {
                 $stopped = function_exists( 'posix_kill' ) ? @posix_kill( $process, 15 ) : false;
-                if ( !$stopped )
+                if ( !$stopped && function_exists( 'exec' ) )
                 {
                     $output = array();
                     @exec( 'kill -TERM ' . (int)$process . ' 2>&1', $output, $code );
@@ -525,7 +526,8 @@ class XrowExtractJob
             if ( $candidate && is_executable( $candidate ) && strpos( $base, 'fpm' ) === false && strpos( $base, 'cgi' ) === false )
                 return $candidate;
         }
-        $found = trim( (string)@shell_exec( 'command -v php 2>/dev/null' ) );
+        // shell_exec() may be disabled (then it does not exist at all in PHP 8)
+        $found = function_exists( 'shell_exec' ) ? trim( (string)@shell_exec( 'command -v php 2>/dev/null' ) ) : '';
         if ( $found !== '' && is_executable( $found ) )
             return $found;
         return false;
@@ -591,6 +593,8 @@ class XrowExtractJob
     {
         if ( function_exists( 'posix_getuid' ) )
             return posix_getuid() === 0;
+        if ( !function_exists( 'shell_exec' ) ) // disabled: it does not exist in PHP 8
+            return false;
         return trim( (string)@shell_exec( 'id -u 2>/dev/null' ) ) === '0';
     }
 

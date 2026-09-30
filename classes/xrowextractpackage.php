@@ -96,6 +96,9 @@ class XrowExtractPackage
         // needing the phar:// stream wrapper, which autoload.php unregisters on every
         // request/command on purpose. No shell is involved (proc_open with an argument
         // array), so nothing in the archive's own file name ever reaches a shell.
+        // A disabled function does not exist in PHP 8: calling it would be an Error, not a false
+        if ( !function_exists( 'proc_open' ) )
+            return array( 'ok' => false, 'entries' => array(), 'error' => 'proc_open() is disabled on this server, so the archive cannot be checked' );
         $descriptors = array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
         $process = @proc_open( array( 'tar', '-tvzf', $real ), $descriptors, $pipes, null, null, array( 'bypass_shell' => true ) );
         if ( !is_resource( $process ) )

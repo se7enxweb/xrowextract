@@ -271,7 +271,7 @@ class XrowExtractScheduler
     public static function runJobHere( $jobID )
     {
         $php = XrowExtractJob::phpCliBinary();
-        if ( !$php )
+        if ( !$php || !function_exists( 'proc_open' ) ) // disabled: it does not exist in PHP 8
             return 127;
         $argv = array( $php, XrowExtractJob::runnerScript(), '--run=' . $jobID );
         if ( XrowExtractJob::runningAsRoot() )
