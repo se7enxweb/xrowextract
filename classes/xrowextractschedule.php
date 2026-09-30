@@ -220,8 +220,32 @@ class XrowExtractSchedule extends eZPersistentObject
             $errors[] = 'The cron expression is not valid: five fields, minute hour day-of-month month day-of-week.';
         $definition = isset( $values['definition'] ) && is_array( $values['definition'] ) ? $values['definition'] : array();
         $errors = array_merge( $errors, XrowExtractScheduler::validateDefinition( $kind, $definition ) );
-        if ( $errors )
+        if ( $errors || $expression === false )
             return array( 'schedule' => $schedule, 'errors' => $errors );
+
+        $notify = isset( $values['notify'] ) && is_array( $values['notify'] ) ? $values['notify'] : array();
+        $retention = isset( $values['retention'] ) && is_array( $values['retention'] ) ? $values['retention'] : array();
+        $json = array(
+            'definition' => json_encode( $definition ),
+            'frequency' => json_encode( $frequency ),
+            'notify' => json_encode( array(
+                'failure_emails' => self::cleanEmails( isset( $notify['failure_emails'] ) ? $notify['failure_emails'] : '' ),
+                'success' => !empty( $notify['success'] ),
+                'success_emails' => self::cleanEmails( isset( $notify['success_emails'] ) ? $notify['success_emails'] : '' ),
+                'admin_notice' => !isset( $notify['admin_notice'] ) || !empty( $notify['admin_notice'] ),
+                'webhook_url' => isset( $notify['webhook_url'] ) && preg_match( '#^https?://#i', trim( $notify['webhook_url'] ) ) ? trim( $notify['webhook_url'] ) : '',
+            ) ),
+            'retention' => json_encode( array(
+                'files_days' => isset( $retention['files_days'] ) && (int)$retention['files_days'] > 0 ? (int)$retention['files_days'] : '',
+                'history_days' => isset( $retention['history_days'] ) && (int)$retention['history_days'] > 0 ? (int)$retention['history_days'] : '',
+            ) ),
+        );
+        // json_encode() refuses text that is not UTF-8: storing its false would silently empty that part of the schedule
+        foreach ( $json as $encoded )
+        {
+            if ( $encoded === false )
+                return array( 'schedule' => $schedule, 'errors' => array( 'A value of the schedule is not valid UTF-8 text and cannot be stored.' ) );
+        }
 
         if ( !XrowExtractSchema::ensure() )
             return array( 'schedule' => $schedule, 'errors' => array( 'The schedule tables could not be created (see the debug log).' ) );
@@ -232,25 +256,14 @@ class XrowExtractSchedule extends eZPersistentObject
         }
         $schedule->setAttribute( 'name', $name );
         $schedule->setAttribute( 'kind', $kind );
-        $schedule->setAttribute( 'definition', json_encode( $definition ) );
-        $schedule->setAttribute( 'frequency', json_encode( $frequency ) );
+        $schedule->setAttribute( 'definition', $json['definition'] );
+        $schedule->setAttribute( 'frequency', $json['frequency'] );
         $schedule->setAttribute( 'cron_expr', $expression );
         $schedule->setAttribute( 'delta_mode', isset( $values['delta_mode'] ) && $values['delta_mode'] === 'delta' ? 'delta' : 'full' );
         $ids = isset( $values['destination_ids'] ) ? array_values( array_unique( array_filter( array_map( 'intval', (array)$values['destination_ids'] ) ) ) ) : array();
         $schedule->setAttribute( 'destination_ids', implode( ',', $ids ) );
-        $notify = isset( $values['notify'] ) && is_array( $values['notify'] ) ? $values['notify'] : array();
-        $schedule->setAttribute( 'notify', json_encode( array(
-            'failure_emails' => self::cleanEmails( isset( $notify['failure_emails'] ) ? $notify['failure_emails'] : '' ),
-            'success' => !empty( $notify['success'] ),
-            'success_emails' => self::cleanEmails( isset( $notify['success_emails'] ) ? $notify['success_emails'] : '' ),
-            'admin_notice' => !isset( $notify['admin_notice'] ) || !empty( $notify['admin_notice'] ),
-            'webhook_url' => isset( $notify['webhook_url'] ) && preg_match( '#^https?://#i', trim( $notify['webhook_url'] ) ) ? trim( $notify['webhook_url'] ) : '',
-        ) ) );
-        $retention = isset( $values['retention'] ) && is_array( $values['retention'] ) ? $values['retention'] : array();
-        $schedule->setAttribute( 'retention', json_encode( array(
-            'files_days' => isset( $retention['files_days'] ) && (int)$retention['files_days'] > 0 ? (int)$retention['files_days'] : '',
-            'history_days' => isset( $retention['history_days'] ) && (int)$retention['history_days'] > 0 ? (int)$retention['history_days'] : '',
-        ) ) );
+        $schedule->setAttribute( 'notify', $json['notify'] );
+        $schedule->setAttribute( 'retention', $json['retention'] );
         $schedule->setAttribute( 'enabled', !isset( $values['enabled'] ) || !empty( $values['enabled'] ) ? 1 : 0 );
         $schedule->setAttribute( 'next_run', (int)XrowExtractCron::nextRun( $expression, $now ) );
         $schedule->setAttribute( 'modified', $now );
