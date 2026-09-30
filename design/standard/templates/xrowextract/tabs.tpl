@@ -31,10 +31,11 @@
     </a>
     {/if}
     {undef $can_schedule $can_history $can_destinations}
-    {def $schedule_alerts = fetch( 'xrowextract', 'schedule_alerts' )}
+    {* Its own name: the Jobs view sets $schedule_alerts itself, and this include shares its variables *}
+    {def $xe_tab_alerts = fetch( 'xrowextract', 'schedule_alerts' )}
     <a href={'xrowextract/jobs'|ezurl}{if $active|eq( 'jobs' )} class="xe-tab-active" aria-current="page"{/if}>
-        <strong>{'Jobs'|i18n( 'design/standard/extract' )}{if and( is_set( $RunningJobsCount ), $RunningJobsCount|gt( 0 ) )} <span class="xe-tab-badge">{$RunningJobsCount}</span>{/if}{if $schedule_alerts|gt( 0 )} <span class="xe-tab-badge xe-tab-badge-bad" title="{'Failed scheduled runs you have not seen yet'|i18n( 'design/standard/extract' )|wash}">{$schedule_alerts}</span>{/if}</strong>
+        <strong>{'Jobs'|i18n( 'design/standard/extract' )}{if and( is_set( $RunningJobsCount ), $RunningJobsCount|gt( 0 ) )} <span class="xe-tab-badge">{$RunningJobsCount}</span>{/if}{if $xe_tab_alerts|gt( 0 )} <span class="xe-tab-badge xe-tab-badge-bad" title="{'Failed scheduled runs you have not seen yet'|i18n( 'design/standard/extract' )|wash}">{$xe_tab_alerts}</span>{/if}</strong>
         <small>{'Background exports: started, running and finished'|i18n( 'design/standard/extract' )}</small>
     </a>
-    {undef $schedule_alerts}
+    {undef $xe_tab_alerts}
 </nav>
