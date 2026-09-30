@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!DOCTYPE export [<!ENTITY x SYSTEM "file:///etc/passwd">]>
+<export><columns><column name="name">N</column></columns><object><field name="name">&x;</field></object></export>
