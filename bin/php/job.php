@@ -16,6 +16,36 @@
 
 require_once dirname( __FILE__ ) . '/../../../../autoload.php';
 
+// $taken->id is set once this process has taken a job on (below). However the process then ends, the job must not stay
+// "running": this shutdown function marks it failed, with the PHP error when a fatal one (memory, time
+// limit) ended it. Registered before the kernel's own shutdown functions, so it still sees that error as
+// the last one and the kernel is still usable. A command-line process of its own, never a request.
+$taken = new stdClass();
+$taken->id = null;
+$taken->error = null; // why, when the runner itself gives up on the job
+register_shutdown_function( static function () use ( $taken )
+{
+    if ( $taken->id === null )
+        return;
+    $error = error_get_last();
+    $fatal = $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true );
+    // A runner stopped by the memory limit needs some room of its own to read and write job.json
+    if ( $fatal )
+        @ini_set( 'memory_limit', (string)( memory_get_usage() + 64 * 1024 * 1024 ) );
+    $message = $fatal ? 'The job runner stopped with a PHP error: ' . $error['message'] . ' (' . basename( $error['file'] ) . ':' . $error['line'] . ')'
+                      : ( $taken->error !== null ? $taken->error : 'The job runner ended without recording a result.' );
+    if ( XrowExtractJob::markFailed( $taken->id, $message ) )
+    {
+        try
+        {
+            XrowExtractScheduler::afterJob( $taken->id );
+        }
+        catch ( Throwable $e )
+        {
+        }
+    }
+} );
+
 $cli = eZCLI::instance();
 $script = eZScript::instance( array(
     'description'    => "Runs, lists or cleans up xrowextract background export jobs.",
@@ -78,14 +108,42 @@ $dir = XrowExtractJob::path( $id );
 $logPath = $dir . '/' . XrowExtractJob::LOG_FILE;
 $progressPath = $dir . '/' . XrowExtractJob::PROGRESS_FILE;
 
+// From here on the job is this process's (see $taken at the top). An exception or error that
+// nothing catches marks it failed with its message and records the run in the history (for a schedule
+// with its failure notification), instead of the kernel's "An unexpected error has occurred" alone.
+$taken->id = $id;
+set_exception_handler( function ( Throwable $e ) use ( $cli, $id )
+{
+    $message = 'The job runner stopped: ' . get_class( $e ) . ': ' . $e->getMessage() . ' (' . basename( $e->getFile() ) . ':' . $e->getLine() . ')';
+    $cli->error( $message );
+    eZLog::write( "Job $id: $message", 'error.log' );
+    if ( XrowExtractJob::markFailed( $id, $message ) )
+    {
+        try
+        {
+            XrowExtractScheduler::afterJob( $id );
+        }
+        catch ( Throwable $historyError )
+        {
+            $cli->error( 'The history row could not be written: ' . $historyError->getMessage() );
+        }
+    }
+    eZExecution::cleanup();
+    eZExecution::setCleanExit();
+    exit( 1 );
+} );
+
+$phpCli = XrowExtractJob::phpCliBinary();
+if ( !$phpCli )
+{
+    $taken->error = 'No PHP command line binary found (csv.ini [Jobs] PhpCli).';
+    $fail( $taken->error ); // the shutdown function marks the job failed with it
+}
+
 $job['state'] = 'running';
 $job['started'] = time();
 $job['pid'] = getmypid();
 XrowExtractJob::save( $id, $job );
-
-$phpCli = XrowExtractJob::phpCliBinary();
-if ( !$phpCli )
-    $fail( 'No PHP command line binary found (csv.ini [Jobs] PhpCli).' );
 
 $logHandle = @fopen( $logPath, 'a' );
 if ( $logHandle )

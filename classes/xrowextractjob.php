@@ -123,6 +123,32 @@ class XrowExtractJob
         return $job;
     }
 
+    /**
+     * Marks a job that is still queued or running as failed, with $message as its error (and as the
+     * last line of its log, where the Jobs page shows it). A job in any other state (done, skipped,
+     * already failed or cancelled) is left alone. True when it was marked.
+     */
+    public static function markFailed( $id, $message )
+    {
+        if ( !self::isValidID( $id ) )
+            return false;
+        $job = self::load( $id );
+        if ( !$job || !in_array( $job['state'], array( 'queued', 'running' ), true ) || !empty( $job['cancelled'] ) )
+            return false;
+        $message = trim( (string)preg_replace( '/\s+/', ' ', (string)$message ) );
+        $job['state'] = 'failed';
+        $job['ended'] = time();
+        $job['error'] = mb_substr( $message !== '' ? $message : 'The job stopped.', 0, 1000 );
+        self::save( $id, $job );
+        $log = @fopen( self::path( $id ) . '/' . self::LOG_FILE, 'a' );
+        if ( $log )
+        {
+            fwrite( $log, '[' . date( 'c' ) . '] ' . $job['error'] . "\n" );
+            fclose( $log );
+        }
+        return true;
+    }
+
     /** Every job, newest first. */
     public static function listAll()
     {
