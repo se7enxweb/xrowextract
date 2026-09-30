@@ -157,6 +157,7 @@ foreach ( XrowExtractDestination::fetchList() as $destination )
 {
     $id = (int)$destination->attribute( 'id' );
     $config = $destination->configArray();
+    $class = XrowExtractDestination::transportClass( $destination->attribute( 'dest_type' ) );
     $rows[] = array(
         'id' => $id,
         'name' => $destination->attribute( 'name' ),
@@ -170,7 +171,8 @@ foreach ( XrowExtractDestination::fetchList() as $destination )
         'used_by' => isset( $usedBy[$id] ) ? array_values( array_unique( $usedBy[$id] ) ) : array(),
         'owner_user' => XrowExtractJob::ownerInfo( (string)$destination->attribute( 'owner_login' ) ),
         'test' => $testResult && $testResult['id'] === $id ? $testResult : null,
-        'unavailable' => call_user_func( array( XrowExtractDestination::transportClass( $destination->attribute( 'dest_type' ) ), 'unavailableReason' ) ),
+        // A destination of a type this installation no longer has: listed, marked, never called
+        'unavailable' => $class ? $class::unavailableReason() : 'unknown destination type',
     );
 }
 $typeChoices = array();
