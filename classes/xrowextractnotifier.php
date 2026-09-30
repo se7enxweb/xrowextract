@@ -161,7 +161,7 @@ class XrowExtractNotifier
     public static function webhook( $url, array $payload )
     {
         $transport = new XrowExtractTransportHttp( array( 'url' => $url ), array( 'hmac_key' => self::webhookSecret() ) );
-        $body = json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+        $body = json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE );
         $result = XrowExtractNotifierHttp::post( $url, $body, $transport->signedHeaders( hash( 'sha256', $body ) ) );
         return $result;
     }
