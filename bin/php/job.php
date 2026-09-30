@@ -35,10 +35,11 @@ $options = $script->getOptions(
 );
 $script->initialize();
 
-$fail = function ( $message ) use ( $cli, $script )
+$fail = function ( $message ) use ( $cli, $script ): never
 {
     $cli->error( $message );
     $script->shutdown( 1 );
+    exit( 1 ); // shutdown() with an exit code exits; this only states it
 };
 
 if ( $options['clean'] )

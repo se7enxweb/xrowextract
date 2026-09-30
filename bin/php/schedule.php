@@ -81,10 +81,11 @@ $options = $script->getOptions(
 );
 $script->initialize();
 
-$fail = function ( $message ) use ( $cli, $script )
+$fail = function ( $message ) use ( $cli, $script ): never
 {
     $cli->error( $message );
     $script->shutdown( 1 );
+    exit( 1 ); // shutdown() with an exit code exits; this only states it
 };
 $when = function ( $time ) { return $time ? date( 'Y-m-d H:i', $time ) : '-'; };
 $load = function ( $id ) use ( $fail )
