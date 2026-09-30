@@ -160,6 +160,26 @@ Command line: ext:xrowextract:schedule (--list, --run, --enable,
 --disable, --cron, --crontab, --create), ext:xrowextract:destination
 (--list, --test, --send, --trust-host-key), ext:xrowextract:history.
 
+Requirements
+
+XrowExtractRequirements says in one place what each feature needs:
+PHP 8.1 or later with mbstring, ctype and json and writable var and cache
+folders (required: without them nothing works), and for single features
+dom and xmlreader (Import content file), zip (the ZIP downloads and
+archives), dom, zlib, proc_open(), tar and gzip and a writable storage
+folder (content packages), proc_open(), exec() and a PHP command line
+binary (background jobs, schedules), sodium (passwords and keys of
+destinations), curl (HTTP, S3, WebDAV and FTP destinations) and the
+OpenSSH client (SFTP destinations). A page names the features of that
+page the server cannot offer, and what they miss.
+  php extension/xrowextract/bin/php/requirements.php [--feature=a,b]
+      [--strict] [--json]          (./console ext:xrowextract:requirements)
+prints PASS or FAIL per requirement, WARN for a missing optional one with
+the features it takes away, and exits 1 when a required one is missing
+(with --feature also when one of those features is unavailable, with
+--strict on anything missing). Run it as the web server's user: disabled
+functions and writable folders depend on user and PHP configuration.
+
 Checks (the release gate)
 
 bin/check.sh runs everything a release has to pass and prints PASS/FAIL
@@ -168,9 +188,14 @@ per part, exit code 1 when any part fails:
            deprecation fails too); --php=/path/to/php picks the binary
   ts       xmllint --noout on translations/*/translation.ts
   dup      no <source> twice in one <context> of a .ts file
-  phpstan  PHPStan (phpstan.neon.dist: level 6 without required type
-           declarations, PHP 8.1 to 8.5; phpstan-baseline.neon holds only
+  phpstan  PHPStan (phpstan.neon.dist: level 8, every parameter, return
+           and property typed, PHP 8.1 to 8.5; phpstan-baseline.neon holds only
            findings PHPStan cannot see past, each explained)
+  unit     the PHPUnit tests in tests/unit
+  req      the requirements check: bin/php/requirements.php in the test
+           installation (XROWEXTRACT_TEST_ROOT), else the checkout's check
+           against EXPONENTIAL_ROOT
+  cli, views, posts  the integration tests below
 PHPStan needs the Exponential kernel and library classes: EXPONENTIAL_ROOT
 names an Exponential root (default: the installation this extension is
 installed in). Anywhere else, clone se7enxweb/exponential and point
