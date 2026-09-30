@@ -55,7 +55,7 @@ $unpackManifestZip = function ( $stored, $originalName )
     $unpacked = XrowExtractManifest::unpackZip( $stored, $stored . '.data' );
     if ( !$unpacked['ok'] )
         return array( 'path' => false, 'name' => $originalName, 'error' => $unpacked['error'] );
-    return array( 'path' => $unpacked['path'], 'name' => $unpacked['name'], 'error' => '' );
+    return array( 'path' => $unpacked['path'] ?? false, 'name' => $unpacked['name'] ?? $originalName, 'error' => '' );
 };
 
 // Resume a job (from the Jobs page): the same file and settings, a new job, --resume-from added
@@ -259,7 +259,7 @@ $diskFree = XrowExtractUpload::freeDiskSpace();
 $tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? XrowExtractUpload::humanSize( $diskFree ) : false );
 $tpl->setVariable( 'UploadedSize', $hasFile && isset( $_SESSION[$SESSION_KEY]['size'] ) ? XrowExtractUpload::humanSize( (int)$_SESSION[$SESSION_KEY]['size'] ) : false );
 $uploadJsFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-upload.js';
-$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ) ?: '0', 0, 12 ) : '0' );
 
 if ( $http->hasPostVariable( 'RemoveFile' ) && $hasFile )
 {
@@ -662,7 +662,7 @@ if ( $http->hasPostVariable( 'TrySample' ) )
         else
         {
             $forgetFile();
-            $_SESSION[$SESSION_KEY] = array( 'path' => $sample['file'], 'name' => basename( $sample['file'] ), 'format' => 'package', 'kind' => 'package',
+            $_SESSION[$SESSION_KEY] = array( 'path' => (string)$sample['file'], 'name' => basename( (string)$sample['file'] ), 'format' => 'package', 'kind' => 'package',
                                              'sample' => true, 'kinds' => array( 'create', 'update', 'unchanged', 'class_missing' ), 'classID' => $SampleClassID );
             return $module->redirectTo( 'xrowextract/import' );
         }
@@ -999,7 +999,7 @@ if ( $PackageIsTransient && !$KeepThisPackage && $Package instanceof eZPackage )
 }
 
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ) ?: '0', 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/import.tpl' );

@@ -59,7 +59,7 @@ class XrowExtractPackage
             $sample = @file_get_contents( $storedPath, false, null, 0, 2048 );
             if ( $sample !== false )
             {
-                $sample = ltrim( preg_replace( '/^\xEF\xBB\xBF/', '', $sample ) );
+                $sample = ltrim( preg_replace( '/^\xEF\xBB\xBF/', '', $sample ) ?? $sample );
                 if ( preg_match( '/^<\?xml[^>]*>\s*/', $sample, $m ) )
                     $sample = substr( $sample, strlen( $m[0] ) );
                 if ( strpos( $sample, '<content-class' ) === 0 )
@@ -87,7 +87,7 @@ class XrowExtractPackage
      * first and independently of how the kernel itself later extracts it.
      *
      * @param string $path
-     * @return array{ok: bool, entries: list<string>, error: string|null}
+     * @return array{ok: true, entries: list<string>, error: null}|array{ok: false, entries: list<string>, error: string}
      */
     public static function scanArchiveEntries( $path ): array
     {
@@ -118,9 +118,13 @@ class XrowExtractPackage
         if ( $exitCode !== 0 )
             return array( 'ok' => false, 'entries' => array(), 'error' => 'not a valid .ezpkg/.tar.gz archive' . ( trim( $err ) !== '' ? ': ' . trim( $err ) : '' ) );
 
+        // Fail closed: a listing that cannot be split refuses the archive rather than passing it as empty
+        $lines = preg_split( '/\r?\n/', trim( $out ) );
+        if ( $lines === false )
+            return array( 'ok' => false, 'entries' => array(), 'error' => 'unreadable archive listing refused' );
         $entries = array();
         $error = null;
-        foreach ( preg_split( '/\r?\n/', trim( $out ) ) as $line )
+        foreach ( $lines as $line )
         {
             if ( $line === '' )
                 continue;
@@ -155,7 +159,8 @@ class XrowExtractPackage
             $entries[] = $relative;
         }
 
-        return array( 'ok' => $error === null, 'entries' => $entries, 'error' => $error );
+        return $error === null ? array( 'ok' => true, 'entries' => $entries, 'error' => null )
+                               : array( 'ok' => false, 'entries' => $entries, 'error' => $error );
     }
 
     /**
@@ -169,7 +174,7 @@ class XrowExtractPackage
      * enough returned for the caller to say so, instead of being refused.
      *
      * @param string $storedPath
-     * @return array{ok: bool, package: eZPackage|null, error: string|null, renamed: bool, renamed_from: string|null, renamed_to: string|null}
+     * @return array{ok: true, package: eZPackage, error: null, renamed: bool, renamed_from: string|null, renamed_to: string|null}|array{ok: false, package: null, error: string, renamed: false, renamed_from: null, renamed_to: null}
      */
     public static function importUploadedArchive( $storedPath ): array
     {
@@ -352,7 +357,7 @@ class XrowExtractPackage
      * @param string $storedPath
      * @param string $kind
      * @param string $originalName
-     * @return array{ok: bool, package: eZPackage|null, error: string|null}
+     * @return array{ok: true, package: eZPackage, error: null}|array{ok: false, package: null, error: string}
      */
     public static function wrapStandaloneXML( $storedPath, $kind, $originalName = '' ): array
     {
@@ -557,7 +562,7 @@ class XrowExtractPackage
      */
     public static function forgetInspections( $packageName ): void
     {
-        foreach ( (array)glob( eZSys::cacheDirectory() . '/xrowextract/inspect/' . self::inspectionCachePrefix( $packageName ) . '*.json' ) as $file )
+        foreach ( glob( eZSys::cacheDirectory() . '/xrowextract/inspect/' . self::inspectionCachePrefix( $packageName ) . '*.json' ) ?: array() as $file )
             @unlink( $file );
     }
 
@@ -1451,6 +1456,9 @@ class XrowExtractPackage
                     $new = sprintf( '%.2f', (float)$old + 1 );
                 else
                     $new = $old . ' (sample, edited)';
+                // A node read from a document always has one; without it there is nothing to edit
+                if ( !$childNode->ownerDocument instanceof DOMDocument )
+                    return false;
                 while ( $childNode->firstChild )
                     $childNode->removeChild( $childNode->firstChild );
                 $childNode->appendChild( $childNode->ownerDocument->createTextNode( $new ) );
@@ -1603,7 +1611,7 @@ class XrowExtractPackage
                         $identifier = (string)$attrNode->getAttributeNS( 'http://ez.no/ezobject', 'identifier' );
                         if ( $identifier === '' )
                             continue;
-                        $text = trim( preg_replace( '/\s+/u', ' ', (string)$attrNode->textContent ) );
+                        $text = trim( preg_replace( '/\s+/u', ' ', (string)$attrNode->textContent ) ?? (string)$attrNode->textContent );
                         if ( $text === '' )
                         {
                             // A value held in XML attributes only (a relation's remote ids, a date's timestamp)
@@ -1987,7 +1995,7 @@ class XrowExtractPackage
         {
             $class = eZContentClass::fetchByRemoteID( $remoteID );
             if ( $class instanceof eZContentClass )
-                $report['created_classes'][] = array( 'id' => (int)$class->attribute( 'id' ), 'identifier' => $class->attribute( 'identifier' ), 'name' => $class->attribute( 'name' ) );
+                $report['created_classes'][] = array( 'id' => (int)$class->attribute( 'id' ), 'identifier' => (string)$class->attribute( 'identifier' ), 'name' => (string)$class->attribute( 'name' ) );
         }
         foreach ( $beforeObjects as $remoteID )
         {
@@ -1998,7 +2006,7 @@ class XrowExtractPackage
                 $mainNode = $object->attribute( 'main_node' );
                 $report['created_objects'][] = array(
                     'id'      => (int)$object->attribute( 'id' ),
-                    'name'    => $object->name(),
+                    'name'    => (string)$object->name(),
                     'node_id' => $mainNode instanceof eZContentObjectTreeNode ? (int)$mainNode->attribute( 'node_id' ) : null,
                 );
             }
@@ -2967,7 +2975,7 @@ class XrowExtractPackage
      * @param string $datatype
      * @param string $classIdentifier
      * @param array<int, string> $remoteIDs
-     * @return array{kind: 'attr'|'attrfmt', value: string, format?: string}|null
+     * @return array{kind: 'attr', value: string}|array{kind: 'attrfmt', value: string, format: string}|null
      */
     protected static function sampleAttributeValue( eZContentClassAttribute $classAttribute, $datatype, int $index, $classIdentifier, array $remoteIDs, string $language ): ?array
     {
@@ -2991,9 +2999,9 @@ class XrowExtractPackage
             case 'ezurl':
                 return array( 'kind' => 'attr', 'value' => "https://example.com/sample-{$index}-{$language}" );
             case 'ezdate':
-                return array( 'kind' => 'attr', 'value' => date( 'Y-m-d', strtotime( "+{$index} day" ) ) );
+                return array( 'kind' => 'attr', 'value' => date( 'Y-m-d', strtotime( "+{$index} day" ) ?: time() ) );
             case 'ezdatetime':
-                return array( 'kind' => 'attr', 'value' => date( 'Y-m-d H:i:s', strtotime( "+{$index} hour" ) ) );
+                return array( 'kind' => 'attr', 'value' => date( 'Y-m-d H:i:s', strtotime( "+{$index} hour" ) ?: time() ) );
             case 'ezselection':
                 $content = $classAttribute->content();
                 $options = isset( $content['options'] ) ? $content['options'] : array();

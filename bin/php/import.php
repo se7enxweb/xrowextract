@@ -109,8 +109,8 @@ elseif ( $options['manifest'] )
 $unpacked = XrowExtractManifest::unpackZip( $path, XrowExtractImport::uploadDir() . '/cli_zip_' . bin2hex( random_bytes( 6 ) ) . '.dat' );
 if ( $unpacked['ok'] )
 {
-    $cli->output( "Read {$unpacked['name']} from the zip " . basename( $path ) . '.' );
-    $path = $unpacked['path'];
+    $cli->output( 'Read ' . ( $unpacked['name'] ?? '' ) . ' from the zip ' . basename( $path ) . '.' );
+    $path = $unpacked['path'] ?? $path;
 }
 elseif ( $unpacked['error'] !== '' )
 {
@@ -313,8 +313,8 @@ if ( $reportFile )
     $report = array(
         'counts' => $result['counts'], 'total_rows' => $totalRows, 'processed_rows' => $totalRows - $skipRows,
         'resumed_from' => $skipRows ? $resumeFrom : null, 'ezoe' => $result['ezoe'],
-        'peak_memory_bytes' => $peakMemory, 'errors_file' => $errorsHeaderWritten ? basename( $errorsFile ) : null,
-        'applied' => (bool)$options['apply'], 'file' => basename( $options['file'] ), 'format' => $format,
+        'peak_memory_bytes' => $peakMemory, 'errors_file' => $errorsHeaderWritten && $errorsFile !== null ? basename( $errorsFile ) : null,
+        'applied' => (bool)$options['apply'], 'file' => basename( (string)$options['file'] ), 'format' => $format,
         'manifest' => $manifestUsed ? array( 'source' => $manifestUsed['source'], 'exact_columns' => count( $manifestUsed['matched'] ),
                                              'not_described' => $manifestUsed['unknown'], 'checksum' => $manifestUsed['checksum'] ) : null,
         'mapping' => array_map( function ( $m ) { return array( 'column' => $m['column'], 'target' => $m['target'] ); }, $mapping ),

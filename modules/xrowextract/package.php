@@ -117,7 +117,7 @@ $tpl->setVariable( 'RenameNotice', $renameNotice );
 $diskFree = XrowExtractUpload::freeDiskSpace();
 $tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? XrowExtractUpload::humanSize( $diskFree ) : false );
 $uploadJsFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract-upload.js';
-$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ) ?: '0', 0, 12 ) : '0' );
 
 // ---------------------------------------------------------------- pick the current package
 
@@ -380,7 +380,7 @@ if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
 $tpl->setVariable( 'TemplateError', $templateError );
 
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ) ?: '0', 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/package.tpl' );

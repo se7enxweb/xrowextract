@@ -147,7 +147,7 @@ foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
         $others[] = $repositoryPackage;
 $tpl->setVariable( 'OtherPackages', $others );
 $scriptFile = dirname( __FILE__ ) . '/../../design/standard/javascript/xrowextract.js';
-$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ), 0, 12 ) : '0' );
+$tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ) ?: '0', 0, 12 ) : '0' );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:xrowextract/compare.tpl' );

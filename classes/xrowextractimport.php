@@ -261,6 +261,8 @@ class XrowExtractImport
     {
         $text = self::stripBOM( (string)$text );
         $fh = fopen( 'php://temp', 'r+' );
+        if ( $fh === false )
+            throw new RuntimeException( 'No temporary stream for reading the CSV text (php://temp).' );
         fwrite( $fh, $text );
         rewind( $fh );
         $header = fgetcsv( $fh, 0, $separator, '"', '' );
@@ -387,7 +389,7 @@ class XrowExtractImport
         $fh = @fopen( $path, 'rb' );
         if ( !$fh )
             return '';
-        $chunk = fread( $fh, $bytes );
+        $chunk = fread( $fh, max( 1, (int)$bytes ) );
         fclose( $fh );
         return XrowBaseHandler::utf8( (string)$chunk );
     }
@@ -596,7 +598,8 @@ class XrowExtractImport
         $manifest = XrowExtractManifest::forDataFile( $path, $format );
         if ( $manifest && $info['header'] )
         {
-            $mapping = XrowExtractManifest::importMapping( $manifest, $info['header'], $path );
+            // A JSON file's numeric keys arrive as ints; the manifest's column keys are names
+            $mapping = XrowExtractManifest::importMapping( $manifest, array_map( 'strval', $info['header'] ), $path );
             if ( $mapping['columnIDs'] )
             {
                 $info['columnIDs'] = array_merge( (array)$info['columnIDs'], $mapping['columnIDs'] );
@@ -848,7 +851,7 @@ class XrowExtractImport
                 $mapping[] = array( 'column' => $name, 'target' => $target, 'reason' => $reason );
                 continue;
             }
-            $key = str_replace( '-', '_', trim( $name ) );
+            $key = str_replace( '-', '_', trim( (string)$name ) );
             $target = 'ignore';
             $reason = '';
             if ( isset( $specials[str_replace( '_', '-', $key )] ) )
@@ -896,7 +899,7 @@ class XrowExtractImport
     /**
      * 'ignore' | array('kind'=>'special'|'attr'|'attrfmt', 'id'=>..., 'format'=>...|null)
      * @param mixed $value
-     * @return array{kind: string, id?: string, format?: string|null}
+     * @return array{kind: 'ignore'}|array{kind: 'special'|'attr', id: string, format: null}|array{kind: 'attrfmt', id: string, format: string}
      */
     public static function parseTarget( $value ): array
     {
@@ -981,7 +984,7 @@ class XrowExtractImport
             $byName[$option['name']] = true;
         }
         $names = array();
-        foreach ( preg_split( '/\s*[|,]\s*/', $raw ) as $piece )
+        foreach ( preg_split( '/\s*[|,]\s*/', $raw ) ?: array() as $piece )
         {
             if ( $piece === '' )
                 continue;
@@ -1011,7 +1014,7 @@ class XrowExtractImport
         if ( $raw === '' )
             return array( true, '' , null );
         $ids = $keywords = $parents = $locales = array();
-        foreach ( preg_split( '/\s*,\s*/', $raw ) as $name )
+        foreach ( preg_split( '/\s*,\s*/', $raw ) ?: array() as $name )
         {
             if ( $name === '' )
                 continue;
@@ -1060,8 +1063,8 @@ class XrowExtractImport
             }
         }
         $usedEzoe = false;
-        $text = html_entity_decode( strip_tags( preg_replace( '#<(br|/p|/li|/h\d|/div)[^>]*>#i', "\n", $raw ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-        $lines = array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $text ) ), function ( $l ) { return $l !== ''; } );
+        $text = html_entity_decode( strip_tags( preg_replace( '#<(br|/p|/li|/h\d|/div)[^>]*>#i', "\n", $raw ) ?? $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        $lines = array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $text ) ?: array() ), function ( $l ) { return $l !== ''; } );
         $xml = '<?xml version="1.0" encoding="utf-8"?><section xmlns:image="http://ez.no/namespaces/ezpublish3/image/" xmlns:xhtml="http://ez.no/namespaces/ezpublish3/xhtml/" xmlns:custom="http://ez.no/namespaces/ezpublish3/custom/">';
         foreach ( $lines as $line )
             $xml .= '<paragraph>' . htmlspecialchars( $line, ENT_QUOTES, 'UTF-8' ) . '</paragraph>';
@@ -1135,7 +1138,7 @@ class XrowExtractImport
         if ( $raw === '' )
             return array( true, '' , null );
         $ids = array();
-        foreach ( preg_split( '/\s*[,|]\s*/', $raw ) as $piece )
+        foreach ( preg_split( '/\s*[,|]\s*/', $raw ) ?: array() as $piece )
         {
             if ( $piece === '' )
                 continue;

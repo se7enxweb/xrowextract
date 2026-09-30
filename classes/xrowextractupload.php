@@ -134,7 +134,7 @@ class XrowExtractUpload
      * @param int|string|null $offset
      * @param string $chunkTmpPath
      * @param int $chunkSize
-     * @return array{ok: bool, received: int|false|null, complete?: bool, error?: string}
+     * @return array{ok: true, received: int|false, complete: bool}|array{ok: false, error: 'not_found'|'offset_mismatch'|'too_large'|'write_failed', received: int|false|null}
      */
     public static function appendChunk( $id, $login, $offset, $chunkTmpPath, $chunkSize ): array
     {
