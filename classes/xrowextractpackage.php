@@ -2774,7 +2774,6 @@ class XrowExtractPackage
         return $folderNodeID;
     }
 
-    /** $base, or $base_2, $base_3, ... the first one not already in the local package repository. */
     /**
      * A one-line "about" document, purely so the package's <documents> is
      * never empty. Not decorative: eZPackage::parseDOMTree() (kernel/classes/
@@ -2830,6 +2829,7 @@ class XrowExtractPackage
         return $operation();
     }
 
+    /** $base, or $base_2, $base_3, ... the first one not already in the local package repository. */
     protected static function uniquePackageName( string $base ): string
     {
         $base = self::validPackageName( $base );
