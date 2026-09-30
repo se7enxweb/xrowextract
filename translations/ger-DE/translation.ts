@@ -6509,6 +6509,194 @@
         <source>Export again: %count object(s) installed from %name</source>
         <translation>Erneut exportieren: %count aus %name installierte(s) Objekt(e)</translation>
     </message>
+    <message>
+        <source>%feature: not available on this server. Missing: %missing.</source>
+        <translation>%feature: auf diesem Server nicht verfügbar. Es fehlt: %missing.</translation>
+    </message>
+    <message>
+        <source>Every xrowextract page and command</source>
+        <translation>Alle Seiten und Befehle von xrowextract</translation>
+    </message>
+    <message>
+        <source>A CSV file with its manifest (ZIP download)</source>
+        <translation>Eine CSV-Datei mit ihrem Manifest (ZIP-Download)</translation>
+    </message>
+    <message>
+        <source>ZIP archives</source>
+        <translation>ZIP-Archive</translation>
+    </message>
+    <message>
+        <source>Import of a file with its manifest (ZIP)</source>
+        <translation>Import einer Datei mit ihrem Manifest (ZIP)</translation>
+    </message>
+    <message>
+        <source>Background jobs</source>
+        <translation>Hintergrundaufträge</translation>
+    </message>
+    <message>
+        <source>Passwords and keys of destinations</source>
+        <translation>Passwörter und Schlüssel der Ziele</translation>
+    </message>
+    <message>
+        <source>HTTP, S3, WebDAV and FTP destinations</source>
+        <translation>HTTP-, S3-, WebDAV- und FTP-Ziele</translation>
+    </message>
+    <message>
+        <source>SFTP destinations</source>
+        <translation>SFTP-Ziele</translation>
+    </message>
+    <message>
+        <source>PHP 8.1 or later</source>
+        <translation>PHP 8.1 oder neuer</translation>
+    </message>
+    <message>
+        <source>The PHP mbstring extension</source>
+        <translation>Die PHP-Erweiterung mbstring</translation>
+    </message>
+    <message>
+        <source>The PHP ctype extension</source>
+        <translation>Die PHP-Erweiterung ctype</translation>
+    </message>
+    <message>
+        <source>The PHP json extension</source>
+        <translation>Die PHP-Erweiterung json</translation>
+    </message>
+    <message>
+        <source>A writable var directory</source>
+        <translation>Ein beschreibbares var-Verzeichnis</translation>
+    </message>
+    <message>
+        <source>A writable cache directory</source>
+        <translation>Ein beschreibbares Cache-Verzeichnis</translation>
+    </message>
+    <message>
+        <source>A writable storage directory</source>
+        <translation>Ein beschreibbares Storage-Verzeichnis</translation>
+    </message>
+    <message>
+        <source>The PHP dom extension</source>
+        <translation>Die PHP-Erweiterung dom</translation>
+    </message>
+    <message>
+        <source>The PHP xmlreader extension</source>
+        <translation>Die PHP-Erweiterung xmlreader</translation>
+    </message>
+    <message>
+        <source>The PHP zlib extension</source>
+        <translation>Die PHP-Erweiterung zlib</translation>
+    </message>
+    <message>
+        <source>The PHP zip extension</source>
+        <translation>Die PHP-Erweiterung zip</translation>
+    </message>
+    <message>
+        <source>The PHP sodium extension</source>
+        <translation>Die PHP-Erweiterung sodium</translation>
+    </message>
+    <message>
+        <source>The PHP curl extension</source>
+        <translation>Die PHP-Erweiterung curl</translation>
+    </message>
+    <message>
+        <source>The PHP function proc_open()</source>
+        <translation>Die PHP-Funktion proc_open()</translation>
+    </message>
+    <message>
+        <source>The PHP function exec()</source>
+        <translation>Die PHP-Funktion exec()</translation>
+    </message>
+    <message>
+        <source>A PHP command line binary</source>
+        <translation>Ein PHP-Kommandozeilenprogramm</translation>
+    </message>
+    <message>
+        <source>The tar and gzip programs</source>
+        <translation>Die Programme tar und gzip</translation>
+    </message>
+    <message>
+        <source>At least one archive format (PHP zip, or tar with gzip)</source>
+        <translation>Mindestens ein Archivformat (PHP zip oder tar mit gzip)</translation>
+    </message>
+    <message>
+        <source>The OpenSSH client programs (sftp, ssh-keyscan, ssh-keygen)</source>
+        <translation>Die OpenSSH-Client-Programme (sftp, ssh-keyscan, ssh-keygen)</translation>
+    </message>
+    <message>
+        <source>Run the installation with a newer PHP.</source>
+        <translation>Die Installation mit einer neueren PHP-Version betreiben.</translation>
+    </message>
+    <message>
+        <source>Install or enable mbstring (php-mbstring).</source>
+        <translation>mbstring installieren oder aktivieren (php-mbstring).</translation>
+    </message>
+    <message>
+        <source>Install or enable ctype.</source>
+        <translation>ctype installieren oder aktivieren.</translation>
+    </message>
+    <message>
+        <source>Install or enable json.</source>
+        <translation>json installieren oder aktivieren.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the installation's var directory.</source>
+        <translation>Dem Benutzer des Webservers Schreibrechte auf das var-Verzeichnis der Installation geben.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the cache directory below var.</source>
+        <translation>Dem Benutzer des Webservers Schreibrechte auf das Cache-Verzeichnis unter var geben.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to var/&lt;site&gt;/storage (packages are kept there).</source>
+        <translation>Dem Benutzer des Webservers Schreibrechte auf var/&lt;site&gt;/storage geben (dort liegen die Pakete).</translation>
+    </message>
+    <message>
+        <source>Install or enable dom (php-xml).</source>
+        <translation>dom installieren oder aktivieren (php-xml).</translation>
+    </message>
+    <message>
+        <source>Install or enable xmlreader (php-xml).</source>
+        <translation>xmlreader installieren oder aktivieren (php-xml).</translation>
+    </message>
+    <message>
+        <source>Install or enable zlib.</source>
+        <translation>zlib installieren oder aktivieren.</translation>
+    </message>
+    <message>
+        <source>Install or enable zip (php-zip).</source>
+        <translation>zip installieren oder aktivieren (php-zip).</translation>
+    </message>
+    <message>
+        <source>Install or enable sodium (php-sodium).</source>
+        <translation>sodium installieren oder aktivieren (php-sodium).</translation>
+    </message>
+    <message>
+        <source>Install or enable curl (php-curl).</source>
+        <translation>curl installieren oder aktivieren (php-curl).</translation>
+    </message>
+    <message>
+        <source>Remove proc_open from disable_functions in php.ini.</source>
+        <translation>proc_open aus disable_functions in der php.ini entfernen.</translation>
+    </message>
+    <message>
+        <source>Remove exec from disable_functions in php.ini.</source>
+        <translation>exec aus disable_functions in der php.ini entfernen.</translation>
+    </message>
+    <message>
+        <source>Install the PHP command line binary, or name it in csv.ini [Jobs] PhpCli.</source>
+        <translation>Das PHP-Kommandozeilenprogramm installieren oder in csv.ini [Jobs] PhpCli angeben.</translation>
+    </message>
+    <message>
+        <source>Install tar and gzip on the server.</source>
+        <translation>tar und gzip auf dem Server installieren.</translation>
+    </message>
+    <message>
+        <source>Install or enable the PHP zip extension, or tar and gzip.</source>
+        <translation>Die PHP-Erweiterung zip installieren oder aktivieren, oder tar und gzip.</translation>
+    </message>
+    <message>
+        <source>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</source>
+        <translation>Den OpenSSH-Client installieren oder seinen Ordner in xrowextract.ini [Destinations] SshBinaryDir angeben.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

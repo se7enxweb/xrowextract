@@ -6507,6 +6507,194 @@
         <source>Export again: %count object(s) installed from %name</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%feature: not available on this server. Missing: %missing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every xrowextract page and command</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A CSV file with its manifest (ZIP download)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ZIP archives</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import of a file with its manifest (ZIP)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Background jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passwords and keys of destinations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HTTP, S3, WebDAV and FTP destinations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SFTP destinations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PHP 8.1 or later</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP mbstring extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP ctype extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP json extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A writable var directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A writable cache directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A writable storage directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP dom extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP xmlreader extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP zlib extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP zip extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP sodium extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP curl extension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP function proc_open()</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The PHP function exec()</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A PHP command line binary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The tar and gzip programs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>At least one archive format (PHP zip, or tar with gzip)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The OpenSSH client programs (sftp, ssh-keyscan, ssh-keygen)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Run the installation with a newer PHP.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable mbstring (php-mbstring).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable ctype.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable json.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the installation's var directory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the cache directory below var.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to var/&lt;site&gt;/storage (packages are kept there).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable dom (php-xml).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable xmlreader (php-xml).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable zlib.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable zip (php-zip).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable sodium (php-sodium).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable curl (php-curl).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove proc_open from disable_functions in php.ini.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove exec from disable_functions in php.ini.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install the PHP command line binary, or name it in csv.ini [Jobs] PhpCli.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install tar and gzip on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install or enable the PHP zip extension, or tar and gzip.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

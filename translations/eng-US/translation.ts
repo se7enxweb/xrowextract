@@ -6507,6 +6507,194 @@
         <source>Export again: %count object(s) installed from %name</source>
         <translation>Export again: %count object(s) installed from %name</translation>
     </message>
+    <message>
+        <source>%feature: not available on this server. Missing: %missing.</source>
+        <translation>%feature: not available on this server. Missing: %missing.</translation>
+    </message>
+    <message>
+        <source>Every xrowextract page and command</source>
+        <translation>Every xrowextract page and command</translation>
+    </message>
+    <message>
+        <source>A CSV file with its manifest (ZIP download)</source>
+        <translation>A CSV file with its manifest (ZIP download)</translation>
+    </message>
+    <message>
+        <source>ZIP archives</source>
+        <translation>ZIP archives</translation>
+    </message>
+    <message>
+        <source>Import of a file with its manifest (ZIP)</source>
+        <translation>Import of a file with its manifest (ZIP)</translation>
+    </message>
+    <message>
+        <source>Background jobs</source>
+        <translation>Background jobs</translation>
+    </message>
+    <message>
+        <source>Passwords and keys of destinations</source>
+        <translation>Passwords and keys of destinations</translation>
+    </message>
+    <message>
+        <source>HTTP, S3, WebDAV and FTP destinations</source>
+        <translation>HTTP, S3, WebDAV and FTP destinations</translation>
+    </message>
+    <message>
+        <source>SFTP destinations</source>
+        <translation>SFTP destinations</translation>
+    </message>
+    <message>
+        <source>PHP 8.1 or later</source>
+        <translation>PHP 8.1 or later</translation>
+    </message>
+    <message>
+        <source>The PHP mbstring extension</source>
+        <translation>The PHP mbstring extension</translation>
+    </message>
+    <message>
+        <source>The PHP ctype extension</source>
+        <translation>The PHP ctype extension</translation>
+    </message>
+    <message>
+        <source>The PHP json extension</source>
+        <translation>The PHP json extension</translation>
+    </message>
+    <message>
+        <source>A writable var directory</source>
+        <translation>A writable var directory</translation>
+    </message>
+    <message>
+        <source>A writable cache directory</source>
+        <translation>A writable cache directory</translation>
+    </message>
+    <message>
+        <source>A writable storage directory</source>
+        <translation>A writable storage directory</translation>
+    </message>
+    <message>
+        <source>The PHP dom extension</source>
+        <translation>The PHP dom extension</translation>
+    </message>
+    <message>
+        <source>The PHP xmlreader extension</source>
+        <translation>The PHP xmlreader extension</translation>
+    </message>
+    <message>
+        <source>The PHP zlib extension</source>
+        <translation>The PHP zlib extension</translation>
+    </message>
+    <message>
+        <source>The PHP zip extension</source>
+        <translation>The PHP zip extension</translation>
+    </message>
+    <message>
+        <source>The PHP sodium extension</source>
+        <translation>The PHP sodium extension</translation>
+    </message>
+    <message>
+        <source>The PHP curl extension</source>
+        <translation>The PHP curl extension</translation>
+    </message>
+    <message>
+        <source>The PHP function proc_open()</source>
+        <translation>The PHP function proc_open()</translation>
+    </message>
+    <message>
+        <source>The PHP function exec()</source>
+        <translation>The PHP function exec()</translation>
+    </message>
+    <message>
+        <source>A PHP command line binary</source>
+        <translation>A PHP command line binary</translation>
+    </message>
+    <message>
+        <source>The tar and gzip programs</source>
+        <translation>The tar and gzip programs</translation>
+    </message>
+    <message>
+        <source>At least one archive format (PHP zip, or tar with gzip)</source>
+        <translation>At least one archive format (PHP zip, or tar with gzip)</translation>
+    </message>
+    <message>
+        <source>The OpenSSH client programs (sftp, ssh-keyscan, ssh-keygen)</source>
+        <translation>The OpenSSH client programs (sftp, ssh-keyscan, ssh-keygen)</translation>
+    </message>
+    <message>
+        <source>Run the installation with a newer PHP.</source>
+        <translation>Run the installation with a newer PHP.</translation>
+    </message>
+    <message>
+        <source>Install or enable mbstring (php-mbstring).</source>
+        <translation>Install or enable mbstring (php-mbstring).</translation>
+    </message>
+    <message>
+        <source>Install or enable ctype.</source>
+        <translation>Install or enable ctype.</translation>
+    </message>
+    <message>
+        <source>Install or enable json.</source>
+        <translation>Install or enable json.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the installation's var directory.</source>
+        <translation>Give the web server user write access to the installation's var directory.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to the cache directory below var.</source>
+        <translation>Give the web server user write access to the cache directory below var.</translation>
+    </message>
+    <message>
+        <source>Give the web server user write access to var/&lt;site&gt;/storage (packages are kept there).</source>
+        <translation>Give the web server user write access to var/&lt;site&gt;/storage (packages are kept there).</translation>
+    </message>
+    <message>
+        <source>Install or enable dom (php-xml).</source>
+        <translation>Install or enable dom (php-xml).</translation>
+    </message>
+    <message>
+        <source>Install or enable xmlreader (php-xml).</source>
+        <translation>Install or enable xmlreader (php-xml).</translation>
+    </message>
+    <message>
+        <source>Install or enable zlib.</source>
+        <translation>Install or enable zlib.</translation>
+    </message>
+    <message>
+        <source>Install or enable zip (php-zip).</source>
+        <translation>Install or enable zip (php-zip).</translation>
+    </message>
+    <message>
+        <source>Install or enable sodium (php-sodium).</source>
+        <translation>Install or enable sodium (php-sodium).</translation>
+    </message>
+    <message>
+        <source>Install or enable curl (php-curl).</source>
+        <translation>Install or enable curl (php-curl).</translation>
+    </message>
+    <message>
+        <source>Remove proc_open from disable_functions in php.ini.</source>
+        <translation>Remove proc_open from disable_functions in php.ini.</translation>
+    </message>
+    <message>
+        <source>Remove exec from disable_functions in php.ini.</source>
+        <translation>Remove exec from disable_functions in php.ini.</translation>
+    </message>
+    <message>
+        <source>Install the PHP command line binary, or name it in csv.ini [Jobs] PhpCli.</source>
+        <translation>Install the PHP command line binary, or name it in csv.ini [Jobs] PhpCli.</translation>
+    </message>
+    <message>
+        <source>Install tar and gzip on the server.</source>
+        <translation>Install tar and gzip on the server.</translation>
+    </message>
+    <message>
+        <source>Install or enable the PHP zip extension, or tar and gzip.</source>
+        <translation>Install or enable the PHP zip extension, or tar and gzip.</translation>
+    </message>
+    <message>
+        <source>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</source>
+        <translation>Install the OpenSSH client, or name its folder in xrowextract.ini [Destinations] SshBinaryDir.</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>

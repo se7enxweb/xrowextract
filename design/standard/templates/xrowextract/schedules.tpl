@@ -23,9 +23,6 @@
         <ul>{foreach $errors as $error}<li>{$error|wash}</li>{/foreach}</ul>
     </div>
     {/if}
-    {if $jobs_available|not}
-    <p class="xe-note xe-note-bad">{'Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled): schedules cannot run.'|i18n('design/standard/extract')}</p>
-    {/if}
 
     <div class="xe-cards">
 

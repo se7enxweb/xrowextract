@@ -39,3 +39,5 @@
     </a>
     {undef $xe_tab_alerts}
 </nav>
+{* The Schedules tab has three parts, each with its own features: schedules_nav.tpl shows their notices *}
+{if $active|ne( 'schedules' )}{include uri='design:xrowextract/requirements_notice.tpl' page=$active}{/if}

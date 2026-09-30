@@ -23,9 +23,6 @@
         <ul>{foreach $errors as $error}<li>{$error|wash}</li>{/foreach}</ul>
     </div>
     {/if}
-    {if $secrets_available|not}
-    <p class="xe-note xe-note-bad">{'The PHP sodium extension is not available: passwords and keys cannot be stored.'|i18n('design/standard/extract')}</p>
-    {/if}
 
     <div class="xe-cards">
 
