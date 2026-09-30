@@ -198,7 +198,10 @@ if ( $job['type'] === 'import_schedule' )
 {
     // A scheduled import: fetch, dry run, and apply only when the dry run found no errors
     $patch = XrowExtractScheduler::runScheduledImport( $id, $runScript );
+    // Deleted from the Jobs page while it ran: nothing is left to record the result in
     $job = XrowExtractJob::load( $id );
+    if ( !$job )
+        $fail( "Job $id was removed while it ran." );
     $job = array_merge( $job, $patch );
     $job['ended'] = time();
     $job['warnings'] = array_values( array_unique( array_merge( isset( $patch['warnings'] ) ? $patch['warnings'] : array(), $logWarnings( $readLog() ) ) ) );
@@ -207,6 +210,8 @@ if ( $job['type'] === 'import_schedule' )
     XrowExtractJob::save( $id, $job );
     XrowExtractScheduler::afterJob( $id );
     $job = XrowExtractJob::load( $id );
+    if ( !$job )
+        $fail( "Job $id was removed while it ran." );
     $cli->output( sprintf( 'Job %s: %s%s', $id, $job['state'], $job['error'] ? ' (' . $job['error'] . ')' : '' ) );
     $script->shutdown( $job['state'] === 'failed' ? 1 : 0 );
 }
