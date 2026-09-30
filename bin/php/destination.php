@@ -71,13 +71,16 @@ $load = function ( $id ) use ( $fail )
         $fail( "No destination $id." );
     return $destination;
 };
-$pairs = function ( $values )
+$pairs = function ( $values, $option ) use ( $fail )
 {
     $out = array();
     foreach ( (array)$values as $entry )
     {
-        if ( strpos( (string)$entry, '=' ) === false )
+        if ( $entry === false || $entry === null || $entry === '' ) // the option was not given
             continue;
+        // A setting without "=" was dropped without a word, so the destination was saved without it
+        if ( strpos( (string)$entry, '=' ) === false || trim( strstr( (string)$entry, '=', true ) ) === '' )
+            $fail( "--$option takes key=value, not $entry." );
         list( $key, $value ) = explode( '=', (string)$entry, 2 );
         $out[trim( $key )] = $value;
     }
@@ -165,21 +168,21 @@ if ( $options['create'] || $options['update'] )
 {
     $existing = $options['update'] ? $load( $options['update'] ) : null;
     $secrets = array();
-    foreach ( $pairs( $options['secret-env'] ) as $name => $variable )
+    foreach ( $pairs( $options['secret-env'], 'secret-env' ) as $name => $variable )
     {
         $value = getenv( trim( $variable ) );
         if ( $value === false )
             $fail( "The environment variable $variable is not set (--secret-env)." );
         $secrets[$name] = $value;
     }
-    foreach ( $pairs( $options['secret-file'] ) as $name => $path )
+    foreach ( $pairs( $options['secret-file'], 'secret-file' ) as $name => $path )
     {
         if ( !is_file( $path ) || !is_readable( $path ) )
             $fail( "Cannot read $path (--secret-file)." );
         $secrets[$name] = (string)file_get_contents( $path );
     }
     $config = $existing ? $existing->configArray() : array();
-    $config = array_merge( $config, $pairs( $options['config'] ) );
+    $config = array_merge( $config, $pairs( $options['config'], 'config' ) );
     $result = XrowExtractDestination::saveFrom( array(
         'name' => $options['name'] ? $options['name'] : ( $existing ? $existing->attribute( 'name' ) : '' ),
         'type' => (string)$options['type'], 'config' => $config, 'secrets' => $secrets,
