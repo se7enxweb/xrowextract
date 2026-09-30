@@ -37,7 +37,7 @@ class XrowExtractScheduler
                     $errors[] = 'Choose a node set or node ids for the site archive.';
                 if ( !empty( $def['format'] ) && !array_key_exists( $def['format'], XrowExtractArchive::formats() ) )
                     $errors[] = 'Unknown archive format.';
-                if ( !empty( $def['files'] ) && !XrowExtractWriter::isFormat( $def['files'] ) )
+                if ( !empty( $def['files'] ) && !XrowExtractWriter::isRowFormat( $def['files'] ) )
                     $errors[] = 'Unknown file format.';
                 break;
             case 'package':

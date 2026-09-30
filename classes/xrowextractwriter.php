@@ -46,6 +46,20 @@ class XrowExtractWriter
         return is_string( $format ) && array_key_exists( $format, self::formats() );
     }
 
+    /**
+     * The formats written a row at a time (everything but the content package): what the files inside a site
+     * archive can be. A package of the archive's nodes is its own action ("Export as package").
+     */
+    public static function rowFormats()
+    {
+        return array_filter( self::formats(), function ( $format ) { return empty( $format['is_package'] ); } );
+    }
+
+    public static function isRowFormat( $format )
+    {
+        return is_string( $format ) && array_key_exists( $format, self::rowFormats() );
+    }
+
     public function __construct( $format, array $columns, $separator = ',', $escape = true, $newLine = "\n", array $meta = array() )
     {
         $this->format = self::isFormat( $format ) ? $format : 'csv';

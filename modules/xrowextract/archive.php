@@ -85,9 +85,9 @@ if ( $http->hasPostVariable( 'ArchiveColumns' ) && isset( $columnChoices[$http->
     $state['columns'] = $http->postVariable( 'ArchiveColumns' );
 if ( !isset( $state['columns'] ) || !isset( $columnChoices[$state['columns']] ) )
     $state['columns'] = 'standard';
-if ( $http->hasPostVariable( 'OutputFormat' ) && XrowExtractWriter::isFormat( $http->postVariable( 'OutputFormat' ) ) )
+if ( $http->hasPostVariable( 'OutputFormat' ) && XrowExtractWriter::isRowFormat( $http->postVariable( 'OutputFormat' ) ) )
     $state['output'] = $http->postVariable( 'OutputFormat' );
-if ( !isset( $state['output'] ) || !XrowExtractWriter::isFormat( $state['output'] ) )
+if ( !isset( $state['output'] ) || !XrowExtractWriter::isRowFormat( $state['output'] ) )
     $state['output'] = 'csv';
 if ( $http->hasPostVariable( 'LanguageSelection' ) )
     $state['plain_text'] = $http->hasPostVariable( 'PlainText' );
@@ -398,7 +398,7 @@ $choices = array();
 foreach ( $columnChoices as $id => $choice )
     $choices[] = array( 'id' => $id, 'name' => $choice[0], 'description' => $choice[1] );
 $tpl->setVariable( 'column_choices', $choices );
-$tpl->setVariable( 'output_formats', array_values( XrowExtractWriter::formats() ) );
+$tpl->setVariable( 'output_formats', array_values( XrowExtractWriter::rowFormats() ) );
 $tpl->setVariable( 'filters', $archiveFilters->values );
 $tpl->setVariable( 'filter_count', $archiveFilters->activeCount() );
 $archiveDateModes = XrowExtractFilters::dateModes();

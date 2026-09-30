@@ -199,8 +199,8 @@ $columnChoice = $options['columns'] ? $options['columns'] : 'standard';
 if ( !array_key_exists( $columnChoice, XrowExtractArchive::columnChoices() ) )
     $fail( "Unknown column choice $columnChoice (--columns). Choices: " . implode( ', ', array_keys( XrowExtractArchive::columnChoices() ) ) . '.' );
 $files = $options['files'] ? $options['files'] : 'csv';
-if ( !XrowExtractWriter::isFormat( $files ) )
-    $fail( "Unknown file format $files (--files). Formats: " . implode( ', ', array_keys( XrowExtractWriter::formats() ) ) . '.' );
+if ( !XrowExtractWriter::isRowFormat( $files ) )
+    $fail( "Unknown file format $files (--files). Formats: " . implode( ', ', array_keys( XrowExtractWriter::rowFormats() ) ) . '.' );
 $counts = XrowExtractArchive::classCounts( $roots, $languages );
 
 // Classes

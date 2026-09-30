@@ -279,7 +279,7 @@ class XrowExtractArchive
         $columnChoice = isset( $options['columns'] ) && array_key_exists( $options['columns'], self::columnChoices() ) ? $options['columns'] : 'standard';
         $plainText = !empty( $options['plain_text'] );
         $progress = isset( $options['progress'] ) && is_callable( $options['progress'] ) ? $options['progress'] : null;
-        $output = isset( $options['output'] ) && XrowExtractWriter::isFormat( $options['output'] ) ? $options['output'] : 'csv';
+        $output = isset( $options['output'] ) && XrowExtractWriter::isRowFormat( $options['output'] ) ? $options['output'] : 'csv';
         $formats = self::formats();
         if ( !isset( $formats[$format] ) || !$formats[$format]['available'] )
             throw new RuntimeException( 'Archive format not available: ' . $format );
