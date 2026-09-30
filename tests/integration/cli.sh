@@ -52,11 +52,25 @@ fi
 echo "INFO class $CLASS below node $NODE, as $RUNAS, extension/xrowextract of $ROOT"
 # t <label> <ok|fail|any> <regex the output must match, or ''> <script> [args...]
 #   ok: exit code 0; fail: exit code 1 to 3 with a message; any: 0 to 3
+# What the kernel logs instead of printing (a failed query, an error of eZDebug) counts too: the new
+# lines of var/log/error.log and warning.log since the case started
+LOGS="$ROOT/var/log/error.log $ROOT/var/log/warning.log"
+logsizes() { for f in $LOGS; do [ -f "$f" ] && stat -c %s "$f" || echo 0; done | tr '\n' ' '; }
+newlog() { # <sizes before>: new log text of this case, 404 lines left out
+  local i=1 f before
+  for f in $LOGS; do
+    before=$(echo "$1" | cut -d' ' -f$i); i=$((i + 1))
+    [ -f "$f" ] && tail -c +$((before + 1)) "$f"
+  done | grep -vE 'Error ocurred using URI|^\s*$' | grep -A1 -E '^\[ ' | grep -vE '^\[ |^--' | head -2 | tr '\n' ' '
+}
 t() {
   local label=$1 want=$2 expect=$3 script=$4
   shift 4
+  local sizes; sizes=$(logsizes)
   run "extension/xrowextract/bin/php/$script" "$@"
   local problems=""
+  local logged; logged=$(newlog "$sizes")
+  [ -n "$logged" ] && problems="logged: ${logged:0:220}"
   case "$want" in
     ok) [ "$rc" = 0 ] || problems="exit $rc (want 0)" ;;
     fail) { [ "$rc" -ge 1 ] && [ "$rc" -le 3 ]; } || problems="exit $rc (want 1 to 3)"
@@ -91,6 +105,9 @@ t 'csv --list-presets' ok 'site:' csv.php --list-presets
 t 'csv --show-preset of a site preset' ok 'Placeholders' csv.php --show-preset="$(sed -n 's/^\[Preset_\(.*\)\]$/site:\1/p' "$ROOT/extension/xrowextract/settings/xrowextract.ini" | head -1)"
 t 'csv: unknown class' fail 'No class' csv.php --class=no_such_class_xyz
 t 'csv: node that does not exist' fail '' csv.php --class=$CLASS --node=999999999
+t 'csv: node beyond any id' fail '' csv.php --class=$CLASS --node=99999999999999999999
+t 'csv: node that is not a number' fail '' csv.php --class=$CLASS --node=abc
+t 'csv: class beyond any id' fail 'No class' csv.php --class=99999999999999999999
 t 'csv: unknown format' fail '' csv.php --class=$CLASS --scope=all --format=pdf
 t 'csv: quote as separator' fail 'separator' csv.php --class=$CLASS --separator='"'
 t 'csv: unknown column' fail 'Unknown column' csv.php --class=$CLASS --columns=no_such_column
@@ -113,6 +130,8 @@ t 'archive zip' ok '^Wrote ' archive.php --nodes=$NODE --classes=$CLASS --format
 t 'archive tar.gz, json files' ok '^Wrote ' archive.php --nodes=$NODE --classes=$CLASS --format=tar.gz --files=json --output="$W/"
 t 'archive: node that does not exist' fail '' archive.php --nodes=999999999
 t 'archive: nodes that are not ids' fail '' archive.php --nodes=abc
+t 'archive: nodes beyond any id' fail '' archive.php --nodes=99999999999999999999
+t 'archive: class beyond any id' fail '' archive.php --nodes=$NODE --classes=99999999999999999999
 t 'archive: unknown class' fail '' archive.php --nodes=$NODE --classes=no_such_class_xyz
 t 'archive: unknown set' fail '' archive.php --set=no_such_set
 t 'archive: unknown format' fail '' archive.php --nodes=$NODE --format=exe
@@ -131,6 +150,8 @@ t 'package: inspect a file that is not a package' fail '' package.php --inspect=
 t 'package: install without a parent' any '' package.php --install=xrowextract_export_clitest --dry-run
 t 'package: install unknown package' fail '' package.php --install=no_such_package_xyz --dry-run --parent=$NODE
 t 'package: parent that does not exist' fail '' package.php --install=xrowextract_export_clitest --dry-run --parent=999999999
+t 'package: parent beyond any id' fail '' package.php --install=xrowextract_export_clitest --dry-run --parent=99999999999999999999
+t 'package: export of a node beyond any id' fail '' package.php --export --node=99999999999999999999 --file="$W/x.ezpkg"
 t 'package: unknown object mode' fail '' package.php --install=xrowextract_export_clitest --dry-run --parent=$NODE --object-mode=bogus
 t 'package --compare with this site' ok 'compared with this site' package.php --compare=xrowextract_export_clitest
 t 'package: export without a node' fail 'Missing --node' package.php --export --file="$W/x.ezpkg"
@@ -160,6 +181,8 @@ t 'import: JSON that is not rows' any '' import.php --file="$W/scalar.json"
 t 'import: a zip that is not one' fail '' import.php --file="$W/fake.zip"
 t 'import: unknown class' fail '' import.php --file="$W/folder.csv" --class=no_such_class_xyz --parent=$NODE
 t 'import: parent that does not exist' any '' import.php --file="$W/folder.csv" --class=$CLASS --parent=999999999
+t 'import: parent beyond any id' any '' import.php --file="$W/folder.csv" --class=$CLASS --parent=99999999999999999999
+t 'import: class beyond any id' fail '' import.php --file="$W/folder.csv" --class=99999999999999999999 --parent=$NODE
 t 'import: unknown match mode' fail 'Unknown --match' import.php --file="$W/folder.csv" --class=$CLASS --match=bogus
 t 'import: unknown language' fail 'Unknown language' import.php --file="$W/folder.csv" --class=$CLASS --language=xx-XX
 t 'import: map to an unknown target' any '' import.php --file="$W/folder.csv" --class=$CLASS --parent=$NODE --map=name=no_such_target
@@ -174,6 +197,7 @@ t 'schedule --next' ok '' schedule.php --next='*/15 * * * *'
 t 'schedule --cron' ok '' schedule.php --cron
 t 'schedule: --next of an invalid expression' fail '' schedule.php --next='61 * * * *'
 t 'schedule: show one that does not exist' fail 'No schedule' schedule.php --show=999999999
+t 'schedule: show one beyond any id' fail 'No schedule' schedule.php --show=99999999999999999999
 t 'schedule: run one that does not exist' fail 'No schedule' schedule.php --run=999999999
 t 'schedule: enable one that does not exist' fail '' schedule.php --enable=999999999
 t 'schedule: create without a name' fail '' schedule.php --create --kind=archive --frequency=daily
@@ -188,6 +212,7 @@ else failed=$((failed + 1)); echo "FAIL runcronjobs.php xrowextract: exit $rc"; 
 t 'destination --list' ok '' destination.php --list
 t 'destination --list --json' ok '' destination.php --list --json
 t 'destination: test one that does not exist' fail 'No destination' destination.php --test=999999999
+t 'destination: test one beyond any id' fail 'No destination' destination.php --test=99999999999999999999
 t 'destination: scan host keys of one that does not exist' fail 'No destination' destination.php --scan-host-key=999999999
 t 'destination: create of an unknown type' fail '' destination.php --create --name=cli-test --type=gopher
 t 'destination: create with a setting that is not key=value' fail 'takes key=value' destination.php --create --name=cli-test --type=local --config='{nope'
@@ -198,6 +223,8 @@ t 'history' ok '' history.php --limit=5
 t 'history --json' ok '' history.php --limit=5 --json
 t 'history with filters' ok '' history.php --state=done --kind=csv --from=2026-01-01 --to=2026-12-31
 t 'history: show a row that does not exist' fail 'No history row' history.php --show=999999999
+t 'history: show a row beyond any id' fail 'No history row' history.php --show=99999999999999999999
+t 'history: a schedule beyond any id' ok '' history.php --schedule=99999999999999999999
 t 'history: unknown state' any '' history.php --state=bogus
 t 'history: unreadable date' any '' history.php --from=yesterday-ish
 t 'job --list' ok '' job.php --list

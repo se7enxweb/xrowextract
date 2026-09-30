@@ -11,11 +11,16 @@ JavaScript error on the page. A bad parameter must be answered with a message or
   admin path  the admin siteaccess prefix (default /admin)
 Environment: XROWEXTRACT_TEST_PASSWORD (required, never printed), XROWEXTRACT_TEST_LOGIN (default
 admin), XROWEXTRACT_TEST_PACKAGE (a package of the repository for the per-package views; default: the
-first one the package list shows), XROWEXTRACT_TEST_SHOTS (a directory for a screenshot of every failing view).
+first one the package list shows), XROWEXTRACT_TEST_SHOTS (a directory for a screenshot of every failing view),
+XROWEXTRACT_TEST_LOGS (the installation's log files, comma separated: a new entry about xrowextract in one
+of them fails the view too, which finds the PHP warnings and notices the kernel logs instead of showing).
 PASS/FAIL per view; the last line is the summary; exit code 1 when a view failed."""
 import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from xetest import LogWatch, login, php_error_in  # noqa: E402
 
 try:
     from playwright.sync_api import sync_playwright
@@ -35,9 +40,7 @@ if not PASSWORD:
     print('FAIL XROWEXTRACT_TEST_PASSWORD is not set')
     sys.exit(2)
 
-PHP_ERRORS = re.compile(r'(<b>)?(Fatal error|Parse error|Warning|Notice|Deprecated|Recoverable fatal error)(</b>)?: |'
-                        r'Uncaught [A-Z][A-Za-z\\]+|Stack trace:|An unexpected error has occurred|'
-                        r'Undefined (variable|array key|index|offset)|Call to a member function')
+LOGS = LogWatch()
 HEX32 = '0123456789abcdef' * 2
 fails = 0
 count = 0
@@ -68,10 +71,11 @@ def check(page, path, label, allow_404=False, js_errors=None):
         problems.append('HTTP %d' % status)
     if status == 404 and not allow_404:
         problems.append('HTTP 404')
-    m = PHP_ERRORS.search(body)
-    if m:
-        text = re.sub(r'<[^>]+>', ' ', body[max(0, m.start() - 80):m.end() + 160])
-        problems.append('PHP: ' + ' '.join(text.split())[:220])
+    error = php_error_in(body)
+    if error:
+        problems.append('PHP: ' + error)
+    for entry in LOGS.new_entries():
+        problems.append('log: ' + entry)
     if js_errors:
         problems.append('JS: ' + '; '.join(e[:160] for e in js_errors[:2]))
     if problems:
@@ -94,12 +98,7 @@ with sync_playwright() as p:
     page = context.new_page()
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto(BASE + ADMIN + '/user/login')
-    page.fill('input[name="Login"]', LOGIN)
-    page.fill('input[name="Password"]', PASSWORD)
-    page.click('input[name="LoginButton"]')
-    page.wait_for_load_state('networkidle')
-    if page.locator('input[name="Password"]').count():
+    if not login(page, BASE, ADMIN, LOGIN, PASSWORD):
         print('FAIL could not log in as %s' % LOGIN)
         sys.exit(1)
 
@@ -145,6 +144,10 @@ with sync_playwright() as p:
         ('/xrowextract/schedules/999999999', 'schedules/<no such schedule>'),
         ('/xrowextract/schedules/abc', 'schedules/<not an id>'),
         ('/xrowextract/schedules/-1', 'schedules/-1'),
+        ('/xrowextract/schedules/99999999999999999999999', 'schedules/<id beyond any integer>'),
+        ('/xrowextract/destinations/99999999999999999999999', 'destinations/<id beyond any integer>'),
+        ('/xrowextract/history?schedule=99999999999999999999999&offset=99999999999999999999999', 'history with ids beyond any integer'),
+        ('/xrowextract/csv?Class_id=99999999999999999999999&Subtree=99999999999999999999999', 'csv with ids beyond any integer'),
         ('/xrowextract/destinations/999999999', 'destinations/<no such destination>'),
         ('/xrowextract/destinations/abc', 'destinations/<not an id>'),
         ('/xrowextract/history?state=%3Cb%3E&kind=x&schedule=abc&offset=-5&from=2026-99-99&to=never&text=%3Cscript%3E', 'history with bad filters'),

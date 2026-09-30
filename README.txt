@@ -193,3 +193,10 @@ Tests
                       a JavaScript error (part "views", XROWEXTRACT_TEST_URL
                       and XROWEXTRACT_TEST_PASSWORD); works the same against
                       Apache, php -S and Velocity
+  tests/integration/views_post.py <base URL>
+                      every POST variable of every view with hostile values
+                      (arrays, markup, paths, ids beyond any integer); it
+                      submits forms, so a test installation only (bin/check.sh
+                      --only=posts). Both browser tests and cli.sh also watch
+                      the installation's log files (XROWEXTRACT_TEST_LOGS for
+                      the browser tests) for new errors about xrowextract.

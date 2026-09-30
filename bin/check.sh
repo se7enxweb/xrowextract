@@ -2,7 +2,7 @@
 # The release gate of xrowextract: every check a release has to pass, one PASS/FAIL line per part, exit
 # code 1 when any part fails (2 for a usage error). Run it from anywhere; it works on the clone it is in.
 #
-#   bin/check.sh [--php=/path/to/php] [--only=lint,ts,dup,phpstan,unit,cli,views]
+#   bin/check.sh [--php=/path/to/php] [--only=lint,ts,dup,phpstan,unit,cli,views,posts]
 #
 #   lint     php -l on every PHP file of the extension with that PHP binary, with every error level on,
 #            so a compile-time deprecation (e.g. an implicitly nullable parameter) fails as well
@@ -14,6 +14,8 @@
 #            XROWEXTRACT_TEST_ROOT set; it writes to that installation's content and database)
 #   views    tests/integration/views.py: every admin view by GET in a browser (only with
 #            XROWEXTRACT_TEST_URL and XROWEXTRACT_TEST_PASSWORD set)
+#   posts    tests/integration/views_post.py: hostile values for every POST variable (only with --only=posts;
+#            it submits forms, so a test installation only)
 # Without --only, every part runs whose requirements are there; cli and views are reported as SKIP
 # when their variables are not set.
 #
@@ -153,6 +155,19 @@ if want views; then
     rc=$?
     summary=$(printf '%s\n' "$out" | tail -1)
     [ $rc = 0 ] && pass "views: ${summary#PASS }" || { printf '%s\n' "$out" | grep -E '^FAIL' | head -30 | sed 's/^/  /'; fail "views: ${summary#FAIL }"; }
+  fi
+fi
+
+# posts: hostile values for every POST variable of every view. It submits forms (it can create, change
+# or delete schedules, destinations, presets, jobs), so it runs only when asked for with --only=posts.
+if [ -n "$ONLY" ] && want posts; then
+  if [ -z "${XROWEXTRACT_TEST_URL:-}" ] || [ -z "${XROWEXTRACT_TEST_PASSWORD:-}" ]; then
+    fail "posts: XROWEXTRACT_TEST_URL / XROWEXTRACT_TEST_PASSWORD are not set"
+  else
+    out=$(python3 tests/integration/views_post.py "$XROWEXTRACT_TEST_URL" 2>&1)
+    rc=$?
+    summary=$(printf '%s\n' "$out" | tail -1)
+    [ $rc = 0 ] && pass "posts: ${summary#PASS }" || { printf '%s\n' "$out" | grep -E '^FAIL' | head -30 | sed 's/^/  /'; fail "posts: ${summary#FAIL }"; }
   fi
 fi
 
