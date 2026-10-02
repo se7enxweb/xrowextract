@@ -2,6 +2,7 @@
 /**
  * The code of extension/xrowextract/bin/php/archive.php, moved into a class (#207 stage 1). The file extension/xrowextract/bin/php/archive.php is one call to it.
  * Guide: doc/bc/6.0/cli_cronjob_view_abstractions.md
+ * @description Export the content below nodes as one archive: a CSV file per class and a manifest
  */
 /*
  * The original header of extension/xrowextract/bin/php/archive.php:

@@ -2,6 +2,7 @@
 /**
  * The code of extension/xrowextract/bin/php/package.php, moved into a class (#207 stage 1). The file extension/xrowextract/bin/php/package.php is one call to it.
  * Guide: doc/bc/6.0/cli_cronjob_view_abstractions.md
+ * @description Inspect, install, export or build a sample of a content package (.ezpkg)
  */
 /*
  * The original header of extension/xrowextract/bin/php/package.php:
