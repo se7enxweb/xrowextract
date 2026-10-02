@@ -27,99 +27,11 @@
  *     linking here for the rest;
  *   - a link added to the kernel's own package/view/full/<name>
  *     (extension/xrowextract/design/standard/override/templates/package/view/full.tpl).
+ *
+ * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @license GNU General Public License v2.0 (or any later version)
+ * @package kernel
  */
 
-$module = $Params['Module'];
-$tpl = eZTemplate::factory();
-
-// A plain variable, not a class/file-level const: this script runs again for every request a
-// long-running Velocity worker serves in the same process, and a top-level `const` (or a bare
-// `function`) declared here would fatal ("cannot redeclare") on the second one.
-$pageSize = 50;
-
-$packageName = isset( $Params['PackageName'] ) ? (string)$Params['PackageName'] : '';
-$package = $packageName !== '' ? eZPackage::fetch( $packageName ) : false;
-if ( !$package instanceof eZPackage )
-{
-    $Result = array();
-    // The page content is HTML: the name comes from the address, so it is escaped
-    $Result['content'] = htmlspecialchars( ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', null, array( '%name' => $packageName ) ), ENT_QUOTES, 'UTF-8' );
-    $Result['path'] = array(
-        array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
-        array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Package contents' ) ),
-    );
-    return $Result;
-}
-
-$allFiles = XrowExtractPackage::allPackageFiles( $package );
-$total = count( $allFiles );
-$offset = isset( $Params['Offset'] ) && ctype_digit( (string)$Params['Offset'] ) ? (int)$Params['Offset'] : 0;
-if ( $offset >= $total && $total > 0 )
-    $offset = (int)( floor( ( $total - 1 ) / $pageSize ) * $pageSize );
-$pageFiles = array_slice( $allFiles, $offset, $pageSize );
-
-// Viewing one file's contents: found by its index in the whole list (not only this page - a direct
-// link, or a browser back/forward, may land on a file whose page differs from the one currently
-// shown), and only ever read once its kind and existence are confirmed the safe way, through
-// packageFilePath() (no path traversal, no symlink escape).
-$viewIndex = isset( $Params['ViewIndex'] ) && ctype_digit( (string)$Params['ViewIndex'] ) ? (int)$Params['ViewIndex'] : -1;
-$viewedFile = null;
-$viewedContent = null;
-if ( $viewIndex >= 0 && isset( $allFiles[$viewIndex] ) )
-{
-    $viewedFile = $allFiles[$viewIndex];
-    $viewedFile['index'] = $viewIndex;
-    if ( $viewedFile['kind'] !== 'image' )
-    {
-        $realPath = XrowExtractPackage::packageFilePath( $package, $viewedFile['path'] );
-        if ( $realPath !== false )
-        {
-            $bytes = (string)@file_get_contents( $realPath );
-            $viewedContent = $viewedFile['kind'] === 'xml' ? XrowExtractPackage::prettyPrintXML( $bytes ) : $bytes;
-        }
-        else
-        {
-            $viewedFile = null; // packageFilePath() refused it; behave as if nothing was found
-        }
-    }
-}
-// Every row needs its own index (into the full list, not the page slice) for its View/Download
-// links, so this is computed here rather than asking the template to add $offset + a loop counter
-foreach ( $pageFiles as $i => &$fileRow )
-    $fileRow['index'] = $offset + $i;
-unset( $fileRow );
-
-$tpl->setVariable( 'PackageName', $packageName );
-$tpl->setVariable( 'Package', $package );
-// The other content packages, for "Compare with" (xrowextract/compare)
-$otherPackages = array();
-foreach ( XrowExtractPackage::repositoryPackages() as $repositoryPackage )
-    if ( $repositoryPackage['name'] !== $packageName )
-        $otherPackages[] = $repositoryPackage;
-$tpl->setVariable( 'OtherPackages', $otherPackages );
-$tpl->setVariable( 'Files', $pageFiles );
-$tpl->setVariable( 'FilesTotal', $total );
-$tpl->setVariable( 'FilesOffset', $offset );
-$tpl->setVariable( 'FilesPageSize', $pageSize );
-$tpl->setVariable( 'ViewedFile', $viewedFile );
-$tpl->setVariable( 'ViewedContent', $viewedContent );
-// eZ TPL has no arithmetic operators of its own here; every number the template needs beyond the
-// plain values above (the "N to M of T" line, the prev/next page offsets) is worked out in PHP
-// instead of trying to compute it in the template.
-$tpl->setVariable( 'FilesShownFrom', $pageFiles ? $offset + 1 : 0 );
-$tpl->setVariable( 'FilesShownTo', $offset + count( $pageFiles ) );
-$tpl->setVariable( 'FilesHasPrevious', $offset > 0 );
-$tpl->setVariable( 'FilesPreviousOffset', max( 0, $offset - $pageSize ) );
-$tpl->setVariable( 'FilesHasNext', $offset + $pageSize < $total );
-$tpl->setVariable( 'FilesNextOffset', $offset + $pageSize );
-
-$Result = array();
-$Result['content'] = $tpl->fetch( 'design:xrowextract/browse.tpl' );
-$Result['path'] = array(
-    array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
-    array( 'url' => 'xrowextract/package', 'text' => ezpI18n::tr( 'design/standard/extract', 'Package' ) ),
-    array( 'url' => false, 'text' => ezpI18n::tr( 'design/standard/extract', 'Package contents' ) ),
-);
-$Result['left_menu'] = 'design:xrowextract/menu_package.tpl';
-
-?>
+// The code is in extension/xrowextract/classes/runnable/views/xrowextract/browse.php (#207); this file is the entry point.
+return \Exponential\View\Extension\Xrowextract\Xrowextract\Browse::main( __FILE__, get_defined_vars() );

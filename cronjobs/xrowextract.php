@@ -8,18 +8,11 @@
  *   crontab: *\/5 * * * * cd /path/to/exponential && php runcronjobs.php xrowextract >/dev/null 2>&1
  *
  * Manually, with the same result: php extension/xrowextract/bin/php/schedule.php --cron
+ *
+ * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @license GNU General Public License v2.0 (or any later version)
+ * @package kernel
  */
 
-$log = function ( $line ) use ( $cli, $isQuiet )
-{
-    if ( !$isQuiet )
-        $cli->output( 'xrowextract: ' . $line );
-};
-$stats = XrowExtractScheduler::runDue( time(), $log );
-if ( !$isQuiet )
-{
-    $cli->output( sprintf( 'xrowextract: %d started, %d skipped, %d still running, %d job folder(s) and %d history row(s) cleaned',
-                           $stats['started'], $stats['skipped'], $stats['busy'], $stats['cleaned_jobs'], $stats['cleaned_history'] ) );
-}
-
-?>
+// The code is in extension/xrowextract/classes/runnable/cronjobs/xrowextract.php (#207); this file is the entry point.
+return \Exponential\Cronjob\Extension\Xrowextract\Xrowextract::main( __FILE__, get_defined_vars() );

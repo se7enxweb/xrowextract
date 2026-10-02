@@ -1,0 +1,417 @@
+<?php
+/**
+ * The code of extension/xrowextract/modules/xrowextract/package.php, moved into a class (#207 stage 1). The file extension/xrowextract/modules/xrowextract/package.php is one call to it.
+ * Guide: doc/bc/6.0/cli_cronjob_view_abstractions.md
+ */
+/*
+ * The original header of extension/xrowextract/modules/xrowextract/package.php:
+ *
+ *
+ * Content-package (.ezpkg) support: upload or pick a package already in the
+ * repository, inspect it (a dry run: what it carries and what would happen,
+ * nothing written), install it through the kernel package system, or build a
+ * rich sample "content + class" package for a chosen class.
+ *
+ * The heavy lifting (parsing, matching, installing, sample generation) is in
+ * XrowExtractPackage; this view is only the HTTP/session plumbing, the same
+ * split xrowextract/import.php uses for XrowExtractImport.
+ *
+ */
+
+namespace Exponential\View\Extension\Xrowextract\Xrowextract
+{
+
+class Package extends \Exponential\Runnable\ModuleView
+{
+    public function run( array $scope )
+    {
+        // the including function's variables ($Params, $Module, $cli, ...)
+        foreach ( array_keys( $scope ) as $__name )
+            if ( $__name !== 'this' && $__name !== 'scope' )
+                ${$__name} = &$scope[$__name];
+        unset( $__name );
+
+        $module = $Params['Module'];
+        $http = \eZHTTPTool::instance();
+        $tpl = \eZTemplate::factory();
+
+        $SESSION_KEY = 'XROWEXTRACT_PACKAGE_NAME';
+        $RENAME_NOTICE_KEY = 'XROWEXTRACT_PACKAGE_RENAME_NOTICE';
+
+        // ---------------------------------------------------------------- upload
+        //
+        // Two ways in, same as the import page: a chunked upload (design/standard/javascript/
+        // xrowextract-upload.js) adopted by its UploadID - the default for anything above a small size,
+        // since one huge multipart POST is exactly what a slow-arriving body needs on Velocity, where the
+        // read loop that is still waiting for the rest of a large body is a live worker a size/idle check
+        // elsewhere can race - and the plain whole-file POST any browser (or a script) still falls back to
+        // without JavaScript. Either way the stored file goes through the same archive safety scan and
+        // import as before.
+
+        // A closure kept in a local variable, not a named function: this script runs again for every
+        // request a long-running Velocity worker serves in the same process, and a bare `function
+        // xrowExtractPackageFinishUpload(){}` declared at the top level here would fatal ("cannot
+        // redeclare") on the second one. $forgetFile above (xrowextract/import.php) sets the pattern.
+        $finishUpload = function ( $stored, $ownedByUpload, $uploadID ) use ( $module, $SESSION_KEY, $RENAME_NOTICE_KEY )
+        {
+            $result = \XrowExtractPackage::importUploadedArchive( $stored );
+            if ( $ownedByUpload )
+                \XrowExtractUpload::delete( $uploadID );
+            else
+                @unlink( $stored );
+            if ( $result['ok'] )
+            {
+                $_SESSION[$SESSION_KEY] = $result['package']->attribute( 'name' );
+                if ( $result['renamed'] )
+                {
+                    $_SESSION[$RENAME_NOTICE_KEY] = \ezpI18n::tr( 'design/standard/extract',
+                        'The package’s own name ("%from") is not a valid identifier; it was imported as "%to".', null,
+                        array( '%from' => $result['renamed_from'], '%to' => $result['renamed_to'] ) );
+                }
+                return $module->redirectTo( 'xrowextract/package' );
+            }
+            return \ezpI18n::tr( 'design/standard/extract', 'The package could not be read: %reason', null, array( '%reason' => $result['error'] ) );
+        };
+
+        $uploadError = '';
+        if ( $http->hasPostVariable( 'UploadPackage' ) && $http->hasPostVariable( 'UploadID' ) && (string)$http->postVariable( 'UploadID' ) !== '' )
+        {
+            $uploadID = (string)$http->postVariable( 'UploadID' );
+            $stored = \XrowExtractUpload::path( $uploadID );
+            if ( $stored === false )
+            {
+                $uploadError = \ezpI18n::tr( 'design/standard/extract', 'The upload could not be found; it may have expired. Choose the file again.' );
+            }
+            else
+            {
+                $outcome = $finishUpload( $stored, true, $uploadID );
+                if ( is_string( $outcome ) )
+                    $uploadError = $outcome;
+                else
+                    return $this->viewResult( isset( $Result ) ? $Result : null,  $outcome );
+            }
+        }
+        elseif ( $http->hasPostVariable( 'UploadPackage' ) )
+        {
+            if ( \eZHTTPFile::canFetch( 'PackageBinaryFile' ) )
+            {
+                $file = \eZHTTPFile::fetch( 'PackageBinaryFile' );
+                list( $hasRoom, $roomMessage ) = $file ? \XrowExtractUpload::hasRoomFor( (int)$file->attribute( 'filesize' ) ) : array( true, '' );
+                if ( !$hasRoom )
+                {
+                    $uploadError = $roomMessage;
+                }
+                else
+                {
+                    // The upload is first copied into the private upload folder under a name with its own
+                    // extension, then goes through the same path as the import page: the archive safety scan
+                    // (no symlinks, hard links, special entries or paths leaving the folder) before anything is
+                    // unpacked, and every kernel/archive exception turned into a message. Passing the web
+                    // server's raw temporary file straight to eZPackage::import() skipped the scan, and on
+                    // Velocity the archive reader could not open that temporary file: an uncaught
+                    // ezcBaseFilePermissionException, a 500.
+                    $stored = $file ? \XrowExtractImport::storeUpload( $file->attribute( 'filename' ), $file->attribute( 'original_filename' ) ) : false;
+                    if ( $stored )
+                    {
+                        $outcome = $finishUpload( $stored, false, null );
+                        if ( is_string( $outcome ) )
+                            $uploadError = $outcome;
+                        else
+                            return $this->viewResult( isset( $Result ) ? $Result : null,  $outcome );
+                    }
+                    else
+                    {
+                        $uploadError = \ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be read.' );
+                    }
+                }
+            }
+            else
+            {
+                $uploadError = \ezpI18n::tr( 'design/standard/extract', 'Choose a file first.' );
+            }
+        }
+        $tpl->setVariable( 'UploadError', $uploadError );
+        $renameNotice = isset( $_SESSION[$RENAME_NOTICE_KEY] ) ? (string)$_SESSION[$RENAME_NOTICE_KEY] : '';
+        unset( $_SESSION[$RENAME_NOTICE_KEY] );
+        $tpl->setVariable( 'RenameNotice', $renameNotice );
+        $diskFree = \XrowExtractUpload::freeDiskSpace();
+        $tpl->setVariable( 'UploadDiskFree', $diskFree !== null ? \XrowExtractUpload::humanSize( $diskFree ) : false );
+        $uploadJsFile = dirname( $this->scriptFile() ) . '/../../design/standard/javascript/xrowextract-upload.js';
+        $tpl->setVariable( 'UploadScriptVersion', is_file( $uploadJsFile ) ? substr( md5_file( $uploadJsFile ) ?: '0', 0, 12 ) : '0' );
+
+        // ---------------------------------------------------------------- pick the current package
+
+        if ( $http->hasPostVariable( 'ForgetPackage' ) )
+        {
+            unset( $_SESSION[$SESSION_KEY] );
+            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/package' ) );
+        }
+
+        $packageName = '';
+        if ( $http->hasPostVariable( 'PackageName' ) )
+            $packageName = (string)$http->postVariable( 'PackageName' );
+        elseif ( isset( $Params['PackageName'] ) && $Params['PackageName'] )
+            $packageName = (string)$Params['PackageName'];
+        elseif ( isset( $_SESSION[$SESSION_KEY] ) )
+            $packageName = (string)$_SESSION[$SESSION_KEY];
+
+        $package = $packageName !== '' ? \eZPackage::fetch( $packageName ) : false;
+        if ( $package instanceof \eZPackage )
+            $_SESSION[$SESSION_KEY] = $packageName;
+        else
+            $packageName = '';
+
+        $tpl->setVariable( 'PackageName', $packageName );
+        $tpl->setVariable( 'Package', $package instanceof \eZPackage ? $package : false );
+
+        // The package contents browser (#26): a short preview here (design:xrowextract/
+        // package_files_preview.tpl), "Browse all N files" linking to the full paginated
+        // xrowextract/browse/<name> for the rest.
+        $filesPreview = $package instanceof \eZPackage ? \XrowExtractPackage::packageFilesPreview( $package ) : array( 'files' => array(), 'total' => 0 );
+        $tpl->setVariable( 'Files', $filesPreview['files'] );
+        $tpl->setVariable( 'FilesTotal', $filesPreview['total'] );
+        $tpl->setVariable( 'FilesOffset', 0 );
+        $tpl->setVariable( 'ViewedFile', false );
+
+        // ---------------------------------------------------------------- install options
+        // (ParentNodeID is resolved before the first inspect() call below, so the dry run can describe
+        // where a new top-level object would land under the parent currently chosen on the page)
+
+        $ParentNodeID = $http->hasPostVariable( 'ParentNodeID' ) ? \XrowExtractColumns::dbID( $http->postVariable( 'ParentNodeID' ) ) : 0;
+        if ( !$ParentNodeID )
+        {
+            $publicContentINI = \eZSiteAccess::getIni( \eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' ), 'content.ini' );
+            $ParentNodeID = (int)$publicContentINI->variable( 'NodeSettings', 'RootNode' );
+        }
+        $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
+        $parentNode = $ParentNodeID ? \eZContentObjectTreeNode::fetch( $ParentNodeID ) : null;
+        $tpl->setVariable( 'ParentNode', ( $parentNode instanceof \eZContentObjectTreeNode && $parentNode->canRead() )
+            ? array( 'name' => $parentNode->attribute( 'name' ), 'path' => $parentNode->attribute( 'path_identification_string' ), 'node_id' => $ParentNodeID ) : false );
+
+        // The dry run, worked out once per package and reused while paging (XrowExtractPackage::cachedInspection():
+        // a 4339-object package takes about 9 s to compare with the site); "Check again" works it out anew
+        $inspection = false;
+        if ( $package instanceof \eZPackage )
+            $inspection = \XrowExtractPackage::cachedInspection( $package, $ParentNodeID, $http->hasPostVariable( 'RecheckInspection' ) );
+
+        // Its object list a page at a time: how many per page (25 ... 1000 or all, remembered per user) and which page
+        $perPageChoices = array( '25', '50', '100', '250', '1000', 'all' );
+        $perPage = isset( $_GET['per_page'] ) && in_array( (string)$_GET['per_page'], $perPageChoices, true ) ? (string)$_GET['per_page'] : '';
+        if ( $perPage !== '' )
+            \eZPreferences::setValue( 'admin_xrowextract_pkg_per_page', $perPage );
+        else
+            $perPage = in_array( (string)\eZPreferences::value( 'admin_xrowextract_pkg_per_page' ), $perPageChoices, true ) ? (string)\eZPreferences::value( 'admin_xrowextract_pkg_per_page' ) : '50';
+        // ... narrowed by the filters first (what the install would do, the class, a part of the name or remote id),
+        // all worked out on the cached dry run - no new inspect() for a filter or a page
+        $inspectionStates = array( 'create', 'update', 'unchanged', 'class_missing' );
+        $filterState = isset( $_GET['state'] ) && in_array( (string)$_GET['state'], $inspectionStates, true ) ? (string)$_GET['state'] : '';
+        $filterClass = isset( $_GET['class'] ) && preg_match( '/^[A-Za-z0-9_]{1,100}$/', (string)$_GET['class'] ) ? (string)$_GET['class'] : '';
+        $filterText = isset( $_GET['q'] ) ? mb_substr( trim( (string)$_GET['q'] ), 0, 100 ) : '';
+        $allObjectsTotal = $inspection ? count( $inspection['objects'] ) : 0;
+        $objectClasses = $inspection ? \XrowExtractPackage::inspectionObjectClasses( $inspection['objects'] ) : array();
+        if ( $inspection )
+            $inspection['objects'] = \XrowExtractPackage::filterInspectionObjects( $inspection['objects'], $filterState, $filterClass, $filterText );
+        $filterQuery = array();
+        foreach ( array( 'state' => $filterState, 'class' => $filterClass, 'q' => $filterText ) as $key => $value )
+            if ( $value !== '' )
+                $filterQuery[$key] = $value;
+        $tpl->setVariable( 'InspectionFilter', array(
+            'state' => $filterState, 'class' => $filterClass, 'q' => $filterText, 'active' => (bool)$filterQuery,
+            'classes' => $objectClasses, 'all_total' => $allObjectsTotal,
+            // For the pager and per-page links, which are query-only (href="?page=..."): every filter, url-encoded
+            'query' => $filterQuery ? '&' . http_build_query( $filterQuery ) : '',
+        ) );
+        $objectTotal = $inspection ? count( $inspection['objects'] ) : 0;
+        $pageSize = $perPage === 'all' ? max( 1, $objectTotal ) : (int)$perPage;
+        $pageCount = max( 1, (int)ceil( $objectTotal / $pageSize ) );
+        $pageNumber = isset( $_GET['page'] ) && ctype_digit( (string)$_GET['page'] ) ? min( $pageCount, max( 1, (int)$_GET['page'] ) ) : 1;
+        $tpl->setVariable( 'InspectionPager', array(
+            'per_page' => $perPage, 'choices' => $perPageChoices, 'page' => $pageNumber, 'pages' => $pageCount, 'total' => $objectTotal,
+            'from' => $objectTotal ? ( $pageNumber - 1 ) * $pageSize + 1 : 0, 'to' => min( $objectTotal, $pageNumber * $pageSize ),
+            'prev' => max( 1, $pageNumber - 1 ), 'next' => min( $pageCount, $pageNumber + 1 ),
+        ) );
+        if ( $inspection )
+            $inspection['objects'] = array_slice( $inspection['objects'], ( $pageNumber - 1 ) * $pageSize, $pageSize );
+        $tpl->setVariable( 'Inspection', $inspection );
+
+        // The install history of this package: who installed it, when, how and with what result (kept after the
+        // job files expire), the viewer's own installs or, with xrowextract/all_jobs, everyone's
+        $packageInstalls = array();
+        $packageInstallCount = 0;
+        if ( $package instanceof \eZPackage && \XrowExtractSchema::exists() )
+        {
+            $viewerLogin = \eZUser::currentUser()->attribute( 'login' );
+            foreach ( \XrowExtractHistory::fetchInstalls( $viewerLogin, \XrowExtractJob::allowAllJobs(), $packageName, 0, 10 ) as $historyRow )
+                $packageInstalls[] = $historyRow->installRow( $viewerLogin );
+            $packageInstallCount = \XrowExtractHistory::countInstalls( $viewerLogin, \XrowExtractJob::allowAllJobs(), $packageName );
+        }
+        $tpl->setVariable( 'PackageInstalls', $packageInstalls );
+        $tpl->setVariable( 'PackageInstallCount', $packageInstallCount );
+        $tpl->setVariable( 'JobsAvailable', \XrowExtractJob::available() );
+
+        $availableSiteAccesses = \eZINI::instance()->variable( 'SiteAccessSettings', 'RelatedSiteAccessList' );
+        $tpl->setVariable( 'AvailableSiteAccesses', $availableSiteAccesses );
+        $SiteAccess = $http->hasPostVariable( 'SiteAccess' ) ? (string)$http->postVariable( 'SiteAccess' ) : \eZINI::instance()->variable( 'SiteSettings', 'DefaultAccess' );
+        if ( !in_array( $SiteAccess, $availableSiteAccesses, true ) && $availableSiteAccesses )
+            $SiteAccess = $availableSiteAccesses[0];
+        $tpl->setVariable( 'SiteAccess', $SiteAccess );
+
+        $ObjectMode = $http->hasPostVariable( 'ObjectMode' ) && in_array( $http->postVariable( 'ObjectMode' ), array( \XrowExtractPackage::OBJECT_SKIP, \XrowExtractPackage::OBJECT_UPDATE, \XrowExtractPackage::OBJECT_NEW ), true )
+                    ? $http->postVariable( 'ObjectMode' ) : \XrowExtractPackage::OBJECT_UPDATE;
+        $tpl->setVariable( 'ObjectMode', $ObjectMode );
+        $ClassMode = $http->hasPostVariable( 'ClassMode' ) && in_array( $http->postVariable( 'ClassMode' ), array( \XrowExtractPackage::CLASS_SKIP, \XrowExtractPackage::CLASS_REPLACE, \XrowExtractPackage::CLASS_NEW ), true )
+                   ? $http->postVariable( 'ClassMode' ) : \XrowExtractPackage::CLASS_SKIP;
+        $tpl->setVariable( 'ClassMode', $ClassMode );
+
+        if ( $http->hasPostVariable( 'BrowseParent' ) )
+        {
+            \eZContentBrowse::browse( array(
+                'action_name' => 'ImportParentNode',
+                'description_template' => 'design:xrowextract/browse_node.tpl',
+                'from_page' => '/xrowextract/package',
+                'persistent_data' => array( 'PackageName' => $packageName, 'ParentNodeID' => $ParentNodeID, 'SiteAccess' => $SiteAccess, 'ObjectMode' => $ObjectMode, 'ClassMode' => $ClassMode ),
+            ), $module );
+        }
+        if ( $http->hasPostVariable( 'ImportParentNodeSelected' ) )
+        {
+            $selected = (array)$http->postVariable( 'ImportParentNodeSelected' );
+            if ( isset( $selected[0] ) )
+                $ParentNodeID = (int)$selected[0];
+            $tpl->setVariable( 'ParentNodeID', $ParentNodeID );
+            $parentNode = \eZContentObjectTreeNode::fetch( $ParentNodeID );
+            $tpl->setVariable( 'ParentNode', ( $parentNode instanceof \eZContentObjectTreeNode && $parentNode->canRead() )
+                ? array( 'name' => $parentNode->attribute( 'name' ), 'path' => $parentNode->attribute( 'path_identification_string' ), 'node_id' => $ParentNodeID ) : false );
+        }
+
+        // ---------------------------------------------------------------- install
+
+        $installReport = false;
+        if ( $http->hasPostVariable( 'Install' ) && $package instanceof \eZPackage && \XrowExtractJob::available() )
+        {
+            // Installing can take minutes (every class and object through the kernel's package handlers), so it
+            // runs as a background job (bin/php/package.php --install, job type "package") and the page goes
+            // straight to the Jobs view, which follows its progress and keeps its report - the request is not held
+            // for the length of the install.
+            $installArgs = array(
+                '--install=' . $package->attribute( 'name' ),
+                '--parent=' . (int)$ParentNodeID,
+                '--site-access=' . $SiteAccess,
+                '--object-mode=' . $ObjectMode,
+                '--class-mode=' . $ClassMode,
+            );
+            $parentForName = \eZContentObjectTreeNode::fetch( (int)$ParentNodeID );
+            $installJobID = \XrowExtractJob::create( array(
+                'type' => 'package', 'owner' => \eZUser::currentUser()->attribute( 'login' ),
+                'what' => \ezpI18n::tr( 'design/standard/extract', 'Install package %name below %parent', null,
+                                       array( '%name' => $package->attribute( 'name' ),
+                                              '%parent' => $parentForName instanceof \eZContentObjectTreeNode ? $parentForName->attribute( 'name' ) : ( 'node ' . (int)$ParentNodeID ) ) ),
+                'format' => 'json', 'output_file' => 'install-report.json', 'args' => $installArgs,
+            ) );
+            if ( !\XrowExtractJob::start( $installJobID ) )
+            {
+                \XrowExtractJob::update( $installJobID, array(
+                    'state' => 'failed', 'ended' => time(),
+                    'error' => \ezpI18n::tr( 'design/standard/extract', 'Could not start the background process.' ),
+                ) );
+            }
+            $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
+            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+        }
+        elseif ( $http->hasPostVariable( 'Install' ) && $package instanceof \eZPackage )
+        {
+            // No background jobs on this installation (XrowExtractJob::available() is false): install in the request
+            $installStartedAt = time();
+            $preInstall = \XrowExtractPackage::cachedInspection( $package, $ParentNodeID );
+            $installReport = \XrowExtractPackage::install( $package, $ParentNodeID, $SiteAccess, $ObjectMode, $ClassMode );
+            \XrowExtractHistory::recordInstall( array(
+                'owner_login' => \eZUser::currentUser()->attribute( 'login' ), 'trigger_type' => 'manual',
+                'started_at' => $installStartedAt, 'ended_at' => time(),
+                'package' => $package->attribute( 'name' ), 'parent_node_id' => (int)$ParentNodeID, 'site_access' => $SiteAccess,
+                'object_mode' => $ObjectMode, 'class_mode' => $ClassMode,
+                'counts' => $preInstall['counts'], 'report' => $installReport,
+                'missing_datatypes' => isset( $preInstall['missing_datatypes'] ) ? $preInstall['missing_datatypes'] : array(),
+            ) );
+            if ( $installReport['ok'] )
+            {
+                \eZContentObject::clearCache();
+                // What "already exists" means just changed; a cached inspect() from before the install would
+                // still say "create" for what this just installed.
+                \XrowExtractPackage::forgetInspections( $packageName );
+                $inspection = \XrowExtractPackage::cachedInspection( $package, $ParentNodeID );
+                $tpl->setVariable( 'Inspection', $inspection );
+            }
+        }
+        $tpl->setVariable( 'InstallReport', $installReport );
+
+        // ---------------------------------------------------------------- repository list
+
+        $tpl->setVariable( 'RepositoryPackages', \XrowExtractPackage::repositoryPackages() );
+
+        // ---------------------------------------------------------------- template builder
+
+        $ClassChoices = array();
+        foreach ( \eZContentClass::fetchList( \eZContentClass::VERSION_STATUS_DEFINED, true, false, array( 'name' => 'asc' ) ) as $class )
+        {
+            $count = (int)\eZPersistentObject::count( \eZContentObject::definition(), array( 'contentclass_id' => (int)$class->attribute( 'id' ) ) );
+            $ClassChoices[] = array( 'id' => (int)$class->attribute( 'id' ), 'identifier' => $class->attribute( 'identifier' ), 'name' => $class->attribute( 'name' ), 'count' => $count );
+        }
+        $tpl->setVariable( 'ClassChoices', $ClassChoices );
+
+        if ( $http->hasPostVariable( 'TemplateClassID' ) )
+            $TemplateClassID = \XrowExtractColumns::dbID( $http->postVariable( 'TemplateClassID' ) );
+        elseif ( isset( $_GET['ClassID'] ) )
+            $TemplateClassID = \XrowExtractColumns::dbID( $_GET['ClassID'] );
+        else
+            $TemplateClassID = 0;
+        if ( !$TemplateClassID && $ClassChoices )
+        {
+            // Fall back to the class with the most objects: the "best" default when none was picked.
+            $best = $ClassChoices[0];
+            foreach ( $ClassChoices as $choice )
+                if ( $choice['count'] > $best['count'] )
+                    $best = $choice;
+            $TemplateClassID = $best['id'];
+        }
+        $tpl->setVariable( 'TemplateClassID', $TemplateClassID );
+
+        $TemplateVariant = $http->hasPostVariable( 'TemplateVariant' ) && in_array( $http->postVariable( 'TemplateVariant' ), array( 'class', 'content', 'both' ), true )
+                         ? $http->postVariable( 'TemplateVariant' ) : 'both';
+        $tpl->setVariable( 'TemplateVariant', $TemplateVariant );
+        $tpl->setVariable( 'TemplateVariants', \XrowExtractPackage::templateVariants() );
+        // Where the sample objects will be created while a build runs (export.ini [PackageTemplate]
+        // ScratchNodeID, default content.ini [NodeSettings] MediaRootNode) - never the public front page.
+        $tpl->setVariable( 'ScratchLocation', \XrowExtractPackage::scratchLocationInfo() );
+
+        $templateError = '';
+        $templateBuilt = false;
+        if ( $http->hasPostVariable( 'BuildTemplate' ) && $TemplateClassID )
+        {
+            // The same builder as the Import page: from the class's own existing objects (read-only), falling back to
+            // temporary sample objects only for a class with none (the old builder always created them, and a made-up
+            // tag or a relation to a sample that had failed then stopped every build)
+            $build = \XrowExtractPackage::buildContentPackage( $TemplateClassID, $TemplateVariant );
+            if ( $build['ok'] )
+            {
+                $_SESSION[$SESSION_KEY] = $build['package']->attribute( 'name' );
+                return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/package' ) );
+            }
+            $templateError = implode( ' ', $build['errors'] );
+        }
+        $tpl->setVariable( 'TemplateError', $templateError );
+
+        $scriptFile = dirname( $this->scriptFile() ) . '/../../design/standard/javascript/xrowextract.js';
+        $tpl->setVariable( 'ScriptVersion', is_file( $scriptFile ) ? substr( md5_file( $scriptFile ) ?: '0', 0, 12 ) : '0' );
+
+        $Result = array();
+        $Result['content'] = $tpl->fetch( 'design:xrowextract/package.tpl' );
+        $Result['path'] = array(
+            array( 'url' => false, 'text' => \ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
+            array( 'url' => false, 'text' => \ezpI18n::tr( 'design/standard/extract', 'Package' ) ),
+        );
+        $Result['left_menu'] = 'design:xrowextract/menu_package.tpl';
+
+        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+    }
+}
+
+}

@@ -15,47 +15,11 @@
  * try/catch(Exception) - that would swallow the exit and the page gets
  * appended to the file (see modules/xrowextract/job_download.php, the same
  * shape this view follows).
+ *
+ * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @license GNU General Public License v2.0 (or any later version)
+ * @package kernel
  */
 
-$packageName = isset( $Params['PackageName'] ) ? (string)$Params['PackageName'] : '';
-$viewIndex = isset( $Params['ViewIndex'] ) && ctype_digit( (string)$Params['ViewIndex'] ) ? (int)$Params['ViewIndex'] : -1;
-
-$package = $packageName !== '' ? eZPackage::fetch( $packageName ) : false;
-$fileRow = null;
-if ( $package instanceof eZPackage && $viewIndex >= 0 )
-{
-    $allFiles = XrowExtractPackage::allPackageFiles( $package );
-    $fileRow = isset( $allFiles[$viewIndex] ) ? $allFiles[$viewIndex] : null;
-}
-$realPath = $fileRow ? XrowExtractPackage::packageFilePath( $package, $fileRow['path'] ) : false;
-if ( $fileRow === null || $realPath === false )
-{
-    header( 'HTTP/1.1 404 Not Found' );
-    eZExecution::cleanExit();
-}
-
-$type = XrowExtractPackage::fileMimeType( $fileRow['path'] );
-
-header( 'Cache-Control: private, no-store, max-age=0' );
-header( 'Pragma: no-cache' );
-header( 'X-Content-Type-Options: nosniff' );
-// A package is uploaded content: an SVG in it may carry script. Inside the browser's <img> it never
-// runs, but opened directly under the admin's own origin it would; the sandbox stops that.
-header( "Content-Security-Policy: default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox" );
-header( 'Content-Type: ' . $type );
-header( 'Content-Length: ' . filesize( $realPath ) );
-// An image is shown inline (the browser page's own <img src>); anything else offered by name,
-// including an .xml/.txt item - reaching this view for one of those means "Download", not "View"
-// (the browser's own inline pretty-print/text reading goes through browse.php instead)
-if ( $fileRow['kind'] !== 'image' )
-    header( 'Content-Disposition: attachment; filename="' . str_replace( array( '"', '\\' ), '_', basename( $fileRow['path'] ) ) . '"' );
-
-while ( @ob_end_clean() );
-
-$fh = fopen( $realPath, 'rb' );
-while ( $fh && !feof( $fh ) )
-    echo fread( $fh, 1048576 );
-if ( $fh )
-    fclose( $fh );
-
-eZExecution::cleanExit();
+// The code is in extension/xrowextract/classes/runnable/views/xrowextract/browse_file.php (#207); this file is the entry point.
+return \Exponential\View\Extension\Xrowextract\Xrowextract\BrowseFile::main( __FILE__, get_defined_vars() );

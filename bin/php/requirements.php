@@ -14,66 +14,13 @@
  * 1 otherwise, 2 for an unknown feature. Run it as the user the web server runs as: writable folders and
  * disabled functions depend on the user and on the PHP configuration (the command line one can differ from
  * the web server's).
+ *
+ * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @license GNU General Public License v2.0 (or any later version)
+ * @package kernel
  */
 
 require_once dirname( __FILE__ ) . '/../../../../autoload.php';
 
-$cli = eZCLI::instance();
-$script = eZScript::instance( array(
-    'description'    => "Checks what xrowextract needs from PHP and the server.",
-    'use-session'    => false,
-    'use-modules'    => false,
-    'use-extensions' => true,
-) );
-$script->startup();
-$options = $script->getOptions(
-    '[feature:][strict][json]',
-    '',
-    array(
-        'feature' => 'Also fail when one of these features (comma separated ids) is not available',
-        'strict'  => 'Fail when any requirement is missing, required or not',
-        'json'    => 'Machine readable',
-    )
-);
-$script->initialize();
-
-$report = XrowExtractRequirements::check();
-$exitCode = $report['ok'] ? 0 : 1;
-
-$wanted = array_values( array_filter( array_map( 'trim', explode( ',', is_string( $options['feature'] ) ? $options['feature'] : '' ) ) ) );
-foreach ( $wanted as $feature )
-{
-    if ( !isset( $report['features'][$feature] ) )
-    {
-        $cli->error( 'No feature ' . $feature . '. Features: ' . implode( ', ', array_keys( $report['features'] ) ) . '.' );
-        $script->shutdown( 2 );
-        exit( 2 );
-    }
-    if ( !$report['features'][$feature]['available'] )
-        $exitCode = 1;
-}
-if ( $options['strict'] )
-{
-    foreach ( $report['requirements'] as $requirement )
-    {
-        if ( !$requirement['ok'] )
-            $exitCode = 1;
-    }
-}
-
-if ( $options['json'] )
-{
-    $cli->output( (string)json_encode( $report + array( 'exit_code' => $exitCode ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
-}
-else
-{
-    foreach ( XrowExtractRequirements::reportLines( $report ) as $line )
-        $cli->output( $line );
-    foreach ( $wanted as $feature )
-        $cli->output( ( $report['features'][$feature]['available'] ? 'PASS' : 'FAIL' ) . ' feature ' . $feature . ' asked for with --feature' );
-}
-
-$script->shutdown( $exitCode );
-exit( $exitCode );
-
-?>
+// The code is in extension/xrowextract/classes/runnable/commands/php_requirements.php (#207); this file is the entry point.
+\Exponential\Command\Extension\Xrowextract\Requirements::main( __FILE__ );
