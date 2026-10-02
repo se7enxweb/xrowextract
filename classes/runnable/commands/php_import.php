@@ -36,15 +36,14 @@ class Import extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Imports an XML, CSV or JSON file (as exported by xrowextract) back into content objects. Dry run by default.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[file:][class:][parent:][match:][language:][map:][apply][user:][report:][output:][progress-file:][resume-from:][background][what:][manifest:][no-manifest]',
             '',
             array(
@@ -67,7 +66,6 @@ class Import extends \Exponential\Runnable\Command
                 'no-manifest'   => 'Ignore any manifest and map the columns from their names, as for a file without one',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

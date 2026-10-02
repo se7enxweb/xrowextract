@@ -52,15 +52,14 @@ class Package extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Inspects, installs, exports or builds a sample of a content package (.ezpkg): a content class, content objects, or both.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[list][inspect:][install:][export][template][clean][dry-run][parent:][site-access:][object-mode:][class-mode:][remove-after]' .
             '[node:][nodes:][subtree][class:][variant:][object-count:][languages:][name:][file:][keep][user:][output:][progress-file:]' .
             '[compare:][with:]' .
@@ -125,7 +124,6 @@ class Package extends \Exponential\Runnable\Command
                 'progress-file' => '--install/--export: write {"done":n,"total":m,"phase":"..."} to this path after each phase (for a background job)',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

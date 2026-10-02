@@ -35,15 +35,14 @@ class Schedule extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Lists, runs, enables and disables xrowextract schedules; runs the cronjob part by hand.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[list][show:][run:][mode:][wait][if-enabled][enable:][disable:][cron][crontab][create][delete:][next:]' .
             '[name:][kind:][preset:][param:*][nodes:][set:][classes:][languages:][files:][format:][node:][subtree][class:]' .
             '[source:][local-path:][destination:][remote-path:][parent:][match:][language:]' .
@@ -96,7 +95,6 @@ class Schedule extends \Exponential\Runnable\Command
                 'json'       => 'Machine readable output for --list and --show',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

@@ -35,15 +35,14 @@ class Requirements extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Checks what xrowextract needs from PHP and the server.",
             'use-session'    => false,
             'use-modules'    => false,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[feature:][strict][json]',
             '',
             array(
@@ -52,7 +51,6 @@ class Requirements extends \Exponential\Runnable\Command
                 'json'    => 'Machine readable',
             )
         );
-        $script->initialize();
 
         $report = \XrowExtractRequirements::check();
         $exitCode = $report['ok'] ? 0 : 1;

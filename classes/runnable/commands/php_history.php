@@ -29,15 +29,14 @@ class History extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Queries the xrowextract export history.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[state:][kind:][schedule:][owner:][trigger:][delivery:][from:][to:][text:][limit:][offset:][show:][json][clean]',
             '',
             array(
@@ -57,7 +56,6 @@ class History extends \Exponential\Runnable\Command
                 'clean'    => 'Remove history rows past their retention now',
             )
         );
-        $script->initialize();
 
         $admin = \eZUser::fetchByName( 'admin' );
         if ( $admin instanceof \eZUser )

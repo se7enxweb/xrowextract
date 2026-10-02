@@ -63,15 +63,14 @@ class Job extends \Exponential\Runnable\Command
             }
         } );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Runs, lists or cleans up xrowextract background export jobs.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[run:][list;][clean;]',
             '',
             array(
@@ -80,7 +79,6 @@ class Job extends \Exponential\Runnable\Command
                 'clean' => 'Remove job folders older than csv.ini [Jobs] RetentionDays (default 7)',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

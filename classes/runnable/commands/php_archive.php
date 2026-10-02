@@ -36,15 +36,14 @@ class Archive extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Exports the content below nodes as one archive: a CSV file for every class, with a manifest (zip, tar.gz, tar.bz2, tar.xz, 7z, rar).",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[set:][nodes:][classes:][exclude-classes:][format:][separator:][line-endings:][unquoted][password-hashes][languages:][columns:][plain-text][files:][date-field:][since:][before:][date:][section:][visibility:][name:][output:][dry-run][list-sets][list-formats][list-classes][user:][progress-file:][changed-since:][lenient][no-manifest][schedule:][run-mode:]',
             '',
             array(
@@ -82,7 +81,6 @@ class Archive extends \Exponential\Runnable\Command
                 'run-mode'        => 'full or delta (recorded in the manifest)',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

@@ -34,15 +34,14 @@ class Csv extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Exports one class as a CSV file: below a node or the whole site, with the columns, names and format of your choice.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[class:][node:][scope:][depth:][depth-operator:][main-only][offset:][limit:][columns:][add:][sets:][names:][separator:][line-endings:][unquoted]' .
             '[languages:][format:][date-field:][since:][before:][date:][section:][state:][visibility:][name:][where:][sort:][order:][sort2:][order2:]' .
             '[extended-filter:][extended-params:][fetch-alias:][alias-param:*][preset:][param:*][list-presets][show-preset:]' .
@@ -104,7 +103,6 @@ class Csv extends \Exponential\Runnable\Command
                 'run-mode'     => 'full or delta (recorded in the manifest)',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {

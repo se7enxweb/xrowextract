@@ -37,15 +37,14 @@ class Destination extends \Exponential\Runnable\Command
             ${$__name} = &$GLOBALS[$__name];
         unset( $__name );
 
-        $cli = \eZCLI::instance();
-        $script = \eZScript::instance( array(
+        $cli = $this->cli();
+        $script = $this->script( array(
             'description'    => "Lists, tests and manages xrowextract delivery destinations.",
             'use-session'    => false,
             'use-modules'    => true,
             'use-extensions' => true,
         ) );
-        $script->startup();
-        $options = $script->getOptions(
+        $options = $this->startup(
             '[list][json][test:][scan-host-key:][trust-host-key:][fingerprint:][create][update:][delete:][send:][file:][name:][type:]' .
             '[config:*][secret-env:*][secret-file:*][clear-secret:*][owner:]',
             '',
@@ -70,7 +69,6 @@ class Destination extends \Exponential\Runnable\Command
                 'owner'          => 'The login recorded as its creator (default: admin)',
             )
         );
-        $script->initialize();
 
         $fail = function ( $message ) use ( $cli, $script ): never
         {
