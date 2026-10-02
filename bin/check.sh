@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# @description Run every release check of xrowextract, one PASS/FAIL line per part
 # The release gate of xrowextract: every check a release has to pass, one PASS/FAIL line per part, exit
 # code 1 when any part fails (2 for a usage error). Run it from anywhere; it works on the clone it is in.
 #

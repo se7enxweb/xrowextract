@@ -2,6 +2,7 @@
 /**
  * The code of extension/xrowextract/cronjobs/xrowextract.php, moved into a class (#207 stage 1). The file extension/xrowextract/cronjobs/xrowextract.php is one call to it.
  * Guide: doc/bc/6.0/cli_cronjob_view_abstractions.md
+ * @description Start the due xrowextract schedules and clean old job folders and history rows
  */
 /*
  * The original header of extension/xrowextract/cronjobs/xrowextract.php:
