@@ -261,14 +261,14 @@ class Import extends \Exponential\Runnable\Command
                 return;
             if ( !$errorsHeaderWritten )
             {
-                fputcsv( $errorsHandle, array_merge( $parsed['header'], array( 'import-error' ) ) );
+                fputcsv( $errorsHandle, array_merge( $parsed['header'], array( 'import-error' ) ), ',', '"', '\\' );
                 $errorsHeaderWritten = true;
             }
             $line = array();
             foreach ( $parsed['header'] as $col )
                 $line[] = isset( $row[$col] ) ? $row[$col] : '';
             $line[] = $rowResult['reason'];
-            fputcsv( $errorsHandle, $line );
+            fputcsv( $errorsHandle, $line, ',', '"', '\\' );
         };
 
         $onProgress = $progressFile ? function ( $done, $total, $counts ) use ( $progressFile )
