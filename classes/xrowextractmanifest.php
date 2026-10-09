@@ -19,6 +19,8 @@
  */
 class XrowExtractManifest
 {
+    use XrowExtractFileModes;
+
     const VERSION = 1;
     const SIDECAR_SUFFIX = '.manifest.json';
 
@@ -427,7 +429,7 @@ class XrowExtractManifest
         $path = self::sidecarPath( $dataPath );
         if ( @file_put_contents( $path, self::encode( $manifest ) ) === false )
             return false;
-        @chmod( $path, 0600 );
+        @chmod( $path, self::fileMode( 0600 ) );
         XrowExtractJob::fixOwnership( $path );
         return $path;
     }
@@ -665,7 +667,7 @@ class XrowExtractManifest
         if ( $ok && $manifest !== null )
             @file_put_contents( self::sidecarPath( $target ), (string)$zip->getFromName( $manifest ) );
         $zip->close();
-        @chmod( $target, 0600 );
+        @chmod( $target, self::fileMode( 0600 ) );
         return array( 'ok' => $ok, 'name' => $data, 'path' => $target, 'has_manifest' => $manifest !== null,
                       'error' => $ok ? '' : 'the data file could not be extracted' );
     }

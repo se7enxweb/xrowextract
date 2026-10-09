@@ -26,6 +26,8 @@ namespace Exponential\Command\Extension\Xrowextract
 
 class Job extends \Exponential\Runnable\Command
 {
+    use \XrowExtractFileModes;
+
     public function run()
     {
         // the script's variables were globals; functions of the script read them with "global"
@@ -164,7 +166,7 @@ class Job extends \Exponential\Runnable\Command
         if ( $logHandle )
         {
             fclose( $logHandle );
-            @chmod( $logPath, 0600 );
+            @chmod( $logPath, self::fileMode( 0600 ) );
             \XrowExtractJob::fixOwnership( $logPath );
         }
 

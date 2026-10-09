@@ -14,6 +14,8 @@
  */
 class XrowExtractSecrets
 {
+    use XrowExtractFileModes;
+
     const PREFIX = 'xs1:';
 
     /** Where the key file is (absolute). */
@@ -55,12 +57,12 @@ class XrowExtractSecrets
             throw new RuntimeException( 'The secrets key file cannot be created in ' . $dir . ' (xrowextract.ini [Secrets] KeyFile).' );
         $new = sodium_crypto_secretbox_keygen();
         $tmp = $path . '.tmp-' . getmypid();
-        $umask = umask( 0077 );
+        $oldUmask = umask( self::creationUmask( 0077 ) );
         $written = @file_put_contents( $tmp, base64_encode( $new ) . "\n", LOCK_EX );
-        umask( $umask );
+        umask( $oldUmask );
         if ( $written === false )
             throw new RuntimeException( 'The secrets key file ' . $path . ' could not be written.' );
-        @chmod( $tmp, 0600 );
+        @chmod( $tmp, self::fileMode( 0600 ) );
         self::giveToFolderOwner( $tmp, $dir );
         // Two processes creating it at once: the first rename wins, the other one reads that key
         if ( !@link( $tmp, $path ) )

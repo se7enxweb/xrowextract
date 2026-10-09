@@ -11,6 +11,8 @@
  */
 class XrowExtractArchive
 {
+    use XrowExtractFileModes;
+
     const BATCH = 100;
 
     /**
@@ -354,10 +356,10 @@ class XrowExtractArchive
         // line may run as different users, so there is no shared folder one of them would own
         $work = eZSys::cacheDirectory() . '/xrowextract-' . bin2hex( random_bytes( 8 ) );
         $dir = $work . '/' . $folder;
-        $umask = umask( 077 );
-        if ( !@mkdir( $work, 0700 ) || !@mkdir( $dir, 0700 ) )
+        $oldUmask = umask( self::creationUmask( 077 ) );
+        if ( !@mkdir( $work, self::dirMode( 0700 ) ) || !@mkdir( $dir, self::dirMode( 0700 ) ) )
         {
-            umask( $umask );
+            umask( $oldUmask );
             throw new RuntimeException( 'Cannot create the work directory' );
         }
 
@@ -505,11 +507,11 @@ class XrowExtractArchive
         }
         catch ( Throwable $e )
         {
-            umask( $umask );
+            umask( $oldUmask );
             self::removeWork( $work );
             throw $e;
         }
-        umask( $umask );
+        umask( $oldUmask );
         return array( 'path' => $archive, 'name' => basename( $archive ), 'work' => $work, 'manifest' => $manifest );
     }
 

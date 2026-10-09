@@ -21,6 +21,8 @@
  */
 class XrowExtractImport
 {
+    use XrowExtractFileModes;
+
     /**
      * Datatypes importable from their plain (no format) column.
      * @return list<string>
@@ -94,9 +96,9 @@ class XrowExtractImport
         $dir = eZSys::cacheDirectory() . '/xrowextract_import';
         if ( !is_dir( $dir ) )
         {
-            mkdir( $dir, 0700, true );
+            mkdir( $dir, self::dirMode( 0700 ), true );
         }
-        @chmod( $dir, 0700 );
+        @chmod( $dir, self::dirMode( 0700 ) );
         $htaccess = $dir . '/.htaccess';
         if ( !is_file( $htaccess ) )
         {
@@ -135,7 +137,7 @@ class XrowExtractImport
         $target = $dir . '/' . $name;
         if ( !@move_uploaded_file( $sourcePath, $target ) && !@copy( $sourcePath, $target ) )
             return false;
-        @chmod( $target, 0600 );
+        @chmod( $target, self::fileMode( 0600 ) );
         // move_uploaded_file() bypasses Velocity's file layer, which would otherwise go on believing the new
         // file is not there for the rest of the request (see XrowExtractPackage::withNativeFileStreams())
         clearstatcache( true );
@@ -155,7 +157,7 @@ class XrowExtractImport
         $target = $dir . '/' . $name;
         if ( file_put_contents( $target, $text ) === false )
             return false;
-        @chmod( $target, 0600 );
+        @chmod( $target, self::fileMode( 0600 ) );
         return $target;
     }
 

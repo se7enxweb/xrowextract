@@ -9,6 +9,8 @@
  */
 abstract class XrowExtractTransport
 {
+    use XrowExtractFileModes;
+
     /** @var array<string, mixed> the destination's plain config */
     protected $config;
     /** @var array<string, mixed> the destination's decrypted secrets */
@@ -133,15 +135,15 @@ abstract class XrowExtractTransport
         $base = eZSys::varDirectory() . '/xrowextract-tmp';
         if ( !is_dir( $base ) )
         {
-            $umask = umask( 0077 );
-            @mkdir( $base, 0700, true );
-            umask( $umask );
+            $oldUmask = umask( self::creationUmask( 0077 ) );
+            @mkdir( $base, self::dirMode( 0700 ), true );
+            umask( $oldUmask );
             XrowExtractJob::fixOwnership( $base );
         }
         $dir = $base . '/' . bin2hex( random_bytes( 8 ) );
-        $umask = umask( 0077 );
-        @mkdir( $dir, 0700 );
-        umask( $umask );
+        $oldUmask = umask( self::creationUmask( 0077 ) );
+        @mkdir( $dir, self::dirMode( 0700 ) );
+        umask( $oldUmask );
         return is_dir( $dir ) ? $dir : false;
     }
 

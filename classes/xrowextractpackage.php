@@ -17,6 +17,8 @@
  */
 class XrowExtractPackage
 {
+    use XrowExtractFileModes;
+
     /** Content object existing-object handling: mirrors eZContentObject::PACKAGE_*. */
     const OBJECT_SKIP = 'skip';
     const OBJECT_UPDATE = 'update';
@@ -2127,7 +2129,7 @@ class XrowExtractPackage
         } );
         if ( !$written || !is_file( $target ) )
             return false;
-        @chmod( $target, 0600 );
+        @chmod( $target, self::fileMode( 0600 ) );
         return $target;
     }
 

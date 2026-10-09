@@ -21,6 +21,8 @@
  */
 class XrowExtractUpload
 {
+    use XrowExtractFileModes;
+
     const ID_PATTERN = '/^[0-9a-f]{32}$/';
     const META_FILE = 'meta.json';
     const DATA_FILE = 'data.bin';
@@ -31,9 +33,9 @@ class XrowExtractUpload
         $dir = eZSys::varDirectory() . '/xrowextract/uploads';
         if ( !is_dir( $dir ) )
         {
-            $umask = umask( 0077 );
-            @mkdir( $dir, 0700, true );
-            umask( $umask );
+            $oldUmask = umask( self::creationUmask( 0077 ) );
+            @mkdir( $dir, self::dirMode( 0700 ), true );
+            umask( $oldUmask );
             XrowExtractJob::fixOwnership( $dir );
         }
         return $dir;
@@ -65,9 +67,9 @@ class XrowExtractUpload
     {
         $id = bin2hex( random_bytes( 16 ) );
         $dir = self::dir( $id );
-        $umask = umask( 0077 );
-        $made = @mkdir( $dir, 0700, true );
-        umask( $umask );
+        $oldUmask = umask( self::creationUmask( 0077 ) );
+        $made = @mkdir( $dir, self::dirMode( 0700 ), true );
+        umask( $oldUmask );
         if ( !$made )
             throw new RuntimeException( 'Cannot create the upload folder' );
         self::saveMeta( $id, array(
@@ -102,7 +104,7 @@ class XrowExtractUpload
         $file = self::dir( $id ) . '/' . self::META_FILE;
         $tmp = $file . '.tmp-' . getmypid();
         file_put_contents( $tmp, json_encode( $meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . "\n" );
-        @chmod( $tmp, 0600 );
+        @chmod( $tmp, self::fileMode( 0600 ) );
         rename( $tmp, $file );
         XrowExtractJob::fixOwnership( $file );
     }
@@ -161,7 +163,7 @@ class XrowExtractUpload
         $written = stream_copy_to_stream( $in, $out );
         fclose( $in );
         fclose( $out );
-        @chmod( $dataFile, 0600 );
+        @chmod( $dataFile, self::fileMode( 0600 ) );
         if ( $written === false || $written !== $chunkSize )
         {
             XrowExtractJob::fixOwnership( $dataFile );

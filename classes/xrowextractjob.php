@@ -15,6 +15,8 @@
  */
 class XrowExtractJob
 {
+    use XrowExtractFileModes;
+
     const ID_PATTERN = '/^[0-9a-f]{32}$/';
     const JOB_FILE = 'job.json';
     const LOG_FILE = 'job.log';
@@ -28,9 +30,9 @@ class XrowExtractJob
         $dir = eZSys::varDirectory() . '/xrowextract-jobs';
         if ( !is_dir( $dir ) )
         {
-            $umask = umask( 0077 );
-            @mkdir( $dir, 0700, true );
-            umask( $umask );
+            $oldUmask = umask( self::creationUmask( 0077 ) );
+            @mkdir( $dir, self::dirMode( 0700 ), true );
+            umask( $oldUmask );
             self::fixOwnership( $dir );
         }
         return $dir;
@@ -68,9 +70,9 @@ class XrowExtractJob
     {
         $id = bin2hex( random_bytes( 16 ) );
         $dir = self::path( $id );
-        $umask = umask( 0077 );
-        $made = @mkdir( $dir, 0700, true );
-        umask( $umask );
+        $oldUmask = umask( self::creationUmask( 0077 ) );
+        $made = @mkdir( $dir, self::dirMode( 0700 ), true );
+        umask( $oldUmask );
         if ( !$made )
             throw new RuntimeException( 'Cannot create the job folder' );
         $job = array_merge( array(
@@ -134,7 +136,7 @@ class XrowExtractJob
             eZDebug::writeError( 'Job ' . $id . ' not saved: ' . $tmp . ' cannot be written', __METHOD__ );
             return;
         }
-        @chmod( $tmp, 0600 );
+        @chmod( $tmp, self::fileMode( 0600 ) );
         rename( $tmp, $file );
         self::fixOwnership( $file );
     }
@@ -412,7 +414,7 @@ class XrowExtractJob
         ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . "\n" );
         if ( $written === false )
             return;
-        @chmod( $tmp, 0600 );
+        @chmod( $tmp, self::fileMode( 0600 ) );
         @rename( $tmp, $path );
         self::fixOwnership( $path );
     }

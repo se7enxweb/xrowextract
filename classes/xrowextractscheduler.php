@@ -14,6 +14,8 @@
  */
 class XrowExtractScheduler
 {
+    use XrowExtractFileModes;
+
     /**
      * Checks a definition before it is saved. Returns a list of error messages.
      *
@@ -424,7 +426,7 @@ class XrowExtractScheduler
             return array( 'state' => $source === 'local' && strpos( $fetched['message'], 'does not exist' ) !== false ? 'skipped' : 'failed',
                           'error' => $message, 'warnings' => array_merge( $warnings, array( $message ) ) );
         }
-        @chmod( $local, 0600 );
+        @chmod( $local, self::fileMode( 0600 ) );
         XrowExtractJob::fixOwnership( $local );
         $args = array( '--file=' . $local );
         foreach ( array( 'class', 'parent', 'match', 'language' ) as $key )

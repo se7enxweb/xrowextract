@@ -29,6 +29,8 @@ namespace Exponential\Command\Extension\Xrowextract
 
 class Import extends \Exponential\Runnable\Command
 {
+    use \XrowExtractFileModes;
+
     public function run()
     {
         // the script's variables were globals; functions of the script read them with "global"
@@ -255,7 +257,7 @@ class Import extends \Exponential\Runnable\Command
             if ( !$errorsHandle )
             {
                 $errorsHandle = fopen( $errorsFile, 'w' );
-                @chmod( $errorsFile, 0600 );
+                @chmod( $errorsFile, self::fileMode( 0600 ) );
             }
             if ( !$errorsHandle )
                 return;
@@ -335,7 +337,7 @@ class Import extends \Exponential\Runnable\Command
                 'mapping' => array_map( function ( $m ) { return array( 'column' => $m['column'], 'target' => $m['target'] ); }, $mapping ),
             );
             file_put_contents( $reportFile, json_encode( $report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
-            @chmod( $reportFile, 0600 );
+            @chmod( $reportFile, self::fileMode( 0600 ) );
             $cli->output( 'Report written to ' . $reportFile );
         }
 

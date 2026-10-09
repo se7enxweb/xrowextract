@@ -17,6 +17,8 @@
  */
 class XrowExtractTransportSftp extends XrowExtractTransport
 {
+    use XrowExtractFileModes;
+
     /** @return array<string, array<mixed>> */
     public static function fields(): array
     {
@@ -256,7 +258,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
             $options = array_merge( array( 'BatchMode=no', 'PubkeyAuthentication=no', 'PreferredAuthentications=password,keyboard-interactive',
                                            'NumberOfPasswordPrompts=1', 'IdentitiesOnly=yes', 'IdentityFile=none' ), $options );
             file_put_contents( $dir . '/askpass', "#!/bin/sh\nprintf '%s\\n' \"\$XRE_SFTP_SECRET\"\n" );
-            chmod( $dir . '/askpass', 0700 );
+            chmod( $dir . '/askpass', self::executableMode( 0700 ) );
             $env = array( 'SSH_ASKPASS' => $dir . '/askpass', 'SSH_ASKPASS_REQUIRE' => 'force', 'DISPLAY' => 'xrowextract:0',
                           'XRE_SFTP_SECRET' => $this->secret( 'password' ) );
         }
@@ -269,7 +271,7 @@ class XrowExtractTransportSftp extends XrowExtractTransport
                 return array( 'ok' => false, 'message' => 'No private key is set for this destination.' );
             }
             file_put_contents( $dir . '/id', $key );
-            chmod( $dir . '/id', 0600 );
+            chmod( $dir . '/id', self::fileMode( 0600 ) );
             $options = array_merge( array( 'BatchMode=yes', 'IdentitiesOnly=yes', 'IdentityFile=' . $dir . '/id', 'PasswordAuthentication=no',
                                            'KbdInteractiveAuthentication=no' ), $options );
         }
