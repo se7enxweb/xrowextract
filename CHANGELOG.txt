@@ -1,3 +1,11 @@
+Version 2.5.8
+
+-  Updated every file and folder the extension makes (jobs, uploads, imports, packages, manifests, schedules, the
+   secrets key, export work folders, the SFTP transport) to keep to the limits EZP_FILE_MODE_MAX and EZP_DIR_MODE_MAX
+   of Exponential 6.0.15 (config.php), through the trait XrowExtractFileModes and the kernel helpers. The private
+   0700 / 0600 modes stay as they are; without the limits, or on a kernel without the helpers, every mode is that
+   of before
+
 Version 2.5.4
 
 -  Added a requirements check of what the extension needs from PHP and the server (19 requirements, 12 features):
