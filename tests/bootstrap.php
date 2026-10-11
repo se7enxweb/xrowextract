@@ -46,11 +46,14 @@ foreach ( $files as $file )
     {
         continue;
     }
-    if ( preg_match_all( '/^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/m', (string)file_get_contents( $file->getPathname() ), $m ) )
+    $source = (string)file_get_contents( $file->getPathname() );
+    // The classes of classes/runnable/ are in a namespace (one per file), the others in none
+    $namespace = preg_match( '/^\s*namespace\s+([A-Za-z_][A-Za-z0-9_\\\\]*)/m', $source, $n ) ? $n[1] . '\\' : '';
+    if ( preg_match_all( '/^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/m', $source, $m ) )
     {
         foreach ( $m[1] as $class )
         {
-            $ownClasses[strtolower( $class )] = $file->getPathname();
+            $ownClasses[strtolower( $namespace . $class )] = $file->getPathname();
         }
     }
 }
@@ -89,3 +92,21 @@ eZINI::resetAllInstances( false );
 
 // The secrets key of the tests, never the installation's
 eZINI::instance( 'xrowextract.ini' )->setVariable( 'Secrets', 'KeyFile', XROWEXTRACT_TEST_VAR . '/secrets.key' );
+
+// csv.ini names each handler file relative to the root, below extension/xrowextract/; the parser checks that the
+// file is there before it uses the handler. This checkout is not necessarily installed in the root (CI's root is a
+// bare clone of se7enxweb/exponential), so the handler files are this checkout's own, as the classes are
+$csvINI = eZINI::instance( 'csv.ini' );
+foreach ( (array)$csvINI->variable( 'General', 'ExportableDatatypes' ) as $datatype )
+{
+    if ( !is_string( $datatype ) || !$csvINI->hasVariable( $datatype, 'HandlerFile' ) )
+    {
+        continue;
+    }
+    $handlerFile = $csvINI->variable( $datatype, 'HandlerFile' );
+    if ( is_string( $handlerFile ) && strncmp( $handlerFile, 'extension/xrowextract/', 22 ) === 0 )
+    {
+        $csvINI->setVariable( $datatype, 'HandlerFile', $checkout . '/' . substr( $handlerFile, 22 ) );
+    }
+}
+unset( $csvINI, $datatype, $handlerFile );
