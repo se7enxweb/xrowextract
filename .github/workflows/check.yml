@@ -39,8 +39,10 @@ jobs:
           tools: composer
           coverage: none
 
+      # The runner image's package lists go stale (a security update removes the
+      # version they name from the mirror), so they are refreshed first.
       - name: Install xmllint
-        run: sudo apt-get install -y --no-install-recommends libxml2-utils
+        run: sudo apt-get update -q && sudo apt-get install -y --no-install-recommends libxml2-utils
 
       # The Zeta Components (ezc*) the extension uses, for PHPStan only; the
       # Exponential checkout has no vendor/ of its own.
