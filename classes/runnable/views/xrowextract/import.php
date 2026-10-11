@@ -20,13 +20,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Import extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params["Module"];
         $http = \eZHTTPTool::instance();
@@ -102,14 +105,14 @@ class Import extends \Exponential\Runnable\ModuleView
                 \XrowExtractJob::start( $newJobID );
                 $http->setSessionVariable( 'eZExtractJobStarted', $newJobID );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
 
         // Start over: forget the uploaded file
         if ( $http->hasPostVariable( 'NewImport' ) )
         {
             $forgetFile();
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
         }
 
         // "Open in Import" from the Package tab: a content package already in the repository becomes this page's
@@ -127,7 +130,7 @@ class Import extends \Exponential\Runnable\ModuleView
                 $forgetFile();
                 $_SESSION[$SESSION_KEY] = array( 'name' => $openName, 'format' => 'package', 'kind' => 'package', 'package_name' => $openName, 'source' => 'repository' );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
         }
 
         // A new upload: the plain (no JavaScript) whole-file fallback, or a finished chunked upload
@@ -167,7 +170,7 @@ class Import extends \Exponential\Runnable\ModuleView
                     {
                         $_SESSION[$SESSION_KEY] = array( 'name' => $originalName, 'format' => $packageKind, 'kind' => $packageKind,
                                                          'package_name' => $wrapped['package']->attribute( 'name' ) );
-                        return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                        return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                     }
                 }
                 else
@@ -190,7 +193,7 @@ class Import extends \Exponential\Runnable\ModuleView
                         $separator = $format === 'csv' ? \XrowExtractImport::detectSeparator( \XrowExtractImport::sniff( $stored ) ) : ',';
                         $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
                                                          'source' => 'chunked', 'upload_id' => $uploadID, 'size' => filesize( $stored ) );
-                        return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                        return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                     }
                 }
             }
@@ -230,7 +233,7 @@ class Import extends \Exponential\Runnable\ModuleView
                         {
                             $_SESSION[$SESSION_KEY] = array( 'name' => $originalName, 'format' => $packageKind, 'kind' => $packageKind,
                                                              'package_name' => $wrapped['package']->attribute( 'name' ) );
-                            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                         }
                     }
                     else
@@ -254,7 +257,7 @@ class Import extends \Exponential\Runnable\ModuleView
                             $separator = $format === 'csv' ? \XrowExtractImport::detectSeparator( \XrowExtractImport::sniff( $stored ) ) : ',';
                             $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $originalName, 'format' => $format, 'separator' => $separator,
                                                              'source' => 'plain', 'size' => filesize( $stored ) );
-                            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                         }
                     }
                 }
@@ -289,7 +292,7 @@ class Import extends \Exponential\Runnable\ModuleView
             // $Package below), and an uploaded/kept package (only 'package_name' is set, no local file - left
             // in the repository, same as the "Forget" action on the Package page).
             $forgetFile();
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
         }
 
         // The one package a $PackageMode session resolves to, however it is backed: an uploaded/kept one
@@ -684,7 +687,7 @@ class Import extends \Exponential\Runnable\ModuleView
                     $forgetFile();
                     $_SESSION[$SESSION_KEY] = array( 'path' => (string)$sample['file'], 'name' => basename( (string)$sample['file'] ), 'format' => 'package', 'kind' => 'package',
                                                      'sample' => true, 'kinds' => array( 'create', 'update', 'unchanged', 'class_missing' ), 'classID' => $SampleClassID );
-                    return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                    return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                 }
             }
             else
@@ -707,7 +710,7 @@ class Import extends \Exponential\Runnable\ModuleView
                         $forgetFile();
                         $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $sampleName, 'format' => $sample['format'], 'separator' => ',',
                                                          'sample' => true, 'kinds' => $sample['kinds'], 'classID' => $SampleClassID, 'source' => 'plain' );
-                        return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/import' ) );
+                        return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/import' ) );
                     }
                 }
             }
@@ -886,7 +889,7 @@ class Import extends \Exponential\Runnable\ModuleView
                 ) );
             }
             $http->setSessionVariable( 'eZExtractJobStarted', $installJobID );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
         elseif ( $hasFile && $PackageMode && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' )
                                                || ( $PackageAutoReview && !$http->hasPostVariable( 'BrowseParent' ) ) ) )
@@ -977,7 +980,7 @@ class Import extends \Exponential\Runnable\ModuleView
             ) );
             \XrowExtractJob::start( $QueuedJobID );
             $http->setSessionVariable( 'eZExtractJobStarted', $QueuedJobID );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
         elseif ( $hasFile && !$NeedsQueue && ( $http->hasPostVariable( 'Preview' ) || $http->hasPostVariable( 'Apply' ) ) )
         {
@@ -1034,7 +1037,7 @@ class Import extends \Exponential\Runnable\ModuleView
         $tpl->setVariable( 'ImportableDatatypes', $importableNames );
         $Result['left_menu'] = 'design:xrowextract/menu_import.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

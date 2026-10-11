@@ -19,13 +19,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class History extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $http = \eZHTTPTool::instance();
@@ -57,7 +60,7 @@ class History extends \Exponential\Runnable\ModuleView
         if ( $http->hasPostVariable( 'AcknowledgeAlerts' ) )
         {
             \eZPreferences::setValue( \XrowExtractFunctionCollection::ALERTS_SEEN_PREFERENCE, time() );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/history' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/history' ) );
         }
 
         $total = \XrowExtractHistory::countFor( $filter, $login, $allowAll );
@@ -150,7 +153,7 @@ class History extends \Exponential\Runnable\ModuleView
         );
         $Result['left_menu'] = 'design:xrowextract/menu_schedules.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

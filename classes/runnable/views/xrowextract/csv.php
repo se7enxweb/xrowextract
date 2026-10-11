@@ -94,13 +94,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Csv extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $csvINI = \eZINI::instance( 'csv.ini' );
         $allowPasswordHash = \XrowExtractColumns::allowPasswordHash();
@@ -137,7 +140,7 @@ class Csv extends \Exponential\Runnable\ModuleView
         {
             unset( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] );
 
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
 
         }
         $sessionConfig = $http->sessionVariable( 'eZExtractConfig' );
@@ -153,7 +156,7 @@ class Csv extends \Exponential\Runnable\ModuleView
         if ( $http->hasPostVariable( 'ResetView' ) )
         {
             $http->setSessionVariable( 'eZExtractConfig', $sessionConfig );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
 
         // Named fetch (fetchalias.ini): apply one's Constant values into the view. Read early, so the node,
@@ -278,7 +281,7 @@ class Csv extends \Exponential\Runnable\ModuleView
             $presetToDelete = \XrowExtractPreset::fetch( (string)$http->postVariable( 'PresetActionRef' ) );
             if ( $presetToDelete && !$presetToDelete['site'] && \XrowExtractPreset::canEdit( $presetToDelete, $xePresetLogin, $xePresetAllowAll ) )
                 \XrowExtractPreset::deleteUser( $presetToDelete['id'] );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
         if ( $http->hasPostVariable( 'DuplicatePreset' ) && $http->hasPostVariable( 'PresetActionRef' ) )
         {
@@ -291,7 +294,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                     'placeholders' => $presetToDuplicate['placeholders'], 'definition' => $presetToDuplicate['definition'],
                 ) );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
         if ( $http->hasPostVariable( 'RenamePreset' ) && $http->hasPostVariable( 'PresetActionRef' ) && $http->hasPostVariable( 'PresetNewName' ) )
         {
@@ -302,7 +305,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                 $presetToRename['name'] = $newName;
                 \XrowExtractPreset::saveUser( $presetToRename['owner_login'], $presetToRename, $presetToRename['id'] );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
         if ( ( $http->hasPostVariable( 'LoadPreset' ) || $http->hasPostVariable( 'RunPresetInBackground' ) || $http->hasPostVariable( 'RunPresetNow' ) ) && $http->hasPostVariable( 'PresetRef' ) )
         {
@@ -339,7 +342,7 @@ class Csv extends \Exponential\Runnable\ModuleView
             if ( $resolvedPreset['error'] !== '' )
             {
                 $http->setSessionVariable( 'eZExtractPresetError', $resolvedPreset['error'] );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+                return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
             }
             $filledPreset = \XrowExtractPreset::fillPlaceholders( $resolvedPreset['definition'], $resolvedPreset['placeholders'], $presetParamOverrides );
             $presetDef = $filledPreset['definition'];
@@ -396,7 +399,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                 $http->setSessionVariable( 'eZExtractRunPresetAfterLoad', $presetRefToLoad );
             if ( $http->hasPostVariable( 'RunPresetNow' ) )
                 $http->setSessionVariable( 'eZExtractDownloadAfterLoad', $presetRefToLoad );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
         // Clearing: one chip ("ClearPresetField", the chip's key), or all of them / the whole loaded preset
         // ("UnloadPreset" / "ClearAllPresetFields") — each field a preset set is put back to the export's own
@@ -488,7 +491,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                     $http->removeSessionVariable( 'eZExtractLoadedPreset' );
                 }
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/csv' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
         if ( $http->hasSessionVariable( 'eZExtractPresetError' ) )
         {
@@ -1414,7 +1417,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                     ) );
                 }
                 $http->setSessionVariable( 'eZExtractJobStarted', $jobID );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+                return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
             }
             $tpl->setVariable( 'BackgroundError', $backgroundError );
         }
@@ -1464,7 +1467,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                     ) );
                 }
                 $http->setSessionVariable( 'eZExtractJobStarted', $exportJobID );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+                return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
             }
         }
 
@@ -1631,7 +1634,7 @@ class Csv extends \Exponential\Runnable\ModuleView
                     $node = \eZContentObjectTreeNode::fetch( $Subtree );
                     if ( !( $node instanceof \eZContentObjectTreeNode ) || !$node->canRead() )
                     {
-                        return $this->viewResult( isset( $Result ) ? $Result : null,  $module->handleError( \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
+                        return $this->viewResult( $Result,  $module->handleError( \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
                     }
                     $file = \XrowExtractColumns::fileName( $node->attribute( 'name' ) );
 
@@ -1794,7 +1797,7 @@ class Csv extends \Exponential\Runnable\ModuleView
 
         $Result['left_menu'] = 'design:xrowextract/menu.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

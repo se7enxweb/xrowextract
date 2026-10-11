@@ -14,6 +14,20 @@
 trait XrowExtractFileModes
 {
     /**
+     * Whether the kernel this runs on has the helper $class::$method(). The helpers are newer than the
+     * kernels the extension also runs on, so this is asked at run time, of the kernel that is there, and
+     * not answered from the kernel the code is checked against (which has them).
+     *
+     * @param string $class
+     * @param string $method
+     * @return bool
+     */
+    private static function kernelHas( string $class, string $method ): bool
+    {
+        return method_exists( $class, $method );
+    }
+
+    /**
      * The mode $mode of a file within EZP_FILE_MODE_MAX (eZFile::fileMode()).
      *
      * @param int $mode
@@ -21,7 +35,7 @@ trait XrowExtractFileModes
      */
     private static function fileMode( $mode )
     {
-        return method_exists( 'eZFile', 'fileMode' ) ? eZFile::fileMode( $mode ) : (int)$mode;
+        return self::kernelHas( 'eZFile', 'fileMode' ) ? eZFile::fileMode( $mode ) : (int)$mode;
     }
 
     /**
@@ -32,7 +46,7 @@ trait XrowExtractFileModes
      */
     private static function dirMode( $mode )
     {
-        return method_exists( 'eZDir', 'dirMode' ) ? eZDir::dirMode( $mode ) : (int)$mode;
+        return self::kernelHas( 'eZDir', 'dirMode' ) ? eZDir::dirMode( $mode ) : (int)$mode;
     }
 
     /**
@@ -44,7 +58,7 @@ trait XrowExtractFileModes
      */
     private static function executableMode( $mode )
     {
-        return method_exists( 'eZFile', 'executableMode' ) ? eZFile::executableMode( $mode ) : (int)$mode;
+        return self::kernelHas( 'eZFile', 'executableMode' ) ? eZFile::executableMode( $mode ) : (int)$mode;
     }
 
     /**
@@ -55,6 +69,6 @@ trait XrowExtractFileModes
      */
     private static function creationUmask( $umask )
     {
-        return method_exists( 'eZFile', 'creationUmask' ) ? eZFile::creationUmask( $umask ) : (int)$umask & 0777;
+        return self::kernelHas( 'eZFile', 'creationUmask' ) ? eZFile::creationUmask( $umask ) : (int)$umask & 0777;
     }
 }

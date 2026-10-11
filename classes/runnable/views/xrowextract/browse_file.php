@@ -29,13 +29,14 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class BrowseFile extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
 
         $packageName = isset( $Params['PackageName'] ) ? (string)$Params['PackageName'] : '';
         $viewIndex = isset( $Params['ViewIndex'] ) && ctype_digit( (string)$Params['ViewIndex'] ) ? (int)$Params['ViewIndex'] : -1;
@@ -79,8 +80,6 @@ class BrowseFile extends \Exponential\Runnable\ModuleView
             fclose( $fh );
 
         \eZExecution::cleanExit();
-
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
     }
 }
 

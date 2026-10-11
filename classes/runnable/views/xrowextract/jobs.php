@@ -18,13 +18,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Jobs extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $http = \eZHTTPTool::instance();
@@ -42,7 +45,7 @@ class Jobs extends \Exponential\Runnable\ModuleView
                 list( $cancelled, $message ) = \XrowExtractJob::cancel( $id, $login );
                 $http->setSessionVariable( 'eZExtractJobNotice', \ezpI18n::tr( 'design/standard/extract', $message ) );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
 
         if ( $http->hasPostVariable( 'DeleteJobID' ) )
@@ -51,7 +54,7 @@ class Jobs extends \Exponential\Runnable\ModuleView
             $job = \XrowExtractJob::isValidID( $id ) ? \XrowExtractJob::load( $id ) : null;
             if ( $job && \XrowExtractJob::canSee( $job, $login, $allJobs ) )
                 \XrowExtractJob::delete( $id );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
 
         // "Export these again": the objects a package install left on the site (a finished install job's own list,
@@ -119,7 +122,7 @@ class Jobs extends \Exponential\Runnable\ModuleView
                 }
                 $http->setSessionVariable( 'eZExtractJobStarted', $againJobID );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
         }
 
         // The id of a job this same browser just started (set by csv.php / archive.php), shown once as a notice
@@ -366,7 +369,7 @@ class Jobs extends \Exponential\Runnable\ModuleView
         );
         $Result['left_menu'] = 'design:xrowextract/menu_jobs.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

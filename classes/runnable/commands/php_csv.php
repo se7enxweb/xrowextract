@@ -467,7 +467,9 @@ class Csv extends \Exponential\Runnable\Command
         $filters = new \XrowExtractFilters( $filterValues );
         $attributeFilter = false;   // set once the class is known
 
-        $countIn = function ( $classID, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly, &$attributeFilter, $filters )
+        // $attributeFilter: the filter to count with, the one of the class once it is known (the parts that work for every
+        // class before), passed in rather than captured by reference so each call says which one it counts with
+        $countIn = function ( $classID, $attributeFilter, $locale = false ) use ( $fetchNode, $depth, $depthOperator, $mainOnly, $filters )
         {
             $result = \eZContentFunctionCollection::fetchObjectTreeCount( $fetchNode, $locale !== false, $locale, 'include', array( (int)$classID ),
                                                                          $attributeFilter === false ? $filters->attributeFilter( false ) : $attributeFilter,
@@ -481,12 +483,12 @@ class Csv extends \Exponential\Runnable\Command
             $cli->output( $scope === 'all' ? 'Classes in the whole site:' : "Classes below node $nodeID:" );
             foreach ( \eZContentClass::fetchList( \eZContentClass::VERSION_STATUS_DEFINED, true, false, array( 'name' => 'asc' ) ) as $class )
             {
-                $count = $countIn( $class->attribute( 'id' ) );
+                $count = $countIn( $class->attribute( 'id' ), false );
                 if ( $count > 0 )
                 {
                     $perLanguage = array();
                     foreach ( $languages as $locale )
-                        $perLanguage[] = $locale . ' ' . $countIn( $class->attribute( 'id' ), $locale );
+                        $perLanguage[] = $locale . ' ' . $countIn( $class->attribute( 'id' ), false, $locale );
                     $cli->output( sprintf( '  %5d  %-32s %-40s %d objects  (%s)', $class->attribute( 'id' ), $class->attribute( 'identifier' ), $class->attribute( 'name' ), $count, implode( ', ', $perLanguage ) ) );
                 }
             }
@@ -778,7 +780,7 @@ class Csv extends \Exponential\Runnable\Command
         }
         $languageCounts = array();
         foreach ( $languages as $locale )
-            $languageCounts[$locale] = $countIn( $classID, $locale );
+            $languageCounts[$locale] = $countIn( $classID, $attributeFilter, $locale );
         $total = array_sum( $languageCounts );
         $wantRows = max( 0, $total - $offset );
         if ( $limit )

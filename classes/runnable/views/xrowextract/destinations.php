@@ -18,13 +18,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Destinations extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $http = \eZHTTPTool::instance();
@@ -66,7 +69,7 @@ class Destinations extends \Exponential\Runnable\ModuleView
         };
 
         if ( $http->hasPostVariable( 'CancelEdit' ) )
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
 
         if ( $http->hasPostVariable( 'NewDestination' ) )
         {
@@ -86,7 +89,7 @@ class Destinations extends \Exponential\Runnable\ModuleView
             $id = isset( $posted['id'] ) ? (int)$posted['id'] : 0;
             $existing = $id ? \XrowExtractDestination::fetch( $id ) : null;
             if ( $id && !$existing )
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+                return $this->viewResult( $Result,  $backTo() );
             $type = $existing ? $existing->attribute( 'dest_type' ) : ( isset( $posted['type'] ) ? (string)$posted['type'] : '' );
             $result = \XrowExtractDestination::saveFrom( array(
                 'name' => isset( $posted['name'] ) ? $posted['name'] : '',
@@ -106,7 +109,7 @@ class Destinations extends \Exponential\Runnable\ModuleView
             else
             {
                 $http->setSessionVariable( 'eZExtractDestinationNotice', \ezpI18n::tr( 'design/standard/extract', 'Destination saved. Test the connection to be sure.' ) );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo( 'destination-' . (int)$saved->attribute( 'id' ) ) );
+                return $this->viewResult( $Result,  $backTo( 'destination-' . (int)$saved->attribute( 'id' ) ) );
             }
         }
         elseif ( $http->hasPostVariable( 'DeleteDestinationID' ) )
@@ -114,7 +117,7 @@ class Destinations extends \Exponential\Runnable\ModuleView
             $destination = \XrowExtractDestination::fetch( \XrowExtractColumns::dbID( $http->postVariable( 'DeleteDestinationID' ) ) );
             if ( $destination )
                 $destination->remove();
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
         }
         elseif ( $http->hasPostVariable( 'TestDestinationID' ) )
         {
@@ -223,7 +226,7 @@ class Destinations extends \Exponential\Runnable\ModuleView
         );
         $Result['left_menu'] = 'design:xrowextract/menu_schedules.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

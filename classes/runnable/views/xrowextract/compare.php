@@ -24,13 +24,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Compare extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $http = \eZHTTPTool::instance();
@@ -56,11 +59,11 @@ class Compare extends \Exponential\Runnable\ModuleView
             $Result['content'] = htmlspecialchars( \ezpI18n::tr( 'design/standard/extract', 'No package %name in the repository.', null,
                                               array( '%name' => !$package instanceof \eZPackage ? $packageName : $otherName ) ), ENT_QUOTES, 'UTF-8' );
             $Result['path'] = $path;
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $Result );
+            return $this->viewResult( $Result,  $Result );
         }
         // A ?with= choice is turned into the plain URL, so the page's address names both packages
         if ( $otherName !== '' && !( isset( $Params['OtherName'] ) && $Params['OtherName'] ) )
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/compare/' . $packageName . '/' . $otherName ) );
+            return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/compare/' . $packageName . '/' . $otherName ) );
 
         $refresh = $http->hasPostVariable( 'RecheckComparison' );
         $mode = $other instanceof \eZPackage ? 'packages' : 'site';
@@ -174,7 +177,7 @@ class Compare extends \Exponential\Runnable\ModuleView
         $Result['path'] = $path;
         $Result['left_menu'] = 'design:xrowextract/menu_compare.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

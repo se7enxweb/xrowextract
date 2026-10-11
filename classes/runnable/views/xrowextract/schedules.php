@@ -20,13 +20,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Schedules extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $http = \eZHTTPTool::instance();
@@ -136,7 +139,7 @@ class Schedules extends \Exponential\Runnable\ModuleView
 
         $editValues = null;
         if ( $http->hasPostVariable( 'CancelEdit' ) )
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
         if ( $http->hasPostVariable( 'NewSchedule' ) )
         {
             $editValues = $blankValues;
@@ -156,7 +159,7 @@ class Schedules extends \Exponential\Runnable\ModuleView
             $values = $postedValues();
             $existing = $values['id'] ? $ownSchedule( $values['id'] ) : null;
             if ( $values['id'] && !$existing )
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+                return $this->viewResult( $Result,  $backTo() );
             $result = \XrowExtractSchedule::saveFrom( $values, $login, $existing );
             $saved = $result['schedule'];
             if ( $result['errors'] || !$saved )
@@ -168,7 +171,7 @@ class Schedules extends \Exponential\Runnable\ModuleView
             {
                 $http->setSessionVariable( 'eZExtractScheduleNotice', \ezpI18n::tr( 'design/standard/extract', 'Schedule saved. Next run: %time', null,
                                            array( '%time' => $saved->attribute( 'next_run' ) ? date( 'Y-m-d H:i', $saved->attribute( 'next_run' ) ) : '-' ) ) );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo( 'schedule-' . (int)$saved->attribute( 'id' ) ) );
+                return $this->viewResult( $Result,  $backTo( 'schedule-' . (int)$saved->attribute( 'id' ) ) );
             }
         }
         elseif ( $http->hasPostVariable( 'DeleteScheduleID' ) )
@@ -176,7 +179,7 @@ class Schedules extends \Exponential\Runnable\ModuleView
             $schedule = $ownSchedule( $http->postVariable( 'DeleteScheduleID' ) );
             if ( $schedule )
                 $schedule->remove();
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
         }
         elseif ( $http->hasPostVariable( 'EnableScheduleID' ) || $http->hasPostVariable( 'DisableScheduleID' ) )
         {
@@ -185,9 +188,9 @@ class Schedules extends \Exponential\Runnable\ModuleView
             if ( $schedule )
             {
                 $schedule->setEnabled( $on );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo( 'schedule-' . (int)$schedule->attribute( 'id' ) ) );
+                return $this->viewResult( $Result,  $backTo( 'schedule-' . (int)$schedule->attribute( 'id' ) ) );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
         }
         elseif ( $http->hasPostVariable( 'RunScheduleID' ) )
         {
@@ -199,12 +202,12 @@ class Schedules extends \Exponential\Runnable\ModuleView
                 if ( $result['job_id'] && $result['ok'] )
                 {
                     $http->setSessionVariable( 'eZExtractJobStarted', $result['job_id'] );
-                    return $this->viewResult( isset( $Result ) ? $Result : null,  $module->redirectTo( 'xrowextract/jobs' ) );
+                    return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/jobs' ) );
                 }
                 $http->setSessionVariable( 'eZExtractScheduleNotice', $result['message'] );
-                return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo( 'schedule-' . (int)$schedule->attribute( 'id' ) ) );
+                return $this->viewResult( $Result,  $backTo( 'schedule-' . (int)$schedule->attribute( 'id' ) ) );
             }
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $backTo() );
+            return $this->viewResult( $Result,  $backTo() );
         }
 
         if ( $http->hasSessionVariable( 'eZExtractScheduleNotice' ) )
@@ -330,7 +333,7 @@ class Schedules extends \Exponential\Runnable\ModuleView
         );
         $Result['left_menu'] = 'design:xrowextract/menu_schedules.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 

@@ -1,0 +1,51 @@
+<?php
+/**
+ * Corrections to the PHPDoc of the kernel's Exponential\Runnable classes, as in
+ * kernel.stub: only the PHPDoc is replaced, and each entry names the kernel
+ * code that shows the type.
+ */
+
+namespace Exponential\Runnable;
+
+// The parent, so the class below resolves within the stubs; nothing of it is changed
+abstract class Runnable
+{
+}
+
+abstract class Command extends Runnable
+{
+    /**
+     * The options never are null: eZScript::getOptions() (kernel/classes/ezscript.php)
+     * calls shutdown( 1 ), which exits, when eZCLI::getOptions() cannot parse
+     * the command line, and otherwise returns the options array.
+     *
+     * @param string $config
+     * @param string $argumentConfig
+     * @param array<string, string>|false $optionHelp
+     * @param array<int, string>|false $arguments
+     * @param bool|array<string, bool> $useStandardOptions
+     * @return array<string, mixed>
+     */
+    public function options( $config = '', $argumentConfig = '', $optionHelp = false, $arguments = false, $useStandardOptions = true ) {}
+
+    /**
+     * @param string $config
+     * @param string $argumentConfig
+     * @param array<string, string>|false $optionHelp
+     * @param array<int, string>|false $arguments
+     * @param bool|array<string, bool> $useStandardOptions
+     * @return array<string, mixed> what options() returns
+     */
+    public function startup( $config = '', $argumentConfig = '', $optionHelp = false, $arguments = false, $useStandardOptions = true ) {}
+
+    /**
+     * @param array<string, mixed> $settings
+     * @param string $config
+     * @param string $argumentConfig
+     * @param array<string, string>|false $optionHelp
+     * @param array<int, string>|false $arguments
+     * @param bool|array<string, bool> $useStandardOptions
+     * @return array<string, mixed> what options() returns
+     */
+    public function start( array $settings, $config = '', $argumentConfig = '', $optionHelp = false, $arguments = false, $useStandardOptions = true ) {}
+}

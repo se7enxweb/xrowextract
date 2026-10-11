@@ -24,13 +24,14 @@ namespace Exponential\Cronjob\Extension\Xrowextract
 
 class Xrowextract extends \Exponential\Runnable\CronjobPart
 {
+    /**
+     * @param array<string, mixed> $scope the variables of eZRunCronjobs::runScript(): $cli (eZCLI) and $isQuiet
+     * @return void
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $cli = isset( $scope['cli'] ) && $scope['cli'] instanceof \eZCLI ? $scope['cli'] : \eZCLI::instance();
+        $isQuiet = !empty( $scope['isQuiet'] );
 
         $log = function ( $line ) use ( $cli, $isQuiet )
         {

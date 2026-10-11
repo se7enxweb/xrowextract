@@ -41,13 +41,16 @@ namespace Exponential\View\Extension\Xrowextract\Xrowextract
 
 class Browse extends \Exponential\Runnable\ModuleView
 {
+    /**
+     * @param array<string, mixed> $scope the variables eZProcess::runFile() gives the view: $Params, the view's
+     *                                    parameters with its eZModule under 'Module'
+     * @return mixed the view's result
+     */
     public function run( array $scope )
     {
-        // the including function's variables ($Params, $Module, $cli, ...)
-        foreach ( array_keys( $scope ) as $__name )
-            if ( $__name !== 'this' && $__name !== 'scope' )
-                ${$__name} = &$scope[$__name];
-        unset( $__name );
+        $Params = isset( $scope['Params'] ) && is_array( $scope['Params'] ) ? $scope['Params'] : array();
+        // The view's result: null until the view sets it, as eZProcess::runFile() finds it unset
+        $Result = null;
 
         $module = $Params['Module'];
         $tpl = \eZTemplate::factory();
@@ -68,7 +71,7 @@ class Browse extends \Exponential\Runnable\ModuleView
                 array( 'url' => false, 'text' => \ezpI18n::tr( 'design/standard/xrowextract', 'Extract' ) ),
                 array( 'url' => false, 'text' => \ezpI18n::tr( 'design/standard/extract', 'Package contents' ) ),
             );
-            return $this->viewResult( isset( $Result ) ? $Result : null,  $Result );
+            return $this->viewResult( $Result,  $Result );
         }
 
         $allFiles = \XrowExtractPackage::allPackageFiles( $package );
@@ -142,7 +145,7 @@ class Browse extends \Exponential\Runnable\ModuleView
         );
         $Result['left_menu'] = 'design:xrowextract/menu_package.tpl';
 
-        return $this->viewResult( isset( $Result ) ? $Result : null, null );
+        return $this->viewResult( $Result, null );
     }
 }
 
