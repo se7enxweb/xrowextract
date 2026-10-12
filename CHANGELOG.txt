@@ -1,3 +1,9 @@
+Unreleased
+
+-  Fixed the top menu on the extension's pages: settings/menu.ini.append.php declared its navigation part without
+   the [NavigationPart] group, so the part was unknown, the pages highlighted Content structure and the Export tab
+   was never selected. The Export tab is selected now
+
 Version 2.5.9
 
 -  Updated the module views, the cronjob part and the commands to read their variables from the scope they are
