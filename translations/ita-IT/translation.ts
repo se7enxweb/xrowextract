@@ -109,6 +109,11 @@
 <context>
     <name>kernel/navigationpart</name>
     <message>
+        <source>Export</source>
+        <comment>Navigation part</comment>
+        <translation>Esporta</translation>
+    </message>
+    <message>
         <source>Extract</source>
         <translation>Esporta</translation>
     </message>

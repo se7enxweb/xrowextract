@@ -3,6 +3,9 @@ Unreleased
 -  Fixed the top menu on the extension's pages: settings/menu.ini.append.php declared its navigation part without
    the [NavigationPart] group, so the part was unknown, the pages highlighted Content structure and the Export tab
    was never selected. The Export tab is selected now
+-  Updated the name of the navigation part from xrowextract to Export, with the message in the context
+   kernel/navigationpart of every translation (eng-US and ger-DE Export, fre-FR Exporter, ita-IT Esporta), so the
+   admin no longer writes a missing-translation debug line for it
 
 Version 2.5.9
 

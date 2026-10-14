@@ -6735,4 +6735,12 @@
         <translation>CSV-Export</translation>
     </message>
 </context>
+<context>
+    <name>kernel/navigationpart</name>
+    <message>
+        <source>Export</source>
+        <comment>Navigation part</comment>
+        <translation>Export</translation>
+    </message>
+</context>
 </TS>

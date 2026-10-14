@@ -1,7 +1,7 @@
 <?php /* #?ini charset="utf8"?
 
 [NavigationPart]
-Part[ezextractnavigationpart]=xrowextract
+Part[ezextractnavigationpart]=Export
 
 [TopAdminMenu]
 Tabs[]=xrowextract
