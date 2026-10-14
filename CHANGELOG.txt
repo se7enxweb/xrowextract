@@ -1,4 +1,4 @@
-Unreleased
+Version 2.5.10
 
 -  Fixed the top menu on the extension's pages: settings/menu.ini.append.php declared its navigation part without
    the [NavigationPart] group, so the part was unknown, the pages highlighted Content structure and the Export tab
