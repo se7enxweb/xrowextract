@@ -458,26 +458,33 @@ class XrowExtractPreset
     public static function summaryLine( array $preset ): string
     {
         $def = $preset['definition'];
+        // in the language of the page (design/standard/extract); identifiers and field names stay as they are
+        $t = function ( $text, array $args = array() )
+        {
+            return class_exists( 'ezpI18n' ) ? ezpI18n::tr( 'design/standard/extract', $text, null, $args ) : strtr( $text, $args );
+        };
         $parts = array();
         if ( $preset['extends'] !== '' )
-            $parts[] = 'extends ' . $preset['extends'];
+            $parts[] = $t( 'extends %preset', array( '%preset' => $preset['extends'] ) );
         if ( !empty( $def['class_identifier'] ) )
-            $parts[] = 'class ' . $def['class_identifier'];
+            $parts[] = $t( 'class %class', array( '%class' => $def['class_identifier'] ) );
         elseif ( isset( $def['class_id'] ) )
-            $parts[] = 'class #' . $def['class_id'];
+            $parts[] = $t( 'class #%id', array( '%id' => $def['class_id'] ) );
         if ( isset( $def['subtree'] ) )
-            $parts[] = 'node ' . $def['subtree'];
+            $parts[] = $t( 'node %node', array( '%node' => $def['subtree'] ) );
         if ( isset( $def['sort_field'] ) && $def['sort_field'] !== 'tree' )
-            $parts[] = 'sorted by ' . $def['sort_field'];
+            $parts[] = $t( 'sorted by %field', array( '%field' => $def['sort_field'] ) );
         if ( !empty( $def['limit'] ) )
-            $parts[] = 'limit ' . $def['limit'];
-        if ( isset( $def['filters']['visibility'] ) && $def['filters']['visibility'] !== 'any' )
-            $parts[] = $def['filters']['visibility'];
+            $parts[] = $t( 'limit %limit', array( '%limit' => $def['limit'] ) );
+        if ( isset( $def['filters']['visibility'] ) && $def['filters']['visibility'] === 'visible' )
+            $parts[] = $t( 'visible only' );
+        elseif ( isset( $def['filters']['visibility'] ) && $def['filters']['visibility'] === 'hidden' )
+            $parts[] = $t( 'hidden only' );
         if ( !empty( $def['filters']['conditions'] ) && is_array( $def['filters']['conditions'] ) )
-            $parts[] = count( $def['filters']['conditions'] ) . ' condition(s)';
+            $parts[] = $t( '%count condition(s)', array( '%count' => count( $def['filters']['conditions'] ) ) );
         if ( isset( $def['output_format'] ) && $def['output_format'] !== 'csv' )
             $parts[] = strtoupper( $def['output_format'] );
-        return $parts ? implode( ', ', $parts ) : 'no settings of its own';
+        return $parts ? implode( ', ', $parts ) : $t( 'no settings of its own' );
     }
 
     /**

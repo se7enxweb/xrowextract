@@ -6705,6 +6705,46 @@
         <source>A setting of the destination is not valid UTF-8 text and cannot be stored.</source>
         <translation>Eine Einstellung des Ziels ist kein gültiger UTF-8-Text und kann nicht gespeichert werden.</translation>
     </message>
+    <message>
+        <source>extends %preset</source>
+        <translation>erweitert %preset</translation>
+    </message>
+    <message>
+        <source>class %class</source>
+        <translation>Klasse %class</translation>
+    </message>
+    <message>
+        <source>class #%id</source>
+        <translation>Klasse #%id</translation>
+    </message>
+    <message>
+        <source>node %node</source>
+        <translation>Knoten %node</translation>
+    </message>
+    <message>
+        <source>sorted by %field</source>
+        <translation>sortiert nach %field</translation>
+    </message>
+    <message>
+        <source>limit %limit</source>
+        <translation>höchstens %limit</translation>
+    </message>
+    <message>
+        <source>visible only</source>
+        <translation>nur sichtbare</translation>
+    </message>
+    <message>
+        <source>hidden only</source>
+        <translation>nur versteckte</translation>
+    </message>
+    <message>
+        <source>%count condition(s)</source>
+        <translation>%count Bedingung(en)</translation>
+    </message>
+    <message>
+        <source>no settings of its own</source>
+        <translation>keine eigenen Einstellungen</translation>
+    </message>
 </context>
 <context>
     <name>design/standard/package/creators/ezcontentobject</name>
