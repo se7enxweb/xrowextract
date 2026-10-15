@@ -132,7 +132,7 @@
                             </small>
                         </span>
                         {def $owner = $row.owner_user}
-                        {if $owner.node_id}<a class="xe-user" style="--xe-user-hue: {$owner.hue}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Started by %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">{else}<span class="xe-user xe-user-gone" style="--xe-user-hue: {$owner.hue}" title="{'Started by %login (account no longer exists)'|i18n('design/standard/extract',, hash( '%login', $owner.login ))|wash}">{/if}
+                        {if $owner.node_id}<a class="xe-user xe-tone-{$owner.hue|mod( 8 )|inc}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Started by %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">{else}<span class="xe-user xe-user-gone xe-tone-{$owner.hue|mod( 8 )|inc}" title="{'Started by %login (account no longer exists)'|i18n('design/standard/extract',, hash( '%login', $owner.login ))|wash}">{/if}
                             <span class="xe-user-avatar" aria-hidden="true">{$owner.initials|wash}</span>
                             <span class="xe-user-name">{$owner.name|wash}{if $row.mine} <small>({'you'|i18n('design/standard/extract')})</small>{/if}</span>
                         {if $owner.node_id}</a>{else}</span>{/if}

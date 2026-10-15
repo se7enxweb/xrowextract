@@ -85,7 +85,7 @@
                 </td>
                 <td>
                     {if $row.changes|count}
-                    <table class="xe-table" style="width: 100%">
+                    <table class="xe-table xe-table-full">
                         {foreach $row.changes as $change}
                         <tr><td><code>{$change.field|wash}</code></td>
                             <td class="xe-long">{$change.old|wash}</td>

@@ -32,6 +32,15 @@ export history and the schedules (popupmenu/xrowextract_import_menu.tpl through 
 ImportExportMenuTemplateArray[]). The menu templates receive the menu's id, item prefix and submenu depth from
 Exponential's popupmenu/popup_export_items.tpl, one definition for both menus.
 
+Look (light and dark)
+
+The pages draw their colours, shadows, radii and code font from the administration's --a4-* tokens and use its
+components (.a4-meter with .a4-pct-<n> for the progress and fill bars), all from Exponential's components.css
+(doc/bc/6.0/admin4-styling.md), so they follow admin4's light and dark mode like the kernel's pages. The templates
+carry no style="" and no <style>; xrowextract.css and xrowextract-schedules.css hold only the extension's own
+.xe-* classes, built from those tokens (tests/unit/StylingRulesTest.php checks both). A user's bubble takes one of
+the eight chart colours (.xe-tone-1 to .xe-tone-8, the same for each login).
+
 Preview
 
 "Preview" in xrowextract/csv shows the export as a spreadsheet will show

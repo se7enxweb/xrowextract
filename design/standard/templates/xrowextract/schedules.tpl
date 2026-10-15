@@ -344,7 +344,7 @@
                         <small>{$s.summary|wash}</small>
                     </span>
                     {def $owner = $s.owner_user}
-                    {if $owner.node_id}<a class="xe-user" style="--xe-user-hue: {$owner.hue}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Owner: %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">{else}<span class="xe-user xe-user-gone" style="--xe-user-hue: {$owner.hue}">{/if}
+                    {if $owner.node_id}<a class="xe-user xe-tone-{$owner.hue|mod( 8 )|inc}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Owner: %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">{else}<span class="xe-user xe-user-gone xe-tone-{$owner.hue|mod( 8 )|inc}">{/if}
                         <span class="xe-user-avatar" aria-hidden="true">{$owner.initials|wash}</span>
                         <span class="xe-user-name">{$owner.name|wash}{if $s.mine} <small>({'you'|i18n('design/standard/extract')})</small>{/if}</span>
                     {if $owner.node_id}</a>{else}</span>{/if}

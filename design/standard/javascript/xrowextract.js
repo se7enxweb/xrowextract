@@ -892,7 +892,7 @@
             var percent = data.progress.total > 0 ? Math.max(0, Math.min(100, Math.round(100 * data.progress.done / data.progress.total))) : 0;
             var bar = row.querySelector('[data-role="progress-bar"]');
             if (bar) {
-                bar.style.width = percent + '%';
+                bar.className = bar.className.replace(/\s*\ba4-pct-\d+\b/g, '') + ' a4-pct-' + percent;
             }
             setText(row, 'progress-text', data.progress.done + ' / ' + data.progress.total + (data.progress.phase ? ' · ' + data.progress.phase : ''));
         }

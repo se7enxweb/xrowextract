@@ -38,7 +38,7 @@
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl} data-file-field="PackageBinaryFile">
                     <input type="hidden" name="UploadID" value="" />
                     <input type="hidden" name="UploadName" value="" />
-                    <div class="xe-progress"><div class="xe-progress-bar" style="width: 0%"></div></div>
+                    <div class="xe-progress a4-meter"><span class="xe-progress-bar a4-pct-0"></span></div>
                     <p class="xe-upload-status" aria-live="polite"></p>
                     <div class="xe-inline">
                         <button class="button xe-upload-pause" type="button" hidden>{'Pause'|i18n('design/standard/extract')}</button>
@@ -100,7 +100,7 @@
 
             <div class="xe-field">
             <div class="xe-scroll" tabindex="0">
-                <table class="xe-table" style="width: 100%">
+                <table class="xe-table xe-table-full">
                     <tr><th>{'Name'|i18n('design/standard/extract')}</th><td class="xe-long">{$Inspection.meta.name|wash}</td>
                         <th>{'Version'|i18n('design/standard/extract')}</th><td>{$Inspection.meta.version|wash}{if $Inspection.meta.release}-{$Inspection.meta.release|wash}{/if}</td></tr>
                     <tr><th>{'Summary'|i18n('design/standard/extract')}</th><td colspan="3" class="xe-long">{$Inspection.meta.summary|wash}</td></tr>
@@ -115,7 +115,7 @@
             <details>
                 <summary>{'Dependencies'|i18n('design/standard/extract')} ({$Inspection.meta.dependencies|count})</summary>
                 <div class="xe-scroll" tabindex="0">
-                <table class="xe-table" style="width: 100%">
+                <table class="xe-table xe-table-full">
                     <thead><tr><th>{'Section'|i18n('design/standard/extract')}</th><th>{'Type'|i18n('design/standard/extract')}</th><th>{'Name'|i18n('design/standard/extract')}</th><th>{'Value'|i18n('design/standard/extract')}</th></tr></thead>
                     <tbody>
                     {foreach $Inspection.meta.dependencies as $dependency}
@@ -419,7 +419,7 @@
 
             <details open>
                 <summary>{'Archive layout'|i18n('design/standard/extract')}</summary>
-                <pre class="xe-example">{literal}&lt;package-name&gt;/
+                <pre class="xe-example" tabindex="0">{literal}&lt;package-name&gt;/
   package.xml               # metadata + the install/uninstall item list
   ezcontentclass/
     &lt;filename&gt;.xml          # one file per class install item
@@ -436,7 +436,7 @@
             <details>
                 <summary>{'package.xml: the elements that matter here'|i18n('design/standard/extract')}</summary>
                 <div class="xe-scroll" tabindex="0">
-                <table class="xe-table" style="width: 100%">
+                <table class="xe-table xe-table-full">
                     <thead><tr><th>{'Element'|i18n('design/standard/extract')}</th><th>{'Meaning'|i18n('design/standard/extract')}</th></tr></thead>
                     <tbody>
                     <tr><td><code>&lt;name&gt;</code></td><td>{'The id this package is known by in the repository (package/list, the picker on this page, ext:xrowextract:package). Unique per repository, not shown to the visitor.'|i18n('design/standard/extract')}</td></tr>
@@ -467,7 +467,7 @@
             <details>
                 <summary>{'Annotated example, from a generated sample package'|i18n('design/standard/extract')}</summary>
                 <p class="xe-side-lead">{'A shortened, real ezcontentobject/*.xml as the class + content variant writes it (an ezstring and an ezobjectrelationlist attribute shown; every other importable datatype follows the same shape).'|i18n('design/standard/extract')}</p>
-                <pre class="xe-example">{literal}&lt;object-list&gt;
+                <pre class="xe-example" tabindex="0">{literal}&lt;object-list&gt;
   &lt;object remote_id="xrowextract-pkgtpl-ng_article-20260929120000-ab12cd-2"
           name="Sample title 2 (eng-US)"
           class_remote_id="..."

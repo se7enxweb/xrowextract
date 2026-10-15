@@ -265,7 +265,7 @@
                         <label><input type="radio" name="LineSeparator" value="unix"{if $state.line|eq( 'unix' )} checked{/if} /><span>Unix</span></label>
                         <label><input type="radio" name="LineSeparator" value="mac"{if $state.line|eq( 'mac' )} checked{/if} /><span>Mac</span></label>
                     </div>
-                    <span class="xe-label" id="xe-a-escape" style="margin-top: .8em">{'Escape'|i18n('design/standard/extract')}</span>
+                    <span class="xe-label xe-label-gap" id="xe-a-escape">{'Escape'|i18n('design/standard/extract')}</span>
                     <div class="xe-segmented" role="radiogroup" aria-labelledby="xe-a-escape">
                         <label><input type="radio" name="Escape" value="1"{if $state.escape} checked{/if} /><span>{'Quoted'|i18n('design/standard/extract')}</span></label>
                         <label><input type="radio" name="Escape" value="0"{if $state.escape|not} checked{/if} /><span>{'Unquoted'|i18n('design/standard/extract')}</span></label>

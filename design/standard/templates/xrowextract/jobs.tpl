@@ -56,9 +56,9 @@
                         </span>
                         {def $owner = $job.owner_user}
                         {if $owner.node_id}
-                        <a class="xe-user" style="--xe-user-hue: {$owner.hue}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Started by %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">
+                        <a class="xe-user xe-tone-{$owner.hue|mod( 8 )|inc}" href={concat( 'content/view/full/', $owner.node_id )|ezurl} title="{'Started by %name (%login)'|i18n('design/standard/extract',, hash( '%name', $owner.name, '%login', $owner.login ))|wash}">
                         {else}
-                        <span class="xe-user xe-user-gone" style="--xe-user-hue: {$owner.hue}" title="{'Started by %login (account no longer exists)'|i18n('design/standard/extract',, hash( '%login', $owner.login ))|wash}">
+                        <span class="xe-user xe-user-gone xe-tone-{$owner.hue|mod( 8 )|inc}" title="{'Started by %login (account no longer exists)'|i18n('design/standard/extract',, hash( '%login', $owner.login ))|wash}">
                         {/if}
                             <span class="xe-user-avatar" aria-hidden="true">{$owner.initials|wash}</span>
                             <span class="xe-user-name">{$owner.name|wash}{if $job.mine} <small>({'you'|i18n('design/standard/extract')})</small>{/if}</span>
@@ -74,7 +74,7 @@
                     </div>
 
                     <div class="xe-job-progress"{if $job.active|not} hidden{/if} data-role="progress-wrap">
-                        <div class="xe-progress"><div class="xe-progress-bar" data-role="progress-bar" style="width: {$job.progress_percent}%"></div></div>
+                        <div class="xe-progress a4-meter"><span class="xe-progress-bar a4-pct-{$job.progress_percent|int}" data-role="progress-bar"></span></div>
                         <span class="xe-job-progress-text" data-role="progress-text">{if $job.progress}{$job.progress.done} / {$job.progress.total} · {$job.progress.phase|wash}{else}{'Starting …'|i18n('design/standard/extract')}{/if}</span>
                     </div>
 

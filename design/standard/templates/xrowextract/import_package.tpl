@@ -27,7 +27,7 @@
     {if $PackageInspection}
     <div class="xe-field">
     <div class="xe-scroll" tabindex="0">
-        <table class="xe-table" style="width: 100%">
+        <table class="xe-table xe-table-full">
             <tr><th>{'Name'|i18n('design/standard/extract')}</th><td class="xe-long">{$PackageInspection.meta.name|wash}</td>
                 <th>{'Version'|i18n('design/standard/extract')}</th><td>{$PackageInspection.meta.version|wash}{if $PackageInspection.meta.release}-{$PackageInspection.meta.release|wash}{/if}</td></tr>
             <tr><th>{'Summary'|i18n('design/standard/extract')}</th><td colspan="3" class="xe-long">{$PackageInspection.meta.summary|wash}</td></tr>

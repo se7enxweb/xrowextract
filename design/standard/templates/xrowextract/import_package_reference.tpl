@@ -5,7 +5,7 @@
 <p class="xe-help">{'A gzip-compressed tar archive (.ezpkg or .tar.gz - the same format, only the extension differs) carrying a content class, one or more content objects, or both; or upload just one class-definition or content-object XML file on its own - either way it is inspected and installed through the same code as package/install and the xrowextract/package page.'|i18n('design/standard/extract')|wash}</p>
 
 <h4>{'Archive layout'|i18n('design/standard/extract')}</h4>
-<pre class="xe-example">package-name/
+<pre class="xe-example" tabindex="0">package-name/
   package.xml                 # metadata + the ordered install/uninstall item list
   ezcontentclass/
     &lt;filename&gt;.xml            # one file per content-class install item
@@ -19,7 +19,7 @@
 
 <h4>{'package.xml'|i18n('design/standard/extract')}</h4>
 <div class="xe-scroll" tabindex="0">
-<table class="xe-table" style="width: 100%">
+<table class="xe-table xe-table-full">
     <thead><tr><th>{'Element'|i18n('design/standard/extract')}</th><th>{'Meaning'|i18n('design/standard/extract')}</th></tr></thead>
     <tbody>
     <tr><td><code>&lt;name&gt;</code></td><td>{'The id the package is known by in the repository (package/list, xrowextract/package, ext:xrowextract:package). Unique per repository, never shown to a visitor.'|i18n('design/standard/extract')|wash}</td></tr>
@@ -53,7 +53,7 @@
 </ul>
 
 <p class="xe-help">{'A real example, from this extension’s own "Package template" sample builder (xrowextract/package) - one attribute of each datatype family it fills a real value for, and the relation from a second sample object to the first:'|i18n('design/standard/extract')|wash}</p>
-<pre class="xe-example">&lt;object remote_id="xrowextract-pkgtpl-article-20260929145755-3f05a3-2"
+<pre class="xe-example" tabindex="0">&lt;object remote_id="xrowextract-pkgtpl-article-20260929145755-3f05a3-2"
         name="Sample Short title 2 (eng-US)"
         class_remote_id="c15b600eb9198b1924063b5a68758232"
         ezobject:class_identifier="article"
@@ -87,7 +87,7 @@
 
 <h4>{'Every importable datatype, with an example'|i18n('design/standard/extract')|wash}</h4>
 <div class="xe-scroll" tabindex="0">
-<table class="xe-table" style="width: 100%">
+<table class="xe-table xe-table-full">
     <thead><tr><th>{'Datatype'|i18n('design/standard/extract')}</th><th>{'Serialized as'|i18n('design/standard/extract')}</th><th>{'Example'|i18n('design/standard/extract')}</th></tr></thead>
     <tbody>
     <tr><td>ezstring, eztext</td><td><code>&lt;text&gt;</code></td><td>Sample Title 2 (eng-US)</td></tr>

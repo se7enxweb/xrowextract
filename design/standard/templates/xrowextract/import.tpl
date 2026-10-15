@@ -139,7 +139,7 @@
                 <div class="xe-chunked-upload" data-upload-url={'xrowextract/upload_chunk'|ezurl} data-file-field="ImportFile">
                     <input type="hidden" name="UploadID" value="" />
                     <input type="hidden" name="UploadName" value="" />
-                    <div class="xe-progress"><div class="xe-progress-bar" style="width: 0%"></div></div>
+                    <div class="xe-progress a4-meter"><span class="xe-progress-bar a4-pct-0"></span></div>
                     <p class="xe-upload-status" aria-live="polite"></p>
                     <div class="xe-inline">
                         <button class="button xe-upload-pause" type="button" hidden>{'Pause'|i18n('design/standard/extract')}</button>
@@ -343,13 +343,13 @@
                 <summary>{'XML - the recommended format'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'What XrowExtractWriter writes, and what "Start from a template" and "Try a sample" build: a root <export>, its class and when it was written; a <columns> block naming every column once, by a short display name and its exact column id (an attribute identifier, "identifier:format" for an attribute format, or a special column id such as ezcontentobject.remote_id); then one <object> per row, one <field name="..."> per column, matched to the <columns> block by that same name. The importer reads a column by its id, not by guessing from a name, so XML mapping is always exact. A DOCTYPE is refused outright (never written by this tool, and the classic way to smuggle in external entities).'|i18n('design/standard/extract')|wash}</p>
                 {if $ReferenceExamples.xml.rowCount|gt( 0 )}
-                <pre class="xe-example">{$ReferenceExamples.xml.text|wash}</pre>
+                <pre class="xe-example" tabindex="0">{$ReferenceExamples.xml.text|wash}</pre>
                 <div class="xe-toolbar">
                     <span class="xe-spacer"></span>
                     <input class="button" type="submit" name="DownloadExample" value="xml" formnovalidate="formnovalidate" />
                 </div>
                 {else}
-                <pre class="xe-example">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+                <pre class="xe-example" tabindex="0">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;export class="ng_article" created="2026-09-29T12:00:00+00:00"&gt;
   &lt;columns&gt;
     &lt;column name="title" id="title"&gt;Title&lt;/column&gt;
@@ -376,13 +376,13 @@
                     <li>{'An empty cell is an empty value, not "not present": for an update, an empty cell can clear an attribute.'|i18n('design/standard/extract')}</li>
                 </ul>
                 {if $ReferenceExamples.csv.rowCount|gt( 0 )}
-                <pre class="xe-example">{$ReferenceExamples.csv.text|wash}</pre>
+                <pre class="xe-example" tabindex="0">{$ReferenceExamples.csv.text|wash}</pre>
                 <div class="xe-toolbar">
                     <span class="xe-spacer"></span>
                     <input class="button" type="submit" name="DownloadExample" value="csv" formnovalidate="formnovalidate" />
                 </div>
                 {else}
-                <pre class="xe-example">"title","remote-id","authors-ids","class","language"
+                <pre class="xe-example" tabindex="0">"title","remote-id","authors-ids","class","language"
 "Sample article","xrowextract-sample-1","42","ng_article","eng-US"</pre>
                 <p class="xe-help">{'A static example (this class has no content on this site yet to show a real one).'|i18n('design/standard/extract')}</p>
                 {/if}
@@ -392,13 +392,13 @@
                 <summary>{'JSON'|i18n('design/standard/extract')}</summary>
                 <p class="xe-help">{'An array of objects, one per row, each key a column name (the same names CSV uses); every value a string. No column list and no class attribute - a "class" column carries the class, the same as CSV.'|i18n('design/standard/extract')}</p>
                 {if $ReferenceExamples.json.rowCount|gt( 0 )}
-                <pre class="xe-example">{$ReferenceExamples.json.text|wash}</pre>
+                <pre class="xe-example" tabindex="0">{$ReferenceExamples.json.text|wash}</pre>
                 <div class="xe-toolbar">
                     <span class="xe-spacer"></span>
                     <input class="button" type="submit" name="DownloadExample" value="json" formnovalidate="formnovalidate" />
                 </div>
                 {else}
-                <pre class="xe-example">[
+                <pre class="xe-example" tabindex="0">[
   {ldelim}"title": "Sample article", "remote-id": "xrowextract-sample-1", "authors-ids": "42", "class": "ng_article", "language": "eng-US"{rdelim}
 ]</pre>
                 <p class="xe-help">{'A static example (this class has no content on this site yet to show a real one).'|i18n('design/standard/extract')}</p>

@@ -80,7 +80,7 @@
 
     function setProgress(sent, total) {
         var pct = total > 0 ? Math.min(100, Math.round((sent / total) * 100)) : 0;
-        if (state && state.parts.bar) state.parts.bar.style.width = pct + '%';
+        if (state && state.parts.bar) state.parts.bar.className = state.parts.bar.className.replace(/\s*\ba4-pct-\d+\b/g, '') + ' a4-pct-' + pct;
         setStatus(human(sent) + ' of ' + human(total) + ' (' + pct + '%)');
     }
 

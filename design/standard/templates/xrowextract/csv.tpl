@@ -46,7 +46,7 @@
                 {foreach $UserPresets as $preset}
                 <li class="xe-preset-row{if $LoadedPresetRef|eq( $preset.ref )} xe-preset-row-loaded{/if}">
                     <div class="xe-preset-row-main">
-                        <span class="xe-user" style="--xe-user-hue: {$preset.owner_user.hue}" title="{$preset.owner_user.name|wash}"><span class="xe-user-avatar" aria-hidden="true">{$preset.owner_user.initials|wash}</span></span>
+                        <span class="xe-user xe-tone-{$preset.owner_user.hue|mod( 8 )|inc}" title="{$preset.owner_user.name|wash}"><span class="xe-user-avatar" aria-hidden="true">{$preset.owner_user.initials|wash}</span></span>
                         <span class="xe-colinfo">
                             <strong>{$preset.name|wash}</strong>{if $preset.shared} <span class="xe-badge">{'shared'|i18n('design/standard/extract')}</span>{else} <span class="xe-badge xe-badge-muted">{'private'|i18n('design/standard/extract')}</span>{/if}
                             <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
@@ -388,7 +388,7 @@
                         <option value="{$section.id}"{if $Filters.section|eq( $section.id )} selected{/if}>{$section.name|wash}</option>
                         {/foreach}
                     </select>
-                    <label class="xe-label" for="xe-filter-state" style="margin-top: .8em">{'Object state'|i18n('design/standard/extract')}</label>
+                    <label class="xe-label xe-label-gap" for="xe-filter-state">{'Object state'|i18n('design/standard/extract')}</label>
                     <select name="Filter[state]" id="xe-filter-state" class="xe-autosubmit">
                         <option value="0">{'Any state'|i18n('design/standard/extract')}</option>
                         {foreach $FilterStates as $state}
@@ -403,7 +403,7 @@
                         <label><input type="radio" name="Filter[visibility]" value="visible" class="xe-autosubmit"{if $Filters.visibility|eq( 'visible' )} checked{/if} /><span>{'Visible'|i18n('design/standard/extract')}</span></label>
                         <label><input type="radio" name="Filter[visibility]" value="hidden" class="xe-autosubmit"{if $Filters.visibility|eq( 'hidden' )} checked{/if} /><span>{'Hidden'|i18n('design/standard/extract')}</span></label>
                     </div>
-                    <label class="xe-label" for="xe-filter-name" style="margin-top: .8em">{'Name contains'|i18n('design/standard/extract')}</label>
+                    <label class="xe-label xe-label-gap" for="xe-filter-name">{'Name contains'|i18n('design/standard/extract')}</label>
                     <input type="search" name="Filter[name]" id="xe-filter-name" value="{$Filters.name|wash}" class="xe-autosubmit" />
                 </div>
             </div>
