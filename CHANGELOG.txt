@@ -1,3 +1,17 @@
+Version 2.5.12
+
+-  Added the entry parameter of xrowextract/import for the node view's Import/Export menu of Exponential 6.0.15:
+   import/(parent)/<node id> starts the import form with that node as its target (kept for the session until
+   another is chosen) and redirects to it; nothing is imported before the user applies a file. A node the user
+   cannot read, that is not a container or below which the user may not create content is refused
+   (XrowExtractEntry::importParent(), ::importRefusal(), tests in tests/unit/EntryTest.php)
+-  Added the import and job entries of that menu (popupmenu/xrowextract_import_menu.tpl through admininterface.ini
+   ImportExportMenuTemplateArray[]): Import into this item (policy import, only where the item can take content),
+   Export and import jobs (jobs), Export history (history) and Schedules (schedule); translations in eng-US and ger-DE
+-  Updated the CSV entries and the "Subtree of class" submenu to take the menu's id, item prefix and submenu depth
+   from Exponential's popupmenu/popup_export_items.tpl, so the same templates serve the context menus' Advanced >
+   Export and the Import/Export menu; the class submenu's id is <menu id>Classes
+
 Version 2.5.11
 
 -  Added entry parameters to xrowextract/csv for the content tree's Advanced > Export menu of Exponential 6.0.15:
