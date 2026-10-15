@@ -84,6 +84,41 @@ class XrowExtractEntry
     }
 
     /**
+     * The import target of xrowextract/import/(parent)/<node id> (the node view's Import/Export menu): the node id,
+     * or 0 when the value is not a valid id.
+     *
+     * @param array<string, mixed> $params the view's parameters (EntryParent)
+     */
+    public static function importParent( array $params ): int
+    {
+        return isset( $params['EntryParent'] ) && is_string( $params['EntryParent'] ) ? self::positiveID( $params['EntryParent'] ) : 0;
+    }
+
+    /**
+     * Whether xrowextract/import was opened with an import target (given, valid or not).
+     *
+     * @param array<string, mixed> $params the view's parameters
+     */
+    public static function isImportEntry( array $params ): bool
+    {
+        return isset( $params['EntryParent'] ) && $params['EntryParent'] !== false;
+    }
+
+    /**
+     * The refusal of an import target as found: 'not_found' (no such node), 'access_denied' (a node the user cannot
+     * read, or below which the user may not create content: not a container, or no content/create there), null
+     * when the import may start there.
+     */
+    public static function importRefusal( bool $nodeExists, bool $nodeReadable, bool $isContainer, bool $canCreate ): ?string
+    {
+        if ( !$nodeExists )
+            return 'not_found';
+        if ( !$nodeReadable || !$isContainer || !$canCreate )
+            return 'access_denied';
+        return null;
+    }
+
+    /**
      * A database id given as text: 1 to 2147483647 in plain digits (no sign, space or leading zero), else 0.
      *
      * @param mixed $value

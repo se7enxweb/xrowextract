@@ -46,6 +46,25 @@ class Import extends \Exponential\Runnable\ModuleView
 
         $SESSION_KEY = 'XROWEXTRACT_IMPORT_FILE';
 
+        // The node view's Import/Export menu: xrowextract/import/(parent)/<node id> makes that node the form's target
+        // (kept in the session until another is chosen), for a container the user can read and create content
+        // below; then the plain form. Nothing is imported here.
+        if ( \XrowExtractEntry::isImportEntry( $Params ) )
+        {
+            $entryParentID = \XrowExtractEntry::importParent( $Params );
+            $entryParent = $entryParentID ? \eZContentObjectTreeNode::fetch( $entryParentID ) : null;
+            $isNode = $entryParent instanceof \eZContentObjectTreeNode;
+            $entryObject = $isNode ? $entryParent->attribute( 'object' ) : null;
+            $entryClass = $entryObject instanceof \eZContentObject ? $entryObject->attribute( 'content_class' ) : null;
+            $refusal = \XrowExtractEntry::importRefusal( $isNode, $isNode && $entryParent->canRead(),
+                                                         $entryClass instanceof \eZContentClass && (bool)$entryClass->attribute( 'is_container' ),
+                                                         $isNode && $entryParent->canCreate() );
+            if ( $refusal !== null )
+                return $this->viewResult( $Result, $module->handleError( $refusal === 'access_denied' ? \eZError::KERNEL_ACCESS_DENIED : \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
+            $http->setSessionVariable( 'eZExtractImportParent', $entryParentID );
+            return $this->viewResult( $Result, $module->redirectTo( 'xrowextract/import' ) );
+        }
+
         /** Forgets the session's current file, deleting it the way its source needs to. */
         $forgetFile = function () use ( &$SESSION_KEY )
         {
@@ -531,6 +550,9 @@ class Import extends \Exponential\Runnable\ModuleView
 
         if ( $http->hasPostVariable( 'ParentNodeID' ) )
             $ParentNodeID = \XrowExtractColumns::dbID( $http->postVariable( 'ParentNodeID' ) );
+        elseif ( $http->hasSessionVariable( 'eZExtractImportParent' ) && \XrowExtractColumns::dbID( $http->sessionVariable( 'eZExtractImportParent' ) ) )
+            // the target the Import/Export menu chose (the entry above)
+            $ParentNodeID = \XrowExtractColumns::dbID( $http->sessionVariable( 'eZExtractImportParent' ) );
         else
         {
             // New objects go below the public site's root by default (content, not the user placement)

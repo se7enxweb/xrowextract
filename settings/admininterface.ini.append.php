@@ -5,5 +5,7 @@
 [AdditionalMenuSettings]
 ExportMenuTemplateArray[]=popupmenu/xrowextract_export_menu.tpl
 ExportSubMenuTemplateArray[]=popupmenu/xrowextract_export_submenus.tpl
+# The import and job entries of the node view's Import/Export menu
+ImportExportMenuTemplateArray[]=popupmenu/xrowextract_import_menu.tpl
 
 */ ?>

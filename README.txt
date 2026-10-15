@@ -25,6 +25,13 @@ export.ini ExportClasses does not offer and a node the user cannot read are refu
 settings/admininterface.ini.append.php (ExportMenuTemplateArray[], ExportSubMenuTemplateArray[], Exponential 6.0.15
 and later) and javascript/xrowextract-exportmenu.js (design.ini BackendJavaScriptList[]).
 
+The node view's Import/Export button (Exponential 6.0.15) offers the same CSV entries and, each for its policy,
+Import into this item (xrowextract/import/(parent)/<node id>: the import form with that node as its target, kept
+for the session, for a container the user can read and create content below; refused otherwise), the jobs, the
+export history and the schedules (popupmenu/xrowextract_import_menu.tpl through admininterface.ini
+ImportExportMenuTemplateArray[]). The menu templates receive the menu's id, item prefix and submenu depth from
+Exponential's popupmenu/popup_export_items.tpl, one definition for both menus.
+
 Preview
 
 "Preview" in xrowextract/csv shows the export as a spreadsheet will show

@@ -47,7 +47,11 @@ $ViewList['import'] = array( 'script' => 'import.php',
                              'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
                                                       'RunInBackground', 'ResumeJobID', 'KeepSamplePackage',
                                                       'DownloadClassXML', 'DownloadObjectXML', 'OpenRepositoryPackage' ),
-                             'params' => array() );
+                             'params' => array(),
+                             // The node view's Import/Export menu: import/(parent)/<node id> starts the form with that
+                             // node as the target (a container below which the user may create content); it redirects
+                             // to the form, nothing is imported (XrowExtractEntry::importRefusal())
+                             'unordered_params' => array( 'parent' => 'EntryParent' ) );
 // The chunked upload endpoint XrowExtractUploadJS talks to: same policy as xrowextract/import
 $ViewList['upload_chunk'] = array( 'script' => 'upload_chunk.php',
                                    'functions' => array( 'import' ),

@@ -6783,5 +6783,21 @@
         <source>%name (%count)</source>
         <translation>%name (%count)</translation>
     </message>
+    <message>
+        <source>Import into this item…</source>
+        <translation>Import into this item…</translation>
+    </message>
+    <message>
+        <source>Export and import jobs</source>
+        <translation>Export and import jobs</translation>
+    </message>
+    <message>
+        <source>Export history</source>
+        <translation>Export history</translation>
+    </message>
+    <message>
+        <source>Schedules</source>
+        <translation>Schedules</translation>
+    </message>
 </context>
 </TS>

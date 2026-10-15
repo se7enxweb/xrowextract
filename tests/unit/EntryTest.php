@@ -74,6 +74,23 @@ class EntryTest extends TestCase
         $this->assertSame( 'access_denied', XrowExtractEntry::refusal( true, false, true, true ) );
     }
 
+    public function testTheImportTarget(): void
+    {
+        $this->assertFalse( XrowExtractEntry::isImportEntry( array( 'EntryParent' => false ) ) );
+        $this->assertFalse( XrowExtractEntry::isImportEntry( array() ) );
+        $this->assertTrue( XrowExtractEntry::isImportEntry( array( 'EntryParent' => 'x' ) ) );
+        $this->assertSame( 42, XrowExtractEntry::importParent( array( 'EntryParent' => '42' ) ) );
+        foreach ( array( '0', '-1', '042', 'abc', '', '2147483648', '1 ' ) as $bad )
+            $this->assertSame( 0, XrowExtractEntry::importParent( array( 'EntryParent' => $bad ) ), $bad );
+        $this->assertSame( 0, XrowExtractEntry::importParent( array( 'EntryParent' => array( '42' ) ) ) );
+
+        $this->assertNull( XrowExtractEntry::importRefusal( true, true, true, true ) );
+        $this->assertSame( 'not_found', XrowExtractEntry::importRefusal( false, false, false, false ) );
+        $this->assertSame( 'access_denied', XrowExtractEntry::importRefusal( true, false, true, true ), 'not readable' );
+        $this->assertSame( 'access_denied', XrowExtractEntry::importRefusal( true, true, false, true ), 'not a container' );
+        $this->assertSame( 'access_denied', XrowExtractEntry::importRefusal( true, true, true, false ), 'no content/create there' );
+    }
+
     public function testClassAllowedFollowsExportClasses(): void
     {
         $this->assertTrue( XrowExtractEntry::classAllowed( 16, 'article', array() ) );
