@@ -1,3 +1,9 @@
+Version 2.5.14
+
+-  Updated the one-line summary of a preset (CSV and schedule pages) to read in the language of the page: its words
+   ("class", "node", "sorted by", "limit", the visibility filter, the number of conditions) are translated in
+   design/standard/extract, so the German administration shows "Klasse user, Knoten 2, sortiert nach name"
+
 Version 2.5.13
 
 -  Updated every page of the extension (CSV, Site archive, Jobs, Import, Package, Browse, Compare, Schedules,
