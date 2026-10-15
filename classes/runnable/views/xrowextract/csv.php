@@ -159,6 +159,31 @@ class Csv extends \Exponential\Runnable\ModuleView
             return $this->viewResult( $Result,  $module->redirectTo( 'xrowextract/csv' ) );
         }
 
+        // The entry of the content tree's Advanced > Export menu (xrowextract/csv/(node)/<id>[/(scope)/list|tree]
+        // [/(class)/<id>][/(columns)/all|migration]): the form is filled in for that node and shown by a redirect
+        // to the plain URL. Nothing is exported here; only a node the user can read, a class the form offers.
+        if ( \XrowExtractEntry::isEntry( $Params ) )
+        {
+            $entry = \XrowExtractEntry::parse( $Params );
+            if ( $entry['errors'] )
+                return $this->viewResult( $Result, $module->handleError( \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
+            $entryNode = \eZContentObjectTreeNode::fetch( $entry['node'] );
+            $entryClass = $entry['class'] > 0 ? \eZContentClass::fetch( $entry['class'] ) : null;
+            $refusal = \XrowExtractEntry::refusal( $entryNode instanceof \eZContentObjectTreeNode,
+                                                   $entryNode instanceof \eZContentObjectTreeNode && $entryNode->canRead(),
+                                                   $entry['class'] > 0,
+                                                   $entryClass instanceof \eZContentClass && \XrowExtractEntry::classAllowed(
+                                                       (int)$entryClass->attribute( 'id' ), (string)$entryClass->attribute( 'identifier' ),
+                                                       (array)$ini_bis->variable( 'ExportSettings', 'ExportClasses' ) ) );
+            if ( $refusal !== null )
+                return $this->viewResult( $Result, $module->handleError( $refusal === 'access_denied' ? \eZError::KERNEL_ACCESS_DENIED : \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
+            $http->setSessionVariable( 'eZExtractConfig', \XrowExtractEntry::applyToConfig( $sessionConfig, $entry ) );
+            $http->removeSessionVariable( 'eZExtractLoadedPreset' );
+            $http->removeSessionVariable( 'eZExtractPresetFields' );
+            unset( $_SESSION['EXTRACTCSV_OBJECTID_ARRAY'] );
+            return $this->viewResult( $Result, $module->redirectTo( 'xrowextract/csv' ) );
+        }
+
         // Named fetch (fetchalias.ini): apply one's Constant values into the view. Read early, so the node,
         // class, sort, depth, limit/offset, main-locations and a condition below all see the override.
         $FetchAliasChoices = \XrowExtractFetchAlias::choices();
@@ -873,6 +898,15 @@ class Csv extends \Exponential\Runnable\ModuleView
                 }
         }
 
+        // The columns an entry asked for (XrowExtractEntry::applyToConfig()), once, in place of the saved list:
+        // every attribute of the class, or the column set "migration"
+        $entryColumns = isset( $sessionConfig['EntryColumns'] ) ? (string)$sessionConfig['EntryColumns'] : '';
+        unset( $sessionConfig['EntryColumns'] );
+        $entryResetAttributes = !$keepPosted && $entryColumns === 'all';
+        $entryColumnSet = !$keepPosted && $entryColumns === 'migration' ? 'migration' : '';
+        if ( $entryColumnSet !== '' )
+            $Attributes = array();
+
         // The columns before any add action, to tell what an add brought in
         $columnIDsBeforeAdd = array();
         foreach ( (array)$Attributes as $item )
@@ -909,7 +943,7 @@ class Csv extends \Exponential\Runnable\ModuleView
         }
 
         // A column set: its columns that are not in the list yet, in the set's order
-        if ( $http->hasPostVariable( 'AddColumnSet' ) )
+        if ( $http->hasPostVariable( 'AddColumnSet' ) || $entryColumnSet !== '' )
         {
             $present = array();
             foreach ( (array)$Attributes as $item )
@@ -920,7 +954,7 @@ class Csv extends \Exponential\Runnable\ModuleView
             $classColumnsByID = array();
             foreach ( \XrowExtractColumns::classColumns( $Class_id ) as $column )
                 $classColumnsByID[$column['id']] = $column;
-            foreach ( \XrowExtractCatalogue::setColumnIDs( (string)$http->postVariable( 'AddColumnSet' ), $Class_id ) as $id )
+            foreach ( \XrowExtractCatalogue::setColumnIDs( $entryColumnSet !== '' ? $entryColumnSet : (string)$http->postVariable( 'AddColumnSet' ), $Class_id ) as $id )
             {
                 if ( isset( $present[$id] ) )
                     continue;
@@ -935,13 +969,13 @@ class Csv extends \Exponential\Runnable\ModuleView
         }
 
         // Remove all columns, or start again from every class attribute
-        if ( $http->hasPostVariable( 'RemoveAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) )
+        if ( $http->hasPostVariable( 'RemoveAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) || $entryResetAttributes )
         {
             $Attributes = array();
         }
 
         // Add every class attribute that is not a column yet, in class order
-        if ( $http->hasPostVariable( 'AddAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) )
+        if ( $http->hasPostVariable( 'AddAllAttributes' ) || $http->hasPostVariable( 'ResetAttributes' ) || $entryResetAttributes )
         {
             $present = array();
             foreach ( (array)$Attributes as $item )

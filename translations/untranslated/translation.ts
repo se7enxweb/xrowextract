@@ -6741,4 +6741,47 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>extension/xrowextract/popupmenu</name>
+    <message>
+        <source>Children as CSV…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtree as CSV…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtree of class</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtree as CSV, every attribute…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Subtree as CSV, migration columns…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No classes below this item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The classes could not be loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More classes…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%name (%count)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

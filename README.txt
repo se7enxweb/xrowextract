@@ -9,6 +9,22 @@ It comes with following modules/views
 
 xrowextract/csv
 
+Opening the form for a node (the content tree's Advanced > Export menu)
+
+The administration's context menus (the content tree and the sub-items "..." menu) have Advanced > Export, with
+entries for a user with the policy xrowextract/csv: Children as CSV, Subtree as CSV, Subtree of class (the classes
+below the item, read from xrowextract/subtree_classes/<node id> when the submenu opens), Subtree as CSV with every
+attribute or with the migration columns. Each opens the form filled in, nothing more:
+
+  xrowextract/csv/(node)/<node id>[/(scope)/list|tree][/(class)/<class id>][/(columns)/all|migration]
+
+The scope is the subtree when not given; without a class the form chooses as before; without columns the saved
+columns of the class stay. The view fills its saved settings in (filters and offset cleared, output settings kept)
+and redirects to xrowextract/csv; the user starts the export there. A value that is not valid, a class
+export.ini ExportClasses does not offer and a node the user cannot read are refused. The menu entries come from
+settings/admininterface.ini.append.php (ExportMenuTemplateArray[], ExportSubMenuTemplateArray[], Exponential 6.0.15
+and later) and javascript/xrowextract-exportmenu.js (design.ini BackendJavaScriptList[]).
+
 Preview
 
 "Preview" in xrowextract/csv shows the export as a spreadsheet will show

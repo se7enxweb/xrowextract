@@ -6743,4 +6743,47 @@
         <translation>Export</translation>
     </message>
 </context>
+<context>
+    <name>extension/xrowextract/popupmenu</name>
+    <message>
+        <source>Children as CSV…</source>
+        <translation>Unterelemente als CSV…</translation>
+    </message>
+    <message>
+        <source>Subtree as CSV…</source>
+        <translation>Teilbaum als CSV…</translation>
+    </message>
+    <message>
+        <source>Subtree of class</source>
+        <translation>Teilbaum einer Klasse</translation>
+    </message>
+    <message>
+        <source>Subtree as CSV, every attribute…</source>
+        <translation>Teilbaum als CSV, alle Attribute…</translation>
+    </message>
+    <message>
+        <source>Subtree as CSV, migration columns…</source>
+        <translation>Teilbaum als CSV, Migrationsspalten…</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Wird geladen…</translation>
+    </message>
+    <message>
+        <source>No classes below this item</source>
+        <translation>Keine Klassen unter diesem Element</translation>
+    </message>
+    <message>
+        <source>The classes could not be loaded</source>
+        <translation>Die Klassen konnten nicht geladen werden</translation>
+    </message>
+    <message>
+        <source>More classes…</source>
+        <translation>Weitere Klassen…</translation>
+    </message>
+    <message>
+        <source>%name (%count)</source>
+        <translation>%name (%count)</translation>
+    </message>
+</context>
 </TS>

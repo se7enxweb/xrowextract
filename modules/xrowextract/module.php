@@ -7,7 +7,18 @@ $ViewList['csv'] = array( 'script' => 'csv.php',
                           'functions' => array( 'csv' ),
             			  'default_navigation_part' => 'ezextractnavigationpart',
             			  'post_actions' => array( 'Download', 'DownloadManifest', 'DownloadWithManifest', 'BrowseSubtree', 'AddAttribute', 'Remove', 'RemoveData', 'RunInBackground', 'ExportAsPackage' ),
-            			  'params' => array() );
+            			  'params' => array(),
+                          // The entry of the content tree's Advanced > Export menu: the form filled in for a node,
+                          // csv/(node)/<node id>[/(scope)/list|tree][/(class)/<class id>][/(columns)/all|migration]
+                          // (XrowExtractEntry); it redirects to the form, nothing is exported
+                          'unordered_params' => array( 'node' => 'EntryNode', 'scope' => 'EntryScope',
+                                                       'class' => 'EntryClass', 'columns' => 'EntryColumns' ) );
+
+// JSON for the Export menu's "Subtree of class" list: the classes below a node the user can read, with how many
+// objects of each the user can read there, most first (at most XrowExtractEntry::CLASS_LIST_LIMIT). Read only.
+$ViewList['subtree_classes'] = array( 'script' => 'subtree_classes.php',
+                                      'functions' => array( 'csv' ),
+                                      'params' => array( 'NodeID' ) );
 
 $ViewList['archive'] = array( 'script' => 'archive.php',
                               'functions' => array( 'csv' ),
