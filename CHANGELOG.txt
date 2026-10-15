@@ -1,3 +1,24 @@
+Version 2.5.13
+
+-  Updated every page of the extension (CSV, Site archive, Jobs, Import, Package, Browse, Compare, Schedules,
+   Destinations, History and the left menu) for admin4's dark mode: xrowextract.css and xrowextract-schedules.css
+   take every colour, shadow, radius and the code font from Exponential's --a4-* tokens (components.css, a light and
+   a dark value each) instead of fixed light colours, so cards, panels, tables, badges, notes, the code samples and
+   the job timeline follow the light and dark mode like the kernel's pages. The local --xe-* colour properties are
+   gone; the accent is the administration's one
+-  Updated the progress bars (jobs, chunked upload, package upload) and the column fill bars of the preview to
+   Exponential's .a4-meter and .a4-pct-<n> classes; the scripts swap the .a4-pct class instead of writing a width
+-  Updated the user bubbles to one of the eight chart colours (.xe-tone-1 to .xe-tone-8, from the login's hue),
+   readable in both modes
+-  Removed every style="" from the templates (.xe-label-gap and .xe-table-full instead); the form names, ids and
+   script hooks are unchanged
+-  Fixed contrast and target sizes found by axe: the inactive sort fields are desaturated instead of faded, the
+   selected archive scope keeps its text colour, the job summaries and the package file list's buttons are 24px
+   targets, and the import reference's examples can be scrolled with the keyboard; forced colors keep an outline on
+   the current and selected states
+-  Added tests/unit/StylingRulesTest.php: no inline CSS in templates or script markup, no colour literal or local
+   colour property in the stylesheets
+
 Version 2.5.12
 
 -  Added the entry parameter of xrowextract/import for the node view's Import/Export menu of Exponential 6.0.15:
