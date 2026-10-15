@@ -1,3 +1,18 @@
+Version 2.5.11
+
+-  Added entry parameters to xrowextract/csv for the content tree's Advanced > Export menu of Exponential 6.0.15:
+   csv/(node)/<node id>[/(scope)/list|tree][/(class)/<class id>][/(columns)/all|migration] fills the form in for a
+   node (the children or the subtree, a class, every attribute or the migration columns) and redirects to it;
+   nothing is exported before the user starts it. Invalid values, a class export.ini ExportClasses does not offer
+   and a node the user cannot read are refused (XrowExtractEntry, tests in tests/unit/EntryTest.php)
+-  Added the view xrowextract/subtree_classes/<node id> (policy xrowextract/csv): JSON of the classes with objects
+   below a node the user can read, counted with the user's read access, most first, for the menu's "Subtree of
+   class" list
+-  Added the CSV entries of that menu (popupmenu/xrowextract_export_menu.tpl and xrowextract_export_submenus.tpl
+   through admininterface.ini ExportMenuTemplateArray[] and ExportSubMenuTemplateArray[], shown for the policy
+   xrowextract/csv) and javascript/xrowextract-exportmenu.js, which reads the class list when the submenu opens;
+   translations in eng-US and ger-DE
+
 Version 2.5.10
 
 -  Fixed the top menu on the extension's pages: settings/menu.ini.append.php declared its navigation part without
