@@ -72,4 +72,20 @@ class StylingRulesTest extends TestCase
         }
         $this->assertSame( array(), $found, 'colour literals or local colour properties in the stylesheets' );
     }
+
+    public function testTemplatesCloseTheFramesTheyOpen(): void
+    {
+        // a template that closes more <div> than it opens ends the administration's page frame early, which puts the
+        // footer outside the page (the Package tab closed two too many up to 2.5.14)
+        $found = array();
+        foreach ( self::files( 'design', '.tpl' ) as $path )
+        {
+            $source = preg_replace( '/\{\*.*?\*\}/s', '', (string)file_get_contents( $path ) );
+            $open = preg_match_all( '/<div[\s>]/i', $source );
+            $close = preg_match_all( '/<\/div>/i', $source );
+            if ( $open !== $close )
+                $found[] = basename( $path ) . " ($open open, $close closed)";
+        }
+        $this->assertSame( array(), $found, 'templates whose <div> elements do not balance' );
+    }
 }

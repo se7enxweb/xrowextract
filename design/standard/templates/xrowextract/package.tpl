@@ -525,7 +525,7 @@
         </section>
     </div>
 
-    {* DESIGN: Content END *}</div></div></div></div></div></div>
+    {* DESIGN: Content END *}</div></div></div></div>
 </div>
 <script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>
 <script src={concat( 'javascript/xrowextract-upload.js'|ezdesign( 'no' ), '?v=', $UploadScriptVersion )|wash}></script>
