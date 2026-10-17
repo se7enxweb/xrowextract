@@ -1,3 +1,17 @@
+Version 2.5.17
+
+-  Updated the Export and Import/Export menu entries, the "Subtree of class" submenu, the preset buttons of the CSV
+   page and the confirmation of a sample or package import to run without inline code, so they work under an
+   administration's Content Security Policy without 'unsafe-inline': the menu entries are declared in data-menu-*
+   attributes and registered in menuArray by xrowextract-exportmenu.js, the preset buttons and confirmations use
+   data attributes handled by xrowextract.js. Works with the old and the new popup menu script and in every admin
+   design. StylingRulesTest checks that no template has an inline script, an on...= attribute or a javascript: link
+-  Fixed the column selects of the import mapping, which had no accessible name: each is named after its file column
+
+Version 2.5.16
+
+-  Added Spanish (Spain and Mexico), Hebrew, Latin and Klingon translations
+
 Version 2.5.15
 
 -  Fixed the Package tab's template, which closed two frames more than it opened: the administration's footer
