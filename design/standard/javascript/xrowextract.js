@@ -1261,3 +1261,31 @@
     top.addEventListener('change', function () { mirror(top, step2); });
     step2.addEventListener('change', function () { mirror(step2, top); });
 }());
+
+/**
+ * The preset buttons of the CSV page (Load, Run now, Run in the background, Duplicate, Rename, Delete) say which
+ * preset they act on in data-xe-preset-ref (into the form's PresetRef) or data-xe-preset-action-ref (into
+ * PresetActionRef); the value is put in when the button is pressed, before the form submits (capture phase, so it
+ * comes before every other click listener). Delete asks first through data-confirm (above). This replaces the
+ * onclick attributes, so the page works under a Content Security Policy without 'unsafe-inline'.
+ */
+(function () {
+    'use strict';
+    if (window.xrowExtractPresetRefs) {
+        return;
+    }
+    window.xrowExtractPresetRefs = true;
+    document.addEventListener('click', function (event) {
+        var button = event.target && event.target.closest ? event.target.closest('[data-xe-preset-ref], [data-xe-preset-action-ref]') : null;
+        if (!button || !button.form) {
+            return;
+        }
+        var pairs = { 'data-xe-preset-ref': 'PresetRef', 'data-xe-preset-action-ref': 'PresetActionRef' };
+        Object.keys(pairs).forEach(function (attr) {
+            var field = button.form.elements[pairs[attr]];
+            if (button.hasAttribute(attr) && field) {
+                field.value = button.getAttribute(attr);
+            }
+        });
+    }, true);
+}());

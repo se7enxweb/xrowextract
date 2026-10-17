@@ -9,6 +9,7 @@
  */
 ( function()
 {
+    if ( window.xrowExtractExportMenu ) return;
     var lists = {};
 
     function fill( menu, template, values )
@@ -96,4 +97,80 @@
     }
 
     window.xrowExtractExportMenu = { 'show': show };
+
+    /*
+     * The entries xrowextract adds to the core menus (popupmenu/xrowextract_export_menu.tpl, xrowextract_import_menu.tpl)
+     * and its class submenu (xrowextract_export_submenus.tpl) carry no inline code, so they work under a Content
+     * Security Policy without 'unsafe-inline'. Here they are put in menuArray (added to, never assigned anew) the way
+     * the inline scripts did: an entry's data-menu-url / data-menu-shown-if become menuArray[menu]['elements'][id], a
+     * class submenu (data-menu-depth) gets its entry and the onshow above. Pointing at an entry calls the same global
+     * functions the onmouseover attributes called: ezpopmenu_showSubLevel() for the one with data-menu-submenu,
+     * ezpopmenu_mouseOver() for the others. The event stops at the entry, so a newer ezpopupmenu.js, which acts on
+     * data-menu-* by itself, does not open the submenu a second time. Works with the old and the new ezpopupmenu.js;
+     * set up once, however often this file is printed.
+     */
+    function register()
+    {
+        var menus = window.menuArray;
+        if ( !menus || !document.querySelectorAll ) return;
+        var i, el, entry;
+
+        var classMenus = document.querySelectorAll( 'div.xrowextract-class-menu[id]' );
+        for ( i = 0; i < classMenus.length; i++ )
+        {
+            el = classMenus[i];
+            if ( el.getAttribute( 'data-xrowextract-ready' ) ) continue;
+            el.setAttribute( 'data-xrowextract-ready', '1' );
+            entry = menus[el.id];
+            if ( !entry )
+            {
+                entry = menus[el.id] = { 'depth': parseInt( el.getAttribute( 'data-menu-depth' ), 10 ) || 0, 'elements': {} };
+            }
+            if ( !entry['elements'] ) entry['elements'] = {};
+            entry['onshow'] = show;
+        }
+
+        var items = document.querySelectorAll( 'a[data-xrowextract-menu]' );
+        for ( i = 0; i < items.length; i++ )
+        {
+            el = items[i];
+            if ( el.getAttribute( 'data-xrowextract-ready' ) ) continue;
+            el.setAttribute( 'data-xrowextract-ready', '1' );
+            var menu = menus[el.getAttribute( 'data-xrowextract-menu' )];
+            if ( el.id && menu && el.hasAttribute( 'data-menu-url' ) )
+            {
+                if ( !menu['elements'] ) menu['elements'] = {};
+                var item = { 'url': el.getAttribute( 'data-menu-url' ) };
+                if ( el.hasAttribute( 'data-menu-shown-if' ) ) item['shown_if'] = el.getAttribute( 'data-menu-shown-if' );
+                menu['elements'][el.id] = item;
+            }
+            el.addEventListener( 'mouseover', pointed );
+        }
+    }
+
+    function pointed( event )
+    {
+        var el = event.currentTarget;
+        event.stopPropagation();
+        var sub = el.getAttribute( 'data-menu-submenu' );
+        if ( sub )
+        {
+            if ( typeof window.ezpopmenu_showSubLevel === 'function' ) window.ezpopmenu_showSubLevel( event, sub, el.id );
+        }
+        else if ( typeof window.ezpopmenu_mouseOver === 'function' )
+        {
+            window.ezpopmenu_mouseOver( el.getAttribute( 'data-xrowextract-menu' ) );
+        }
+    }
+
+    // the menus are at the end of the page, after this file (BackendJavaScriptList, in the head)
+    if ( document.readyState === 'loading' )
+    {
+        document.addEventListener( 'DOMContentLoaded', register );
+    }
+    else
+    {
+        register();
+    }
+    window.addEventListener( 'load', register );
 } )();

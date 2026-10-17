@@ -52,16 +52,16 @@
                             <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
                         </span>
                         <span class="xe-preset-buttons">
-                            <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
-                            <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
-                            {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
+                            <button type="submit" class="button" name="LoadPreset" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Load'|i18n('design/standard/extract')}</button>
+                            <button type="submit" class="button" name="RunPresetNow" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Run now'|i18n('design/standard/extract')}</button>
+                            {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
                             <details class="xe-preset-more">
                                 <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
                                 <div class="xe-preset-more-menu">
-                                    <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{if $preset.can_edit}{'Duplicate'|i18n('design/standard/extract')}{else}{'Duplicate as your own'|i18n('design/standard/extract')}{/if}</button>
+                                    <button type="submit" name="DuplicatePreset" value="1" data-xe-preset-action-ref="{$preset.ref|wash}">{if $preset.can_edit}{'Duplicate'|i18n('design/standard/extract')}{else}{'Duplicate as your own'|i18n('design/standard/extract')}{/if}</button>
                                     {if $preset.can_edit}
-                                    <span class="xe-preset-rename"><input type="text" name="PresetNewName" placeholder="{'New name'|i18n('design/standard/extract')|wash}" aria-label="{'New name'|i18n('design/standard/extract')|wash}" /><button type="submit" name="RenamePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Rename'|i18n('design/standard/extract')}</button></span>
-                                    <button type="submit" class="xe-remove" name="DeletePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'; return confirm('{'Delete this preset?'|i18n('design/standard/extract')|wash}')">{'Delete'|i18n('design/standard/extract')}</button>
+                                    <span class="xe-preset-rename"><input type="text" name="PresetNewName" placeholder="{'New name'|i18n('design/standard/extract')|wash}" aria-label="{'New name'|i18n('design/standard/extract')|wash}" /><button type="submit" name="RenamePreset" value="1" data-xe-preset-action-ref="{$preset.ref|wash}">{'Rename'|i18n('design/standard/extract')}</button></span>
+                                    <button type="submit" class="xe-remove" name="DeletePreset" value="1" data-xe-preset-action-ref="{$preset.ref|wash}" data-confirm="{'Delete this preset?'|i18n('design/standard/extract')|wash}">{'Delete'|i18n('design/standard/extract')}</button>
                                     {/if}
                                     <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
                                 </div>
@@ -96,13 +96,13 @@
                                 <small>{if $preset.description|ne( '' )}{$preset.description|wash} — {/if}{$preset.summary|wash}</small>
                             </span>
                             <span class="xe-preset-buttons">
-                                <button type="submit" class="button" name="LoadPreset" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Load'|i18n('design/standard/extract')}</button>
-                                <button type="submit" class="button" name="RunPresetNow" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run now'|i18n('design/standard/extract')}</button>
-                                {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" onclick="this.form.PresetRef.value='{$preset.ref|wash}'">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
+                                <button type="submit" class="button" name="LoadPreset" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Load'|i18n('design/standard/extract')}</button>
+                                <button type="submit" class="button" name="RunPresetNow" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Run now'|i18n('design/standard/extract')}</button>
+                                {if $BackgroundAvailable}<button type="submit" class="button" name="RunPresetInBackground" value="1" data-xe-preset-ref="{$preset.ref|wash}">{'Run in the background'|i18n('design/standard/extract')}</button>{/if}
                                 <details class="xe-preset-more">
                                     <summary title="{'More'|i18n('design/standard/extract')|wash}">⋯</summary>
                                     <div class="xe-preset-more-menu">
-                                        <button type="submit" name="DuplicatePreset" value="1" onclick="this.form.PresetActionRef.value='{$preset.ref|wash}'">{'Duplicate as your own'|i18n('design/standard/extract')}</button>
+                                        <button type="submit" name="DuplicatePreset" value="1" data-xe-preset-action-ref="{$preset.ref|wash}">{'Duplicate as your own'|i18n('design/standard/extract')}</button>
                                         <details><summary>{'Copy as INI'|i18n('design/standard/extract')}</summary><pre class="xe-fetchparams-code">{$preset.ini_block|wash}</pre></details>
                                     </div>
                                 </details>

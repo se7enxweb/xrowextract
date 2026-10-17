@@ -42,6 +42,31 @@ class StylingRulesTest extends TestCase
         $this->assertSame( array(), $found, 'style="" or <style> in templates' );
     }
 
+    public function testTemplatesHaveNoInlineCode(): void
+    {
+        // the administration's Content Security Policy (script-src 'self') runs no inline <script>, no on...=
+        // attribute and no javascript: link: code is in design/standard/javascript, values in data-* attributes
+        $found = array();
+        foreach ( self::files( 'design', '.tpl' ) as $path )
+        {
+            $source = preg_replace( '/\{\*.*?\*\}/s', '', (string)file_get_contents( $path ) );
+            $count = 0;
+            if ( preg_match_all( '/<script\b([^>]*)>(.*?)<\/script>/is', $source, $m, PREG_SET_ORDER ) )
+            {
+                foreach ( $m as $script )
+                {
+                    if ( trim( $script[2] ) !== '' && !preg_match( '/type\s*=\s*["\']application\/json/i', $script[1] ) )
+                        $count++;
+                }
+            }
+            $count += preg_match_all( '/<[a-z][^>]*\son[a-z]+\s*=/i', $source );
+            $count += preg_match_all( '/javascript:/i', $source );
+            if ( $count )
+                $found[] = basename( $path ) . " ($count)";
+        }
+        $this->assertSame( array(), $found, 'inline <script>, on...= handlers or javascript: links in templates' );
+    }
+
     public function testScriptsWriteNoInlineSizesOrColours(): void
     {
         $found = array();
