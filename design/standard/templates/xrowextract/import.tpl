@@ -286,7 +286,7 @@
                     <tr>
                         <td><code>{$map.column|wash}</code></td>
                         <td>
-                            <select name="Mapping[{$map.index}]">
+                            <select name="Mapping[{$map.index}]" aria-label="{'Maps to'|i18n('design/standard/extract')|wash}: {$map.column|wash}">
                                 <option value="ignore"{if $map.target|eq( 'ignore' )} selected{/if}>{'Ignore'|i18n('design/standard/extract')}</option>
                                 {if $SpecialChoices|count}
                                 <optgroup label="{'Special columns'|i18n('design/standard/extract')|wash}">
