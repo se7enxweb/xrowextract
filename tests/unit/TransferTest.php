@@ -168,7 +168,11 @@ class TransferTest extends TestCase
         // every column the mapping writes passes the kernel's normalisation unchanged
         $row = XrowExtractTransfer::historyRow( array( 'job_id' => self::ID, 'kind' => 'csv', 'run_state' => 'done', 'row_count' => 3 ), self::job() );
         unset( $row['detail'] );
-        $this->assertSame( $row, array_intersect_key( expKernelTransferRun::normalize( $row ), $row ) );
+        // the kernel orders its columns its own way: compare the values, not the order
+        $normalized = array_intersect_key( expKernelTransferRun::normalize( $row ), $row );
+        ksort( $row );
+        ksort( $normalized );
+        $this->assertSame( $row, $normalized );
     }
 
     public function testTheSettingsDeclareTheQueueJobType(): void

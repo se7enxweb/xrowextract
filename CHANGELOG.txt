@@ -8,6 +8,10 @@ Unreleased
 -  Added "Re-import this file" on the Jobs and History pages: the file of a finished class export (CSV, JSON, XML)
    opens in Import with its column manifest, as if it had been uploaded, for the user who may see the job and use
    Import; nothing is imported before the import's steps (XrowExtractReimport)
+-  Fixed the extension's tables on SQLite: the SQLite driver lists only the tables that start with "ez", so
+   XrowExtractSchema never saw xrowextract_schedule, _destination and _history, tried to create them again on
+   every write and failed with "table already exists" (schedules could not be saved). The tables are now looked
+   up in sqlite_master (information_schema on PostgreSQL)
 
 Version 2.5.19
 

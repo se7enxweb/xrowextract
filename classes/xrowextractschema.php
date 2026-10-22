@@ -28,9 +28,48 @@ class XrowExtractSchema
      */
     protected static function existingTables( eZDBInterface $db ): array
     {
-        $list = $db->relationList();
-        if ( !is_array( $list ) || !$list )
-            $list = array_keys( (array)$db->eZTableList() );
+        return self::tablesOf( $db );
+    }
+
+    /**
+     * The tables of a database, lower case, asked of the engine itself where the kernel's list is incomplete:
+     * the SQLite driver's relationList() and eZTableList() name only the tables that start with "ez", so on SQLite
+     * the extension's own tables were never seen, ensure() created them again on every write and failed with
+     * "table already exists". SQLite is asked through sqlite_master, PostgreSQL through information_schema;
+     * every other engine (MySQL/MariaDB, Oracle, MongoDB) through relationList(), which lists every table there.
+     * When the query fails, the kernel's list is used as before.
+     *
+     * @return list<string>
+     */
+    public static function tablesOf( eZDBInterface $db ): array
+    {
+        $type = strtolower( (string)$db->databaseName() );
+        $list = null;
+        $sql = '';
+        if ( $type === 'sqlite' || $type === 'sqlite3' )
+            $sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'xrowextract%'";
+        elseif ( $type === 'postgresql' || $type === 'pgsql' )
+            $sql = "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_name LIKE 'xrowextract%'";
+        if ( $sql !== '' )
+        {
+            $rows = $db->arrayQuery( $sql );
+            if ( is_array( $rows ) )
+            {
+                $list = array();
+                foreach ( $rows as $row )
+                {
+                    $row = array_change_key_case( (array)$row, CASE_LOWER );
+                    if ( isset( $row['name'] ) )
+                        $list[] = $row['name'];
+                }
+            }
+        }
+        if ( $list === null )
+        {
+            $list = $db->relationList();
+            if ( !is_array( $list ) || !$list )
+                $list = array_keys( (array)$db->eZTableList() );
+        }
         return array_values( array_map( 'strtolower', array_map( 'strval', (array)$list ) ) );
     }
 
