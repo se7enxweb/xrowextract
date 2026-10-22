@@ -56,6 +56,19 @@ class EntryTest extends TestCase
         );
     }
 
+    public function testAClassAloneKeepsTheFormsNode(): void
+    {
+        // the class page's "Export the objects of this class" (the transfer registry): xrowextract/csv/(class)/2
+        $entry = XrowExtractEntry::parse( self::params( array( 'EntryClass' => '2' ) ) );
+        $this->assertSame( array( 'node' => 0, 'scope' => 'tree', 'class' => 2, 'columns' => '', 'errors' => array() ), $entry );
+        $config = XrowExtractEntry::applyToConfig( array( 'Version' => 2, 'Subtree' => 43, 'Class_id' => 4 ), $entry );
+        $this->assertSame( 43, $config['Subtree'], 'the node the form had stays' );
+        $this->assertSame( 2, $config['Class_id'] );
+        $this->assertContains( 'node', XrowExtractEntry::parse( self::params( array( 'EntryNode' => '0', 'EntryClass' => '2' ) ) )['errors'],
+                               'a node given and invalid is still refused' );
+        $this->assertContains( 'class', XrowExtractEntry::parse( self::params( array( 'EntryClass' => 'article' ) ) )['errors'] );
+    }
+
     public function testAnEntryIsToldByAnyOfItsParameters(): void
     {
         $this->assertFalse( XrowExtractEntry::isEntry( self::params( array() ) ) );

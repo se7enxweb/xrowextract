@@ -167,10 +167,12 @@ class Csv extends \Exponential\Runnable\ModuleView
             $entry = \XrowExtractEntry::parse( $Params );
             if ( $entry['errors'] )
                 return $this->viewResult( $Result, $module->handleError( \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
-            $entryNode = \eZContentObjectTreeNode::fetch( $entry['node'] );
+            // a class alone (the class page's entry, node 0): the form keeps its node, only the class is checked
+            $entryNode = $entry['node'] > 0 ? \eZContentObjectTreeNode::fetch( $entry['node'] ) : null;
+            $entryNodeOK = $entry['node'] === 0 || $entryNode instanceof \eZContentObjectTreeNode;
             $entryClass = $entry['class'] > 0 ? \eZContentClass::fetch( $entry['class'] ) : null;
-            $refusal = \XrowExtractEntry::refusal( $entryNode instanceof \eZContentObjectTreeNode,
-                                                   $entryNode instanceof \eZContentObjectTreeNode && $entryNode->canRead(),
+            $refusal = \XrowExtractEntry::refusal( $entryNodeOK,
+                                                   $entry['node'] === 0 || ( $entryNode instanceof \eZContentObjectTreeNode && $entryNode->canRead() ),
                                                    $entry['class'] > 0,
                                                    $entryClass instanceof \eZContentClass && \XrowExtractEntry::classAllowed(
                                                        (int)$entryClass->attribute( 'id' ), (string)$entryClass->attribute( 'identifier' ),

@@ -2,6 +2,8 @@
 /**
  * The entry parameters of xrowextract/csv: the content tree's Advanced > Export menu opens the CSV form pre-filled
  * for a node with xrowextract/csv/(node)/<node id>[/(scope)/list|tree][/(class)/<class id>][/(columns)/all|migration].
+ * The class page's "Export the objects of this class" (the transfer registry) gives a class alone,
+ * xrowextract/csv/(class)/<class id>: the form keeps the node it had and switches to that class.
  * The view only fills its form with them (and redirects to itself); the export is started there by the user.
  *
  * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
@@ -39,8 +41,9 @@ class XrowExtractEntry
     }
 
     /**
-     * Reads and checks the entry parameters. The node is required; the scope is the subtree when not given; the
-     * class is 0 (the form chooses) and the columns '' (the form's columns) when not given.
+     * Reads and checks the entry parameters. The node is required unless a class is given (node 0: the form keeps
+     * its node); the scope is the subtree when not given; the class is 0 (the form chooses) and the columns '' (the
+     * form's columns) when not given.
      *
      * @param array<string, mixed> $params the view's parameters
      * @return array{node: int, scope: string, class: int, columns: string, errors: array<int, string>}
@@ -54,7 +57,7 @@ class XrowExtractEntry
         $errors = array();
 
         $node = self::positiveID( $value( 'EntryNode' ) );
-        if ( $node === 0 )
+        if ( $node === 0 && ( $value( 'EntryNode' ) !== null || $value( 'EntryClass' ) === null ) )
             $errors[] = 'node';
 
         $scope = $value( 'EntryScope' ) ?? 'tree';
@@ -176,7 +179,8 @@ class XrowExtractEntry
      */
     public static function applyToConfig( array $config, array $entry ): array
     {
-        $config['Subtree'] = $entry['node'];
+        if ( $entry['node'] > 0 )
+            $config['Subtree'] = $entry['node'];
         $config['Scope'] = $entry['scope'];
         if ( $entry['class'] > 0 )
             $config['Class_id'] = $entry['class'];
