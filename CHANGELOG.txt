@@ -12,6 +12,8 @@ Unreleased
    XrowExtractSchema never saw xrowextract_schedule, _destination and _history, tried to create them again on
    every write and failed with "table already exists" (schedules could not be saved). The tables are now looked
    up in sqlite_master (information_schema on PostgreSQL)
+-  Fixed the Export tab's icon: it shows upload (Icon=upload in [Topmenu_xrowextract] of menu.ini), as data goes
+   out of the site; Imports, which brings data in, keeps download. 2.5.19 had them the wrong way round
 
 Version 2.5.19
 

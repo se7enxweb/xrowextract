@@ -12,7 +12,7 @@ Who it is for:
   for each file);
 - **administrators** who want nightly exports, backups of a subtree or regular deliveries to a partner.
 
-Everything is reached from the **Export** tab of the administration (shown with the download icon in admin4), from
+Everything is reached from the **Export** tab of the administration (shown with the upload icon in admin4: data goes out of the site), from
 the content tree's context menus, from the console and from a cronjob part.
 
 - Source: <https://github.com/se7enxweb/xrowextract>
@@ -273,7 +273,7 @@ demo site (its class identifiers and node ids); replace or extend them for your 
 | `fetchalias.ini` | Two example named fetches: `xrowextract_recent_content`, `xrowextract_by_section` |
 | `browse.ini` | The browse modes for the export node, the archive nodes and the import parent |
 | `admininterface.ini` | The menu templates of the *Advanced > Export* and *Import/Export* menus |
-| `menu.ini` | The **Export** tab (`[Topmenu_xrowextract]`, `Icon=download`) |
+| `menu.ini` | The **Export** tab (`[Topmenu_xrowextract]`, `Icon=upload`) |
 | `cronjob.ini` | The cronjob part `xrowextract` |
 | `module.ini`, `design.ini`, `site.ini` | Register the module, the design (and its menu script) and the translations |
 
