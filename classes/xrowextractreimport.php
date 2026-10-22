@@ -19,7 +19,8 @@ class XrowExtractReimport
      * Whether a job's file can be imported again, without asking who looks (the Jobs and History rows; the view
      * checks the user again).
      *
-     * @param array|null $job as XrowExtractJob::load() returns it
+     * @param array<string, mixed>|null $job as XrowExtractJob::load() returns it
+     * @phpstan-assert-if-true array<string, mixed> $job
      */
     public static function isReimportable( $job ): bool
     {
@@ -35,11 +36,11 @@ class XrowExtractReimport
     /**
      * The file of a job the user may import again, or null.
      *
-     * @param array|null $job
+     * @param array<string, mixed>|null $job
      * @param string $login the current user's login
      * @param bool $allJobs whether the user may see every user's jobs (xrowextract/all_jobs)
      * @param string|null $directory the job's directory (XrowExtractJob::path() when null; tests give one)
-     * @return array|null array( 'path' => data file, 'name' => its file name, 'manifest' => sidecar path or null )
+     * @return array{path: string, name: string, manifest: string|null}|null data file, its file name, sidecar path or null
      */
     public static function source( $job, $login, $allJobs, $directory = null ): ?array
     {
