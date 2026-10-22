@@ -6861,8 +6861,8 @@
         <translation>Export (xrowextract)</translation>
     </message>
     <message>
-        <source>Download the items of a class, a folder or the whole site as CSV, XML, JSON or an archive, now or on a schedule, and import such files back.</source>
-        <translation>Die Objekte einer Klasse, eines Ordners oder der ganzen Site als CSV, XML, JSON oder Archiv herunterladen, sofort oder nach Zeitplan, und solche Dateien wieder importieren.</translation>
+        <source>Download the items of a class, a folder or the whole site as CSV, XML, JSON or an archive, now or on a schedule. It also gives everyday users remarkably simple yet advanced tools for importing content.</source>
+        <translation>Die Objekte einer Klasse, eines Ordners oder der ganzen Site als CSV, XML, JSON oder Archiv herunterladen, sofort oder nach Zeitplan. Dazu bietet es auch Endanwendern ausgesprochen einfache und zugleich leistungsfähige Werkzeuge zum Importieren von Inhalten.</translation>
     </message>
     <message>
         <source>Export the objects of this class…</source>
