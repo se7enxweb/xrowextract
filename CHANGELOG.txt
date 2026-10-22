@@ -5,6 +5,9 @@ Unreleased
    for…?" boxes, the "Import and export" lists, the class page ("Export the objects of this class…") and the search
 -  Added the "Looking for another import or export?" box to the class export and import pages, and the "Import and
    export" list to every left menu of the module; on an older kernel both are left out
+-  Added "Re-import this file" on the Jobs and History pages: the file of a finished class export (CSV, JSON, XML)
+   opens in Import with its column manifest, as if it had been uploaded, for the user who may see the job and use
+   Import; nothing is imported before the import's steps (XrowExtractReimport)
 
 Version 2.5.19
 

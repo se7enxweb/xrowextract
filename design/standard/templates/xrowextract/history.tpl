@@ -172,6 +172,12 @@
                     <div class="xe-job-buttons">
                         <a class="button" href={concat( 'xrowextract/jobs#job-', $row.job_id )|ezurl}>{'Show the job'|i18n('design/standard/extract')}</a>
                         {if or( $row.state|eq( 'done' ), $row.state|eq( 'warning' ) )}<a class="button" href={concat( 'xrowextract/job_download/', $row.job_id )|ezurl}>{'Download'|i18n('design/standard/extract')}</a>{/if}
+                        {if and( $row.reimportable, fetch( 'user', 'has_access_to', hash( 'module', 'xrowextract', 'function', 'import' ) ) )}
+                        <form method="post" action={'xrowextract/import'|ezurl} class="xe-inline">
+                            <input type="hidden" name="ReimportJobID" value="{$row.job_id|wash}" />
+                            <button type="submit" class="button" title="{'Open this file in Import, with its column manifest: change the rows in a spreadsheet first, or load them into another site'|i18n('design/standard/extract')|wash}">{'Re-import this file'|i18n('design/standard/extract')}</button>
+                        </form>
+                        {/if}
                     </div>
                     {/if}
                 </li>

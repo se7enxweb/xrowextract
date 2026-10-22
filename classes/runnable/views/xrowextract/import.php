@@ -158,6 +158,35 @@ class Import extends \Exponential\Runnable\ModuleView
         // content-class/content-object XML file is detected first and routed to the package repository;
         // anything else is treated as a row file (CSV/XML/JSON), in that checking order.
         $uploadError = '';
+
+        // "Re-import this file" (Jobs and History pages): a finished class export's file, with its manifest, becomes
+        // this page's file as if it had been uploaded (XrowExtractReimport); then the usual steps, nothing imported yet
+        if ( $http->hasPostVariable( 'ReimportJobID' ) )
+        {
+            $reimportID = (string)$http->postVariable( 'ReimportJobID' );
+            $reimportJob = \XrowExtractJob::isValidID( $reimportID ) ? \XrowExtractJob::load( $reimportID ) : null;
+            $reimport = \XrowExtractReimport::source( $reimportJob, $login, \XrowExtractJob::allowAllJobs() );
+            if ( $reimport === null )
+                return $this->viewResult( $Result, $module->handleError( \eZError::KERNEL_NOT_AVAILABLE, 'kernel' ) );
+            list( $hasRoom, $roomMessage ) = \XrowExtractUpload::hasRoomFor( (int)filesize( $reimport['path'] ) );
+            $stored = $hasRoom ? \XrowExtractImport::storeUpload( $reimport['path'], $reimport['name'] ) : false;
+            if ( $stored === false )
+            {
+                $uploadError = $hasRoom ? \ezpI18n::tr( 'design/standard/extract', 'The uploaded file could not be stored.' ) : $roomMessage;
+            }
+            else
+            {
+                $forgetFile();
+                if ( $reimport['manifest'] !== null )
+                    @copy( $reimport['manifest'], \XrowExtractManifest::sidecarPath( $stored ) );
+                $format = \XrowExtractImport::detectFormat( \XrowExtractImport::sniff( $stored ) );
+                $separator = $format === 'csv' ? \XrowExtractImport::detectSeparator( \XrowExtractImport::sniff( $stored ) ) : ',';
+                $_SESSION[$SESSION_KEY] = array( 'path' => $stored, 'name' => $reimport['name'], 'format' => $format, 'separator' => $separator,
+                                                 'source' => 'plain', 'size' => filesize( $stored ) );
+                return $this->viewResult( $Result, $module->redirectTo( 'xrowextract/import' ) );
+            }
+        }
+
         if ( $http->hasPostVariable( 'Upload' ) && $http->hasPostVariable( 'UploadID' ) && (string)$http->postVariable( 'UploadID' ) !== '' )
         {
             $uploadID = (string)$http->postVariable( 'UploadID' );

@@ -45,7 +45,7 @@ $ViewList['import'] = array( 'script' => 'import.php',
                              'functions' => array( 'import' ),
                              'default_navigation_part' => 'ezextractnavigationpart',
                              'post_actions' => array( 'Upload', 'RemoveFile', 'NewImport', 'BrowseParent', 'Preview', 'Apply',
-                                                      'RunInBackground', 'ResumeJobID', 'KeepSamplePackage',
+                                                      'RunInBackground', 'ResumeJobID', 'ReimportJobID', 'KeepSamplePackage',
                                                       'DownloadClassXML', 'DownloadObjectXML', 'OpenRepositoryPackage' ),
                              'params' => array(),
                              // The node view's Import/Export menu: import/(parent)/<node id> starts the form with that

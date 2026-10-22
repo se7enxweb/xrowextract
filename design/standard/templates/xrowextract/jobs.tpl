@@ -193,6 +193,13 @@
                         {if $job.has_manifest}
                         <a class="button" href={concat( 'xrowextract/job_download/', $job.id, '/manifest' )|ezurl} title="{'The typed column manifest of the file: datatype, format and language of every column, row count and checksum'|i18n('design/standard/extract')|wash}">{'Download manifest'|i18n('design/standard/extract')}</a>
                         {/if}
+                        {* the file of a class export opened in Import, with its manifest; nothing is imported before the steps *}
+                        {if and( $job.reimportable, fetch( 'user', 'has_access_to', hash( 'module', 'xrowextract', 'function', 'import' ) ) )}
+                        <form method="post" action={'xrowextract/import'|ezurl} class="xe-inline">
+                            <input type="hidden" name="ReimportJobID" value="{$job.id|wash}" />
+                            <button type="submit" class="button" title="{'Open this file in Import, with its column manifest: change the rows in a spreadsheet first, or load them into another site'|i18n('design/standard/extract')|wash}">{'Re-import this file'|i18n('design/standard/extract')}</button>
+                        </form>
+                        {/if}
                         {/if}
                         {* A finished package install: the package itself, and its installed objects exported again *}
                         {if and( $job.type|eq( 'package' ), $job.package_name )}

@@ -73,6 +73,9 @@ class History extends \Exponential\Runnable\ModuleView
                 'id' => (int)$h->attribute( 'id' ),
                 'job_id' => $h->attribute( 'job_id' ),
                 'job_exists' => $h->jobExists(),
+                // "Re-import this file": the run's job is a finished class export of CSV, JSON or XML (XrowExtractReimport)
+                'reimportable' => $h->jobExists() && \XrowExtractJob::isValidID( (string)$h->attribute( 'job_id' ) )
+                                  && \XrowExtractReimport::isReimportable( \XrowExtractJob::load( (string)$h->attribute( 'job_id' ) ) ),
                 'kind' => $h->attribute( 'kind' ),
                 'what' => $h->attribute( 'what' ),
                 'trigger' => $h->attribute( 'trigger_type' ),

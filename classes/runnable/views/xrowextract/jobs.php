@@ -241,6 +241,8 @@ class Jobs extends \Exponential\Runnable\ModuleView
                 'active' => $job['state'] === 'queued' || $job['state'] === 'running',
                 'counts' => isset( $job['counts'] ) ? $job['counts'] : null,
                 'has_errors_file' => !empty( $job['has_errors_file'] ),
+                // "Re-import this file": a finished class export of CSV, JSON or XML (XrowExtractReimport)
+                'reimportable' => \XrowExtractReimport::isReimportable( $job ),
                 'has_manifest' => $job['state'] === 'done' && $job['output_file'] && is_file( \XrowExtractJob::path( $job['id'] ) . '/' . $job['output_file'] . \XrowExtractManifest::SIDECAR_SUFFIX ),
                 'warnings' => isset( $job['warnings'] ) ? array_values( (array)$job['warnings'] ) : array(),
                 'schedule_id' => isset( $job['schedule_id'] ) ? (int)$job['schedule_id'] : 0,
