@@ -30,6 +30,7 @@
                 <div>
                     <h2 id="xe-card-jobs">{if $all_jobs}{'All jobs'|i18n('design/standard/extract')}{else}{'Your jobs'|i18n('design/standard/extract')}{/if}</h2>
                     <p>{'Exports started with "Run in the background", kept for %days days after they finish.'|i18n('design/standard/extract',, hash( '%days', $retention_days ))}</p>
+                    {include uri='design:xrowextract/transfer_runs_link.tpl'}
                 </div>
             </header>
 

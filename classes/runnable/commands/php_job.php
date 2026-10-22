@@ -161,6 +161,8 @@ class Job extends \Exponential\Runnable\Command
         $job['started'] = time();
         $job['pid'] = getmypid();
         \XrowExtractJob::save( $id, $job );
+        // Exponential 6.0.15 and later: the run's row in the kernel's run history is running now
+        \XrowExtractTransfer::markRunning( $job );
 
         $logHandle = @fopen( $logPath, 'a' );
         if ( $logHandle )

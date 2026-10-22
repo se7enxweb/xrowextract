@@ -43,5 +43,11 @@ Keywords[]=Massenbearbeitung
 Keywords[]=Sicherung
 Actions[]=class|export|Export the objects of this class…|xrowextract/csv/(class)/%classID%|xrowextract/csv
 Weight=20
+# Background jobs (kernel 6.0.15 and later, transfer.ini; doc/eng-us/features/6.0/transfer-runs.md): the job queue
+# runs them as xrowextract.run (settings/expqueue.ini.append.php) when it can, else the kernel's content jobs, else
+# Export's own process. Every run is written to the kernel's run history; who has xrowextract/all_jobs sees
+# everyone's runs of Export there, everybody else their own.
+QueueJobType=xrowextract.run
+HistoryAllPermission=xrowextract/all_jobs
 
 */ ?>

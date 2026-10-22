@@ -294,6 +294,8 @@ class XrowExtractJob
             'state' => 'failed', 'ended' => time(), 'cancelled' => true,
             'error' => 'Cancelled by ' . $login . ( $notStopped ? ' (process ' . implode( ', ', $notStopped ) . ' could not be stopped from this server user; it may finish on its own)' : '' ),
         ) );
+        // A job the job queue or the kernel's content jobs run: their job is cancelled too (a queued one never starts)
+        XrowExtractTransfer::cancel( $job );
         return array( !$notStopped, $notStopped ? 'The job was marked cancelled, but its process could not be stopped from here.' : 'The job was cancelled.' );
     }
 
@@ -637,10 +639,21 @@ class XrowExtractJob
      * Launches "<php cli> bin/php/job.php --run=<id>" detached: the request
      * does not wait for it. bin/php/job.php itself carries the job out and
      * updates job.json as it goes.
+     *
+     * From Exponential 6.0.15 on the job goes to the kernel's transfer runner first (XrowExtractTransfer): the job
+     * queue or the kernel's content jobs run it when they can (true at once, nothing is launched here); otherwise it
+     * is launched here as before, with its run history row in job.json for bin/php/job.php to end.
      * @param string $id
      */
     public static function start( $id ): bool
     {
+        $job = self::load( $id );
+        if ( $job !== null && $job['state'] === 'queued' && empty( $job[XrowExtractTransfer::ENGINE_KEY] ) )
+        {
+            $engine = XrowExtractTransfer::submit( $id, $job );
+            if ( $engine === 'expqueue' || $engine === 'contentjob' )
+                return true;
+        }
         $php = self::phpCliBinary();
         if ( !self::available() || $php === false )
             return false;

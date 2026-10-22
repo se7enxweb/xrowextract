@@ -5374,6 +5374,10 @@
         <translation>Diese Datei erneut importieren</translation>
     </message>
     <message>
+        <source>All import and export runs</source>
+        <translation>Alle Import- und Exportläufe</translation>
+    </message>
+    <message>
         <source>Open this file in Import, with its column manifest: change the rows in a spreadsheet first, or load them into another site</source>
         <translation>Diese Datei im Import öffnen, mit ihrem Spalten-Manifest: die Zeilen vorher in einer Tabelle ändern, oder sie in eine andere Site laden</translation>
     </message>

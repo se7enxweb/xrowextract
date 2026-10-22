@@ -299,6 +299,9 @@ class XrowExtractHistory extends eZPersistentObject
      */
     public static function record( array $data ): ?XrowExtractHistory
     {
+        // The same run in Exponential's run history of every import and export tool (6.0.15 and later; nothing
+        // on an older kernel), even when this table cannot be written
+        XrowExtractTransfer::mirror( $data );
         if ( !XrowExtractSchema::ensure() )
             return null;
         $row = null;
