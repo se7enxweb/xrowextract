@@ -1,3 +1,5 @@
+Installation, configuration, usage and examples: see README.md. This file keeps the detailed technical notes.
+
 CSV Extract for eZ publish
 
 Developed by
