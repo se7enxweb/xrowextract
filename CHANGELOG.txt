@@ -1,3 +1,14 @@
+Version 2.5.19
+
+-  Updated the Export tab of the administration to show the download icon (Icon=download in [Topmenu_xrowextract]
+   of menu.ini)
+-  Added README.md, a complete guide: the features page by page, requirements, installation with Composer and by
+   hand, every settings file with examples, usage step by step, the commands, the cronjob, the policy functions,
+   the template fetch functions, upgrading, known limits and troubleshooting. README.txt points to it and keeps
+   the detailed technical notes
+-  Updated composer.json (description, keywords, support links, PHP 8.1 and the PHP extensions it needs or
+   suggests), extension.xml (copyright of 7x and xrow, dependencies) and ezinfo.php to state version 2.5.19
+
 Version 2.5.18
 
 -  Completed the translations in Croatian, Czech, Danish, Dutch, Italian, Norwegian, Polish, Brazilian Portuguese, Swedish and Turkish

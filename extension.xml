@@ -2,9 +2,26 @@
 <software>
     <metadata>
         <name>Exponential xrowextract extension</name>
-        <version>2.5.18</version>
-        <copyright>Copyright (C) 2013 xrow GmbH</copyright>
+        <version>2.5.19</version>
+        <copyright>Copyright (C) 1998 - 2026 7x &amp; Exponential Foundation. Copyright (C) 2008 - 2013 xrow GmbH. All rights reserved.</copyright>
         <license>GNU General Public License v2.0 (or any later version)</license>
         <info_url>https://github.com/se7enxweb/xrowextract</info_url>
     </metadata>
+    <dependencies>
+        <requires>
+            <php version="8.1" />
+            <exponential version="6.0" />
+            <phpextension name="mbstring" />
+            <phpextension name="ctype" />
+            <phpextension name="json" />
+        </requires>
+        <suggests>
+            <phpextension name="dom" reason="XML imports and content packages" />
+            <phpextension name="xmlreader" reason="XML imports" />
+            <phpextension name="zip" reason="ZIP downloads and site archives" />
+            <phpextension name="zlib" reason="content packages" />
+            <phpextension name="sodium" reason="encrypted credentials of delivery destinations" />
+            <phpextension name="curl" reason="HTTP, S3, WebDAV and FTP delivery destinations" />
+        </suggests>
+    </dependencies>
 </software>
