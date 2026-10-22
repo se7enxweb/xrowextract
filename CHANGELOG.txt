@@ -1,3 +1,11 @@
+Unreleased
+
+-  Added the tool to Exponential's transfer registry (settings/kernelservices.ini.append.php, kernel 6.0.15 and
+   later): the kernel lists Export in its "Which import or export tool do I need?" page, the other tools' "Looking
+   for…?" boxes, the "Import and export" lists, the class page ("Export the objects of this class…") and the search
+-  Added the "Looking for another import or export?" box to the class export and import pages, and the "Import and
+   export" list to every left menu of the module; on an older kernel both are left out
+
 Version 2.5.19
 
 -  Updated the Export tab of the administration to show the download icon (Icon=download in [Topmenu_xrowextract]

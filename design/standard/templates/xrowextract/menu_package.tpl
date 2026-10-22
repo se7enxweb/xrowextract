@@ -67,3 +67,6 @@
 </div>
 
 {* DESIGN: Content END *}</div></div></div></div></div></div>
+
+{* the "Import and export" list of the transfer registry (Exponential 6.0.15 and later; nothing on an older kernel) *}
+{if ezini_hasvariable( 'Service_transfer.registry', 'Class', 'kernelservices.ini' )}{include uri='design:transfer/left_menu.tpl' current='transfer.xrowextract'}{/if}

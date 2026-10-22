@@ -491,3 +491,6 @@
 </form>
 <script src={concat( 'javascript/xrowextract.js'|ezdesign( 'no' ), '?v=', $ScriptVersion )|wash}></script>
 <script src={concat( 'javascript/xrowextract-upload.js'|ezdesign( 'no' ), '?v=', $UploadScriptVersion )|wash}></script>
+
+{* the other import and export tools of the transfer registry (Exponential 6.0.15 and later; nothing on an older kernel) *}
+{if ezini_hasvariable( 'Service_transfer.registry', 'Class', 'kernelservices.ini' )}{include uri='design:transfer/looking_for.tpl' tool='transfer.xrowextract'}{/if}

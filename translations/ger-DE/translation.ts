@@ -6842,4 +6842,19 @@
         <translation>Zeitpläne</translation>
     </message>
 </context>
+<context>
+    <name>kernel/transfer</name>
+    <message>
+        <source>Export (xrowextract)</source>
+        <translation>Export (xrowextract)</translation>
+    </message>
+    <message>
+        <source>Download the items of a class, a folder or the whole site as CSV, XML, JSON or an archive, now or on a schedule, and import such files back.</source>
+        <translation>Die Objekte einer Klasse, eines Ordners oder der ganzen Site als CSV, XML, JSON oder Archiv herunterladen, sofort oder nach Zeitplan, und solche Dateien wieder importieren.</translation>
+    </message>
+    <message>
+        <source>Export the objects of this class…</source>
+        <translation>Die Objekte dieser Klasse exportieren …</translation>
+    </message>
+</context>
 </TS>
