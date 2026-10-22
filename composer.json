@@ -1,23 +1,71 @@
 {
     "name": "se7enxweb/xrowextract",
-    "description": "This extenstion delivers tools for extracting/exporting content object data to csv",
+    "description": "Export and import content of an Exponential site: one class or a whole site as CSV, XML, JSON or content packages, with filters, presets, previews, background jobs, schedules, delivery destinations and an export history.",
     "type": "ezpublish-legacy-extension",
+    "keywords": [
+        "exponential",
+        "exponential legacy",
+        "extension",
+        "export",
+        "import",
+        "csv",
+        "xml",
+        "json",
+        "content package",
+        "migration",
+        "backup",
+        "scheduler"
+    ],
+    "homepage": "https://github.com/se7enxweb/xrowextract",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "7x",
-            "homepage": "https://se7enx.com"
+            "homepage": "https://se7enx.com",
+            "email": "info@se7enx.com",
+            "role": "Maintainer"
         },
         {
             "name": "xrow GmbH",
-            "homepage": "https://www.xrow.com"
+            "homepage": "https://www.xrow.com",
+            "role": "Creator"
+        },
+        {
+            "name": "Björn Dieding",
+            "email": "bjoern@xrow.de",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/se7enxweb/xrowextract/issues",
+        "source": "https://github.com/se7enxweb/xrowextract",
+        "docs": "https://github.com/se7enxweb/xrowextract#readme"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/se7enxweb"
         }
     ],
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
+        "php": ">=8.1",
+        "ext-ctype": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
         "se7enxweb/ezpublish-legacy-installer": "*"
     },
+    "suggest": {
+        "ext-dom": "Importing XML content files and content packages",
+        "ext-xmlreader": "Importing XML content files",
+        "ext-zip": "ZIP downloads and site archives",
+        "ext-zlib": "Content packages",
+        "ext-sodium": "Encrypted passwords and keys of delivery destinations",
+        "ext-curl": "HTTP, S3, WebDAV and FTP delivery destinations"
+    },
     "extra": {
-        "ezpublish-legacy-extension-name": "xrowextract"
+        "ezpublish-legacy-extension-name": "xrowextract",
+        "installer-name": "xrowextract"
     }
 }
