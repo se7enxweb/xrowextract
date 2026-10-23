@@ -1,4 +1,4 @@
-Unreleased
+Version 2.5.20
 
 -  Updated the PHP requirement to 8.0 or later (composer.json, extension.xml, the requirements check, PHPStan's
    phpVersion and the READMEs), as Exponential 6.0.15 runs on PHP 8.0 and requires this package. The only 8.1
