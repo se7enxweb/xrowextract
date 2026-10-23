@@ -6547,8 +6547,8 @@
         <translation>SFTP ghochmey</translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
-        <translation>PHP 8.1 pagh chu&apos; law&apos;</translation>
+        <source>PHP 8.0 or later</source>
+        <translation>PHP 8.0 pagh chu&apos; law&apos;</translation>
     </message>
     <message>
         <source>The PHP mbstring extension</source>

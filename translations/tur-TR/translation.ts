@@ -6544,8 +6544,8 @@
         <translation>SFTP hedefleri</translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
-        <translation>PHP 8.1 veya üzeri</translation>
+        <source>PHP 8.0 or later</source>
+        <translation>PHP 8.0 veya üzeri</translation>
     </message>
     <message>
         <source>The PHP mbstring extension</source>

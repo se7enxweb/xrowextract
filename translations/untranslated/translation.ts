@@ -6544,7 +6544,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
+        <source>PHP 8.0 or later</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

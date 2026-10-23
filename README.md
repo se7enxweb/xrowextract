@@ -71,7 +71,7 @@ Highlights:
 ## Requirements
 
 - Exponential 6.x (the legacy kernel)
-- PHP 8.1 or newer with `mbstring`, `ctype` and `json`, and writable `var` and cache folders (required)
+- PHP 8.0 or newer with `mbstring`, `ctype` and `json`, and writable `var` and cache folders (required)
 - Optional, per feature:
 
 | Feature | Needs |

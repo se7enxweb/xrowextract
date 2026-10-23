@@ -197,7 +197,7 @@ Command line: ext:xrowextract:schedule (--list, --run, --enable,
 Requirements
 
 XrowExtractRequirements says in one place what each feature needs:
-PHP 8.1 or later with mbstring, ctype and json and writable var and cache
+PHP 8.0 or later with mbstring, ctype and json and writable var and cache
 folders (required: without them nothing works), and for single features
 dom and xmlreader (Import content file), zip (the ZIP downloads and
 archives), dom, zlib, proc_open(), tar and gzip and a writable storage
@@ -223,7 +223,7 @@ per part, exit code 1 when any part fails:
   ts       xmllint --noout on translations/*/translation.ts
   dup      no <source> twice in one <context> of a .ts file
   phpstan  PHPStan (phpstan.neon.dist: level 8, every parameter, return
-           and property typed, PHP 8.1 to 8.5; phpstan-baseline.neon holds only
+           and property typed, PHP 8.0 to 8.5; phpstan-baseline.neon holds only
            findings PHPStan cannot see past, each explained)
   unit     the PHPUnit tests in tests/unit
   req      the requirements check: bin/php/requirements.php in the test

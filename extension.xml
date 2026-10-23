@@ -9,7 +9,7 @@
     </metadata>
     <dependencies>
         <requires>
-            <php version="8.1" />
+            <php version="8.0" />
             <exponential version="6.0" />
             <phpextension name="mbstring" />
             <phpextension name="ctype" />

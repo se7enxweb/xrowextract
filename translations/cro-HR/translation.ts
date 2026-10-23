@@ -6544,8 +6544,8 @@
         <translation>SFTP odredišta</translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
-        <translation>PHP 8.1 ili noviji</translation>
+        <source>PHP 8.0 or later</source>
+        <translation>PHP 8.0 ili noviji</translation>
     </message>
     <message>
         <source>The PHP mbstring extension</source>

@@ -6546,8 +6546,8 @@
         <translation>יעדי SFTP</translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
-        <translation>PHP 8.1 ומעלה</translation>
+        <source>PHP 8.0 or later</source>
+        <translation>PHP 8.0 ומעלה</translation>
     </message>
     <message>
         <source>The PHP mbstring extension</source>

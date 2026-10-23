@@ -6558,8 +6558,8 @@
         <translation>SFTP-Ziele</translation>
     </message>
     <message>
-        <source>PHP 8.1 or later</source>
-        <translation>PHP 8.1 oder neuer</translation>
+        <source>PHP 8.0 or later</source>
+        <translation>PHP 8.0 oder neuer</translation>
     </message>
     <message>
         <source>The PHP mbstring extension</source>

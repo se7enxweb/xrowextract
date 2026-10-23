@@ -18,7 +18,7 @@
  */
 class XrowExtractRequirements
 {
-    const MIN_PHP_VERSION = '8.1.0';
+    const MIN_PHP_VERSION = '8.0.0';
 
     /** @var array<string, array{ok: bool, detail: string}>|null The probes of this request (they do not change within one). */
     protected static ?array $probed = null;
@@ -32,7 +32,7 @@ class XrowExtractRequirements
     public static function requirements(): array
     {
         return array(
-            'php'           => array( 'label' => 'PHP 8.1 or later',                                    'hint' => 'Run the installation with a newer PHP.' ),
+            'php'           => array( 'label' => 'PHP 8.0 or later',                                    'hint' => 'Run the installation with a newer PHP.' ),
             'mbstring'      => array( 'label' => 'The PHP mbstring extension',                          'hint' => 'Install or enable mbstring (php-mbstring).' ),
             'ctype'         => array( 'label' => 'The PHP ctype extension',                             'hint' => 'Install or enable ctype.' ),
             'json'          => array( 'label' => 'The PHP json extension',                              'hint' => 'Install or enable json.' ),

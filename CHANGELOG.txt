@@ -1,5 +1,9 @@
 Unreleased
 
+-  Updated the PHP requirement to 8.0 or later (composer.json, extension.xml, the requirements check, PHPStan's
+   phpVersion and the READMEs), as Exponential 6.0.15 runs on PHP 8.0 and requires this package. The only 8.1
+   feature in the code was the never return type of the $fail closure in seven commands; that closure always
+   exits, so its type moved to a PHPDoc @var and PHPStan still knows that nothing after a $fail() call runs
 -  Added the tool to Exponential's transfer registry (settings/kernelservices.ini.append.php, kernel 6.0.15 and
    later): the kernel lists Export in its "Which import or export tool do I need?" page, the other tools' "Looking
    for…?" boxes, the "Import and export" lists, the class page ("Export the objects of this class…") and the search

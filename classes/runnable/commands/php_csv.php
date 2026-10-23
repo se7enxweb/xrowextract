@@ -104,7 +104,8 @@ class Csv extends \Exponential\Runnable\Command
             )
         );
 
-        $fail = function ( $message ) use ( $cli, $script ): never
+        /** @var \Closure(mixed): never $fail It exits; PHP 8.0 has no never return type to say so */
+        $fail = function ( $message ) use ( $cli, $script )
         {
             $cli->error( $message );
             $script->shutdown( 1 );
