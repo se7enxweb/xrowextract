@@ -5,7 +5,7 @@
     <name>design/standard/extract</name>
     <message>
         <source>View</source>
-        <translation>Wyświetl</translation>
+        <translation>Wyświetlić</translation>
     </message>
     <message>
         <source>Package contents</source>
@@ -21,11 +21,11 @@
     </message>
     <message>
         <source>Browse all %count files</source>
-        <translation>Przeglądaj wszystkie pliki (%count)</translation>
+        <translation>Przeglądać wszystkie pliki (%count)</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation>Zamknij</translation>
+        <translation>Zamknąć</translation>
     </message>
     <message>
         <source>Package contents: %name</source>
@@ -57,7 +57,7 @@
     </message>
     <message>
         <source>Check again</source>
-        <translation>Sprawdź ponownie</translation>
+        <translation>Sprawdzić ponownie</translation>
     </message>
     <message>
         <source>Pages of the package’s objects</source>
@@ -93,7 +93,7 @@
     </message>
     <message>
         <source>Download with manifest (.zip)</source>
-        <translation>Pobierz z manifestem (.zip)</translation>
+        <translation>Pobrać z manifestem (.zip)</translation>
     </message>
     <message>
         <source>The file and its typed column manifest in one zip: the importer reads it back with every column mapped exactly</source>
@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Download manifest</source>
-        <translation>Pobierz manifest</translation>
+        <translation>Pobrać manifest</translation>
     </message>
     <message>
         <source>Could not read %name: %reason</source>
@@ -145,7 +145,7 @@
     </message>
     <message>
         <source>Open the history</source>
-        <translation>Otwórz historię</translation>
+        <translation>Otworzyć historię</translation>
     </message>
     <message>
         <source>Started by a schedule</source>
@@ -185,7 +185,7 @@
     </message>
     <message>
         <source>Add a destination</source>
-        <translation>Dodaj miejsce docelowe</translation>
+        <translation>Dodać miejsce docelowe</translation>
     </message>
     <message>
         <source>SFTP, FTP/FTPS, a local or NAS folder, S3, WebDAV or an HTTP upload; test the connection first.</source>
@@ -193,7 +193,7 @@
     </message>
     <message>
         <source>Create a schedule</source>
-        <translation>Utwórz harmonogram</translation>
+        <translation>Utworzyć harmonogram</translation>
     </message>
     <message>
         <source>What runs, when, full or only the changes, where the file goes and who hears about it.</source>
@@ -201,7 +201,7 @@
     </message>
     <message>
         <source>Follow the history</source>
-        <translation>Śledź historię</translation>
+        <translation>Śledzić historię</translation>
     </message>
     <message>
         <source>Every run with its rows, size, checksum, delivery and warnings; failures also as a badge on the Jobs tab.</source>
@@ -241,7 +241,7 @@
     </message>
     <message>
         <source>Change the schedule</source>
-        <translation>Zmień harmonogram</translation>
+        <translation>Zmienić harmonogram</translation>
     </message>
     <message>
         <source>New schedule</source>
@@ -273,7 +273,7 @@
     </message>
     <message>
         <source>Choose a preset</source>
-        <translation>Wybierz zestaw</translation>
+        <translation>Wybrać zestaw</translation>
     </message>
     <message>
         <source>No presets yet: save one on the One class tab first.</source>
@@ -337,7 +337,7 @@
     </message>
     <message>
         <source>Read the file from</source>
-        <translation>Odczytaj plik z</translation>
+        <translation>Odczytać plik z</translation>
     </message>
     <message>
         <source>A folder on this server</source>
@@ -365,7 +365,7 @@
     </message>
     <message>
         <source>Choose a destination</source>
-        <translation>Wybierz miejsce docelowe</translation>
+        <translation>Wybrać miejsce docelowe</translation>
     </message>
     <message>
         <source>File there</source>
@@ -505,11 +505,11 @@
     </message>
     <message>
         <source>Deliver to</source>
-        <translation>Dostarcz do</translation>
+        <translation>Dostarczyć do</translation>
     </message>
     <message>
         <source>Add one</source>
-        <translation>Dodaj</translation>
+        <translation>Dodać</translation>
     </message>
     <message>
         <source>The file and its manifest; retried with a growing pause when a delivery fails. The job folder keeps its copy either way.</source>
@@ -537,11 +537,11 @@
     </message>
     <message>
         <source>Show failures as a notice and a badge on the Jobs tab</source>
-        <translation>Pokazuj błędy jako komunikat i plakietkę na karcie Zadania</translation>
+        <translation>Pokazywać błędy jako komunikat i plakietkę na karcie Zadania</translation>
     </message>
     <message>
         <source>Keep</source>
-        <translation>Przechowuj</translation>
+        <translation>Przechowywać</translation>
     </message>
     <message>
         <source>days</source>
@@ -557,7 +557,7 @@
     </message>
     <message>
         <source>Save schedule</source>
-        <translation>Zapisz harmonogram</translation>
+        <translation>Zapisać harmonogram</translation>
     </message>
     <message>
         <source>All schedules</source>
@@ -593,7 +593,7 @@
     </message>
     <message>
         <source>Run it from system cron instead</source>
-        <translation>Uruchamiaj go zamiast tego z systemowego cron</translation>
+        <translation>Uruchamiać go zamiast tego z systemowego cron</translation>
     </message>
     <message>
         <source>Only what changed since the last successful run</source>
@@ -601,19 +601,19 @@
     </message>
     <message>
         <source>Run changes only</source>
-        <translation>Uruchom tylko zmiany</translation>
+        <translation>Uruchomić tylko zmiany</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation>Edytuj</translation>
+        <translation>Edytować</translation>
     </message>
     <message>
         <source>Disable</source>
-        <translation>Wyłącz</translation>
+        <translation>Wyłączyć</translation>
     </message>
     <message>
         <source>Enable</source>
-        <translation>Włącz</translation>
+        <translation>Włączyć</translation>
     </message>
     <message>
         <source>Delete this schedule? Its history is kept.</source>
@@ -721,7 +721,7 @@
     </message>
     <message>
         <source>Change the destination</source>
-        <translation>Zmień miejsce docelowe</translation>
+        <translation>Zmienić miejsce docelowe</translation>
     </message>
     <message>
         <source>New destination</source>
@@ -761,27 +761,27 @@
     </message>
     <message>
         <source>Paste a new one to replace it</source>
-        <translation>Wklej nową wartość, aby ją zastąpić</translation>
+        <translation>Wkleić nową wartość, aby ją zastąpić</translation>
     </message>
     <message>
         <source>Paste it here</source>
-        <translation>Wklej tutaj</translation>
+        <translation>Wkleić tutaj</translation>
     </message>
     <message>
         <source>Type a new one to replace it</source>
-        <translation>Wpisz nową wartość, aby ją zastąpić</translation>
+        <translation>Wpisać nową wartość, aby ją zastąpić</translation>
     </message>
     <message>
         <source>Set it</source>
-        <translation>Ustaw</translation>
+        <translation>Ustawić</translation>
     </message>
     <message>
         <source>Clear it</source>
-        <translation>Wyczyść</translation>
+        <translation>Wyczyścić</translation>
     </message>
     <message>
         <source>Save destination</source>
-        <translation>Zapisz miejsce docelowe</translation>
+        <translation>Zapisać miejsce docelowe</translation>
     </message>
     <message>
         <source>Where scheduled exports deliver their files, and where a scheduled import can read one from.</source>
@@ -849,11 +849,11 @@
     </message>
     <message>
         <source>Trust this host key</source>
-        <translation>Zaufaj temu kluczowi hosta</translation>
+        <translation>Zaufać temu kluczowi hosta</translation>
     </message>
     <message>
         <source>Test connection</source>
-        <translation>Testuj połączenie</translation>
+        <translation>Testować połączenie</translation>
     </message>
     <message>
         <source>Schedules still deliver here. Delete this destination anyway?</source>
@@ -1005,11 +1005,11 @@
     </message>
     <message>
         <source>Show the failed runs</source>
-        <translation>Pokaż nieudane uruchomienia</translation>
+        <translation>Pokazać nieudane uruchomienia</translation>
     </message>
     <message>
         <source>Mark as seen</source>
-        <translation>Oznacz jako przejrzane</translation>
+        <translation>Oznaczyć jako przejrzane</translation>
     </message>
     <message>
         <source>Export history</source>
@@ -1105,7 +1105,7 @@
     </message>
     <message>
         <source>Reset</source>
-        <translation>Wyzeruj</translation>
+        <translation>Wyzerować</translation>
     </message>
     <message>
         <source>%count run(s)</source>
@@ -1129,7 +1129,7 @@
     </message>
     <message>
         <source>Show the job</source>
-        <translation>Pokaż zadanie</translation>
+        <translation>Pokazać zadanie</translation>
     </message>
     <message>
         <source>Pages</source>
@@ -1253,7 +1253,7 @@
     </message>
     <message>
         <source>Read the inspection</source>
-        <translation>Przeczytaj wynik sprawdzenia</translation>
+        <translation>Przeczytać wynik sprawdzenia</translation>
     </message>
     <message>
         <source>Every class and object it carries, and what installing it would do: create, update, unchanged, or class missing. Nothing is written yet.</source>
@@ -1261,7 +1261,7 @@
     </message>
     <message>
         <source>Choose where and how</source>
-        <translation>Wybierz miejsce i sposób</translation>
+        <translation>Wybrać miejsce i sposób</translation>
     </message>
     <message>
         <source>Parent node for the content, the site access its templates/overrides map to, and how to handle a class or object that already exists.</source>
@@ -1405,11 +1405,11 @@
     </message>
     <message>
         <source>Install 1 change (in the background)</source>
-        <translation>Zainstaluj 1 zmianę (w tle)</translation>
+        <translation>Zainstalować 1 zmianę (w tle)</translation>
     </message>
     <message>
         <source>Review and install the package</source>
-        <translation>Przejrzyj i zainstaluj pakiet</translation>
+        <translation>Przejrzeć i zainstalować pakiet</translation>
     </message>
     <message>
         <source>See what the package would create, update or leave alone on this site, choose where it goes, then install it.</source>
@@ -1437,15 +1437,15 @@
     </message>
     <message>
         <source>Update it</source>
-        <translation>Zaktualizuj go</translation>
+        <translation>Zaktualizować go</translation>
     </message>
     <message>
         <source>Leave it</source>
-        <translation>Pozostaw go</translation>
+        <translation>Pozostawić go</translation>
     </message>
     <message>
         <source>Add a copy</source>
-        <translation>Dodaj kopię</translation>
+        <translation>Dodać kopię</translation>
     </message>
     <message>
         <source>Matched by remote id.</source>
@@ -1457,15 +1457,15 @@
     </message>
     <message>
         <source>Keep the site’s</source>
-        <translation>Zachowaj klasę witryny</translation>
+        <translation>Zachować klasę witryny</translation>
     </message>
     <message>
         <source>Replace it</source>
-        <translation>Zastąp ją</translation>
+        <translation>Zastąpić ją</translation>
     </message>
     <message>
         <source>Add as new</source>
-        <translation>Dodaj jako nową</translation>
+        <translation>Dodać jako nową</translation>
     </message>
     <message>
         <source>Matched by remote id, else by identifier.</source>
@@ -1477,11 +1477,11 @@
     </message>
     <message>
         <source>Review again</source>
-        <translation>Przejrzyj ponownie</translation>
+        <translation>Przejrzeć ponownie</translation>
     </message>
     <message>
         <source>Review the package (dry run)</source>
-        <translation>Przejrzyj pakiet (przebieg próbny)</translation>
+        <translation>Przejrzeć pakiet (przebieg próbny)</translation>
     </message>
     <message>
         <source>Next: review the package. The dry run lists every class and object with what installing would do; the install itself then runs in the background, with its progress and log on the Jobs page.</source>
@@ -1489,7 +1489,7 @@
     </message>
     <message>
         <source>Install %count changes (in the background)</source>
-        <translation>Zainstaluj zmiany (%count) (w tle)</translation>
+        <translation>Zainstalować zmiany (%count) (w tle)</translation>
     </message>
     <message>
         <source>Install the package now? It runs as a background job; its progress and log are on the Jobs page.</source>
@@ -1541,7 +1541,7 @@
     </message>
     <message>
         <source>Install package %name below %parent</source>
-        <translation>Zainstaluj pakiet %name pod %parent</translation>
+        <translation>Zainstalować pakiet %name pod %parent</translation>
     </message>
     <message>
         <source>The package could not be read: %reason</source>
@@ -1549,7 +1549,7 @@
     </message>
     <message>
         <source>Export as package</source>
-        <translation>Eksportuj jako pakiet</translation>
+        <translation>Wyeksportować jako pakiet</translation>
     </message>
     <message>
         <source>This class, below the node chosen above, as a real content package (.ezpkg) - installable on another site through xrowextract/import or xrowextract/package. Always runs as a background job; see the Jobs tab.</source>
@@ -1561,23 +1561,23 @@
     </message>
     <message>
         <source>Try a sample: %format</source>
-        <translation>Wypróbuj przykład: %format</translation>
+        <translation>Wypróbować przykład: %format</translation>
     </message>
     <message>
         <source>Download a template: %format</source>
-        <translation>Pobierz szablon: %format</translation>
+        <translation>Pobrać szablon: %format</translation>
     </message>
     <message>
         <source>Read the %format reference</source>
-        <translation>Przeczytaj opis formatu %format</translation>
+        <translation>Przeczytać opis formatu %format</translation>
     </message>
     <message>
         <source>Upload a %format file</source>
-        <translation>Prześlij plik %format</translation>
+        <translation>Przesłać plik %format</translation>
     </message>
     <message>
         <source>Download %format</source>
-        <translation>Pobierz %format</translation>
+        <translation>Pobrać %format</translation>
     </message>
     <message>
         <source>Pick a format below to try a sample, get a template, read its reference, or upload a file of that kind.</source>
@@ -1597,15 +1597,15 @@
     </message>
     <message>
         <source>Download a template</source>
-        <translation>Pobierz szablon</translation>
+        <translation>Pobrać szablon</translation>
     </message>
     <message>
         <source>Read the reference</source>
-        <translation>Przeczytaj opis formatu</translation>
+        <translation>Przeczytać opis formatu</translation>
     </message>
     <message>
         <source>Upload a file of this kind</source>
-        <translation>Prześlij plik tego rodzaju</translation>
+        <translation>Przesłać plik tego rodzaju</translation>
     </message>
     <message>
         <source>Plain spreadsheet rows; separator and encoding are detected automatically.</source>
@@ -1641,7 +1641,7 @@
     </message>
     <message>
         <source>Try a sample (.ezpkg)</source>
-        <translation>Wypróbuj przykład (.ezpkg)</translation>
+        <translation>Wypróbować przykład (.ezpkg)</translation>
     </message>
     <message>
         <source>A content package sample is built read-only from up to 3 of the class’s own existing objects (class only for a class with no content yet) and altered on the copy only, so its dry run shows every outcome: unchanged, updated, newly created, and a class the site does not have. Not kept in the package repository unless you choose to.</source>
@@ -1649,7 +1649,7 @@
     </message>
     <message>
         <source>Keep in the repository</source>
-        <translation>Zachowaj w repozytorium</translation>
+        <translation>Zachować w repozytorium</translation>
     </message>
     <message>
         <source>Content package: what to include</source>
@@ -1665,11 +1665,11 @@
     </message>
     <message>
         <source>Download class definition XML</source>
-        <translation>Pobierz XML definicji klasy</translation>
+        <translation>Pobrać XML definicji klasy</translation>
     </message>
     <message>
         <source>Download object XML</source>
-        <translation>Pobierz XML obiektu</translation>
+        <translation>Pobrać XML obiektu</translation>
     </message>
     <message>
         <source>This class has no content on this site yet: a &quot;class + content&quot; or &quot;content only&quot; package download would use temporary hidden scratch content instead (removed again immediately after), not real existing objects.</source>
@@ -1717,11 +1717,11 @@
     </message>
     <message>
         <source>Import content file</source>
-        <translation>Importuj plik treści</translation>
+        <translation>Zaimportować plik treści</translation>
     </message>
     <message>
         <source>Import content package</source>
-        <translation>Importuj pakiet treści</translation>
+        <translation>Zaimportować pakiet treści</translation>
     </message>
     <message>
         <source>An XML, CSV or JSON export (any column set), or a content package (.ezpkg) with classes and content, or a single class or object XML.</source>
@@ -1797,7 +1797,7 @@
     </message>
     <message>
         <source>Keep both</source>
-        <translation>Zachowaj oba</translation>
+        <translation>Zachować oba</translation>
     </message>
     <message>
         <source>Where a design/template/override this package might carry would map to.</source>
@@ -1809,7 +1809,7 @@
     </message>
     <message>
         <source>Install as a background job</source>
-        <translation>Zainstaluj jako zadanie w tle</translation>
+        <translation>Zainstalować jako zadanie w tle</translation>
     </message>
     <message>
         <source>Background jobs are not available on this server (no PHP command line binary was found, or exec() is disabled).</source>
@@ -2021,7 +2021,7 @@
     </message>
     <message>
         <source>Pick a package</source>
-        <translation>Wybierz pakiet</translation>
+        <translation>Wybrać pakiet</translation>
     </message>
     <message>
         <source>Upload an .ezpkg, or choose one already in the repository that carries a content class or content object.</source>
@@ -2029,7 +2029,7 @@
     </message>
     <message>
         <source>Upload an .ezpkg file</source>
-        <translation>Prześlij plik .ezpkg</translation>
+        <translation>Przesłać plik .ezpkg</translation>
     </message>
     <message>
         <source>It is added to the local package repository under its own name, then opened below for inspection - nothing is installed yet.</source>
@@ -2041,7 +2041,7 @@
     </message>
     <message>
         <source>Open</source>
-        <translation>Otwórz</translation>
+        <translation>Otworzyć</translation>
     </message>
     <message>
         <source>Current package: %name</source>
@@ -2061,7 +2061,7 @@
     </message>
     <message>
         <source>Forget</source>
-        <translation>Zapomnij</translation>
+        <translation>Zapomnieć</translation>
     </message>
     <message>
         <source>Inspection — nothing written</source>
@@ -2133,11 +2133,11 @@
     </message>
     <message>
         <source>Install</source>
-        <translation>Zainstaluj</translation>
+        <translation>Zainstalować</translation>
     </message>
     <message>
         <source>Install this package</source>
-        <translation>Zainstaluj ten pakiet</translation>
+        <translation>Zainstalować ten pakiet</translation>
     </message>
     <message>
         <source>Install-time matching and options</source>
@@ -2165,11 +2165,11 @@
     </message>
     <message>
         <source>Update in place</source>
-        <translation>Aktualizuj na miejscu</translation>
+        <translation>Aktualizować na miejscu</translation>
     </message>
     <message>
         <source>Keep both (new copy, new remote id)</source>
-        <translation>Zachowaj oba (nowa kopia, nowe zdalne ID)</translation>
+        <translation>Zachować oba (nowa kopia, nowe zdalne ID)</translation>
     </message>
     <message>
         <source>Existing classes (matched by remote id, then identifier)</source>
@@ -2177,11 +2177,11 @@
     </message>
     <message>
         <source>Replace</source>
-        <translation>Zastąp</translation>
+        <translation>Zastąpić</translation>
     </message>
     <message>
         <source>Keep both (new copy, new identifier)</source>
-        <translation>Zachowaj oba (nowa kopia, nowy identyfikator)</translation>
+        <translation>Zachować oba (nowa kopia, nowy identyfikator)</translation>
     </message>
     <message>
         <source>Replacing a class removes it and every object of it first; the confirmation for that lives in the full install wizard, not here.</source>
@@ -2221,7 +2221,7 @@
     </message>
     <message>
         <source>Build the sample package</source>
-        <translation>Zbuduj przykładowy pakiet</translation>
+        <translation>Zbudować przykładowy pakiet</translation>
     </message>
     <message>
         <source>2-3 real content objects are created, exported into the package, then removed again; nothing from this step stays in the content tree. The result opens below for inspection.</source>
@@ -2497,11 +2497,11 @@
     </message>
     <message>
         <source>Start from a template</source>
-        <translation>Zacznij od szablonu</translation>
+        <translation>Zacząć od szablonu</translation>
     </message>
     <message>
         <source>Download a template for this class</source>
-        <translation>Pobierz szablon dla tej klasy</translation>
+        <translation>Pobrać szablon dla tej klasy</translation>
     </message>
     <message>
         <source>Choose a class first</source>
@@ -2517,7 +2517,7 @@
     </message>
     <message>
         <source>Choose the class, matching, language and parent</source>
-        <translation>Wybierz klasę, dopasowanie, język i element nadrzędny</translation>
+        <translation>Wybrać klasę, dopasowanie, język i element nadrzędny</translation>
     </message>
     <message>
         <source>Before or after the upload; a class, language or parent column in the file wins for its rows.</source>
@@ -2525,7 +2525,7 @@
     </message>
     <message>
         <source>Upload the file</source>
-        <translation>Prześlij plik</translation>
+        <translation>Przesłać plik</translation>
     </message>
     <message>
         <source>An export of this tool (the Migration column set carries everything needed), or a filled template.</source>
@@ -2533,7 +2533,7 @@
     </message>
     <message>
         <source>Check the column mapping</source>
-        <translation>Sprawdź przypisanie kolumn</translation>
+        <translation>Sprawdzić przypisanie kolumn</translation>
     </message>
     <message>
         <source>Columns are matched to attributes, attribute formats and special columns by name; change any, or ignore it.</source>
@@ -2541,7 +2541,7 @@
     </message>
     <message>
         <source>Read the dry run</source>
-        <translation>Przeczytaj przebieg próbny</translation>
+        <translation>Przeczytać przebieg próbny</translation>
     </message>
     <message>
         <source>Per row: create, update (old and new values), unchanged, skip or error with the reason.</source>
@@ -2549,7 +2549,7 @@
     </message>
     <message>
         <source>Import the changes</source>
-        <translation>Zaimportuj zmiany</translation>
+        <translation>Zaimportować zmiany</translation>
     </message>
     <message>
         <source>Only the changed attributes of each row are written; a row with an error writes nothing.</source>
@@ -2625,7 +2625,7 @@
     </message>
     <message>
         <source>Set up the export as usual</source>
-        <translation>Skonfiguruj eksport jak zwykle</translation>
+        <translation>Skonfigurować eksport jak zwykle</translation>
     </message>
     <message>
         <source>Everything you chose (nodes, classes, languages, filters, sort, columns, format) goes into the job.</source>
@@ -2637,7 +2637,7 @@
     </message>
     <message>
         <source>Download the file</source>
-        <translation>Pobierz plik</translation>
+        <translation>Pobrać plik</translation>
     </message>
     <message>
         <source>When the job is done; you can leave and come back.</source>
@@ -2681,7 +2681,7 @@
     </message>
     <message>
         <source>Choose what to export</source>
-        <translation>Wybierz, co eksportować</translation>
+        <translation>Wybrać, co eksportować</translation>
     </message>
     <message>
         <source>Scope (below a node, below a node tree, the whole site), the class, the languages.</source>
@@ -2705,7 +2705,7 @@
     </message>
     <message>
         <source>Download, or run in the background</source>
-        <translation>Pobierz lub uruchom w tle</translation>
+        <translation>Pobrać lub uruchomić w tle</translation>
     </message>
     <message>
         <source>Large exports run as a job; the Jobs tab has the file when it is done.</source>
@@ -2725,7 +2725,7 @@
     </message>
     <message>
         <source>Sort the rows by</source>
-        <translation>Sortuj wiersze według</translation>
+        <translation>Sortować wiersze według</translation>
     </message>
     <message>
         <source>Order</source>
@@ -2769,7 +2769,7 @@
     </message>
     <message>
         <source>Clear filters</source>
-        <translation>Wyczyść filtry</translation>
+        <translation>Wyczyścić filtry</translation>
     </message>
     <message>
         <source>Date</source>
@@ -2961,7 +2961,7 @@
     </message>
     <message>
         <source>Reset to defaults</source>
-        <translation>Przywróć domyślne</translation>
+        <translation>Przywrócić domyślne</translation>
     </message>
     <message>
         <source>Start again from the default node, the class with the most objects and its attributes</source>
@@ -2985,7 +2985,7 @@
     </message>
     <message>
         <source>Download %type</source>
-        <translation>Pobierz %type</translation>
+        <translation>Pobrać %type</translation>
     </message>
     <message>
         <source>The first rows as %type</source>
@@ -3005,11 +3005,11 @@
     </message>
     <message>
         <source>Remove this site from the selection</source>
-        <translation>Usuń tę witrynę z wyboru</translation>
+        <translation>Usunąć tę witrynę z wyboru</translation>
     </message>
     <message>
         <source>Add this site to the selection</source>
-        <translation>Dodaj tę witrynę do wyboru</translation>
+        <translation>Dodać tę witrynę do wyboru</translation>
     </message>
     <message>
         <source>the root node of the default siteaccess</source>
@@ -3037,7 +3037,7 @@
     </message>
     <message>
         <source>Add the plain text of every rich text field</source>
-        <translation>Dodaj czysty tekst każdego pola tekstu sformatowanego</translation>
+        <translation>Dodać czysty tekst każdego pola tekstu sformatowanego</translation>
     </message>
     <message>
         <source>Standard</source>
@@ -3065,7 +3065,7 @@
     </message>
     <message>
         <source>Filter the columns: name, identifier, datatype, format</source>
-        <translation>Filtruj kolumny: nazwa, identyfikator, typ danych, format</translation>
+        <translation>Filtrować kolumny: nazwa, identyfikator, typ danych, format</translation>
     </message>
     <message>
         <source>Attribute formats</source>
@@ -3365,7 +3365,7 @@
     </message>
     <message>
         <source>Include password hashes</source>
-        <translation>Dołącz skróty haseł</translation>
+        <translation>Dołączyć skróty haseł</translation>
     </message>
     <message>
         <source>sensitive</source>
@@ -3377,7 +3377,7 @@
     </message>
     <message>
         <source>Handle with care: it lets anyone try the passwords offline</source>
-        <translation>Zachowaj ostrożność: pozwala każdemu próbować łamać hasła offline</translation>
+        <translation>Zachować ostrożność: pozwala każdemu próbować łamać hasła offline</translation>
     </message>
     <message>
         <source>Password hash and hash type are special columns for users with the policy xrowextract/password_hash (administrators have it); csv.ini can switch them off.</source>
@@ -3601,7 +3601,7 @@
     </message>
     <message>
         <source>Browse for nodes</source>
-        <translation>Przeglądaj węzły</translation>
+        <translation>Przeglądać węzły</translation>
     </message>
     <message>
         <source>No nodes yet. Choose a set, add a node below, or browse.</source>
@@ -3621,15 +3621,15 @@
     </message>
     <message>
         <source>Remove this node</source>
-        <translation>Usuń ten węzeł</translation>
+        <translation>Usunąć ten węzeł</translation>
     </message>
     <message>
         <source>Add a node</source>
-        <translation>Dodaj węzeł</translation>
+        <translation>Dodać węzeł</translation>
     </message>
     <message>
         <source>Filter by name, class or path</source>
-        <translation>Filtruj według nazwy, klasy lub ścieżki</translation>
+        <translation>Filtrować według nazwy, klasy lub ścieżki</translation>
     </message>
     <message>
         <source>Only nodes with content below</source>
@@ -3641,7 +3641,7 @@
     </message>
     <message>
         <source>Add</source>
-        <translation>Dodaj</translation>
+        <translation>Dodać</translation>
     </message>
     <message>
         <source>Classes</source>
@@ -3661,15 +3661,15 @@
     </message>
     <message>
         <source>Filter classes</source>
-        <translation>Filtruj klasy</translation>
+        <translation>Filtrować klasy</translation>
     </message>
     <message>
         <source>Select all</source>
-        <translation>Zaznacz wszystko</translation>
+        <translation>Zaznaczyć wszystko</translation>
     </message>
     <message>
         <source>Select none</source>
-        <translation>Odznacz wszystkie</translation>
+        <translation>Odznaczyć wszystkie</translation>
     </message>
     <message>
         <source>%columns columns</source>
@@ -3705,11 +3705,11 @@
     </message>
     <message>
         <source>Download archive</source>
-        <translation>Pobierz archiwum</translation>
+        <translation>Pobrać archiwum</translation>
     </message>
     <message>
         <source>Choose nodes for the site archive</source>
-        <translation>Wybierz węzły do archiwum witryny</translation>
+        <translation>Wybrać węzły do archiwum witryny</translation>
     </message>
     <message>
         <source>Tick one or more nodes; each is exported with everything below it.</source>
@@ -3725,7 +3725,7 @@
     </message>
     <message>
         <source>Choose the nodes</source>
-        <translation>Wybierz węzły</translation>
+        <translation>Wybrać węzły</translation>
     </message>
     <message>
         <source>A set is the quickest start; the counts show how much is below each node.</source>
@@ -3733,7 +3733,7 @@
     </message>
     <message>
         <source>Check the classes</source>
-        <translation>Sprawdź klasy</translation>
+        <translation>Sprawdzić klasy</translation>
     </message>
     <message>
         <source>All classes with content are ticked; untick the ones you do not need.</source>
@@ -3741,7 +3741,7 @@
     </message>
     <message>
         <source>Choose the archive format</source>
-        <translation>Wybierz format archiwum</translation>
+        <translation>Wybrać format archiwum</translation>
     </message>
     <message>
         <source>ZIP for everyone; TAR.XZ or TAR.BZ2 are smaller.</source>
@@ -3837,7 +3837,7 @@
     </message>
     <message>
         <source>Reset to all class attributes</source>
-        <translation>Przywróć wszystkie atrybuty klasy</translation>
+        <translation>Przywrócić wszystkie atrybuty klasy</translation>
     </message>
     <message>
         <source>Every attribute of the class, in class order, with its identifier as name</source>
@@ -3845,7 +3845,7 @@
     </message>
     <message>
         <source>Remove all</source>
-        <translation>Usuń wszystko</translation>
+        <translation>Usunąć wszystko</translation>
     </message>
     <message>
         <source>No columns yet. Add a column above, or reset to all class attributes.</source>
@@ -3853,15 +3853,15 @@
     </message>
     <message>
         <source>Move up</source>
-        <translation>Przesuń w górę</translation>
+        <translation>Przesunąć w górę</translation>
     </message>
     <message>
         <source>Move down</source>
-        <translation>Przesuń w dół</translation>
+        <translation>Przesunąć w dół</translation>
     </message>
     <message>
         <source>Drag to move</source>
-        <translation>Przeciągnij, aby przenieść</translation>
+        <translation>Przeciągnąć, aby przenieść</translation>
     </message>
     <message>
         <source>Special column</source>
@@ -3873,15 +3873,15 @@
     </message>
     <message>
         <source>Remove this column</source>
-        <translation>Usuń tę kolumnę</translation>
+        <translation>Usunąć tę kolumnę</translation>
     </message>
     <message>
         <source>Remove %name</source>
-        <translation>Usuń %name</translation>
+        <translation>Usunąć %name</translation>
     </message>
     <message>
         <source>Download CSV</source>
-        <translation>Pobierz CSV</translation>
+        <translation>Pobrać CSV</translation>
     </message>
     <message>
         <source>In this selection</source>
@@ -3925,7 +3925,7 @@
     </message>
     <message>
         <source>Load the columns of this class</source>
-        <translation>Wczytaj kolumny tej klasy</translation>
+        <translation>Wczytać kolumny tej klasy</translation>
     </message>
     <message>
         <source>%count objects of this class in the selection.</source>
@@ -3949,11 +3949,11 @@
     </message>
     <message>
         <source>Skip</source>
-        <translation>Pomiń</translation>
+        <translation>Pominąć</translation>
     </message>
     <message>
         <source>Take at most</source>
-        <translation>Pobierz maksymalnie</translation>
+        <translation>Pobrać maksymalnie</translation>
     </message>
     <message>
         <source>0 takes every row. Large exports: take them in batches, for example 5000 rows, skipping 0, 5000, 10000 ...</source>
@@ -4025,7 +4025,7 @@
     </message>
     <message>
         <source>Add a column</source>
-        <translation>Dodaj kolumnę</translation>
+        <translation>Dodać kolumnę</translation>
     </message>
     <message>
         <source>Class attributes</source>
@@ -4041,7 +4041,7 @@
     </message>
     <message>
         <source>Add all class attributes</source>
-        <translation>Dodaj wszystkie atrybuty klasy</translation>
+        <translation>Dodać wszystkie atrybuty klasy</translation>
     </message>
     <message>
         <source>Adds every attribute of the class that is not a column yet</source>
@@ -4057,7 +4057,7 @@
     </message>
     <message>
         <source>Choose the node and the class</source>
-        <translation>Wybierz węzeł i klasę</translation>
+        <translation>Wybrać węzeł i klasę</translation>
     </message>
     <message>
         <source>Depth: the whole subtree or its direct children only.</source>
@@ -4065,7 +4065,7 @@
     </message>
     <message>
         <source>Choose the file format</source>
-        <translation>Wybierz format pliku</translation>
+        <translation>Wybrać format pliku</translation>
     </message>
     <message>
         <source>Separator, line endings and quoting; the sample row shows the result.</source>
@@ -4073,7 +4073,7 @@
     </message>
     <message>
         <source>Pick the columns</source>
-        <translation>Wybierz kolumny</translation>
+        <translation>Wybrać kolumny</translation>
     </message>
     <message>
         <source>Class attributes and special columns; rename a column in the list, remove what you do not need.</source>
@@ -4217,7 +4217,7 @@
     </message>
     <message>
         <source>Close preview</source>
-        <translation>Zamknij podgląd</translation>
+        <translation>Zamknąć podgląd</translation>
     </message>
     <message>
         <source>Copied</source>
@@ -4225,7 +4225,7 @@
     </message>
     <message>
         <source>Copy</source>
-        <translation>Kopiuj</translation>
+        <translation>Kopiować</translation>
     </message>
     <message>
         <source>Copy the rows shown, tab separated, to paste into a spreadsheet</source>
@@ -4241,7 +4241,7 @@
     </message>
     <message>
         <source>Filter rows</source>
-        <translation>Filtruj wiersze</translation>
+        <translation>Filtrować wiersze</translation>
     </message>
     <message>
         <source>No objects match this selection. Check the node, the class and the depth.</source>
@@ -4261,7 +4261,7 @@
     </message>
     <message>
         <source>Refresh</source>
-        <translation>Odśwież</translation>
+        <translation>Odświeżyć</translation>
     </message>
     <message>
         <source>Rows</source>
@@ -4269,7 +4269,7 @@
     </message>
     <message>
         <source>See the rows as a spreadsheet will show them, before downloading</source>
-        <translation>Zobacz wiersze tak, jak pokaże je arkusz kalkulacyjny, przed pobraniem</translation>
+        <translation>Zobaczyć wiersze tak, jak pokaże je arkusz kalkulacyjny, przed pobraniem</translation>
     </message>
     <message>
         <source>Separator</source>
@@ -4277,7 +4277,7 @@
     </message>
     <message>
         <source>Sort the preview by this column</source>
-        <translation>Sortuj podgląd według tej kolumny</translation>
+        <translation>Sortować podgląd według tej kolumny</translation>
     </message>
     <message>
         <source>Type \t for a tab.</source>
@@ -4289,7 +4289,7 @@
     </message>
     <message>
         <source>Wrap cells</source>
-        <translation>Zawijaj komórki</translation>
+        <translation>Zawijać komórki</translation>
     </message>
     <message>
         <source>columns</source>
@@ -4305,7 +4305,7 @@
     </message>
     <message>
         <source>Choose node to export</source>
-        <translation>Wybierz węzeł do eksportu</translation>
+        <translation>Wybrać węzeł do eksportu</translation>
     </message>
     <message>
         <source>Extract settings</source>
@@ -4321,7 +4321,7 @@
     </message>
     <message>
         <source>Change</source>
-        <translation>Zmień</translation>
+        <translation>Zmienić</translation>
     </message>
     <message>
         <source>Tree (full subtree)</source>
@@ -4365,7 +4365,7 @@
     </message>
     <message>
         <source>Remove current pre filled selection</source>
-        <translation>Usuń bieżący wstępnie wypełniony wybór</translation>
+        <translation>Usunąć bieżący wstępnie wypełniony wybór</translation>
     </message>
     <message>
         <source>Export format options</source>
@@ -4397,7 +4397,7 @@
     </message>
     <message>
         <source>Update</source>
-        <translation>Zaktualizuj</translation>
+        <translation>Zaktualizować</translation>
     </message>
     <message>
         <source>Special Attributes</source>
@@ -4405,7 +4405,7 @@
     </message>
     <message>
         <source>Add attribute</source>
-        <translation>Dodaj atrybut</translation>
+        <translation>Dodać atrybut</translation>
     </message>
     <message>
         <source>Selected attribute(s)</source>
@@ -4425,11 +4425,11 @@
     </message>
     <message>
         <source>Remove selected attribute(s)</source>
-        <translation>Usuń wybrane atrybuty</translation>
+        <translation>Usunąć wybrane atrybuty</translation>
     </message>
     <message>
         <source>Download</source>
-        <translation>Pobierz</translation>
+        <translation>Pobrać</translation>
     </message>
     <message>
         <source>Extract</source>
@@ -4437,27 +4437,27 @@
     </message>
     <message>
         <source>Select a node to export</source>
-        <translation>Wybierz węzeł do eksportu</translation>
+        <translation>Wybrać węzeł do eksportu</translation>
     </message>
     <message>
         <source>Setup format options</source>
-        <translation>Ustaw opcje formatu</translation>
+        <translation>Ustawić opcje formatu</translation>
     </message>
     <message>
         <source>Select concerned class</source>
-        <translation>Wybierz odpowiednią klasę</translation>
+        <translation>Wybrać odpowiednią klasę</translation>
     </message>
     <message>
         <source>Add/Remove attributes</source>
-        <translation>Dodaj/usuń atrybuty</translation>
+        <translation>Dodać/usunąć atrybuty</translation>
     </message>
     <message>
         <source>Click the download button</source>
-        <translation>Kliknij przycisk pobierania</translation>
+        <translation>Kliknąć przycisk pobierania</translation>
     </message>
     <message>
         <source>Run in the background</source>
-        <translation>Uruchom w tle</translation>
+        <translation>Uruchomić w tle</translation>
     </message>
     <message>
         <source>Start this export as a job and come back to it: see the Jobs tab</source>
@@ -4525,7 +4525,7 @@
     </message>
     <message>
         <source>Delete</source>
-        <translation>Usuń</translation>
+        <translation>Usunąć</translation>
     </message>
     <message>
         <source>Jobs</source>
@@ -4589,11 +4589,11 @@
     </message>
     <message>
         <source>Choose a file</source>
-        <translation>Wybierz plik</translation>
+        <translation>Wybrać plik</translation>
     </message>
     <message>
         <source>Choose...</source>
-        <translation>Wybierz...</translation>
+        <translation>Wybrać...</translation>
     </message>
     <message>
         <source>Class and matching</source>
@@ -4625,19 +4625,19 @@
     </message>
     <message>
         <source>Ignore</source>
-        <translation>Ignoruj</translation>
+        <translation>Ignorować</translation>
     </message>
     <message>
         <source>Import</source>
-        <translation>Zaimportuj</translation>
+        <translation>Zaimportować</translation>
     </message>
     <message>
         <source>Import %count changes</source>
-        <translation>Importuj zmiany (%count)</translation>
+        <translation>Zaimportować zmiany (%count)</translation>
     </message>
     <message>
         <source>Import another file</source>
-        <translation>Importuj inny plik</translation>
+        <translation>Zaimportować inny plik</translation>
     </message>
     <message>
         <source>Import result</source>
@@ -4657,7 +4657,7 @@
     </message>
     <message>
         <source>Match existing objects by</source>
-        <translation>Dopasuj istniejące obiekty według</translation>
+        <translation>Dopasować istniejące obiekty według</translation>
     </message>
     <message>
         <source>No node %id, or you may not read it.</source>
@@ -4685,11 +4685,11 @@
     </message>
     <message>
         <source>Remove</source>
-        <translation>Usuń</translation>
+        <translation>Usunąć</translation>
     </message>
     <message>
         <source>Reparse</source>
-        <translation>Przetwórz ponownie</translation>
+        <translation>Przetworzyć ponownie</translation>
     </message>
     <message>
         <source>The default when the file has a remote-id column</source>
@@ -4705,7 +4705,7 @@
     </message>
     <message>
         <source>Upload</source>
-        <translation>Prześlij</translation>
+        <translation>Przesłać</translation>
     </message>
     <message>
         <source>Used for rows without a &quot;class&quot; column (a special column, exported as &quot;class&quot;); with one, each row picks its own class.</source>
@@ -4773,11 +4773,11 @@
     </message>
     <message>
         <source>Choose one to apply...</source>
-        <translation>Wybierz jedno do zastosowania...</translation>
+        <translation>Wybrać jedno do zastosowania...</translation>
     </message>
     <message>
         <source>Apply</source>
-        <translation>Zastosuj</translation>
+        <translation>Zastosować</translation>
     </message>
     <message>
         <source>A fetchalias.ini fetch (Module=content, a tree, list, tree_count or list_count) from this siteaccess or the default one. Applying it sets the node, class, sort, depth, limit/offset, main locations and — where it can be read back — a condition.</source>
@@ -4813,7 +4813,7 @@
     </message>
     <message>
         <source>Add condition</source>
-        <translation>Dodaj warunek</translation>
+        <translation>Dodać warunek</translation>
     </message>
     <message>
         <source>No additional conditions. &quot;Add condition&quot; adds a row.</source>
@@ -4825,7 +4825,7 @@
     </message>
     <message>
         <source>Choose a field...</source>
-        <translation>Wybierz pole...</translation>
+        <translation>Wybrać pole...</translation>
     </message>
     <message>
         <source>Object fields</source>
@@ -4849,7 +4849,7 @@
     </message>
     <message>
         <source>Remove this condition</source>
-        <translation>Usuń ten warunek</translation>
+        <translation>Usunąć ten warunek</translation>
     </message>
     <message>
         <source>The value is used as typed; a comma list for &quot;in list&quot; / &quot;not in list&quot;, both value fields for &quot;between&quot; / &quot;not between&quot;. State only takes is / is not / in list / not in list.</source>
@@ -4969,7 +4969,7 @@
     </message>
     <message>
         <source>Invert this condition</source>
-        <translation>Odwróć ten warunek</translation>
+        <translation>Odwrócić ten warunek</translation>
     </message>
     <message>
         <source>not</source>
@@ -5057,7 +5057,7 @@
     </message>
     <message>
         <source>Try a sample</source>
-        <translation>Wypróbuj przykład</translation>
+        <translation>Wypróbować przykład</translation>
     </message>
     <message>
         <source>Nothing to import yet? One click builds a small file from the site’s own content for %class - an edited row, an unchanged row, a new object, and (when the class has a date attribute) a row with a deliberate error - and loads it below, ready to preview. Applying it writes real content.</source>
@@ -5065,15 +5065,15 @@
     </message>
     <message>
         <source>Try a sample (XML - recommended)</source>
-        <translation>Wypróbuj przykład (XML - zalecane)</translation>
+        <translation>Wypróbować przykład (XML - zalecane)</translation>
     </message>
     <message>
         <source>Try a sample (JSON)</source>
-        <translation>Wypróbuj przykład (JSON)</translation>
+        <translation>Wypróbować przykład (JSON)</translation>
     </message>
     <message>
         <source>Try a sample (CSV)</source>
-        <translation>Wypróbuj przykład (CSV)</translation>
+        <translation>Wypróbować przykład (CSV)</translation>
     </message>
     <message>
         <source>sample</source>
@@ -5313,7 +5313,7 @@
     </message>
     <message>
         <source>Import %count changes (writes real content)</source>
-        <translation>Importuj zmiany (%count) (zapisuje prawdziwą treść)</translation>
+        <translation>Zaimportować zmiany (%count) (zapisuje prawdziwą treść)</translation>
     </message>
     <message>
         <source>This sample really writes to the site: %count objects will be created or updated. Continue?</source>
@@ -5325,7 +5325,7 @@
     </message>
     <message>
         <source>Upload the file, or try a sample, or a filled template</source>
-        <translation>Prześlij plik, wypróbuj przykład lub wypełniony szablon</translation>
+        <translation>Przesłać plik, wypróbować przykład lub wypełniony szablon</translation>
     </message>
     <message>
         <source>XML, CSV or JSON, from an export of this tool (the Migration column set carries everything needed) or a downloaded template; XML carries its own column ids and class and is the most exact.</source>
@@ -5341,31 +5341,31 @@
     </message>
     <message>
         <source>Pause</source>
-        <translation>Wstrzymaj</translation>
+        <translation>Wstrzymać</translation>
     </message>
     <message>
         <source>Resume</source>
-        <translation>Wznów</translation>
+        <translation>Wznowić</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Anuluj</translation>
+        <translation>Anulować</translation>
     </message>
     <message>
         <source>Download report</source>
-        <translation>Pobierz raport</translation>
+        <translation>Pobrać raport</translation>
     </message>
     <message>
         <source>Download error rows</source>
-        <translation>Pobierz wiersze z błędami</translation>
+        <translation>Pobrać wiersze z błędami</translation>
     </message>
     <message>
         <source>Resume from row</source>
-        <translation>Wznów od wiersza</translation>
+        <translation>Wznowić od wiersza</translation>
     </message>
     <message>
         <source>Resume as a new job</source>
-        <translation>Wznów jako nowe zadanie</translation>
+        <translation>Wznowić jako nowe zadanie</translation>
     </message>
     <message>
         <source>The uploaded file is kept privately on the server and removed after the import or after a set number of hours.</source>
@@ -5413,11 +5413,11 @@
     </message>
     <message>
         <source>Load a preset</source>
-        <translation>Wczytaj ustawienie predefiniowane</translation>
+        <translation>Wczytać ustawienie predefiniowane</translation>
     </message>
     <message>
         <source>Choose one...</source>
-        <translation>Wybierz jedno...</translation>
+        <translation>Wybrać jedno...</translation>
     </message>
     <message>
         <source>Your presets and shared with you</source>
@@ -5437,7 +5437,7 @@
     </message>
     <message>
         <source>Load</source>
-        <translation>Wczytaj</translation>
+        <translation>Wczytać</translation>
     </message>
     <message>
         <source>Resolve this preset and start it as a job right away, without loading it into the form first</source>
@@ -5453,7 +5453,7 @@
     </message>
     <message>
         <source>Duplicate</source>
-        <translation>Duplikuj</translation>
+        <translation>Zduplikować</translation>
     </message>
     <message>
         <source>Delete this preset?</source>
@@ -5461,7 +5461,7 @@
     </message>
     <message>
         <source>Duplicate as your own</source>
-        <translation>Duplikuj jako własne</translation>
+        <translation>Zduplikować jako własne</translation>
     </message>
     <message>
         <source>INI</source>
@@ -5477,7 +5477,7 @@
     </message>
     <message>
         <source>Save the current settings as a preset</source>
-        <translation>Zapisz bieżące ustawienia jako ustawienie predefiniowane</translation>
+        <translation>Zapisać bieżące ustawienia jako ustawienie predefiniowane</translation>
     </message>
     <message>
         <source>Preset name</source>
@@ -5493,7 +5493,7 @@
     </message>
     <message>
         <source>Save as preset</source>
-        <translation>Zapisz jako ustawienie predefiniowane</translation>
+        <translation>Zapisać jako ustawienie predefiniowane</translation>
     </message>
     <message>
         <source>Captures the scope, the node, the class, the columns, the languages, every filter, the sort and the output settings above. Saving with a preset already loaded updates it (only its owner or a user with all_jobs can); a new name always creates a new one.</source>
@@ -5529,7 +5529,7 @@
     </message>
     <message>
         <source>Run now</source>
-        <translation>Uruchom teraz</translation>
+        <translation>Uruchomić teraz</translation>
     </message>
     <message>
         <source>More</source>
@@ -5541,11 +5541,11 @@
     </message>
     <message>
         <source>Rename</source>
-        <translation>Zmień nazwę</translation>
+        <translation>Zmienić nazwę</translation>
     </message>
     <message>
         <source>Copy as INI</source>
-        <translation>Kopiuj jako INI</translation>
+        <translation>Kopiować jako INI</translation>
     </message>
     <message>
         <source>Advanced</source>
@@ -5565,15 +5565,15 @@
     </message>
     <message>
         <source>Unload</source>
-        <translation>Wyładuj</translation>
+        <translation>Wyładować</translation>
     </message>
     <message>
         <source>Remove %what</source>
-        <translation>Usuń %what</translation>
+        <translation>Usunąć %what</translation>
     </message>
     <message>
         <source>Clear all</source>
-        <translation>Wyczyść wszystko</translation>
+        <translation>Wyczyścić wszystko</translation>
     </message>
     <message>
         <source>This preset set nothing that shows as a chip (an empty preset, or one whose own fields were already cleared).</source>
@@ -5965,7 +5965,7 @@
     </message>
     <message>
         <source>Start from a preset</source>
-        <translation>Zacznij od ustawienia predefiniowanego</translation>
+        <translation>Zacząć od ustawienia predefiniowanego</translation>
     </message>
     <message>
         <source>Optional: load a preset for the site, editors, users, maintenance, developers or partners, and change what you need. Save your own settings as a preset, for you or shared.</source>
@@ -5973,7 +5973,7 @@
     </message>
     <message>
         <source>Choose the data</source>
-        <translation>Wybierz dane</translation>
+        <translation>Wybrać dane</translation>
     </message>
     <message>
         <source>Scope (below a node, below a node tree, the whole site), depth, a named fetch, the class, main locations only, skip and take at most, the languages.</source>
@@ -6017,7 +6017,7 @@
     </message>
     <message>
         <source>Choose the archive and file format</source>
-        <translation>Wybierz format archiwum i plików</translation>
+        <translation>Wybrać format archiwum i plików</translation>
     </message>
     <message>
         <source>ZIP opens everywhere; TAR.GZ, TAR.BZ2 and TAR.XZ are smaller; 7-Zip and RAR need their programs on the server. The files inside are CSV, JSON or XML.</source>
@@ -6025,7 +6025,7 @@
     </message>
     <message>
         <source>Download archive, or run in the background</source>
-        <translation>Pobierz archiwum lub uruchom w tle</translation>
+        <translation>Pobrać archiwum lub uruchomić w tle</translation>
     </message>
     <message>
         <source>Most sites are written in seconds and nothing is kept on the server. A large archive runs as a job, and Export as package makes a content package (.ezpkg) of the nodes instead; the Jobs tab has the files.</source>
@@ -6049,11 +6049,11 @@
     </message>
     <message>
         <source>Compare %a with %b</source>
-        <translation>Porównaj %a z %b</translation>
+        <translation>Porównać %a z %b</translation>
     </message>
     <message>
         <source>Compare %name with this site</source>
-        <translation>Porównaj %name z tą witryną</translation>
+        <translation>Porównać %name z tą witryną</translation>
     </message>
     <message>
         <source>What is compared</source>
@@ -6069,7 +6069,7 @@
     </message>
     <message>
         <source>Compare %name with</source>
-        <translation>Porównaj %name z</translation>
+        <translation>Porównać %name z</translation>
     </message>
     <message>
         <source>this site</source>
@@ -6077,7 +6077,7 @@
     </message>
     <message>
         <source>Compare</source>
-        <translation>Porównaj</translation>
+        <translation>Porównać</translation>
     </message>
     <message>
         <source>Compared at %time</source>
@@ -6245,7 +6245,7 @@
     </message>
     <message>
         <source>Open the job</source>
-        <translation>Otwórz zadanie</translation>
+        <translation>Otworzyć zadanie</translation>
     </message>
     <message>
         <source>A new content package of the %count objects this install left on the site, as a background job</source>
@@ -6253,7 +6253,7 @@
     </message>
     <message>
         <source>Export these again</source>
-        <translation>Eksportuj je ponownie</translation>
+        <translation>Wyeksportować je ponownie</translation>
     </message>
     <message>
         <source>What differs: a package against this site (what installing it would create or change), or two packages against each other. Nothing is written.</source>
@@ -6293,7 +6293,7 @@
     </message>
     <message>
         <source>Open in Import</source>
-        <translation>Otwórz w imporcie</translation>
+        <translation>Otworzyć w imporcie</translation>
     </message>
     <message>
         <source>Review and install it on the Import page, the same way as an uploaded file</source>
@@ -6305,11 +6305,11 @@
     </message>
     <message>
         <source>Compare with</source>
-        <translation>Porównaj z</translation>
+        <translation>Porównać z</translation>
     </message>
     <message>
         <source>Filter the package’s objects</source>
-        <translation>Filtruj obiekty pakietu</translation>
+        <translation>Filtrować obiekty pakietu</translation>
     </message>
     <message>
         <source>What the install would do</source>
@@ -6341,7 +6341,7 @@
     </message>
     <message>
         <source>Open the package</source>
-        <translation>Otwórz pakiet</translation>
+        <translation>Otworzyć pakiet</translation>
     </message>
     <message>
         <source>Install history</source>
@@ -6369,11 +6369,11 @@
     </message>
     <message>
         <source>Open it on the Package tab</source>
-        <translation>Otwórz na karcie Pakiet</translation>
+        <translation>Otworzyć na karcie Pakiet</translation>
     </message>
     <message>
         <source>Compare with this site</source>
-        <translation>Porównaj z tą witryną</translation>
+        <translation>Porównać z tą witryną</translation>
     </message>
     <message>
         <source>Package install</source>
@@ -6505,7 +6505,7 @@
     </message>
     <message>
         <source>Export again: %count object(s) installed from %name</source>
-        <translation>Eksportuj ponownie: obiekty zainstalowane z %name (liczba: %count)</translation>
+        <translation>Wyeksportować ponownie: obiekty zainstalowane z %name (liczba: %count)</translation>
     </message>
     <message>
         <source>%feature: not available on this server. Missing: %missing.</source>
@@ -6774,7 +6774,7 @@
     </message>
     <message>
         <source>Export CSV</source>
-        <translation>Eksportuj CSV</translation>
+        <translation>Wyeksportować CSV</translation>
     </message>
 </context>
 <context>
@@ -6829,7 +6829,7 @@
     </message>
     <message>
         <source>Import into this item…</source>
-        <translation>Importuj do tego elementu…</translation>
+        <translation>Zaimportować do tego elementu…</translation>
     </message>
     <message>
         <source>Export and import jobs</source>
