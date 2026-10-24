@@ -1,12 +1,15 @@
 <?php
 
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Uploaded package archives (XrowExtractPackage): the tar listing check refuses traversal, absolute paths and links
  * whatever tar the server has (GNU tar or bsdtar); the kernel's header scan (expPackageArchive, where the kernel has
  * it) refuses what ezcArchive cannot read safely before this class opens the archive itself; and an archive opened
- * here never applies the modes packed into it.
+ * here never applies the modes packed into it. The listing check itself is tested with fixed listings as GNU tar and
+ * bsdtar print them, and the branches that use the kernel's header scan run with a stand-in (tests/stubs/) when the
+ * kernel has no expPackageArchive.
  */
 class PackageArchiveTest extends TestCase
 {
@@ -67,6 +70,83 @@ class PackageArchiveTest extends TestCase
         $this->assertStringStartsWith( 'archive refused: ', (string)XrowExtractPackage::kernelArchiveProblem( $path ) );
         $this->assertNull( self::openArchiveForReading( $path ), 'never handed to ezcArchive' );
         $this->assertLessThan( 5, microtime( true ) - $started );
+    }
+
+    /** The kernel's header scan, with the stand-in of tests/stubs/ when the kernel has none (in a process of its own) */
+    #[RunInSeparateProcess]
+    public function testTheKernelScanBranchesRunWithAStandIn(): void
+    {
+        $standIn = !class_exists( 'expPackageArchive' );
+        if ( $standIn )
+            require dirname( __DIR__ ) . '/stubs/expPackageArchive.php';
+
+        $pax = $this->archive( 'pax', array( self::entry( 'PaxHeader/package.xml', 'x', "20 path=package.xml\n" ), self::file( 'package.xml' ) ) );
+        $this->assertStringStartsWith( 'archive refused: ', (string)XrowExtractPackage::kernelArchiveProblem( $pax ) );
+        $this->assertNull( self::openArchiveForReading( $pax ), 'refused by the scan, not opened' );
+
+        $plain = $this->archive( 'plain', array( self::file( 'package.xml' ) ) );
+        $this->assertNull( XrowExtractPackage::kernelArchiveProblem( $plain ) );
+        $this->assertInstanceOf( ezcArchive::class, self::openArchiveForReading( $plain ) );
+        if ( $standIn )
+            $this->assertSame( array( $pax, $plain ), expPackageArchive::$opened, 'opened through expPackageArchive::open()' );
+    }
+
+    public function testAGnuTarListingIsRead(): void
+    {
+        $scan = XrowExtractPackage::checkListings(
+            array( 'package.xml', 'files/', 'files/a.txt' ),
+            array( '-rw-r--r-- 0/0               1 1970-01-01 00:00 package.xml',
+                   'drwxr-xr-x 0/0               0 1970-01-01 00:00 files/',
+                   '-rw-r--r-- 0/0               1 1970-01-01 00:00 files/a.txt' ) );
+        $this->assertSame( array( 'ok' => true, 'entries' => array( 'package.xml', 'files', 'files/a.txt' ), 'error' => null ), $scan );
+
+        $scan = XrowExtractPackage::checkListings(
+            array( 'package.xml', 'hard' ),
+            array( '-rw-r--r-- 0/0               1 1970-01-01 00:00 package.xml',
+                   'hrw-r--r-- 0/0               0 1970-01-01 00:00 hard link to package.xml' ) );
+        $this->assertSame( 'hard link entry refused: hard', $scan['error'] );
+    }
+
+    public function testABsdtarListingIsRead(): void
+    {
+        // bsdtar (macOS, the BSDs) prints more columns before the name: the name is taken from the names listing
+        $verbose = array( '-rw-r--r--  0 0      0           1 Jan  1  1970 package.xml',
+                          '-rw-r--r--  0 0      0           1 Jan  1  1970 ../evil.php' );
+        $scan = XrowExtractPackage::checkListings( array( 'package.xml', '../evil.php' ), $verbose );
+        $this->assertSame( 'unsafe entry path refused: ../evil.php', $scan['error'] );
+
+        $scan = XrowExtractPackage::checkListings(
+            array( 'package.xml', 'link' ),
+            array( '-rw-r--r--  0 0      0           1 Jan  1  1970 package.xml',
+                   'lrwxr-xr-x  0 0      0           0 Jan  1  1970 link -> /etc/passwd' ) );
+        $this->assertSame( 'symlink entry refused: link', $scan['error'] );
+
+        $scan = XrowExtractPackage::checkListings( array( 'package.xml' ), array( '-rw-r--r--  0 0      0           1 Jan  1  1970 package.xml' ) );
+        $this->assertTrue( $scan['ok'] );
+    }
+
+    public function testANameWithAnEscapedLineBreakIsOneEntry(): void
+    {
+        // GNU tar and bsdtar both print a line break in a name as "\n": one line in either listing
+        $scan = XrowExtractPackage::checkListings(
+            array( 'package.xml', 'files/a\nb.txt' ),
+            array( '-rw-r--r--  0 0      0           1 Jan  1  1970 package.xml',
+                   '-rw-r--r--  0 0      0           1 Jan  1  1970 files/a\nb.txt' ) );
+        $this->assertTrue( $scan['ok'], (string)$scan['error'] );
+        $this->assertSame( array( 'package.xml', 'files/a\nb.txt' ), $scan['entries'] );
+    }
+
+    public function testListingsThatDoNotLineUpAreRefused(): void
+    {
+        // a tar that printed the line break as it is: two lines in one listing, one in the other
+        $scan = XrowExtractPackage::checkListings(
+            array( 'package.xml', 'files/a', 'b.txt' ),
+            array( '-rw-r--r-- 0/0               1 1970-01-01 00:00 package.xml',
+                   '-rw-r--r-- 0/0               1 1970-01-01 00:00 files/a\nb.txt' ) );
+        $this->assertSame( array( 'ok' => false, 'entries' => array(), 'error' => 'unreadable archive listing refused' ), $scan );
+
+        $scan = XrowExtractPackage::checkListings( array( 'package.xml', '' ), array( '-rw-r--r-- 0/0 1 1970-01-01 00:00 package.xml', '' ) );
+        $this->assertSame( 'unreadable archive listing line refused', $scan['error'] );
     }
 
     public function testAPlainPackagePassesTheKernelScan(): void

@@ -123,14 +123,31 @@ class XrowExtractPackage
         if ( !$verbose['ok'] )
             return array( 'ok' => false, 'entries' => array(), 'error' => $verbose['error'] );
 
+        return self::checkListings( $names['lines'], $verbose['lines'] );
+    }
+
+    /**
+     * Checks the two listings of one archive line by line: $names from "tar -tzPf" (one name per line), $verbose
+     * from "tar -tvzPf" (only the type letter at the start of each line is read, so the columns that differ between
+     * GNU tar and bsdtar do not matter). No tar is run here.
+     *
+     * @param list<string> $names
+     * @param list<string> $verbose
+     * @return array{ok: true, entries: list<string>, error: null}|array{ok: false, entries: list<string>, error: string}
+     */
+    public static function checkListings( array $names, array $verbose ): array
+    {
         // Fail closed: two listings that do not line up (a name with a line break in it) refuse the archive
-        if ( count( $names['lines'] ) !== count( $verbose['lines'] ) )
+        if ( count( $names ) !== count( $verbose ) )
             return array( 'ok' => false, 'entries' => array(), 'error' => 'unreadable archive listing refused' );
+        $names = array_values( $names );
+        $verbose = array_values( $verbose );
         $entries = array();
         $error = null;
-        foreach ( $names['lines'] as $index => $name )
+        foreach ( $names as $index => $name )
         {
-            $line = $verbose['lines'][$index];
+            $name = (string)$name;
+            $line = (string)$verbose[$index];
             if ( $name === '' || $line === '' )
             {
                 $error = 'unreadable archive listing line refused';
