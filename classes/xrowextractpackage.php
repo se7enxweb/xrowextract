@@ -108,48 +108,45 @@ class XrowExtractPackage
         // A disabled function does not exist in PHP 8: calling it would be an Error, not a false
         if ( !function_exists( 'proc_open' ) )
             return array( 'ok' => false, 'entries' => array(), 'error' => 'proc_open() is disabled on this server, so the archive cannot be checked' );
-        $descriptors = array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
-        $process = @proc_open( array( 'tar', '-tvzf', $real ), $descriptors, $pipes, null, null, array( 'bypass_shell' => true ) );
-        if ( !is_resource( $process ) )
-            return array( 'ok' => false, 'entries' => array(), 'error' => 'could not run tar to read the archive' );
-        $out = (string)stream_get_contents( $pipes[1] );
-        $err = (string)stream_get_contents( $pipes[2] );
-        fclose( $pipes[1] );
-        fclose( $pipes[2] );
-        $exitCode = proc_close( $process );
-        if ( $exitCode !== 0 )
-            return array( 'ok' => false, 'entries' => array(), 'error' => 'not a valid .ezpkg/.tar.gz archive' . ( trim( $err ) !== '' ? ': ' . trim( $err ) : '' ) );
+        //
+        // The names come from a listing of names only ("tar -tzPf"), the type letters from the
+        // verbose one ("tar -tvzPf"), line by line. The columns before the name in the verbose
+        // listing differ between GNU tar ("-rw-r--r-- 0/0 1 1970-01-01 00:00 name") and bsdtar
+        // ("-rw-r--r--  0 0 0 1 Jan  1  1970 name", macOS, the BSDs): read from there, the name
+        // started with the date on bsdtar, so "../evil.php" and "/tmp/evil.php" were taken for
+        // "Jan  1  1970 ../evil.php" and got past the checks below. -P keeps a leading "/" or
+        // "../" in the listing, where GNU tar would otherwise strip it there (and only there).
+        $names = self::tarListing( array( 'tar', '-tzPf', $real ) );
+        if ( !$names['ok'] )
+            return array( 'ok' => false, 'entries' => array(), 'error' => $names['error'] );
+        $verbose = self::tarListing( array( 'tar', '-tvzPf', $real ) );
+        if ( !$verbose['ok'] )
+            return array( 'ok' => false, 'entries' => array(), 'error' => $verbose['error'] );
 
-        // Fail closed: a listing that cannot be split refuses the archive rather than passing it as empty
-        $lines = preg_split( '/\r?\n/', trim( $out ) );
-        if ( $lines === false )
+        // Fail closed: two listings that do not line up (a name with a line break in it) refuse the archive
+        if ( count( $names['lines'] ) !== count( $verbose['lines'] ) )
             return array( 'ok' => false, 'entries' => array(), 'error' => 'unreadable archive listing refused' );
         $entries = array();
         $error = null;
-        foreach ( $lines as $line )
+        foreach ( $names['lines'] as $index => $name )
         {
-            if ( $line === '' )
-                continue;
-            // "<type+perm> <owner>/<group> <size> <date> <time> <name>[ -> <target>]"
-            // Fail closed: a line this cannot read refuses the archive rather than being skipped
-            if ( !preg_match( '/^(.)\S*\s+\S+\s+\S+\s+\S+\s+\S+\s+(.*)$/', $line, $m ) )
+            $line = $verbose['lines'][$index];
+            if ( $name === '' || $line === '' )
             {
                 $error = 'unreadable archive listing line refused';
                 break;
             }
-            $type = $m[1];
-            $name = $m[2];
+            $type = $line[0];
             if ( $type === 'l' )
             {
-                $error = 'symlink entry refused: ' . preg_replace( '/\s*->.*/', '', $name );
+                $error = 'symlink entry refused: ' . $name;
                 break;
             }
-            // Only plain files and folders: a hard link ("h", "... link to <target>") can point at a file
-            // outside the package, and device, fifo or socket entries have no place in a package at all
+            // Only plain files and folders: a hard link ("h") can point at a file outside the package,
+            // and device, fifo or socket entries have no place in a package at all
             if ( $type !== '-' && $type !== 'd' )
             {
-                $error = ( $type === 'h' ? 'hard link' : "special ($type)" ) . ' entry refused: '
-                       . preg_replace( '/\s+link to .*$/', '', $name );
+                $error = ( $type === 'h' ? 'hard link' : "special ($type)" ) . ' entry refused: ' . $name;
                 break;
             }
             $relative = rtrim( $name, '/' );
@@ -163,6 +160,81 @@ class XrowExtractPackage
 
         return $error === null ? array( 'ok' => true, 'entries' => $entries, 'error' => null )
                                : array( 'ok' => false, 'entries' => $entries, 'error' => $error );
+    }
+
+    /**
+     * Runs tar with $command (no shell) and returns its output split into lines.
+     *
+     * @param list<string> $command
+     * @return array{ok: true, lines: list<string>, error: null}|array{ok: false, lines: list<string>, error: string}
+     */
+    protected static function tarListing( array $command ): array
+    {
+        $descriptors = array( 1 => array( 'pipe', 'w' ), 2 => array( 'pipe', 'w' ) );
+        $process = @proc_open( $command, $descriptors, $pipes, null, null, array( 'bypass_shell' => true ) );
+        if ( !is_resource( $process ) )
+            return array( 'ok' => false, 'lines' => array(), 'error' => 'could not run tar to read the archive' );
+        $out = (string)stream_get_contents( $pipes[1] );
+        $err = (string)stream_get_contents( $pipes[2] );
+        fclose( $pipes[1] );
+        fclose( $pipes[2] );
+        $exitCode = proc_close( $process );
+        if ( $exitCode !== 0 )
+            return array( 'ok' => false, 'lines' => array(), 'error' => 'not a valid .ezpkg/.tar.gz archive' . ( trim( $err ) !== '' ? ': ' . trim( $err ) : '' ) );
+        $out = rtrim( $out, "\r\n" );
+        // Fail closed: a listing that cannot be split refuses the archive rather than passing it as empty
+        $lines = $out === '' ? array() : preg_split( '/\r?\n/', $out );
+        if ( $lines === false )
+            return array( 'ok' => false, 'lines' => array(), 'error' => 'unreadable archive listing refused' );
+        return array( 'ok' => true, 'lines' => $lines, 'error' => null );
+    }
+
+    /**
+     * The first reason the kernel's own tar reader must not be given the archive at $path, as a text, or null.
+     *
+     * With a kernel that has expPackageArchive, its bounded scan of the tar headers: ezcArchive's GNU reader
+     * loops for ever on a PAX header (what Python's tarfile and bsdtar write for names that are not ASCII)
+     * and on most GNU extension headers, and reads a GNU long name wholly into memory. eZPackage::import()
+     * of such a kernel scans the archive itself; this class opens it on its own before that (see
+     * renamedArchiveCopyIfNeeded()), so it asks first. An older kernel has no such scan; null then.
+     */
+    public static function kernelArchiveProblem( string $path ): ?string
+    {
+        if ( !class_exists( 'expPackageArchive' ) || !method_exists( 'expPackageArchive', 'scan' ) )
+            return null;
+        $problem = expPackageArchive::scan( $path );
+        return $problem === null ? null : 'archive refused: ' . expPackageArchive::problemText( $problem );
+    }
+
+    /**
+     * The archive at $path opened for reading with the kernel's ezcArchive. Through expPackageArchive::open()
+     * where the kernel has it (header scan first, every extracted file 0644 and directory 0755); otherwise
+     * directly, with an extract callback that gives the same modes, so a set-uid or world writable mode
+     * packed into the archive is never applied.
+     *
+     * @return ezcArchive|null null when the kernel's scan refuses the archive
+     * @throws ezcArchiveException when ezcArchive cannot read it
+     */
+    protected static function openArchiveForReading( string $path )
+    {
+        if ( class_exists( 'expPackageArchive' ) && method_exists( 'expPackageArchive', 'open' ) )
+        {
+            $problem = null;
+            return expPackageArchive::open( $path, $problem );
+        }
+        $callback = new class extends ezcArchiveCallback {
+            use XrowExtractFileModes;
+            function createFileCallback( $fileName, &$permissions, &$userId, &$groupId )
+            {
+                $permissions = self::fileMode( 0644 );
+            }
+            function createDirectoryCallback( $dirName, &$permissions, &$userId, &$groupId )
+            {
+                $permissions = self::dirMode( 0755 );
+            }
+        };
+        return ezcArchive::open( "compress.zlib://$path", ezcArchive::TAR_GNU,
+                                 new ezcArchiveOptions( array( 'readOnly' => true, 'extractCallback' => $callback ) ) );
     }
 
     /**
@@ -188,6 +260,9 @@ class XrowExtractPackage
         $scan = self::scanArchiveEntries( $storedPath );
         if ( !$scan['ok'] )
             return array( 'ok' => false, 'package' => null, 'error' => $scan['error'], 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
+        $kernelProblem = self::kernelArchiveProblem( $storedPath );
+        if ( $kernelProblem !== null )
+            return array( 'ok' => false, 'package' => null, 'error' => $kernelProblem, 'renamed' => false, 'renamed_from' => null, 'renamed_to' => null );
 
         $renameInfo = self::renamedArchiveCopyIfNeeded( $storedPath );
         $importPath = $renameInfo['path'];
@@ -254,12 +329,14 @@ class XrowExtractPackage
         $result = array( 'path' => $storedPath, 'renamed' => false, 'from' => null, 'to' => null );
         try
         {
-            $archive = ezcArchive::open( "compress.zlib://$storedPath", ezcArchive::TAR_GNU, new ezcArchiveOptions( array( 'readOnly' => true ) ) );
+            $archive = self::openArchiveForReading( $storedPath );
         }
         catch ( \Throwable $e )
         {
             return $result; // not a readable archive at all; eZPackage::import() will say so itself
         }
+        if ( $archive === null )
+            return $result; // refused by the kernel's header scan; importUploadedArchive() has asked it before
 
         $peekDir = eZPackage::temporaryImportPath() . '/rename-peek-' . getmypid() . '-' . substr( md5( uniqid( '', true ) ), 0, 8 );
         eZDir::mkdir( $peekDir, false, true );
