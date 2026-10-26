@@ -1,3 +1,13 @@
+Version 2.5.22
+
+-  Fixed: The tar listing check is a method of its own with tests for GNU tar and bsdtar listings, escaped line breaks
+   and listings that do not line up, and the branches that use the kernel's header scan run in the tests with a
+   stand-in when the kernel has none, from ekked's pull request #6.
+-  Fixed: An uploaded package with a path outside the package is refused with bsdtar as well, the kernel's tar header
+   scan runs before the archive is opened, and modes packed into it are not applied, from ekked's pull request #6.
+-  Fixed: The kernel's archive class is probed through one method, and the extract callbacks declare their return
+   type.
+
 Version 2.5.20
 
 -  Updated the PHP requirement to 8.0 or later (composer.json, extension.xml, the requirements check, PHPStan's
