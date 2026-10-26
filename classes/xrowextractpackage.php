@@ -217,10 +217,19 @@ class XrowExtractPackage
      */
     public static function kernelArchiveProblem( string $path ): ?string
     {
-        if ( !class_exists( 'expPackageArchive' ) || !method_exists( 'expPackageArchive', 'scan' ) )
+        if ( !self::kernelArchiveHas( 'scan' ) )
             return null;
         $problem = expPackageArchive::scan( $path );
         return $problem === null ? null : 'archive refused: ' . expPackageArchive::problemText( $problem );
+    }
+
+    /**
+     * Whether the kernel has expPackageArchive with the static method $method. Kernels before 6.0.15 have
+     * no such class; the name is passed in so that the check is made at run time, against the installed kernel.
+     */
+    protected static function kernelArchiveHas( string $method ): bool
+    {
+        return class_exists( 'expPackageArchive' ) && method_exists( 'expPackageArchive', $method );
     }
 
     /**
@@ -234,18 +243,18 @@ class XrowExtractPackage
      */
     protected static function openArchiveForReading( string $path )
     {
-        if ( class_exists( 'expPackageArchive' ) && method_exists( 'expPackageArchive', 'open' ) )
+        if ( self::kernelArchiveHas( 'open' ) )
         {
             $problem = null;
             return expPackageArchive::open( $path, $problem );
         }
         $callback = new class extends ezcArchiveCallback {
             use XrowExtractFileModes;
-            function createFileCallback( $fileName, &$permissions, &$userId, &$groupId )
+            function createFileCallback( $fileName, &$permissions, &$userId, &$groupId ): void
             {
                 $permissions = self::fileMode( 0644 );
             }
-            function createDirectoryCallback( $dirName, &$permissions, &$userId, &$groupId )
+            function createDirectoryCallback( $dirName, &$permissions, &$userId, &$groupId ): void
             {
                 $permissions = self::dirMode( 0755 );
             }
