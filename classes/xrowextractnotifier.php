@@ -183,8 +183,15 @@ class XrowExtractNotifier
             $first = false;
         }
         $mail->setSubject( $subject );
-        $mail->setBody( $body );
-        $mail->setContentType( 'text/plain', 'utf-8' );
+        // the report as it is for the text part, and in the kernel's mail layout for the HTML part (Exponential
+        // 6.0.15 and later; an older kernel sends the text only)
+        if ( class_exists( 'expMailTemplateBody' ) && method_exists( 'expMailTemplateBody', 'fromText' ) )
+            expMailTemplateBody::fromText( $mail, $body, array( 'title' => $subject ) );
+        else
+        {
+            $mail->setBody( $body );
+            $mail->setContentType( 'text/plain', 'utf-8' );
+        }
         return (bool)eZMailTransport::send( $mail );
     }
 
