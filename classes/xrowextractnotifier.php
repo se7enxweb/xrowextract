@@ -13,6 +13,15 @@
 class XrowExtractNotifier
 {
     /**
+     * Whether the kernel has the class $class with the static method $method. A kernel before 6.0.15 has no
+     * expMailTemplateBody; the names are passed in so that the check is made at run time, against the installed kernel.
+     */
+    private static function kernelHas( string $class, string $method ): bool
+    {
+        return class_exists( $class ) && method_exists( $class, $method );
+    }
+
+    /**
      * The e-mail address of a login, or ''.
      *
      * @param mixed $login
@@ -185,7 +194,7 @@ class XrowExtractNotifier
         $mail->setSubject( $subject );
         // the report as it is for the text part, and in the kernel's mail layout for the HTML part (Exponential
         // 6.0.15 and later; an older kernel sends the text only)
-        if ( class_exists( 'expMailTemplateBody' ) && method_exists( 'expMailTemplateBody', 'fromText' ) )
+        if ( self::kernelHas( 'expMailTemplateBody', 'fromText' ) )
             expMailTemplateBody::fromText( $mail, $body, array( 'title' => $subject ) );
         else
         {
