@@ -59,16 +59,16 @@ class PackageArchiveTest extends TestCase
         $this->assertSame( 'hard link entry refused: hard', $scan['error'] );
     }
 
-    public function testThePaxArchiveIsRefusedByTheKernelScan(): void
+    public function testThePaxArchiveIsAcceptedByTheKernelScan(): void
     {
         if ( !class_exists( 'expPackageArchive' ) )
             $this->markTestSkipped( 'the kernel has no expPackageArchive' );
         $path = $this->archive( 'pax', array( self::entry( 'PaxHeader/package.xml', 'x', "20 path=package.xml\n" ), self::file( 'package.xml' ) ) );
         $this->assertTrue( XrowExtractPackage::scanArchiveEntries( $path )['ok'], 'tar itself reads it' );
 
+        // an older package imports without issues: the kernel does not refuse it
         $started = microtime( true );
-        $this->assertStringStartsWith( 'archive refused: ', (string)XrowExtractPackage::kernelArchiveProblem( $path ) );
-        $this->assertNull( self::openArchiveForReading( $path ), 'never handed to ezcArchive' );
+        $this->assertNull( XrowExtractPackage::kernelArchiveProblem( $path ) );
         $this->assertLessThan( 5, microtime( true ) - $started );
     }
 
@@ -81,14 +81,17 @@ class PackageArchiveTest extends TestCase
             require dirname( __DIR__ ) . '/stubs/expPackageArchive.php';
 
         $pax = $this->archive( 'pax', array( self::entry( 'PaxHeader/package.xml', 'x', "20 path=package.xml\n" ), self::file( 'package.xml' ) ) );
-        $this->assertStringStartsWith( 'archive refused: ', (string)XrowExtractPackage::kernelArchiveProblem( $pax ) );
-        $this->assertNull( self::openArchiveForReading( $pax ), 'refused by the scan, not opened' );
+        $this->assertNull( XrowExtractPackage::kernelArchiveProblem( $pax ), 'a PAX archive is accepted' );
+
+        $outside = $this->archive( 'outside', array( self::file( '../evil.php' ) ) );
+        $this->assertStringStartsWith( 'archive refused: ', (string)XrowExtractPackage::kernelArchiveProblem( $outside ) );
+        $this->assertNull( self::openArchiveForReading( $outside ), 'refused by the scan, not opened' );
 
         $plain = $this->archive( 'plain', array( self::file( 'package.xml' ) ) );
         $this->assertNull( XrowExtractPackage::kernelArchiveProblem( $plain ) );
         $this->assertInstanceOf( ezcArchive::class, self::openArchiveForReading( $plain ) );
         if ( $standIn )
-            $this->assertSame( array( $pax, $plain ), expPackageArchive::$opened, 'opened through expPackageArchive::open()' );
+            $this->assertSame( array( $outside, $plain ), expPackageArchive::$opened, 'opened through expPackageArchive::open()' );
     }
 
     public function testAGnuTarListingIsRead(): void
