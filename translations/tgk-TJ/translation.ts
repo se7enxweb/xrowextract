@@ -4201,7 +4201,7 @@
     </message>
     <message>
         <source>%count rows do not have as many cells as the header. A spreadsheet would shift their columns: a value probably contains the separator. Switch &quot;Escape&quot; to &quot;Yes&quot; or choose another separator.</source>
-        <translation>%count сатр ҳуҷайраҳои ба қадри сарлавҳа надорад. Ҷадвали электронӣ сутунҳои онҳоро ҷойивазкунӣ мекунад: қимат эҳтимолан ҷудокунанда дорад. &quot;Фирор&quot;-ро ба &quot;Ҳа&quot; иваз кунед ё ҷудокунандаи дигарро интихоб кунед.</translation>
+        <translation>%count сатр ҳуҷайраҳои ба қадри сарлавҳа надорад. Ҷадвали электронӣ сутунҳои онҳоро ҷойивазкунӣ мекунад: қимат эҳтимолан ҷудокунанда дорад. &quot;Экранкунӣ&quot;-ро ба &quot;Ҳа&quot; иваз кунед ё ҷудокунандаи дигарро интихоб кунед.</translation>
     </message>
     <message>
         <source>%percent % of the rows shown have a value</source>
@@ -4385,7 +4385,7 @@
     </message>
     <message>
         <source>Escape</source>
-        <translation>Фирор</translation>
+        <translation>Экранкунӣ</translation>
     </message>
     <message>
         <source>&quot;No&quot; is not %rfc conform, &lt;br&gt; removal of CR and LF from field value</source>
