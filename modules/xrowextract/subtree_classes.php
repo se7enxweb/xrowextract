@@ -4,7 +4,7 @@
  * { node, classes: [ { id, identifier, name, count } ], more, total }, the classes with objects below a node the
  * user can read, counted with the user's read access. Read only.
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package kernel
  */

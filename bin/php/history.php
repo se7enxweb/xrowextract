@@ -9,7 +9,7 @@
  *   php extension/xrowextract/bin/php/history.php --show=120 [--json]
  *   php extension/xrowextract/bin/php/history.php --clean                    (retention, as the cronjob part does it)
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package kernel
  */

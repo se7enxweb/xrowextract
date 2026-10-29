@@ -3,7 +3,7 @@
  * The code of extension/xrowextract/modules/xrowextract/subtree_classes.php: the classes below a node for the
  * content tree's Advanced > Export > "Subtree of class" list, as JSON.
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  */
 

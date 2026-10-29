@@ -5,7 +5,7 @@
  * delivery, from, to, text, owner) and paged (offset). Policy xrowextract/history; your own runs, or
  * everyone's with xrowextract/all_jobs. "Mark as seen" clears the failure badge of the Jobs tab.
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package kernel
  */

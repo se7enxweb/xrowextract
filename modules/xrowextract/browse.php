@@ -28,7 +28,7 @@
  *   - a link added to the kernel's own package/view/full/<name>
  *     (extension/xrowextract/design/standard/override/templates/package/view/full.tpl).
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package kernel
  */

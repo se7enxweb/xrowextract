@@ -6,7 +6,7 @@
  * xrowextract/csv/(class)/<class id>: the form keeps the node it had and switches to that class.
  * The view only fills its form with them (and redirects to itself); the export is started there by the user.
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package xrowextract
  */

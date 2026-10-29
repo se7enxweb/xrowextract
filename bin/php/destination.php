@@ -17,7 +17,7 @@
  *   php extension/xrowextract/bin/php/destination.php --send=2 --file=var/export.csv  (deliver a file by hand)
  *   php extension/xrowextract/bin/php/destination.php --delete=2
  *
- * @copyright Copyright (C) 1998 - 2026 7x and the Exponential Foundation. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  * @package kernel
  */

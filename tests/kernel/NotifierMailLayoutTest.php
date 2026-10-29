@@ -8,7 +8,7 @@
  *
  *  NL-01 - the report text is the text part; the HTML part is the layout with the subject as its heading, escaped
  *
- * @copyright Copyright (C) 1998 - 2026 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
  * @license GNU General Public License v2.0 (or any later version)
  */
 
