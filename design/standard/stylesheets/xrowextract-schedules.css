@@ -11,7 +11,7 @@
     text-decoration: none;
 }
 .xe-subnav a:hover { border-color: var(--a4-accent); }
-.xe-subnav a.xe-subnav-active { border-color: var(--a4-accent); background: var(--a4-accent-soft); color: var(--a4-accent-text); font-weight: bold; }
+.xe-subnav a.xe-subnav-active { border-color: var(--a4-accent); background: var(--a4-accent-soft); color: var(--a4-accent-text); font-weight: var(--a4-weight-bold); }
 
 .xe-tab-badge-bad { background: var(--a4-bad-bg); color: var(--a4-bad); }
 
@@ -33,7 +33,7 @@
 .xe-schedule-off .xe-colinfo strong { color: var(--a4-muted); }
 .xe-schedule-meta code, .xe-code-line {
     padding: .1em .35em;
-    border-radius: 3px;
+    border-radius: var(--a4-radius-s);
     background: var(--a4-soft);
     font-family: var(--a4-mono);
     font-size: .88em;
@@ -45,7 +45,7 @@
 .xe-crontab summary { cursor: pointer; color: var(--a4-muted); }
 
 .xe-new-destination { margin: 0 0 1em; }
-.xe-new-destination label { font-weight: bold; }
+.xe-new-destination label { font-weight: var(--a4-weight-bold); }
 .xe-secrets { margin-top: 1em; padding: .8em; border: 1px solid var(--a4-line); border-radius: var(--a4-radius-s); }
 .xe-secret .xe-badge { margin-left: .4em; font-weight: normal; }
 .xe-secret .xe-label { display: flex; flex-wrap: wrap; align-items: center; gap: .2em .4em; overflow-wrap: anywhere; }
