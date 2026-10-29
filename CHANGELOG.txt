@@ -1,3 +1,7 @@
+Version 2.5.25
+
+-  Updated: One copyright notice, Exponential Foundation and 7x.
+
 Version 2.5.24
 
 -  Updated: The admin stylesheets use the shared admin tokens for weights, durations, radii, table headers and muted text, with the old values as fallbacks where a design has no tokens.
